@@ -4,7 +4,7 @@ import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
 /**
  * A packet buffer optimized for network communication.
  * Auto-extends when writing beyond capacity.
- * Little-endian byte order for consistency.
+ * Big-endian byte order for network compatibility.
  * 
  * @implements {IPacketBuffer}
  */
@@ -76,19 +76,19 @@ export default class PacketBuffer implements IPacketBuffer {
     }
 
     readShort(): number {
-        const value = this._dataView.getInt16(this._index, true);
+        const value = this._dataView.getInt16(this._index);
         this._index += 2;
         return value;
     }
 
     readInt(): number {
-        const value = this._dataView.getInt32(this._index, true);
+        const value = this._dataView.getInt32(this._index);
         this._index += 4;
         return value;
     }
 
     readFloat(): number {
-        const value = this._dataView.getFloat32(this._index, true);
+        const value = this._dataView.getFloat32(this._index);
         this._index += 4;
         return value;
     }
@@ -136,7 +136,7 @@ export default class PacketBuffer implements IPacketBuffer {
     writeShort(value: number, offset?: number): number {
         const pos = offset ?? this._index;
         this._ensureCapacity(pos + 2);
-        this._dataView.setInt16(pos, value, true);
+        this._dataView.setInt16(pos, value);
         if (offset === undefined) {
             this._index += 2;
         }
@@ -146,7 +146,7 @@ export default class PacketBuffer implements IPacketBuffer {
     writeInt(value: number, offset?: number): number {
         const pos = offset ?? this._index;
         this._ensureCapacity(pos + 4);
-        this._dataView.setInt32(pos, value, true);
+        this._dataView.setInt32(pos, value);
         if (offset === undefined) {
             this._index += 4;
         }
@@ -156,7 +156,7 @@ export default class PacketBuffer implements IPacketBuffer {
     writeFloat(value: number, offset?: number): number {
         const pos = offset ?? this._index;
         this._ensureCapacity(pos + 4);
-        this._dataView.setFloat32(pos, value, true);
+        this._dataView.setFloat32(pos, value);
         if (offset === undefined) {
             this._index += 4;
         }
@@ -169,8 +169,8 @@ export default class PacketBuffer implements IPacketBuffer {
         const totalSize = 4 + stringBytes.length;
         this._ensureCapacity(pos + totalSize);
 
-        // Write length and string bytes
-        this._dataView.setInt32(pos, stringBytes.length, true);        
+        // Write length and string bytes (length in big-endian)
+        this._dataView.setInt32(pos, stringBytes.length);       
         const targetView = new Uint8Array(this._buffer, pos + 4, stringBytes.length);
         targetView.set(stringBytes);
                 
