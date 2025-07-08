@@ -4,17 +4,17 @@ import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
 
 
 /**
- * Integer codec for encoding and decoding 4-byte integers (signed by default).
+ * Integer codec for encoding and decoding 1-byte integers (signed by default).
  * 
  * @extends AbstractCodec<number>
  */
-export default class IntCodec extends AbstractCodec<number> {
+export default class ByteCodec extends AbstractCodec<number> {
     
     encode(buffer: IPacketBuffer, data: number): number {
-        return buffer.writeInt(data);
+        return buffer.writeByte(data);
     }
 
     decode(buffer: IPacketBuffer): number {
-        return buffer.readInt();
+        return buffer.readByte();
     }
 }

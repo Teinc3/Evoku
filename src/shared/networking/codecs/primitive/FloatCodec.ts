@@ -4,17 +4,19 @@ import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
 
 
 /**
- * Integer codec for encoding and decoding 4-byte integers (signed by default).
+ * Integer codec for encoding and decoding 4-byte Float values.
+ * 
+ * Follows the IEEE 754 standard for 32-bit floating point representation.
  * 
  * @extends AbstractCodec<number>
  */
-export default class IntCodec extends AbstractCodec<number> {
+export default class FloatCodec extends AbstractCodec<number> {
     
     encode(buffer: IPacketBuffer, data: number): number {
-        return buffer.writeInt(data);
+        return buffer.writeFloat(data);
     }
 
     decode(buffer: IPacketBuffer): number {
-        return buffer.readInt();
+        return buffer.readFloat();
     }
 }

@@ -13,13 +13,13 @@ export default interface IPacketBuffer {
     readFloat(): number;
     readString(): string;
 
-    write(data: ArrayBuffer | Uint8Array, offset?: number): void;
-    writeBool(value: boolean, offset?: number): void;
-    writeByte(value: number, offset?: number): void;
-    writeShort(value: number, offset?: number): void;
-    writeInt(value: number, offset?: number): void;
-    writeFloat(value: number, offset?: number): void;
-    writeString(value: string, offset?: number): void;
+    write(data: ArrayBuffer | Uint8Array, offset?: number): number;
+    writeBool(value: boolean, offset?: number): number;
+    writeByte(value: number, offset?: number): number;
+    writeShort(value: number, offset?: number): number;
+    writeInt(value: number, offset?: number): number;
+    writeFloat(value: number, offset?: number): number;
+    writeString(value: string, offset?: number): number;
 
     clone(): IPacketBuffer;
 
