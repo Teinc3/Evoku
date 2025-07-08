@@ -1,31 +1,28 @@
+import PacketBuffer from "@shared/utils/PacketBuffer";
+
 import type ICodec from "@shared/types/networking/ICodec";
+import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
 
 /**
  * Abstract base class for codecs that handle encoding and decoding of data contracts.
  */
 export default abstract class AbstractCodec<DType> implements ICodec<DType> {
 
-    _buffer: ArrayBuffer;
-
-    constructor(buffer: ArrayBuffer = new ArrayBuffer(0)) {
-        this._buffer = buffer;
-    }
-
     /**
-     * Encodes the provided data into an ArrayBuffer that can be sent over the network.
+     * Encodes the provided data into an PacketBuffer that can be sent over the network.
      * 
-     * @param {ArrayBuffer} buffer - The buffer to encode data into. If not provided, a new ArrayBuffer will be created.
+     * @param {IPacketBuffer} buffer - The buffer to encode data into. If not provided, a new PacketBuffer will be created.
      * @param {DType} [data] - Optional: The data to encode.
      * @return {number} The number of bytes written to the buffer.
      */
-    abstract encode(buffer: ArrayBuffer, data?: DType): number;
+    abstract encode(buffer: IPacketBuffer, data: DType): number;
 
     /**
-     * Decodes the provided ArrayBuffer into the original data type.
+     * Decodes the provided PacketBuffer into the original data type.
      * 
-     * @param {ArrayBuffer} buffer - The ArrayBuffer to decode.
+     * @param {IPacketBuffer} buffer - The PacketBuffer to decode.
      * @return {DType} The decoded data.
      */
-    abstract decode(buffer: ArrayBuffer): DType;
+    abstract decode(buffer: IPacketBuffer): DType;
 
 }

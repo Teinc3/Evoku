@@ -1,4 +1,8 @@
+import PacketBuffer from '@shared/utils/PacketBuffer';
+import IntCodec from '@shared/networking/codecs/primitive/IntCodec';
+
 import type IPacket from '@shared/types/networking/IPacket';
+import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
 import type ActionType from '@shared/types/contracts/ActionType';
 import type IDataContract from '@shared/types/contracts/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
@@ -38,20 +42,31 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
         this._data = {} as GenericContract; // Initialize with an empty object of type IDataContract
     }
 
-    unwrap(buffer: ArrayBuffer): GenericContract {
-        const codecInstance = new this.Codec(buffer);
+    /**
+     * Unwraps the provided packet buffer into Data bound by the packet's contract.
+     * 
+     * @param buffer 
+     * @returns {GenericContract} The data decoded from the packet buffer.
+     */
+    unwrap(buffer: IPacketBuffer): GenericContract {
+        const codecInstance = new this.Codec();
         return codecInstance.decode(buffer);
     }
 
-    wrap(data: GenericContract): ArrayBuffer {
-
-        const dataBuffer = new ArrayBuffer();
-        // TODO: Write packet ID as integer
-
+    /**
+     * Wraps the provided data, bound by the packet's contract, into a packet buffer.
+     * 
+     * @param {GenericContract} data - The data to be wrapped in the packet.
+     * @return {IPacketBuffer} The packet buffer containing the encoded data.
+     */
+    wrap(data: GenericContract): IPacketBuffer {
+        const dataBuffer = new PacketBuffer();
+        const intCodecInstance = new IntCodec();
         const codecInstance = new this.Codec();
-        const numberOfBytes = codecInstance.encode(new ArrayBuffer(), data);
 
-        // Finally copy the encoded data into the dataBuffer
+        // Encode packetID and data
+        intCodecInstance.encode(dataBuffer, this.id);
+        codecInstance.encode(dataBuffer, data);
 
         return dataBuffer;
     }

@@ -1,15 +1,14 @@
 import type IDataContract from '@shared/types/contracts/IDataContract';
+import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
 
 
 export default interface ICodec<DataType> {
-    _buffer: ArrayBuffer;
-
-    decode: (buffer: ArrayBuffer) => DataType;
-    encode: (buffer: ArrayBuffer, data: DataType) => number;
+    decode: (buffer: IPacketBuffer) => DataType;
+    encode: (buffer: IPacketBuffer, data: DataType) => number;
 }
 
 
-export type CodecConstructor<DType> = new (buffer?: ArrayBuffer) => ICodec<DType>;
+export type CodecConstructor<DType> = new () => ICodec<DType>;
 
 
 export type CodecMap<GenericContract extends IDataContract> = {

@@ -2,6 +2,7 @@ import AbstractCodec from "@shared/networking/codecs/AbstractCodec";
 
 import type { CodecMap, ICustomCodec } from "@shared/types/networking/ICodec";
 import type IDataContract from "@shared/types/contracts/IDataContract";
+import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
 
 
 /**
@@ -26,19 +27,19 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
 
     /**
      * Encodes the provided data (or if no data is provided from the packet's
-     * data storage) into an ArrayBuffer that can be sent over the network.
+     * data storage) into an PacketBuffer that can be sent over the network.
      * 
-     * @param {ArrayBuffer} [buffer=new ArrayBuffer] - The buffer to encode data into.
+     * @param {IPacketBuffer} [buffer] - The buffer to encode data into.
      * @param {GenericContract} [data] - The data to encode. If not provided, uses the packet's internal data.
      * @return {number} The number of bytes
      */
-    encode(buffer: ArrayBuffer = new ArrayBuffer(), data: GenericContract): number {
+    encode(buffer: IPacketBuffer, data: GenericContract): number {
 
         let dataLength: number = 0;
 
         for (const key in this.codecMap) {
             const Codec = this.codecMap[key];
-            const codecInstance = new Codec(buffer);
+            const codecInstance = new Codec();
             dataLength += codecInstance.encode(buffer, data[key]);
         }
 
@@ -46,18 +47,18 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
     }
 
     /**
-     * Decodes the provided ArrayBuffer into the original data type.
+     * Decodes the provided PacketBuffer into the original data type.
      * 
-     * @param {ArrayBuffer} buffer - The ArrayBuffer to decode.
+     * @param {IPacketBuffer} buffer - The PacketBuffer to decode.
      * @return {IDataContract} The decoded data.
      */
-    decode(buffer: ArrayBuffer): GenericContract {
+    decode(buffer: IPacketBuffer): GenericContract {
 
         const data = {} as GenericContract; // Reset internal data
 
         for (const key in this.codecMap) {
             const Codec = this.codecMap[key];
-            const codecInstance = new Codec(buffer);
+            const codecInstance = new Codec();
             data[key] = codecInstance.decode(buffer);
         }
 
