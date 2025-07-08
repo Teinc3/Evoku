@@ -1,9 +1,7 @@
 import PacketBuffer from '@shared/utils/PacketBuffer';
-import IntCodec from '@shared/networking/codecs/primitive/IntCodec';
 
 import type IPacket from '@shared/types/networking/IPacket';
 import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
-import type ActionType from '@shared/types/contracts/ActionType';
 import type IDataContract from '@shared/types/contracts/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
 
@@ -23,7 +21,7 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      * The unique identifier for the packet type.
      * This should be defined in subclasses to specify the packet's action type.
      * 
-     * @type {ActionType}
+     * @type {GenericContract['action']}
      * @abstract
      * @readonly
      */
@@ -75,11 +73,9 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
         }
 
         const dataBuffer = new PacketBuffer();
-        const intCodecInstance = new IntCodec();
         const codecInstance = new this.Codec();
-
-        // Encode packetID and data
-        intCodecInstance.encode(dataBuffer, this.id);
+        // Codec also has an `action` property that is used to encode the packet ID
+        // So we can just pass it in directly, no problem
         codecInstance.encode(dataBuffer, data ?? this.data);
 
         return dataBuffer;
