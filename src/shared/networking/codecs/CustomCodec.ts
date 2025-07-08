@@ -54,7 +54,7 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
      */
     decode(buffer: IPacketBuffer): GenericContract {
 
-        const data = {} as GenericContract; // Reset internal data
+        const data: Record<string, GenericContract[keyof GenericContract]> = {}; // Reset internal data
 
         for (const key in this.codecMap) {
             const Codec = this.codecMap[key];
@@ -62,7 +62,7 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
             data[key] = codecInstance.decode(buffer);
         }
 
-        return data;
+        return data as GenericContract;
     }
 
 }

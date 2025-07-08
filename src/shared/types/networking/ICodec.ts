@@ -12,7 +12,7 @@ export type CodecConstructor<DType> = new () => ICodec<DType>;
 
 
 export type CodecMap<GenericContract extends IDataContract> = {
-    [ContractKey in keyof GenericContract]: CodecConstructor<GenericContract[ContractKey]>
+    [ContractKey in keyof Omit<GenericContract, 'action'>]: CodecConstructor<GenericContract[ContractKey]>
 };
 
 

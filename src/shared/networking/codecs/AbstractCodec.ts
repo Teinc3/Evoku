@@ -1,7 +1,6 @@
-import PacketBuffer from "@shared/utils/PacketBuffer";
-
 import type ICodec from "@shared/types/networking/ICodec";
 import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
+
 
 /**
  * Abstract base class for codecs that handle encoding and decoding of data contracts.

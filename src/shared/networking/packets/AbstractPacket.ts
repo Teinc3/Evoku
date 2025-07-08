@@ -27,7 +27,7 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      * @abstract
      * @readonly
      */
-    abstract readonly id: ActionType;
+    abstract readonly id: GenericContract['action'];
 
     /**
      * The codec used for encoding and decoding the packet's data.
@@ -38,8 +38,16 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      */
     abstract readonly Codec: CodecConstructor<GenericContract>;
 
-    constructor() {
-        this._data = {} as GenericContract; // Initialize with an empty object of type IDataContract
+    constructor(data?: GenericContract) {
+        this._data = data ?? {} as GenericContract;
+    }
+
+    get data(): GenericContract {
+        return this._data;
+    }
+
+    set data(value: GenericContract) {
+        this._data = value;
     }
 
     /**
@@ -50,7 +58,8 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      */
     unwrap(buffer: IPacketBuffer): GenericContract {
         const codecInstance = new this.Codec();
-        return codecInstance.decode(buffer);
+        this.data = codecInstance.decode(buffer);
+        return this.data;
     }
 
     /**
@@ -59,16 +68,22 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      * @param {GenericContract} data - The data to be wrapped in the packet.
      * @return {IPacketBuffer} The packet buffer containing the encoded data.
      */
-    wrap(data: GenericContract): IPacketBuffer {
+    wrap(data?: GenericContract): IPacketBuffer {
+
+        if (!data && !this.data) {
+            throw new Error('No data provided to wrap in packet buffer.');
+        }
+
         const dataBuffer = new PacketBuffer();
         const intCodecInstance = new IntCodec();
         const codecInstance = new this.Codec();
 
         // Encode packetID and data
         intCodecInstance.encode(dataBuffer, this.id);
-        codecInstance.encode(dataBuffer, data);
+        codecInstance.encode(dataBuffer, data ?? this.data);
 
         return dataBuffer;
+
     }
 
 }

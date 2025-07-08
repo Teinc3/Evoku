@@ -11,6 +11,9 @@ export default interface IPacket<GenericContract extends IDataContract> {
     readonly id: ActionType
     readonly Codec: CodecConstructor<GenericContract>;
 
+    get data(): GenericContract;
+    set data(value: GenericContract);
+
     wrap: (data: GenericContract) => IPacketBuffer;
     unwrap: (buffer: IPacketBuffer) => GenericContract;
     
