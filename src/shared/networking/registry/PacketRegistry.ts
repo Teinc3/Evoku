@@ -11,7 +11,7 @@ import type { PacketConstructor } from "@shared/types/networking/IPacket";
  * based on their ActionType.
  */
 export default class PacketRegistry {
-    private static registry = new Map<ActionType, PacketConstructor>;
+    private static registry = new Map<ActionType, PacketConstructor>();
     
     static registerPacket(packetClass: PacketConstructor): void {
         this.registry.set(packetClass.prototype.id, packetClass);

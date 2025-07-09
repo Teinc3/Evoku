@@ -33,7 +33,7 @@ export default class PacketBuffer implements IPacketBuffer {
 
     clone(): IPacketBuffer {
         const clone = new PacketBuffer(this._buffer.byteLength);
-        clone.write(this.buffer);
+        clone.write(this.buffer.slice(0, this.index));
         clone.index = this.index; // Copy current index
         return clone;
     }
