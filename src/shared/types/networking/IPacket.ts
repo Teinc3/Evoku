@@ -18,3 +18,5 @@ export default interface IPacket<GenericContract extends IDataContract> {
     unwrap: (buffer: IPacketBuffer) => GenericContract;
     
 }
+
+export type PacketConstructor = new <GenericContract extends IDataContract>(data?: GenericContract) => IPacket<GenericContract>;
