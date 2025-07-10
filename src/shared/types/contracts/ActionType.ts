@@ -10,7 +10,11 @@ export enum Mechanics {
     SETCELL,
 }
 
+export enum PUPActions {
 
-type ActionType = Networking | GameAction;
+}
+
+
+type ActionType = Networking | Mechanics | PUPActions;
 
 export default ActionType;
