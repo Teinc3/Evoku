@@ -1,4 +1,3 @@
-import type ActionType from '@shared/types/contracts/ActionType';
 import type IDataContract from '@shared/types/contracts/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
 import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
@@ -8,7 +7,7 @@ export default interface IPacket<GenericContract extends IDataContract> {
 
     _data: GenericContract;
 
-    readonly id: ActionType
+    readonly id: GenericContract['action']
     readonly Codec: CodecConstructor<GenericContract>;
 
     get data(): GenericContract;

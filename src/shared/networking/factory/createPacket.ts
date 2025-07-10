@@ -4,7 +4,6 @@ import PacketRegistry from "@shared/networking/registry/PacketRegistry";
 
 import type IPacket from "@shared/types/networking/IPacket";
 import type IDataContract from "@shared/types/contracts/IDataContract";
-import type ActionType from "@shared/types/contracts/ActionType";
 import type { CodecMap } from "@shared/types/networking/ICodec";
 import type { OmitAction } from "@shared/types/contracts/IDataContract";
 import type { PacketConstructor } from "@shared/types/networking/IPacket";
@@ -16,7 +15,7 @@ import type { PacketConstructor } from "@shared/types/networking/IPacket";
  * all abstract properties and provides full type safety.
  */
 export default function createPacket<GenericContract extends IDataContract>(
-    action: ActionType,
+    action: GenericContract['action'],
     codecMap: OmitAction<CodecMap<GenericContract>>
 ) {
     return class PacketClass extends AbstractPacket<GenericContract> implements IPacket<GenericContract> {
