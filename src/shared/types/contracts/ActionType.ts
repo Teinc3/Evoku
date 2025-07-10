@@ -6,7 +6,9 @@ export enum Networking {
     PONG
 }
 
-export enum GameAction {}
+export enum Mechanics {
+    SETCELL,
+}
 
 
 type ActionType = Networking | GameAction;
