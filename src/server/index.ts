@@ -2,7 +2,7 @@ import WSServer from './WSServer';
 
 
 // Load configuration from environment variables
-const PORT = 8745
+const PORT = parseInt(process.env['BACKEND_PORT'] || '8745', 10);
 
 function bootstrap() {
     // 1. Create a new server instance
@@ -16,6 +16,7 @@ function bootstrap() {
     signals.forEach(signal => {
         process.on(signal, async () => {
             console.log(`Received ${signal}, shutting down gracefully...`);
+            server.close();
             process.exit(0);
         });
     });

@@ -41,5 +41,15 @@ export default class WSServer {
             console.log(`WebSocket server is running on ws://localhost:${this.port}`);
         });
     }
-    
+
+    public close(): void {
+        this.wss.close(() => {
+            console.log('WebSocket server closed');
+        });
+        
+        this.server.close(() => {
+            console.log('HTTP server closed');
+        });
+    }
+
 }
