@@ -1,15 +1,12 @@
-import IntCodec from "@shared/networking/codecs/primitive/IntCodec";
 import ByteCodec from "@shared/networking/codecs/primitive/ByteCodec";
 import ShortCodec from "@shared/networking/codecs/primitive/ShortCodec";
-import createPacket from "@shared/networking/factory/createPacket";
+import createPlayerActionPacket from "@shared/networking/factory/createPlayerActionPacket";
 import { Mechanics } from "@shared/types/contracts/ActionType";
 
 import type SetCellContract from "@shared/types/contracts/mechanics/SetCellContract";
 
 
-export default createPacket<SetCellContract>(Mechanics.SETCELL, {
-    time: IntCodec,
-    playerID: ByteCodec,
+export default createPlayerActionPacket<SetCellContract>(Mechanics.SETCELL, {
     index: ShortCodec, // Might fk up for 16*16 as bytes are signed, so take short
     value: ByteCodec
 });

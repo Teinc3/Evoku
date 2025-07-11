@@ -1,11 +1,9 @@
 import type { Mechanics } from "@shared/types/contracts/ActionType";
-import type IDataContract from "@shared/types/contracts/IDataContract";
+import PlayerActionContract from "./PlayerActionContract";
 
 
-export default interface SetCellContract extends IDataContract {
+export default interface SetCellContract extends PlayerActionContract {
     action: Mechanics.SETCELL;
-    time: number;
-    playerID: number;
     index: number;
     value: number;
 }
