@@ -1,4 +1,4 @@
-import type { Networking } from "../ActionType";
+import type Networking from "../../enums/networking";
 import type IDataContract from "../IDataContract";
 
 

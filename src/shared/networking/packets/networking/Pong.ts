@@ -1,6 +1,6 @@
 import IntCodec from "@shared/networking/codecs/primitive/IntCodec";
 import createPacket from "@shared/networking/factory/createPacket";
-import { Networking } from "@shared/types/contracts/ActionType";
+import Networking from "@shared/types/enums/networking";
 
 import type PongContract from "@shared/types/contracts/networking/PongContract";
 

@@ -1,8 +1,8 @@
-import type ActionType from "./ActionType";
+import type ActionEnum from "../enums/ActionEnum";
 
 
 export default interface IDataContract {
-    action: ActionType;
+    action: ActionEnum;
 }
 
 export type OmitAction<ContractMapping> = Omit<ContractMapping, 'action'>;

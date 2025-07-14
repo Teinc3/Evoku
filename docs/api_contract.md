@@ -5,7 +5,7 @@
 Each internal object handled through the Packet Pipeline has an
 `action` property mapping to an Enum specifying what it handles.
 This is used to route the object to the correct handler.
-The Enums have a union type [`ActionType`](../src/shared/types/contracts/ActionType.ts).
+The Enums have a union type [`ActionEnum`](../src/shared/types/enums/ActionEnum.ts).
 
 The data contracts of these specific objects all extend the
 [`IDataContract`](../src/shared/types/contracts/IDataContract.ts). The
@@ -18,7 +18,7 @@ generic type of such objects is referred to as `GenericContract` in the codebase
 #### IDataContract
 ```ts
 export default interface IDataContract {
-    action: ActionType;
+    action: ActionEnum;
 }
 ```
 All contracts must extend this base interface.
@@ -35,36 +35,41 @@ This unified base contract covers all player actions - from game mechanics to po
 
 ### Action Categories
 
-Currently implemented action types:
+ActionEnum is a type union of all further action enums/types:
+
+```ts
+type ActionEnum = Networking | CombinedMechanics
+```
 
 #### Networking Actions
 ```ts
-export enum Networking {
+enum Networking {
     PING,    // Client-server ping
     PONG     // Server response to ping
 }
 ```
 
+#### Powerups
+```ts
+type Powerups = EarthPUP | FirePUP | WaterPUP | MetalPUP | WoodPUP;
+```
+
 #### Game Mechanics
 ```ts
-export enum Mechanics {
+enum Mechanics {
     SETCELL  // Set cell state in game
 }
 ```
 
-#### PUP Actions
+Note that a union of both Mechanics and Powerups is also exported as `CombinedMechanics`.
 ```ts
-export enum PUPActions {
-    // Currently empty - for future power-up actions
-}
+export type CombinedMechanics = Mechanics | Powerups;
 ```
 
 ## Contract Examples
 
 ### Simple Networking Contract
 ```ts
-import { Networking } from "@shared/types/contracts/ActionType";
-
 export default interface PingContract extends IDataContract {
     action: Networking.PING;
     clientTime: number;
@@ -74,8 +79,6 @@ export default interface PingContract extends IDataContract {
 
 ### Player Action Contract
 ```ts
-import { Mechanics } from "@shared/types/contracts/ActionType";
-
 export default interface SetCellContract extends PlayerActionContract {
     action: Mechanics.SETCELL;
     index: number;        // Cell position in game grid
@@ -87,8 +90,6 @@ export default interface SetCellContract extends PlayerActionContract {
 
 ### Basic Packet Factory
 ```ts
-import { createPacket } from "@shared/networking/factory/PacketFactory";
-
 const Ping = createPacket<PingContract>(Networking.PING, {
     clientTime: IntCodec,
     serverTime: IntCodec
@@ -98,8 +99,6 @@ const Ping = createPacket<PingContract>(Networking.PING, {
 ### Player Action Packet Factory
 For player action packets that share common fields:
 ```ts
-import { createPlayerActionPacket } from "@shared/networking/factory/createPlayerActionPacket";
-
 const SetCell = createPlayerActionPacket<SetCellContract>(
     Mechanics.SETCELL,
     {
@@ -132,7 +131,7 @@ const codecMap = {
 ### ID Scrambling (Future Feature)
 Packet IDs will be scrambled using a deterministic seed to slow down reverse engineering:
 ```ts
-export enum Networking {
+enum Networking {
     PING = scrambleID(),  // Will generate obfuscated ID
     PONG = scrambleID(),
 }

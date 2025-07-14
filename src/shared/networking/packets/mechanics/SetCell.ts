@@ -1,7 +1,7 @@
 import ByteCodec from "@shared/networking/codecs/primitive/ByteCodec";
 import ShortCodec from "@shared/networking/codecs/primitive/ShortCodec";
 import createPlayerActionPacket from "@shared/networking/factory/createPlayerActionPacket";
-import { Mechanics } from "@shared/types/contracts/ActionType";
+import Mechanics from "@shared/types/enums/mechanics/mechanics";
 
 import type SetCellContract from "@shared/types/contracts/mechanics/SetCellContract";
 

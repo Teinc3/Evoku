@@ -1,4 +1,4 @@
-import type { Mechanics } from "@shared/types/contracts/ActionType";
+import type Mechanics from "@shared/types/enums/mechanics/mechanics";
 import PlayerActionContract from "./PlayerActionContract";
 
 
