@@ -28,3 +28,9 @@ export interface ActionContractC2S extends BaseActionContract {
 export default interface BaseActionContract extends OmitAction<IDataContract> {
     moveID: number;
 }
+
+
+// Helper types to extend a generic contract with ActionContractS2C and ActionContractC2S
+// Used for converting processed action contracts from packet pipeline into normal data contracts
+export type ExtendedContractS2C<GenericContract extends IDataContract> = GenericContract & ActionContractS2C;
+export type ExtendedContractC2S<GenericContract extends IDataContract> = GenericContract & ActionContractC2S;
