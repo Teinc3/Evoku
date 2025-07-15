@@ -1,4 +1,4 @@
-import IDataContract from "@shared/types/contracts/IDataContract";
+import IDataContract from "@shared/types/contracts/base/IDataContract";
 
 export default function universalContractGuard<GenericContract extends IDataContract>(
     action: GenericContract['action'],

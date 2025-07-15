@@ -1,5 +1,4 @@
-import ByteCodec from "@shared/networking/codecs/primitive/ByteCodec";
-import ShortCodec from "@shared/networking/codecs/primitive/ShortCodec";
+import { ByteCodec, ShortCodec } from "@shared/networking/codecs/primitive";
 import createActionPackets from "@shared/networking/factory/createActionPackets";
 import Mechanics from "@shared/types/enums/mechanics/mechanics";
 

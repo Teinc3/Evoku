@@ -1,9 +1,9 @@
 import IntCodec from "@shared/networking/codecs/primitive/IntCodec";
 import CustomCodec from "@shared/networking/codecs/CustomCodec";
 
-import type IDataContract from "@shared/types/contracts/IDataContract";
+import type IDataContract from "@shared/types/contracts/base/IDataContract";
 import type { CodecMap } from "@shared/types/networking/ICodec";
-import type { OmitAction } from "@shared/types/contracts/IDataContract";
+import type { OmitAction } from "@shared/types/contracts/base/IDataContract";
 
 
 /**

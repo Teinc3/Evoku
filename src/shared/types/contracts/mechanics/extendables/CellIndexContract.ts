@@ -1,4 +1,4 @@
-import type ExtendableContract from "@shared/types/contracts/mechanics/ExtendableContract";
+import type ExtendableContract from "@shared/types/contracts/base/ExtendableContract";
 
 
 /**

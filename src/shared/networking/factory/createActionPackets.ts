@@ -1,11 +1,10 @@
 import createPacket from "@shared/networking/factory/createPacket";
-import IntCodec from "../codecs/primitive/IntCodec";
-import ByteCodec from "../codecs/primitive/ByteCodec";
+import { IntCodec, ByteCodec } from "../codecs/primitive";
 
-import type { ActionContractS2C, ActionContractC2S } from "@shared/types/contracts/mechanics/ActionContract";
+import type { ActionContractS2C, ActionContractC2S } from "@shared/types/contracts/base/ActionContract";
 import type { CodecMap } from "@shared/types/networking/ICodec";
-import type { OmitAction } from "@shared/types/contracts/IDataContract";
-import type IDataContract from "@shared/types/contracts/IDataContract";
+import type { OmitAction } from "@shared/types/contracts/base/IDataContract";
+import type IDataContract from "@shared/types/contracts/base/IDataContract";
 
 
 export const BASE_ACTION_S2C_CODECS = {

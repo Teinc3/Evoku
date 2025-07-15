@@ -1,5 +1,5 @@
 import type Mechanics from "@shared/types/enums/mechanics/mechanics";
-import type IDataContract from "@shared/types/contracts/IDataContract";
+import type IDataContract from "@shared/types/contracts/base/IDataContract";
 
 
 export default interface SetCellBaseContract extends IDataContract {

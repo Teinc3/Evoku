@@ -2,7 +2,7 @@ import PacketBuffer from '@shared/utils/PacketBuffer';
 
 import type IPacket from '@shared/types/networking/IPacket';
 import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
-import type IDataContract from '@shared/types/contracts/IDataContract';
+import type IDataContract from '@shared/types/contracts/base/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
 
 

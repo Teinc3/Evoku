@@ -1,6 +1,6 @@
 enum WaterPUP {
     CRYO,
-    PURIFY
+    CASCADE
 }
 
 export default WaterPUP;

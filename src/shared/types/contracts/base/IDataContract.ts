@@ -1,4 +1,4 @@
-import type ActionEnum from "../enums/ActionEnum";
+import type ActionEnum from "../../enums/ActionEnum";
 
 
 export default interface IDataContract {

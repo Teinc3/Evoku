@@ -1,4 +1,4 @@
-import type IDataContract from '@shared/types/contracts/IDataContract';
+import type IDataContract from '@shared/types/contracts/base/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
 import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
 

@@ -3,14 +3,12 @@
  * This provides a type-safe, ergonomic way to create packets with minimal boilerplate.
  */
 
-import createPacket from "../factory/createPacket";
-import createPacketCodec from "../factory/createPacketCodec";
-import Networking from "../../types/enums/networking";
-import IntCodec from "../codecs/primitive/IntCodec";
-import StringCodec from "../codecs/primitive/StringCodec";
-import BoolCodec from "../codecs/primitive/BoolCodec";
+import createPacket from "@shared/networking/factory/createPacket";
+import createPacketCodec from "@shared/networking/factory/createPacketCodec";
+import Networking from "@shared/types/enums/networking";
+import { IntCodec, StringCodec, BoolCodec } from "@shared/networking/codecs/primitive/";
 
-import type IDataContract from "../../types/contracts/IDataContract";
+import type IDataContract from "@shared/types/contracts/base/IDataContract";
 
 
 // Example 1: Simple packet with just one field

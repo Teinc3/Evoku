@@ -3,9 +3,9 @@ import createPacketCodec from "@shared/networking/factory/createPacketCodec";
 import PacketRegistry from "@shared/networking/registry/PacketRegistry";
 
 import type IPacket from "@shared/types/networking/IPacket";
-import type IDataContract from "@shared/types/contracts/IDataContract";
+import type IDataContract from "@shared/types/contracts/base/IDataContract";
 import type { CodecConstructor, CodecMap } from "@shared/types/networking/ICodec";
-import type { OmitAction } from "@shared/types/contracts/IDataContract";
+import type { OmitAction } from "@shared/types/contracts/base/IDataContract";
 import type { PacketConstructor } from "@shared/types/networking/IPacket";
 
 

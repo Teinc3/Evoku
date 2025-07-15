@@ -1,5 +1,5 @@
-import type IDataContract from "@shared/types/contracts/IDataContract";
-import type { OmitAction } from "@shared/types/contracts/IDataContract";
+import type IDataContract from "./IDataContract";
+import type { OmitAction } from "./IDataContract";
 
 
 /**

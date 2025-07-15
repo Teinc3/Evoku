@@ -1,5 +1,5 @@
-import type BaseActionContract from "@shared/types/contracts/mechanics/ActionContract";
-import type TargetContract from "../TargetContract";
+import type BaseActionContract from "@shared/types/contracts/base/ActionContract";
+import type TargetContract from "../extendables/TargetContract";
 
 
 /**
