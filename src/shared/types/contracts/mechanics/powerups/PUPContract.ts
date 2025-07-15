@@ -1,3 +1,4 @@
+import IDataContract from "../../base/IDataContract";
 import type TargetContract from "../extendables/TargetContract";
 
 
@@ -6,6 +7,6 @@ import type TargetContract from "../extendables/TargetContract";
  * 
  * Can be used as a generic contract when creating an Action Packet for a PUP.
  */
-export default interface PUPBaseContract extends TargetContract {
+export default interface PUPBaseContract extends TargetContract, IDataContract {
     pupID: number;
 }

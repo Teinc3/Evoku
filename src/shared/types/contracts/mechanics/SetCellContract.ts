@@ -1,9 +1,9 @@
 import type Mechanics from "@shared/types/enums/mechanics/mechanics";
-import type IDataContract from "@shared/types/contracts/base/IDataContract";
+import CellIndexContract from "./extendables/CellIndexContract";
+import ValueContract from "./extendables/ValueContract";
+import IDataContract from "../base/IDataContract";
 
 
-export default interface SetCellBaseContract extends IDataContract {
+export default interface SetCellBaseContract extends CellIndexContract, ValueContract, IDataContract {
     action: Mechanics.SETCELL;
-    index: number;
-    value: number;
 }
