@@ -17,5 +17,5 @@ export default function createPacketCodec<GenericContract extends IDataContract>
             action: IntCodec,
             ...codecMap
         } as CodecMap<GenericContract>;
-    };
+    }
 }
