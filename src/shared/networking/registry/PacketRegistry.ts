@@ -11,13 +11,13 @@ import type { PacketConstructor } from "@shared/types/networking/IPacket";
  * based on their ActionEnum.
  */
 export default class PacketRegistry {
-    private static registry = new Map<ActionEnum, PacketConstructor>();
+    private static registry = new Map<ActionEnum, PacketConstructor<ActionEnum>>();
     
-    static registerPacket(packetClass: PacketConstructor): void {
-        this.registry.set(packetClass.prototype.id, packetClass);
+    static registerPacket(packetClass: PacketConstructor<ActionEnum>): void {
+        this.registry.set(packetClass.id, packetClass);
     }
 
-    static getPacket(id: ActionEnum): PacketConstructor | undefined {
+    static getPacket(id: ActionEnum) {
         return this.registry.get(id);
     }
 }

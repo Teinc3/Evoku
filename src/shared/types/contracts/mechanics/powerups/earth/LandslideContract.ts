@@ -1,11 +1,9 @@
-import type EarthPUP from "@shared/types/enums/mechanics/powerups/earth";
 import type PUPBaseContract from "../PUPContract";
-import type CellIndexContract from "../../extendables/CellIndexContract";
+import type CellIndexContract from "../../../extendables/CellIndexContract";
 
 
-export default interface LandslideBaseContract extends PUPBaseContract {
-    action: EarthPUP.LANDSLIDE;
-}
+export default interface LandslideBaseContract extends PUPBaseContract {}
 
 // Landslide is an rAOE powerup
+export interface LandslideContractC2S extends LandslideBaseContract {}
 export interface LandslideContractS2C extends LandslideBaseContract, CellIndexContract {}

@@ -1,9 +1,10 @@
-import type Gameplay from "@shared/types/enums/mechanics/gameplay";
-import CellIndexContract from "./extendables/CellIndexContract";
-import ValueContract from "./extendables/ValueContract";
-import IDataContract from "../base/IDataContract";
+import type CellIndexContract from "../extendables/CellIndexContract";
+import type ValueContract from "../extendables/ValueContract";
+import type IDataContract from "../base/IDataContract";
+import type { ExtendedContractC2S, ExtendedContractS2C } from "../base/ActionContract";
 
 
-export default interface SetCellBaseContract extends CellIndexContract, ValueContract, IDataContract {
-    action: Gameplay.SETCELL;
-}
+export default interface SetCellBaseContract extends CellIndexContract, ValueContract, IDataContract {}
+
+export type SetCellContract = ExtendedContractC2S<SetCellBaseContract>;
+export type CellSetContract = ExtendedContractS2C<SetCellBaseContract>;

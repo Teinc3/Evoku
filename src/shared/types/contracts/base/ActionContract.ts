@@ -1,5 +1,4 @@
 import type IDataContract from "./IDataContract";
-import type { OmitAction } from "./IDataContract";
 
 
 /**
@@ -25,7 +24,7 @@ export interface ActionContractC2S extends BaseActionContract {
  * 
  * This is used to define the structure of an action that can be performed in the game.
  */
-export default interface BaseActionContract extends OmitAction<IDataContract> {
+export default interface BaseActionContract extends IDataContract {
     moveID: number;
 }
 

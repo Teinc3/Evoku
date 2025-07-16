@@ -1,9 +1,8 @@
 import createPacket from "@shared/networking/factory/createPacket";
-import { IntCodec, ByteCodec, ShortCodec } from "../codecs/primitive";
+import { IntCodec, ByteCodec } from "../codecs/primitive";
 
 import type { ActionContractS2C, ActionContractC2S } from "@shared/types/contracts/base/ActionContract";
 import type { CodecMap } from "@shared/types/networking/ICodec";
-import type { OmitAction } from "@shared/types/contracts/base/IDataContract";
 import type IDataContract from "@shared/types/contracts/base/IDataContract";
 
 

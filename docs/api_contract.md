@@ -102,7 +102,7 @@ export default interface SetCellContract extends PlayerActionContract {
 
 ### Basic Packet Factory
 ```ts
-const Ping = createPacket<PingContract>(Networking.PING, {
+const Ping = createPacket(Networking.PING, {
     clientTime: IntCodec,
     serverTime: IntCodec
 });

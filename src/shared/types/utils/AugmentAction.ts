@@ -1,8 +1,9 @@
-import type ActionMap from "../actionmap";
+import type ActionEnum from "../enums/ActionEnum";
+import type ActionMap from "../actionmap"
 
 
-type AugmentAction<Action extends keyof ActionMap> = ActionMap[Action] & {
-    action: ActionMap[Action]["action"];
+type AugmentAction<GenericAction extends ActionEnum> = ActionMap[GenericAction] & {
+    action: GenericAction;
 };
 
 export default AugmentAction;

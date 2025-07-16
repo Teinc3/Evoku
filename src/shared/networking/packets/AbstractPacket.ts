@@ -2,8 +2,9 @@ import PacketBuffer from '@shared/utils/PacketBuffer';
 
 import type IPacket from '@shared/types/networking/IPacket';
 import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
-import type IDataContract from '@shared/types/contracts/base/IDataContract';
 import type { CodecConstructor } from '@shared/types/networking/ICodec';
+import type ActionEnum from '@shared/types/enums/ActionEnum';
+import type ActionMap from '@shared/types/actionmap';
 
 
 /**
@@ -13,38 +14,38 @@ import type { CodecConstructor } from '@shared/types/networking/ICodec';
  * This class serves as a base for all packet types, providing a method to retrieve the packet ID.
  * It is intended to be extended by specific packet implementations that define their own ID.
  */
-export default abstract class AbstractPacket<GenericContract extends IDataContract> implements IPacket<GenericContract> { 
+export default abstract class AbstractPacket<GenericAction extends ActionEnum> implements IPacket<GenericAction> { 
 
-    _data: GenericContract;
+    _data: ActionMap[GenericAction];
 
     /**
      * The unique identifier for the packet type.
      * This should be defined in subclasses to specify the packet's action type.
      * 
-     * @type {GenericContract['action']}
+     * @type {GenericAction}
      * @abstract
      * @readonly
      */
-    abstract readonly id: GenericContract['action'];
+    abstract readonly id: GenericAction;
 
     /**
      * The codec used for encoding and decoding the packet's data.
      * 
-     * @type {CodecConstructor<GenericContract>}
+     * @type {CodecConstructor<ActionMap[GenericAction]>}
      * @abstract
      * @readonly
      */
-    abstract readonly Codec: CodecConstructor<GenericContract>;
+    abstract readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
 
-    constructor(data?: GenericContract) {
-        this._data = data ?? {} as GenericContract;
+    constructor(data?: ActionMap[GenericAction]) {
+        this._data = data ?? {} as ActionMap[GenericAction];
     }
 
-    get data(): GenericContract {
+    get data(): ActionMap[GenericAction] {
         return this._data;
     }
 
-    set data(value: GenericContract) {
+    set data(value: ActionMap[GenericAction]) {
         this._data = value;
     }
 
@@ -52,9 +53,9 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
      * Unwraps the provided packet buffer into Data bound by the packet's contract.
      * 
      * @param buffer 
-     * @returns {GenericContract} The data decoded from the packet buffer.
+     * @returns {ActionMap[GenericAction]} The data decoded from the packet buffer.
      */
-    unwrap(buffer: IPacketBuffer): GenericContract {
+    unwrap(buffer: IPacketBuffer): ActionMap[GenericAction] {
         const codecInstance = new this.Codec();
         this.data = codecInstance.decode(buffer);
         return this.data;
@@ -63,10 +64,10 @@ export default abstract class AbstractPacket<GenericContract extends IDataContra
     /**
      * Wraps the provided data, bound by the packet's contract, into a packet buffer.
      * 
-     * @param {GenericContract} data - The data to be wrapped in the packet.
+     * @param {ActionMap[GenericAction]} data - The data to be wrapped in the packet.
      * @return {IPacketBuffer} The packet buffer containing the encoded data.
      */
-    wrap(data?: GenericContract): IPacketBuffer {
+    wrap(data?: ActionMap[GenericAction]): IPacketBuffer {
 
         if (!data && !this.data) {
             throw new Error('No data provided to wrap in packet buffer.');
