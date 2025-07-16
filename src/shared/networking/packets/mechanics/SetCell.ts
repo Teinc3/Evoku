@@ -5,7 +5,7 @@ import Gameplay from "@shared/types/enums/mechanics/gameplay";
 import type SetCellBaseContract from "@shared/types/contracts/mechanics/SetCellContract";
 
 
-export default createActionPackets<SetCellBaseContract>(Gameplay.SETCELL, {
+export default createActionPackets<SetCellBaseContract>(Gameplay.SET_CELL, {
     index: ShortCodec, // Might fk up for 16*16 as bytes are signed, so take short
     value: ByteCodec
 });

@@ -1,6 +1,6 @@
 enum Gameplay {
-    SETCELL = -1,
-    CELLSET = -2,
+    SET_CELL = -1,
+    CELL_SET = -2,
 }
 
 export default Gameplay

@@ -1,6 +1,8 @@
 enum FirePUP {
-    INFERNO = 20,
-    METABOLIC = 22,
+    USE_INFERNO = 20,
+    INFERNO_USED = 21,
+    USE_METABOLIC = 22,
+    METABOLIC_USED = 23,
 }
 
 export default FirePUP;

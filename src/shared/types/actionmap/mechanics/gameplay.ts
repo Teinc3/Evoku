@@ -3,6 +3,6 @@ import type { SetCellContract, CellSetContract } from "../../contracts/mechanics
 
 
 export default interface GameplayActionMap {
-    [Gameplay.SETCELL]: SetCellContract;
-    [Gameplay.CELLSET]: CellSetContract;
+    [Gameplay.SET_CELL]: SetCellContract;
+    [Gameplay.CELL_SET]: CellSetContract;
 }

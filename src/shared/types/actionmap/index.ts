@@ -1,5 +1,5 @@
 import type NetworkingActionMap from "./networking";
-import type GameplayActionMap from "./mechanics/";
+import type MechanicsActionMap from "./mechanics/";
 
 
-export default interface ActionMap extends NetworkingActionMap, GameplayActionMap {}
+export default interface ActionMap extends NetworkingActionMap, MechanicsActionMap {}
