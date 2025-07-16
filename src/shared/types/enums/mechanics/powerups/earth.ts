@@ -1,6 +1,6 @@
 enum EarthPUP {
-    LANDSLIDE,
-    EXCAVATE
+    LANDSLIDE = 50,
+    EXCAVATE = 52
 }
 
 export default EarthPUP;

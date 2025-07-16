@@ -1,6 +1,6 @@
 enum WoodPUP {
-    ENTANGLE,
-    WISDOM
+    ENTANGLE = 30,
+    WISDOM = 32
 }
 
 export default WoodPUP;

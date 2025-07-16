@@ -1,7 +1,7 @@
 import type Networking from "@shared/types/enums/networking";
-import type CombinedMechanics from "@shared/types/enums/mechanics";
+import type Mechanics from "@shared/types/enums/mechanics";
 
 
-type ActionEnum = Networking | CombinedMechanics
+type ActionEnum = Networking | Mechanics
 
 export default ActionEnum;

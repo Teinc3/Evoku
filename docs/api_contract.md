@@ -2,14 +2,18 @@
 
 ## Overview
 
-Each internal object handled through the Packet Pipeline has an
-`action` property mapping to an Enum specifying what it handles.
-This is used to route the object to the correct handler.
+Each internal object handled through the Packet Pipeline is bound
+by a specific contract, which all extend the
+[`IDataContract`](../src/shared/types/contracts/IDataContract.ts).
+The generic type of such objects is referred to as `GenericContract` in the codebase.
+
+During handling and routing of these data objects, an `action` property 
+is augmented into the object using [`AugmentAction`](../src/shared/types/utils/AugmentAction.ts),
+which maps the property to an Enum acting as a type discriminator.
+This is used by an Event Bus to route the object to the correct handler,
+or to allow wrapping the packet ID in the object for serialization.
 The Enums have a union type [`ActionEnum`](../src/shared/types/enums/ActionEnum.ts).
 
-The data contracts of these specific objects all extend the
-[`IDataContract`](../src/shared/types/contracts/IDataContract.ts). The
-generic type of such objects is referred to as `GenericContract` in the codebase.
 
 ## Contract Types
 
@@ -17,11 +21,21 @@ generic type of such objects is referred to as `GenericContract` in the codebase
 
 #### IDataContract
 ```ts
-export default interface IDataContract {
-    action: ActionEnum;
-}
+export default interface IDataContract {}
 ```
-All contracts must extend this base interface.
+All contracts must extend this base interface for consistency.
+
+#### AugmentAction
+```ts
+type AugmentAction<Action extends keyof ActionMap> = ActionMap[Action] & {
+    action: ActionMap[Action]["action"];
+};
+
+// Usage example:
+// K now requires explicit action declaration
+// { action: Networking.PING }
+type K = AugmentAction<PingContract>;
+```
 
 #### PlayerActionContract
 Base contract for ANY action taken by a player inside a game:
@@ -56,14 +70,14 @@ type Powerups = EarthPUP | FirePUP | WaterPUP | MetalPUP | WoodPUP;
 
 #### Game Mechanics
 ```ts
-enum Mechanics {
+enum Gameplay {
     SETCELL  // Set cell state in game
 }
 ```
 
-Note that a union of both Mechanics and Powerups is also exported as `CombinedMechanics`.
+Note that a union of both Gameplay and Powerups is also exported as `Mechanics`.
 ```ts
-export type CombinedMechanics = Mechanics | Powerups;
+export type Mechanics = Gameplay | Powerups;
 ```
 
 ## Contract Examples
@@ -71,7 +85,6 @@ export type CombinedMechanics = Mechanics | Powerups;
 ### Simple Networking Contract
 ```ts
 export default interface PingContract extends IDataContract {
-    action: Networking.PING;
     clientTime: number;
     serverTime: number;
 }
@@ -80,7 +93,6 @@ export default interface PingContract extends IDataContract {
 ### Player Action Contract
 ```ts
 export default interface SetCellContract extends PlayerActionContract {
-    action: Mechanics.SETCELL;
     index: number;        // Cell position in game grid
     value: number;        // New cell value
 }
@@ -100,7 +112,7 @@ const Ping = createPacket<PingContract>(Networking.PING, {
 For player action packets that share common fields:
 ```ts
 const SetCell = createPlayerActionPacket<SetCellContract>(
-    Mechanics.SETCELL,
+    Gameplay.SETCELL,
     {
         index: ShortCodec,
         value: ByteCodec
@@ -204,7 +216,7 @@ describe('PingContract', () => {
 describe('createPlayerActionPacket', () => {
     it('should include base action fields', () => {
         const SetCell = createPlayerActionPacket<SetCellContract>(
-            Mechanics.SETCELL,
+            Gameplay.SETCELL,
             { index: ShortCodec, value: ByteCodec }
         );
         

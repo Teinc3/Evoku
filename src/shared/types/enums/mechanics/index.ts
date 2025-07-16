@@ -1,7 +1,7 @@
-import type Mechanics from "@shared/types/enums/mechanics/mechanics";
+import type Gameplay from "@shared/types/enums/mechanics/gameplay";
 import type Powerups from "@shared/types/enums/mechanics/powerups";
 
 
-type CombinedMechanics = Mechanics | Powerups
+type Mechanics = Gameplay | Powerups
 
-export default CombinedMechanics;
+export default Mechanics;
