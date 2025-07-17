@@ -1,6 +1,6 @@
 import AbstractCodec from "./AbstractCodec";
 
-import type { CodecMap, ICustomCodec } from "../../types/networking/ICodec";
+import type { CustomCodecMap, ICustomCodec } from "../../types/networking/ICodec";
 import type IDataContract from "../../types/contracts/base/IDataContract";
 import type IPacketBuffer from "../../types/utils/IPacketBuffer";
 
@@ -19,11 +19,11 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
      * A map of codecs used for encoding and decoding the packet's data.
      * Each key corresponds to a property in the data contract, and the value is a codec constructor.
      * 
-     * @type {CodecMap<GenericContract>}
+     * @type {CustomCodecMap<GenericContract>}
      * @abstract
      * @readonly
      */
-    abstract readonly codecMap: CodecMap<GenericContract>;
+    abstract readonly codecMap: CustomCodecMap<GenericContract>;
 
     /**
      * Encodes the provided data (or if no data is provided from the packet's

@@ -3,7 +3,7 @@ import createPacketCodec from "./createPacketCodec";
 import PacketRegistry from "../registry/PacketRegistry";
 
 import type IPacket from "../../types/networking/IPacket";
-import type { CodecConstructor, CodecMap } from "../../types/networking/ICodec";
+import type { CodecConstructor, CustomCodecMap } from "../../types/networking/ICodec";
 import type { PacketConstructor } from "../../types/networking/IPacket";
 import type ActionEnum from "../../types/enums/ActionEnum";
 import type ActionMap from "../../types/actionmap";
@@ -19,7 +19,7 @@ import type ActionMap from "../../types/actionmap";
  */
 export default function createPacket<GenericAction extends ActionEnum>(
     action: GenericAction,
-    codecLike: CodecMap<ActionMap[GenericAction]> | CodecConstructor<ActionMap[GenericAction]>,
+    codecLike: CustomCodecMap<ActionMap[GenericAction]> | CodecConstructor<ActionMap[GenericAction]>,
 ) {
 
     return class PacketClass extends AbstractPacket<GenericAction> implements IPacket<GenericAction> {
