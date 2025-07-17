@@ -1,8 +1,8 @@
-import AbstractCodec from "@shared/networking/codecs/AbstractCodec";
+import AbstractCodec from "./AbstractCodec";
 
-import type { CodecMap, ICustomCodec } from "@shared/types/networking/ICodec";
-import type IDataContract from "@shared/types/contracts/base/IDataContract";
-import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
+import type { CodecMap, ICustomCodec } from "../../types/networking/ICodec";
+import type IDataContract from "../../types/contracts/base/IDataContract";
+import type IPacketBuffer from "../../types/utils/IPacketBuffer";
 
 
 /**

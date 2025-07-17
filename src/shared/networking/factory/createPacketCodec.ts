@@ -1,8 +1,8 @@
-import IntCodec from "@shared/networking/codecs/primitive/IntCodec";
-import CustomCodec from "@shared/networking/codecs/CustomCodec";
+import IntCodec from "../codecs/primitive/IntCodec";
+import CustomCodec from "../codecs/CustomCodec";
 
-import type IDataContract from "@shared/types/contracts/base/IDataContract";
-import type { CodecConstructor, CodecMap } from "@shared/types/networking/ICodec";
+import type IDataContract from "../../types/contracts/base/IDataContract";
+import type { CodecConstructor, CodecMap } from "../../types/networking/ICodec";
 
 
 /**

@@ -1,6 +1,6 @@
 import type PUPBaseContract from "../PUPContract";
-import type ValueContract from "@shared/types/contracts/extendables/ValueContract";
-import type { ActionContractC2S, ActionContractS2C } from "@shared/types/contracts/base/ActionContract";
+import type ValueContract from "../../../extendables/ValueContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../../base/ActionContract";
 
 
 export default interface LockBaseContract extends PUPBaseContract, ValueContract {}

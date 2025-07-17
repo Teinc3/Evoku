@@ -1,5 +1,5 @@
 import type PUPBaseContract from "../PUPContract";
-import type { ActionContractC2S, ActionContractS2C } from "@shared/types/contracts/base/ActionContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../../base/ActionContract";
 
 
 export default interface CascadeBaseContract extends PUPBaseContract {}

@@ -1,8 +1,7 @@
-import { ByteCodec, ShortCodec } from "@shared/networking/codecs/primitive";
-import createActionPackets from "@shared/networking/factory/createActionPackets";
-import Gameplay from "@shared/types/enums/mechanics/gameplay";
-
-import type SetCellBaseContract from "@shared/types/contracts/mechanics/SetCellContract";
+import { ByteCodec, ShortCodec } from "../../codecs/primitive";
+import createActionPackets from "../../factory/createActionPackets";
+import Gameplay from "../../../types/enums/mechanics/gameplay";
+import type SetCellBaseContract from "../../../types/contracts/mechanics/SetCellContract";
 
 
 export default createActionPackets<SetCellBaseContract>(Gameplay.SET_CELL, {

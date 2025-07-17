@@ -1,10 +1,10 @@
-import PacketBuffer from '@shared/utils/PacketBuffer';
+import PacketBuffer from '../../utils/PacketBuffer';
 
-import type IPacket from '@shared/types/networking/IPacket';
-import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
-import type { CodecConstructor } from '@shared/types/networking/ICodec';
-import type ActionEnum from '@shared/types/enums/ActionEnum';
-import type ActionMap from '@shared/types/actionmap';
+import type IPacket from '../../types/networking/IPacket';
+import type IPacketBuffer from '../../types/utils/IPacketBuffer';
+import type { CodecConstructor } from '../../types/networking/ICodec';
+import type ActionEnum from '../../types/enums/ActionEnum';
+import type ActionMap from '../../types/actionmap';
 
 
 /**

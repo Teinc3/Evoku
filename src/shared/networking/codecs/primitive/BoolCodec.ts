@@ -1,6 +1,6 @@
-import AbstractCodec from "@shared/networking/codecs/AbstractCodec";
+import AbstractCodec from "../AbstractCodec";
 
-import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
+import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
 
 
 /**

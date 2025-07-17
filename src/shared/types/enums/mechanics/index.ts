@@ -1,5 +1,5 @@
-import type Gameplay from "@shared/types/enums/mechanics/gameplay";
-import type Powerups from "@shared/types/enums/mechanics/powerups";
+import type Gameplay from "./gameplay";
+import type Powerups from "./powerups";
 
 
 type Mechanics = Gameplay | Powerups

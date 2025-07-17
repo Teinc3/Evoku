@@ -1,5 +1,5 @@
-import type ActionEnum from "@shared/types/enums/ActionEnum";
-import type { PacketConstructor } from "@shared/types/networking/IPacket";
+import type ActionEnum from "../../types/enums/ActionEnum";
+import type { PacketConstructor } from "../../types/networking/IPacket";
 
 
 /**

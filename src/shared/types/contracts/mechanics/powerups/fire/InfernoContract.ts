@@ -1,6 +1,6 @@
 import type PUPBaseContract from "../PUPContract";
 import type CellIndexContract from "../../../extendables/CellIndexContract";
-import type { ActionContractC2S, ActionContractS2C } from "@shared/types/contracts/base/ActionContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../../base/ActionContract";
 
 
 export default interface InfernoBaseContract extends PUPBaseContract, CellIndexContract {}

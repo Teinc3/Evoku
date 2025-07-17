@@ -1,7 +1,7 @@
-import { ByteCodec, ShortCodec } from "@shared/networking/codecs/primitive";
-import createActionPackets from "@shared/networking/factory/createActionPackets";
-import ExcavateBaseContract from "@shared/types/contracts/mechanics/powerups/earth/ExcavateContract";
-import EarthPUP from "@shared/types/enums/mechanics/powerups/earth";
+import { ByteCodec, ShortCodec } from "../../../codecs/primitive";
+import createActionPackets from "../../../factory/createActionPackets";
+import ExcavateBaseContract from "../../../../types/contracts/mechanics/powerups/earth/ExcavateContract";
+import EarthPUP from "../../../../types/enums/mechanics/powerups/earth";
 
 
 export default createActionPackets<ExcavateBaseContract>(EarthPUP.USE_EXCAVATE, {

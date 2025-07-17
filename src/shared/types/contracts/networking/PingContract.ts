@@ -1,4 +1,4 @@
-import type IDataContract from "@shared/types/contracts/base/IDataContract";
+import type IDataContract from "../base/IDataContract";
 
 
 export default interface PingContract extends IDataContract {

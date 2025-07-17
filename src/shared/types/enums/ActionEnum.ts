@@ -1,5 +1,5 @@
-import type Networking from "@shared/types/enums/networking";
-import type Mechanics from "@shared/types/enums/mechanics";
+import type Networking from "./networking";
+import type Mechanics from "./mechanics";
 
 
 type ActionEnum = Networking | Mechanics
