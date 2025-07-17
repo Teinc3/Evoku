@@ -20,10 +20,36 @@ export type OmitExtendableFields<GenericContract extends IDataContract> = Omit<G
 
 export type RequiredInjectableKeys<T> = Extract<keyof T, keyof ExtendableContractKeys>;
 
-export type IsSameKeySet<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
-
-export type HasDuplicates<T extends readonly any[]> = T extends readonly [infer Head, ...infer Tail] ? Head extends Tail[number] ? true : HasDuplicates<Tail> : false;
-
 export type InjectableCodecMap = {
     [K in keyof ExtendableContractKeys]: CodecConstructor<any>
 };
+
+// collects any duplicate entries in a readonly tuple T
+export type DuplicateKeys<
+    T extends readonly any[],
+    Seen = never
+> = T extends readonly [infer Head, ...infer Tail]
+    ? Head extends Seen
+        ? Head | DuplicateKeys<Tail, Seen>
+        : DuplicateKeys<Tail, Seen | Head>
+    : never;
+
+// validate that Keys[] is exactly the Required set, no extras, no misses, no dupes.
+// if it is, yields Keys itself; otherwise yields an object literal showing
+// missing ∪ extra ∪ duplicates.
+export type ValidateInclude<
+    Keys extends readonly PropertyKey[],
+    Required extends PropertyKey
+> = {
+    missing: Exclude<Required, Keys[number]>;
+    extra: Exclude<Keys[number], Required>;
+    duplicates: DuplicateKeys<Keys>;
+} extends { missing: never; extra: never; duplicates: never }
+    ? Keys
+    : {
+        "Error: invalid `include`": {
+            missing: Exclude<Required, Keys[number]>;
+            extra: Exclude<Keys[number], Required>;
+            duplicates: DuplicateKeys<Keys>;
+        };
+    };

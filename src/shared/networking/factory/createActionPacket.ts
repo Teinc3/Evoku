@@ -4,8 +4,8 @@ import { IntCodec, ByteCodec, ShortCodec } from "../codecs/primitive";
 import type { CustomCodecMap } from "../../types/networking/ICodec";
 import type ActionEnum from "../../types/enums/ActionEnum";
 import type ActionMap from "../../types/actionmap/"
-import type { ExtendableContractKeys, HasDuplicates, 
-    InjectableCodecMap, IsSameKeySet, RequiredInjectableKeys
+import type { ExtendableContractKeys, InjectableCodecMap,
+    RequiredInjectableKeys, ValidateInclude
 } from "../../types/utils/CodecExtensionHelpers";
 
 
@@ -20,8 +20,34 @@ export const INJECTABLE_CODECS: InjectableCodecMap = {
     value: ByteCodec
 } as const;
 
+
 /**
- * Creates a packet for a specific GenericAction.
+ * A utility function to pick specific keys from a mapping of codecs.
+ * 
+ * @param all - A mapping of all codecs.
+ * @param include - An array of keys to include from the mapping.
+ * @returns A new object containing only the specified keys from the mapping.
+ */
+export function pickInjectables<
+    Mapping extends Record<string, any>,
+    IncludeArray extends readonly (keyof Mapping)[]
+>(
+    all: Mapping,
+    include: IncludeArray
+): Pick<Mapping, IncludeArray[number]> {
+    const out = {} as Pick<Mapping, IncludeArray[number]>;
+    // Object.keys(all) comes back in the same order you wrote `all`’s properties.
+    for (const key of Object.keys(all) as (keyof Mapping)[]) {
+        if (include.includes(key)) {
+            out[key] = all[key];
+        }
+    }
+    return out;
+}
+
+
+/**
+ * Creates a packet for a specific GenericAction, allowing for the injection of common extendable codecs.
  * 
  * @param action - The action identifier for the packets.
  * @param include - An array of keys, indexing extendable fields of codecs to include in the packet.
@@ -35,16 +61,7 @@ export default function createActionPacket<
     SpecificMap extends CustomCodecMap<Omit<ActionMap[GenericAction], IncludeKeys[number]>>
 >(
     action: GenericAction,
-    include: IncludeKeys & (
-        IsSameKeySet<
-            IncludeKeys[number], // The union of keys the user provided
-            RequiredInjectableKeys<ActionMap[GenericAction]> // The union of keys that are required
-        > extends true
-            ? HasDuplicates<IncludeKeys> extends false
-                ? IncludeKeys // If they match, the type is valid.
-                : "Error: The 'include' array must not contain duplicate keys."
-            : "Error: The 'include' array must contain all required injectable keys exactly once."
-    ),
+    include: ValidateInclude<IncludeKeys, RequiredInjectableKeys<ActionMap[GenericAction]>>,
     specificCodecMap: SpecificMap & { 
         [K in keyof SpecificMap]: 
             K extends keyof Omit<ActionMap[GenericAction], IncludeKeys[number]> 
@@ -52,20 +69,16 @@ export default function createActionPacket<
     }
 ) {
 
-    const injectedCodecs: CustomCodecMap<Pick<ActionMap[GenericAction], IncludeKeys[number]>>
-        = Object.entries(INJECTABLE_CODECS)
-            .filter(([key]) => include.includes(key as IncludeKeys[number]))
-            .reduce((acc, [key, codec]) => {
-                acc[key as IncludeKeys[number]] = codec;
-                return acc;
-            }, {} as CustomCodecMap<Pick<ActionMap[GenericAction], IncludeKeys[number]>>
-        );
+    const injected = pickInjectables(
+        INJECTABLE_CODECS,
+        include as readonly (keyof ExtendableContractKeys)[]
+    ) as CustomCodecMap<Pick<ActionMap[GenericAction], IncludeKeys[number]>>;
     
     const fullCodecMap = {
-        ...injectedCodecs,
-        ...specificCodecMap as CustomCodecMap<Omit<ActionMap[GenericAction], IncludeKeys[number]>>
-    };
+        ...injected,
+        ...specificCodecMap
+    } as CustomCodecMap<ActionMap[GenericAction]>;
 
-    return createPacket(action, fullCodecMap as CustomCodecMap<ActionMap[GenericAction]>);
+    return createPacket(action, fullCodecMap);
 
 }
