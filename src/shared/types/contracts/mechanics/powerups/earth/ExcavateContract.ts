@@ -1,6 +1,6 @@
-import type PUPBaseContract from "../PUPContract";
+import type PUPBaseContract from "../../../extendables/PUPContract";
 import type CellIndexContract from "../../../extendables/CellIndexContract";
-import type { ActionContractC2S, ActionContractS2C } from "../../../base/ActionContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../../extendables/ActionContract";
 
 
 export default interface ExcavateBaseContract extends PUPBaseContract, CellIndexContract {}

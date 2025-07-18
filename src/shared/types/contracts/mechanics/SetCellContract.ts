@@ -1,7 +1,7 @@
 import type CellIndexContract from "../extendables/CellIndexContract";
 import type ValueContract from "../extendables/ValueContract";
-import type IDataContract from "../base/IDataContract";
-import type { ActionContractC2S, ActionContractS2C } from "../base/ActionContract";
+import type IDataContract from "../IDataContract";
+import type { ActionContractC2S, ActionContractS2C } from "../extendables/ActionContract";
 
 
 export default interface SetCellBaseContract extends CellIndexContract, ValueContract, IDataContract {}

@@ -1,5 +1,5 @@
-import IDataContract from "../../base/IDataContract";
-import type TargetContract from "../../extendables/TargetContract";
+import type IDataContract from "../IDataContract";
+import type TargetContract from "./TargetContract";
 
 
 /**

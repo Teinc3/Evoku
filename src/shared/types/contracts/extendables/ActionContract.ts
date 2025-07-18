@@ -1,4 +1,4 @@
-import type IDataContract from "./IDataContract";
+import type IDataContract from "../IDataContract";
 
 
 /**

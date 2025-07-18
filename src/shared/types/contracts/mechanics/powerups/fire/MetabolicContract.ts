@@ -1,5 +1,5 @@
-import type PUPBaseContract from "../PUPContract";
-import type { ActionContractC2S, ActionContractS2C } from "../../../base/ActionContract";
+import type PUPBaseContract from "../../../extendables/PUPContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../../extendables/ActionContract";
 
 
 export default interface MetabolicBaseContract extends PUPBaseContract {}

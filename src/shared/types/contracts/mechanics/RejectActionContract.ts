@@ -1,4 +1,4 @@
-import type BaseActionContract from "../base/ActionContract"
+import type BaseActionContract from "../extendables/ActionContract"
 
 
 export default interface RejectActionContract extends BaseActionContract {

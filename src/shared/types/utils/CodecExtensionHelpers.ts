@@ -1,8 +1,8 @@
-import type IDataContract from "../contracts/base/IDataContract";
-import type { ActionContractS2C, ActionContractC2S } from "../contracts/base/ActionContract";
+import type IDataContract from "../contracts/IDataContract";
+import type { ActionContractS2C, ActionContractC2S } from "../contracts/extendables/ActionContract";
 import type ValueContract from "../contracts/extendables/ValueContract";
 import type CellIndexContract from "../contracts/extendables/CellIndexContract";
-import type PUPBaseContract from "../contracts/mechanics/powerups/PUPContract";
+import type PUPBaseContract from "../contracts/extendables/PUPContract";
 import type TargetContract from "../contracts/extendables/TargetContract";
 import type { CodecConstructor } from "../networking/ICodec";
 

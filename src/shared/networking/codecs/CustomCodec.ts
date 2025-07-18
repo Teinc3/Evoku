@@ -1,7 +1,7 @@
 import AbstractCodec from "./AbstractCodec";
 
 import type { CustomCodecMap, ICustomCodec } from "../../types/networking/ICodec";
-import type IDataContract from "../../types/contracts/base/IDataContract";
+import type IDataContract from "../../types/contracts/IDataContract";
 import type IPacketBuffer from "../../types/utils/IPacketBuffer";
 
 
