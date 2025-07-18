@@ -12,7 +12,7 @@ import type { ExtendableContractKeys, InjectableCodecMap,
 export const INJECTABLE_CODECS: InjectableCodecMap = {
     serverTime: IntCodec,
     clientTime: IntCodec,
-    moveID: ByteCodec,
+    actionID: ByteCodec,
     pupID: ShortCodec,
     playerID: ByteCodec,
     targetID: ByteCodec,

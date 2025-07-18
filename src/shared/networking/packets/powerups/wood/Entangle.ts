@@ -4,12 +4,12 @@ import WoodPUP from "../../../../types/enums/mechanics/powerups/wood";
 
 export const UseEntangle = createActionPacket(
     WoodPUP.USE_ENTANGLE,
-    ['clientTime', 'moveID', 'pupID', 'targetID'],
+    ['clientTime', 'actionID', 'pupID', 'targetID'],
     {}
 );
 
 export const EntangleUsed = createActionPacket(
     WoodPUP.ENTANGLE_USED,
-    ['serverTime', 'playerID', 'moveID', 'pupID', 'targetID'],
+    ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID'],
     {}
 );

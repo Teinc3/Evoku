@@ -7,7 +7,7 @@ import type IDataContract from "./IDataContract";
  * This is used to define the structure of an action that can be performed in the game.
  */
 export default interface BaseActionContract extends IDataContract {
-    moveID: number;
+    actionID: number;
 }
 
 /**

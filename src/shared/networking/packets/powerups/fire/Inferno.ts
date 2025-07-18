@@ -4,12 +4,12 @@ import FirePUP from "../../../../types/enums/mechanics/powerups/fire";
 
 export const UseInferno = createActionPacket(
     FirePUP.USE_INFERNO,
-    ['clientTime', 'moveID', 'pupID', 'targetID', 'cellIndex'],
+    ['clientTime', 'actionID', 'pupID', 'targetID', 'cellIndex'],
     {}
 );
 
 export const InfernoUsed = createActionPacket(
     FirePUP.INFERNO_USED,
-    ['serverTime', 'playerID', 'moveID', 'pupID', 'targetID', 'cellIndex'],
+    ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex'],
     {}
 );
