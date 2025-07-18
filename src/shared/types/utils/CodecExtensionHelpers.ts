@@ -2,21 +2,18 @@ import type IDataContract from "../contracts/IDataContract";
 import type { ActionContractS2C, ActionContractC2S } from "../contracts/extendables/ActionContract";
 import type ValueContract from "../contracts/extendables/ValueContract";
 import type CellIndexContract from "../contracts/extendables/CellIndexContract";
-import type PUPBaseContract from "../contracts/extendables/PUPContract";
+import type PUPContract from "../contracts/extendables/PUPContract";
 import type TargetContract from "../contracts/extendables/TargetContract";
 import type { CodecConstructor } from "../networking/ICodec";
 
 
-export type AllExtendableContracts = ActionContractS2C | ActionContractC2S | ValueContract | CellIndexContract | PUPBaseContract | TargetContract;
+export type AllExtendableContracts = ActionContractS2C | ActionContractC2S | ValueContract | CellIndexContract | PUPContract | TargetContract;
 
 export type KeysToOmitMap<GenericContract extends IDataContract> = {
     [K in AllExtendableContracts as GenericContract extends K ? keyof K : never]: never
 };
 
 export type ExtendableContractKeys = KeysToOmitMap<AllExtendableContracts>;
-
-// Merge all of these omitted types together into one single unified type
-export type OmitExtendableFields<GenericContract extends IDataContract> = Omit<GenericContract, keyof KeysToOmitMap<GenericContract>>;
 
 export type RequiredInjectableKeys<T> = Extract<keyof T, keyof ExtendableContractKeys>;
 

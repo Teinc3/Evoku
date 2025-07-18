@@ -1,6 +1,6 @@
 import createActionPacket from "../../factory/createActionPacket";
 import Gameplay from "../../../types/enums/mechanics/gameplay";
-import { IntCodec } from "@shared/networking/codecs/primitive";
+import { IntCodec } from "../../codecs/primitive";
 
 
 export default createActionPacket(

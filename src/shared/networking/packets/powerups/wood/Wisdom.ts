@@ -4,12 +4,12 @@ import WoodPUP from "../../../../types/enums/mechanics/powerups/wood";
 
 export const UseWisdom = createActionPacket(
     WoodPUP.USE_WISDOM, 
-    ['clientTime', 'actionID', 'pupID', 'targetID'],
+    ['clientTime', 'actionID', 'pupID'],
     {}
 );
 
 export const WisdomUsed = createActionPacket(
     WoodPUP.WISDOM_USED, 
-    ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex', 'value'],
+    ['serverTime', 'playerID', 'actionID', 'pupID', 'cellIndex', 'value'],
     {}
 );

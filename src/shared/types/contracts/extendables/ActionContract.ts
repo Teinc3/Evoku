@@ -1,12 +1,11 @@
-import type IDataContract from "../IDataContract";
-
+import type IExtendableContract from "../IExtendableContract";
 
 /**
  * The base contract for all actions.
  * 
  * This is used to define the structure of an action that can be performed in the game.
  */
-export default interface BaseActionContract extends IDataContract {
+export default interface BaseActionContract extends IExtendableContract {
     actionID: number;
 }
 

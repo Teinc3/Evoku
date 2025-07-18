@@ -1,12 +1,8 @@
-import type IDataContract from "../IDataContract";
-import type TargetContract from "./TargetContract";
-
+import type IExtendableContract from "../IExtendableContract";
 
 /**
- * The base contract for all Power-Up (PUP) actions.
- * 
- * Can be used as a generic contract when creating an Action Packet for a PUP.
+ * Extendable interface containing the pupID attribute.
  */
-export default interface PUPBaseContract extends TargetContract, IDataContract {
+export default interface PUPContract extends IExtendableContract {
     pupID: number;
 }
