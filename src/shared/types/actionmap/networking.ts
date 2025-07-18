@@ -1,6 +1,5 @@
 import type Networking from "../enums/networking";
-import type PingContract from "../contracts/networking/PingContract";
-import type PongContract from "../contracts/networking/PongContract";
+import type { PingContract, PongContract } from "../contracts/networking/PingPongContract";
 
 
 export default interface NetworkingActionMap {
