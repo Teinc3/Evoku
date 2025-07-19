@@ -5,6 +5,7 @@ import type IDataContract from "../../types/contracts/IDataContract";
 import type { CodecConstructor, CustomCodecMap } from "../../types/networking/ICodec";
 
 
+// TODO: Consider typing using AugmentAction type so that the action field is defined
 /**
  * Factory function to create packet codec classes with minimal boilerplate
  */

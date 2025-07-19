@@ -1,24 +1,12 @@
 import createPacket from "./createPacket";
-import { IntCodec, ByteCodec, ShortCodec } from "../codecs/primitive";
+import INJECTABLE_CODECS from "../codecs/custom/InjectableCodecs";
 
 import type { CustomCodecMap } from "../../types/networking/ICodec";
 import type ActionEnum from "../../types/enums/actions";
 import type ActionMap from "../../types/actionmap/"
-import type { ExtendableContractKeys, InjectableCodecMap,
+import type { ExtendableContractKeys,
     RequiredInjectableKeys, ValidateInclude
 } from "../../types/utils/CodecExtensionHelpers";
-
-
-export const INJECTABLE_CODECS: InjectableCodecMap = {
-    serverTime: IntCodec,
-    clientTime: IntCodec,
-    actionID: ByteCodec,
-    pupID: ShortCodec,
-    playerID: ByteCodec,
-    targetID: ByteCodec,
-    cellIndex: ShortCodec,
-    value: ByteCodec
-} as const;
 
 
 /**
