@@ -1,4 +1,4 @@
-import type ActionEnum from "../../types/enums/ActionEnum";
+import type ActionEnum from "../../types/enums/actions";
 import type { PacketConstructor } from "../../types/networking/IPacket";
 
 

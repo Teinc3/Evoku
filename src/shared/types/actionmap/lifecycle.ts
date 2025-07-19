@@ -1,4 +1,4 @@
-import type Lifecycle from "../enums/lifecycle";
+import type Lifecycle from "../enums/actions/lifecycle";
 import type { JoinQueueContract, LeaveQueueContract,
     QueueUpdateContract } from "../contracts/lifecycle/QueueContract";
 import type MatchFoundContract from "../contracts/lifecycle/MatchFoundContract";

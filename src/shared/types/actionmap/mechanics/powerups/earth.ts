@@ -1,4 +1,4 @@
-import type EarthPUP from "../../../enums/mechanics/powerups/earth";
+import type EarthPUP from "../../../enums/actions/mechanics/powerups/earth";
 import type { ExcavateContractC2S, ExcavateContractS2C } from "../../../contracts/mechanics/powerups/earth/ExcavateContract";
 import type { LandslideContractS2C, LandslideContractC2S } from "../../../contracts/mechanics/powerups/earth/LandslideContract";
 

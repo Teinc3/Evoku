@@ -1,4 +1,4 @@
-import type Networking from "../enums/networking";
+import type Networking from "../enums/actions/networking";
 import type { PingContract, PongContract } from "../contracts/networking/PingPongContract";
 
 

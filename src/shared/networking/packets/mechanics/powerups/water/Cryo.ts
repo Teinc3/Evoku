@@ -1,15 +1,15 @@
 import createActionPacket from "../../../factory/createActionPacket";
-import FirePUP from "../../../../types/enums/mechanics/powerups/fire";
+import WaterPUP from "../../../../types/enums/actions/mechanics/powerups/water";
 
 
-export const UseInferno = createActionPacket(
-    FirePUP.USE_INFERNO,
+export const UseCryo = createActionPacket(
+    WaterPUP.USE_CRYO,
     ['clientTime', 'actionID', 'pupID', 'targetID', 'cellIndex'],
     {}
 );
 
-export const InfernoUsed = createActionPacket(
-    FirePUP.INFERNO_USED,
+export const CryoUsed = createActionPacket(
+    WaterPUP.CRYO_USED,
     ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex'],
     {}
 );

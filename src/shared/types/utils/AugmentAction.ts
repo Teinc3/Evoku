@@ -1,4 +1,4 @@
-import type ActionEnum from "../enums/ActionEnum";
+import type ActionEnum from "../enums/actions";
 import type ActionMap from "../actionmap"
 
 

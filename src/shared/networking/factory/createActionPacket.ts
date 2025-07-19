@@ -2,7 +2,7 @@ import createPacket from "./createPacket";
 import { IntCodec, ByteCodec, ShortCodec } from "../codecs/primitive";
 
 import type { CustomCodecMap } from "../../types/networking/ICodec";
-import type ActionEnum from "../../types/enums/ActionEnum";
+import type ActionEnum from "../../types/enums/actions";
 import type ActionMap from "../../types/actionmap/"
 import type { ExtendableContractKeys, InjectableCodecMap,
     RequiredInjectableKeys, ValidateInclude

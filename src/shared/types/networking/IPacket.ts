@@ -1,5 +1,5 @@
 import type ActionMap from '../actionmap';
-import type ActionEnum from '../enums/ActionEnum';
+import type ActionEnum from '../enums/actions';
 import type IPacketBuffer from '../utils/IPacketBuffer';
 import type { CodecConstructor } from './ICodec';
 

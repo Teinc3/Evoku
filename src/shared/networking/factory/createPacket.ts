@@ -5,7 +5,7 @@ import PacketRegistry from "../registry/PacketRegistry";
 import type IPacket from "../../types/networking/IPacket";
 import type { CodecConstructor, CustomCodecMap } from "../../types/networking/ICodec";
 import type { PacketConstructor } from "../../types/networking/IPacket";
-import type ActionEnum from "../../types/enums/ActionEnum";
+import type ActionEnum from "../../types/enums/actions";
 import type ActionMap from "../../types/actionmap";
 
 

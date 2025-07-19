@@ -3,7 +3,7 @@ import PacketBuffer from '../../utils/PacketBuffer';
 import type IPacket from '../../types/networking/IPacket';
 import type IPacketBuffer from '../../types/utils/IPacketBuffer';
 import type { CodecConstructor } from '../../types/networking/ICodec';
-import type ActionEnum from '../../types/enums/ActionEnum';
+import type ActionEnum from '../../types/enums/actions';
 import type ActionMap from '../../types/actionmap';
 
 

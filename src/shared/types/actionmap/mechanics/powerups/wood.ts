@@ -1,4 +1,4 @@
-import type WoodPUP from "../../../enums/mechanics/powerups/wood";
+import type WoodPUP from "../../../enums/actions/mechanics/powerups/wood";
 import type { WisdomContractC2S, WisdomContractS2C } from "../../../contracts/mechanics/powerups/wood/WisdomContract";
 import type { EntangleContractC2S, EntangleContractS2C } from "../../../contracts/mechanics/powerups/wood/EntangleContract";
 

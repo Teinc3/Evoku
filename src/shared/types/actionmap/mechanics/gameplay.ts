@@ -1,4 +1,4 @@
-import type Gameplay from "../../enums/mechanics/gameplay";
+import type Gameplay from "../../enums/actions/mechanics/gameplay";
 import type { SetCellContract, CellSetContract } from "../../contracts/mechanics/SetCellContract";
 import type RejectActionContract from "../../contracts/mechanics/RejectActionContract";
 import type { DrawPupContract, PupDrawnContract } from "../../contracts/mechanics/powerups/DrawPupContract";
