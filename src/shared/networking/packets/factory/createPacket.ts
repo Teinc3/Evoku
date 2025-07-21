@@ -1,12 +1,12 @@
-import AbstractPacket from "../packets/AbstractPacket";
-import createPacketCodec from "./createPacketCodec";
-import PacketRegistry from "../registry/PacketRegistry";
+import AbstractPacket from "../AbstractPacket";
+import createPacketCodec from "../../codecs/factory/createPacketCodec";
+import PacketRegistry from "../../registry/PacketRegistry";
 
-import type IPacket from "../../types/networking/IPacket";
-import type { CodecConstructor, CustomCodecMap } from "../../types/networking/ICodec";
-import type { PacketConstructor } from "../../types/networking/IPacket";
-import type ActionEnum from "../../types/enums/actions";
-import type ActionMap from "../../types/actionmap";
+import type IPacket from "../../../types/networking/IPacket";
+import type { CodecConstructor, CustomCodecMap } from "../../../types/networking/ICodec";
+import type { PacketConstructor } from "../../../types/networking/IPacket";
+import type ActionEnum from "../../../types/enums/actions";
+import type ActionMap from "../../../types/actionmap";
 
 
 /**

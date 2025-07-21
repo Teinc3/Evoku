@@ -1,4 +1,4 @@
-import createActionPacket from "../../factory/createActionPacket";
+import createActionPacket from "../factory/createActionPacket";
 import Gameplay from "../../../types/enums/actions/mechanics/gameplay";
 import { IntCodec } from "../../codecs/primitive";
 

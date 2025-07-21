@@ -1,4 +1,4 @@
-import createActionPacket from "../../../factory/createActionPacket";
+import createActionPacket from "../../factory/createActionPacket";
 import MetalPUP from "../../../../types/enums/actions/mechanics/powerups/metal";
 
 

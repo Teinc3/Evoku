@@ -1,6 +1,6 @@
 import { ByteCodec } from "../../codecs/primitive";
-import { createArrayCodec } from "../../factory/createArrayCodec";
-import createPacket from "../../factory/createPacket";
+import { createArrayCodec } from "../../codecs/factory/createArrayCodec";
+import createPacket from "../factory/createPacket";
 import Lifecycle from "../../../types/enums/actions/lifecycle";
 
 

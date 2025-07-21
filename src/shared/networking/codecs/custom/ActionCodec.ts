@@ -1,4 +1,4 @@
-import scrambler from '../../../utils/PacketScrambler'
+import scrambler from '../../crypto/scramble/PacketScrambler'
 import { ByteCodec } from "../primitive";
 
 import type IPacketBuffer from "../../../types/utils/IPacketBuffer";

@@ -1,12 +1,12 @@
 import createPacket from "./createPacket";
-import INJECTABLE_CODECS from "../codecs/custom/InjectableCodecs";
+import INJECTABLE_CODECS from "../../codecs/custom/InjectableCodecs";
 
-import type { CustomCodecMap } from "../../types/networking/ICodec";
-import type ActionEnum from "../../types/enums/actions";
-import type ActionMap from "../../types/actionmap/"
+import type { CustomCodecMap } from "../../../types/networking/ICodec";
+import type ActionEnum from "../../../types/enums/actions";
+import type ActionMap from "../../../types/actionmap/"
 import type { ExtendableContractKeys,
     RequiredInjectableKeys, ValidateInclude
-} from "../../types/utils/CodecExtensionHelpers";
+} from "../../../types/utils/CodecExtensionHelpers";
 
 
 /**

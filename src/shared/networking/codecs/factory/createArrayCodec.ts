@@ -1,6 +1,6 @@
-import AbstractCodec from "../codecs/AbstractCodec";
-import type IPacketBuffer from "../../types/utils/IPacketBuffer";
-import type { CodecConstructor } from "../../types/networking/ICodec";
+import AbstractCodec from "../AbstractCodec";
+import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
+import type { CodecConstructor } from "../../../types/networking/ICodec";
 
 
 /**

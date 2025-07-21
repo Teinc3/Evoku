@@ -1,5 +1,6 @@
 import seedrandom from 'seedrandom';
-import ActionEnum from '../types/enums/actions';
+
+import ActionEnum from '../../../types/enums/actions';
 
 
 export class PacketScrambler {

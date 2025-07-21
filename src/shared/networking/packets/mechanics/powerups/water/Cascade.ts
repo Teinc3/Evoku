@@ -1,4 +1,4 @@
-import createActionPacket from "../../../factory/createActionPacket";
+import createActionPacket from "../../factory/createActionPacket";
 import WaterPUP from "../../../../types/enums/actions/mechanics/powerups/water";
 
 
