@@ -1,0 +1,6 @@
+{
+  "printWidth": 100,
+  "experimentalOperatorPosition": "start",
+  "trailingComma": "es5",
+  "arrowParens": "avoid"
+}

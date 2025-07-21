@@ -10,7 +10,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",
     "test:client": "ng test",
-    "test:server": "jest --config jest.config.cjs"
+    "test:server": "jest --config jest.config.cjs",
+    "format": "prettier --write ."
   },
   "prettier": {
     "overrides": [
@@ -55,6 +56,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "prettier": "^3.6.2",
     "ts-jest": "^29.4.0",
     "tsx": "^4.20.3",
     "typescript": "~5.8.2"
