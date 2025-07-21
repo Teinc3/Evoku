@@ -4,6 +4,8 @@ export default interface IPacketBuffer {
     get dataView(): DataView;
     get index(): number;
     set index(newIndex: number);
+    get maxWritten(): number;
+    set maxWritten(value: number);
 
     read(length: number): Uint8Array;
     readBool(): boolean;

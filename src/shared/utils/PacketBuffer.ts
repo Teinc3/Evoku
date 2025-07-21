@@ -12,32 +12,16 @@ export default class PacketBuffer implements IPacketBuffer {
     
     private _buffer: ArrayBuffer;
     private _dataView: DataView;
-    private _index: number = 0;
+    private _index: number;
+    private _maxWritten: number;
 
 
     constructor(initialSize: number = 255) {
         this._buffer = new ArrayBuffer(initialSize, { maxByteLength: (2**16 - 1) });
         this._dataView = new DataView(this._buffer);
+        this._index = 0;
+        this._maxWritten = 0; // Track the maximum index written to
     }
-
-
-    private _ensureCapacity(requiredSize: number): void {
-        if (requiredSize <= this._buffer.byteLength) {
-            return
-        }
-
-        const newSize = Math.min(Math.max(this._buffer.byteLength * 2, requiredSize), this._buffer.maxByteLength!);
-        this._buffer.resize(newSize);
-        this._dataView = new DataView(this._buffer); // Recreate DataView to reflect new buffer size
-    }
-
-    clone(): IPacketBuffer {
-        const clone = new PacketBuffer(this._buffer.byteLength);
-        clone.write(this.buffer.slice(0, this.index));
-        clone.index = this.index; // Copy current index
-        return clone;
-    }
-
 
     // Getters and Setters
     get buffer(): ArrayBuffer {
@@ -53,18 +37,90 @@ export default class PacketBuffer implements IPacketBuffer {
     }
 
     set index(newIndex: number) {
+        // Allow seeking over maxWritten but not beyond current buffer size
         if (newIndex < 0 || newIndex >= this._buffer.byteLength) {
             throw new RangeError("Index is out of bounds!");
         }
         this._index = newIndex;
     }
 
-    
+    get maxWritten(): number {
+        return this._maxWritten;
+    }
+
+    set maxWritten(value: number) {
+        // Monotonically increases
+        this._maxWritten = Math.max(this._maxWritten, value);
+    }
+
+    // Private methods
+    private _checkReadBounds(bytes: number): void {
+        if (this._index + bytes > this.maxWritten) {
+            throw new RangeError("Read index out of bounds!");
+        }
+    }
+
+    private _ensureCapacity(requiredSize: number): void {
+        if (requiredSize <= this._buffer.byteLength) {
+            return
+        }
+
+        const newSize = Math.min(Math.max(this._buffer.byteLength * 2, requiredSize), this._buffer.maxByteLength!);
+        this._buffer.resize(newSize);
+        this._dataView = new DataView(this._buffer); // Recreate DataView to reflect new buffer size
+    }
+
+    private _performRead<DType>(
+        bytesToRead: number,
+        readFn: (pos: number) => DType
+    ): DType {
+
+        this._checkReadBounds(bytesToRead);
+        const value = readFn(this._index);
+        this._index += bytesToRead;
+        return value;
+
+    }
+
+    private _performWrite<DType>(
+        bytesToWrite: number,
+        writeFn: (pos: number, value: DType) => void,
+        value: DType,
+        offset?: number
+    ): number {
+
+        const pos = offset ?? this._index;
+        this._ensureCapacity(pos + bytesToWrite);
+        
+        writeFn(pos, value);
+        
+        if (offset === undefined) {
+            this._index += bytesToWrite;
+            this.maxWritten = this._index;
+        } else {
+            this.maxWritten = pos + bytesToWrite;
+        }
+        return bytesToWrite;
+
+    }
+
+    private _writeBytes(pos: number, data: Uint8Array): void {
+        const targetView = new Uint8Array(this._buffer, pos, data.length);
+        targetView.set(data);
+    }
+
+
+    // Public methods
+    clone(): IPacketBuffer {
+        const clone = new PacketBuffer(this._buffer.byteLength);
+        clone.write(this.buffer.slice(0, this.maxWritten));
+        clone.index = this.index; // Copy current index
+        return clone;
+    }
+
     // Read Methods
     read(length: number): Uint8Array {
-        const result = new Uint8Array(this._buffer, this._index, length);
-        this._index += length;
-        return result;
+        return this._performRead(length, (pos) => new Uint8Array(this._buffer, pos, length));
     }
 
     readBool(): boolean {
@@ -72,51 +128,31 @@ export default class PacketBuffer implements IPacketBuffer {
     }
 
     readByte(): number {
-        return this._dataView.getInt8(this._index++);
+        return this._performRead(1, this._dataView.getInt8.bind(this._dataView));
     }
 
     readShort(): number {
-        const value = this._dataView.getInt16(this._index);
-        this._index += 2;
-        return value;
+        return this._performRead(2, this._dataView.getInt16.bind(this._dataView));
     }
 
     readInt(): number {
-        const value = this._dataView.getInt32(this._index);
-        this._index += 4;
-        return value;
+        return this._performRead(4, this._dataView.getInt32.bind(this._dataView));
     }
 
     readFloat(): number {
-        const value = this._dataView.getFloat32(this._index);
-        this._index += 4;
-        return value;
+        return this._performRead(4, this._dataView.getFloat32.bind(this._dataView));
     }
 
     readString(): string {
-        const length = this.readInt();
-        const bytes = new Uint8Array(this._buffer, this._index, length);
-        this._index += length;
-        return new TextDecoder().decode(bytes);
+        return new TextDecoder().decode(this.read(this.readInt()));
     }
 
     // Write Methods
     write(data: ArrayBuffer | Uint8Array, offset?: number): number {
-        const pos = offset ?? this._index;
         if (data instanceof ArrayBuffer) {
-            // If data is an ArrayBuffer, convert to byte array for simple handling
             data = new Uint8Array(data);
         }
-                
-        this._ensureCapacity(pos + data.length);
-
-        const targetView = new Uint8Array(this._buffer, pos, data.length);
-        targetView.set(data);
-                
-        if (offset === undefined) {
-            this._index += data.length;
-        }
-        return data.length;
+        return this._performWrite(data.length, this._writeBytes.bind(this), data, offset);
     }
 
     writeBool(value: boolean, offset?: number): number {
@@ -124,59 +160,24 @@ export default class PacketBuffer implements IPacketBuffer {
     }
 
     writeByte(value: number, offset?: number): number {
-        const pos = offset ?? this._index;
-        this._ensureCapacity(pos + 1);
-        this._dataView.setInt8(pos, value);
-        if (offset === undefined) {
-            this._index++;
-        }
-        return 1;
+        return this._performWrite(1, this._dataView.setInt8.bind(this._dataView), value, offset);
     }
 
     writeShort(value: number, offset?: number): number {
-        const pos = offset ?? this._index;
-        this._ensureCapacity(pos + 2);
-        this._dataView.setInt16(pos, value);
-        if (offset === undefined) {
-            this._index += 2;
-        }
-        return 2;
+        return this._performWrite(2, this._dataView.setInt16.bind(this._dataView), value, offset);
     }
 
     writeInt(value: number, offset?: number): number {
-        const pos = offset ?? this._index;
-        this._ensureCapacity(pos + 4);
-        this._dataView.setInt32(pos, value);
-        if (offset === undefined) {
-            this._index += 4;
-        }
-        return 4;
+        return this._performWrite(4, this._dataView.setInt32.bind(this._dataView), value, offset);
     }
 
     writeFloat(value: number, offset?: number): number {
-        const pos = offset ?? this._index;
-        this._ensureCapacity(pos + 4);
-        this._dataView.setFloat32(pos, value);
-        if (offset === undefined) {
-            this._index += 4;
-        }
-        return 4;
+        return this._performWrite(4, this._dataView.setFloat32.bind(this._dataView), value, offset);
     }
 
     writeString(value: string, offset?: number): number {
-        const pos = offset ?? this._index;
         const stringBytes = new TextEncoder().encode(value);
-        const totalSize = 4 + stringBytes.length;
-        this._ensureCapacity(pos + totalSize);
-
-        // Write length and string bytes (length in big-endian)
-        this._dataView.setInt32(pos, stringBytes.length);       
-        const targetView = new Uint8Array(this._buffer, pos + 4, stringBytes.length);
-        targetView.set(stringBytes);
-                
-        if (offset === undefined) {
-            this._index += totalSize;
-        }
-        return totalSize;
+        this.writeInt(stringBytes.length, offset); // Write length
+        return 4 + this.write(stringBytes, offset !== undefined ? offset + 4 : undefined);
     }
 }
