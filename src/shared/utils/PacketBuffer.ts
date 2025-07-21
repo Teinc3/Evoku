@@ -16,8 +16,8 @@ export default class PacketBuffer implements IPacketBuffer {
     private _maxWritten: number;
 
 
-    constructor(initialSize: number = 255) {
-        this._buffer = new ArrayBuffer(initialSize, { maxByteLength: (2**16 - 1) });
+    constructor(initialSize: number = 256) {
+        this._buffer = new ArrayBuffer(initialSize, { maxByteLength: 2**16 });
         this._dataView = new DataView(this._buffer);
         this._index = 0;
         this._maxWritten = 0; // Track the maximum index written to
@@ -65,7 +65,15 @@ export default class PacketBuffer implements IPacketBuffer {
             return
         }
 
-        const newSize = Math.min(Math.max(this._buffer.byteLength * 2, requiredSize), this._buffer.maxByteLength!);
+        let newSize = this._buffer.byteLength * 2;
+        while (newSize < requiredSize) {
+            // Double the buffer size until it is large enough
+            newSize *= 2;
+            if (this._buffer.byteLength >= this._buffer.maxByteLength!) {
+                throw new RangeError("Buffer size exceeds maximum allowed size.");
+            }
+        }
+
         this._buffer.resize(newSize);
         this._dataView = new DataView(this._buffer); // Recreate DataView to reflect new buffer size
     }
