@@ -12,5 +12,5 @@ export default function createPacketCodec<GenericContract extends IDataContract>
 ) {
     return class CustomPacketCodec extends CustomCodec<GenericContract> {
         readonly codecMap = codecMap;
-    } as CodecConstructor<GenericContract>;
+    }
 }

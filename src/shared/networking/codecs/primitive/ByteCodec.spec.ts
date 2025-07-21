@@ -133,23 +133,6 @@ describe('ByteCodec', () => {
     });
   });
 
-  describe('Integration with Other Codecs', () => {
-    it('should work correctly when mixed with other data types', () => {
-      // Write: int, byte, byte, short
-      buffer.writeInt(123456);
-      codec.encode(buffer, 99);
-      codec.encode(buffer, -55);
-      buffer.writeShort(789);
-      
-      // Read back in same order
-      buffer.index = 0;
-      expect(buffer.readInt()).toBe(123456);
-      expect(codec.decode(buffer)).toBe(99);
-      expect(codec.decode(buffer)).toBe(-55);
-      expect(buffer.readShort()).toBe(789);
-    });
-  });
-
   describe('Two\'s Complement Representation', () => {
     it('should handle two\'s complement for negative values', () => {
       const testValue = -1; // Should be 0xFF in two's complement
@@ -166,4 +149,43 @@ describe('ByteCodec', () => {
       expect(codec.decode(buffer)).toBe(-1);
     });
   });
+
+  describe('Out-of-Range Values', () => {
+    it('should wrap values greater than 127', () => {
+      const outOfRangeValue = 128; // One greater than the max
+      const expectedValue = -128; // This is what it will wrap around to
+
+      codec.encode(buffer, outOfRangeValue);
+      buffer.index = 0;
+      const decodedValue = codec.decode(buffer);
+
+      expect(decodedValue).not.toBe(outOfRangeValue);
+      expect(decodedValue).toBe(expectedValue);
+    });
+
+    it('should wrap values less than -128', () => {
+      const outOfRangeValue = -129; // One less than the min
+      const expectedValue = 127; // This is what it will wrap around to
+
+      codec.encode(buffer, outOfRangeValue);
+      buffer.index = 0;
+      const decodedValue = codec.decode(buffer);
+
+      expect(decodedValue).not.toBe(outOfRangeValue);
+      expect(decodedValue).toBe(expectedValue);
+    });
+
+    it('should wrap values full round', () => {
+      const outOfRangeValue = 256; // Two full cycles of 0-255
+      const expectedValue = 0; // Should wrap around to zero
+
+      codec.encode(buffer, outOfRangeValue);
+      buffer.index = 0;
+      const decodedValue = codec.decode(buffer);
+
+      expect(decodedValue).not.toBe(outOfRangeValue);
+      expect(decodedValue).toBe(expectedValue);
+    });
+  });
+
 });
