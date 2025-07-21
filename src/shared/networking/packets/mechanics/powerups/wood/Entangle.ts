@@ -1,5 +1,5 @@
-import createActionPacket from "../../factory/createActionPacket";
-import WoodPUP from "../../../../types/enums/actions/mechanics/powerups/wood";
+import createActionPacket from "../../../factory/createActionPacket";
+import WoodPUP from "../../../../../types/enums/actions/mechanics/powerups/wood";
 
 
 export const UseEntangle = createActionPacket(
