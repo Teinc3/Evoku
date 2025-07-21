@@ -1,4 +1,4 @@
-import createPacket from "../../factory/createPacket";
+import createPacket from "../factory/createPacket";
 import Networking from "../../../types/enums/actions/networking";
 import IntCodec from "../../codecs/primitive/IntCodec";
 

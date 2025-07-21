@@ -1,5 +1,5 @@
-import createActionPacket from "../../factory/createActionPacket";
-import WaterPUP from "../../../../types/enums/actions/mechanics/powerups/water";
+import createActionPacket from "../../../factory/createActionPacket";
+import WaterPUP from "../../../../../types/enums/actions/mechanics/powerups/water";
 
 
 export const UseCryo = createActionPacket(
