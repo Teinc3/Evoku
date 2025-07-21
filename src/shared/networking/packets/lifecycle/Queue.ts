@@ -1,4 +1,4 @@
-import createPacket from "../factory/createPacket";
+import createPacket from "../../factory/createPacket";
 import Lifecycle from "../../../types/enums/actions/lifecycle";
 import { BoolCodec, StringCodec } from "../../codecs/primitive";
 

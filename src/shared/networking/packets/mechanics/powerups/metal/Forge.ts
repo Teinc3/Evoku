@@ -1,5 +1,5 @@
-import createActionPacket from "../../../factory/createActionPacket";
-import MetalPUP from "../../../../../types/enums/actions/mechanics/powerups/metal";
+import createActionPacket from "../../factory/createActionPacket";
+import MetalPUP from "../../../../types/enums/actions/mechanics/powerups/metal";
 
 
 export const UseForge = createActionPacket(

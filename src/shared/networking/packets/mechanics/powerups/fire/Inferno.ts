@@ -1,5 +1,5 @@
-import createActionPacket from "../../../factory/createActionPacket";
-import FirePUP from "../../../../../types/enums/actions/mechanics/powerups/fire";
+import createActionPacket from "../../factory/createActionPacket";
+import FirePUP from "../../../../types/enums/actions/mechanics/powerups/fire";
 
 
 export const UseInferno = createActionPacket(
