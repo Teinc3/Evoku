@@ -1,5 +1,5 @@
-import type IDataContract from '@shared/types/contracts/IDataContract';
-import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
+import type IDataContract from '../contracts/IDataContract';
+import type IPacketBuffer from '../utils/IPacketBuffer';
 
 
 export default interface ICodec<DataType> {
@@ -9,10 +9,10 @@ export default interface ICodec<DataType> {
 
 export type CodecConstructor<DType> = new () => ICodec<DType>;
 
-export type CodecMap<GenericContract extends IDataContract> = {
+export type CustomCodecMap<GenericContract extends IDataContract> = {
     [ContractKey in keyof GenericContract]: CodecConstructor<GenericContract[ContractKey]>
 };
 
 export interface ICustomCodec<GenericContract extends IDataContract> extends ICodec<GenericContract> {
-    readonly codecMap: CodecMap<GenericContract>;
+    readonly codecMap: CustomCodecMap<GenericContract>;
 }

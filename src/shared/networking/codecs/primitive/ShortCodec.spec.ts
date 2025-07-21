@@ -1,6 +1,6 @@
 import ShortCodec from './ShortCodec';
-import PacketBuffer from '@shared/utils/PacketBuffer';
-import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
+import PacketBuffer from '../../../utils/PacketBuffer';
+import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
 
 
 describe('ShortCodec', () => {
@@ -107,9 +107,9 @@ describe('ShortCodec', () => {
       
       buffer.index = 0;
       
-      // Check individual bytes
-      expect(buffer.readByte()).toBe(0xFF);
-      expect(buffer.readByte()).toBe(0xFF);
+      // Check individual bytes - should be -1 (0xFF signed)
+      expect(buffer.readByte()).toBe(-1);
+      expect(buffer.readByte()).toBe(-1);
     });
   });
 

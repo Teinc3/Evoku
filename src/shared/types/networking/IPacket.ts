@@ -1,22 +1,33 @@
-import type ActionType from '@shared/types/contracts/ActionType';
-import type IDataContract from '@shared/types/contracts/IDataContract';
-import type { CodecConstructor } from '@shared/types/networking/ICodec';
-import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
+import type ActionMap from '../actionmap';
+import type ActionEnum from '../enums/actions';
+import type IPacketBuffer from '../utils/IPacketBuffer';
+import type { CodecConstructor } from './ICodec';
 
 
-export default interface IPacket<GenericContract extends IDataContract> {
+export default interface IPacket<GenericAction extends ActionEnum> {
+    
+    _data: ActionMap[GenericAction];
 
-    _data: GenericContract;
+    readonly id: GenericAction;
+    readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
 
-    readonly id: ActionType
-    readonly Codec: CodecConstructor<GenericContract>;
+    get data(): ActionMap[GenericAction];
+    set data(value: ActionMap[GenericAction]);
 
-    get data(): GenericContract;
-    set data(value: GenericContract);
-
-    wrap: (data: GenericContract) => IPacketBuffer;
-    unwrap: (buffer: IPacketBuffer) => GenericContract;
+    wrap: (data: ActionMap[GenericAction]) => IPacketBuffer;
+    unwrap: (buffer: IPacketBuffer) => ActionMap[GenericAction];
     
 }
 
-export type PacketConstructor = new <GenericContract extends IDataContract>(data?: GenericContract) => IPacket<GenericContract>;
+/**
+ * An extended constructor type for packets,
+ * containing static properties for accessing the packet's ID and Codec.
+ */
+export type PacketConstructor<GenericAction extends ActionEnum> = {
+
+    readonly id: GenericAction;
+    readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
+
+    new (data?: ActionMap[GenericAction]): IPacket<GenericAction>;
+
+}

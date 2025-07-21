@@ -1,5 +1,5 @@
-import type ActionType from "@shared/types/contracts/ActionType";
-import type { PacketConstructor } from "@shared/types/networking/IPacket";
+import type ActionEnum from "../../types/enums/actions";
+import type { PacketConstructor } from "../../types/networking/IPacket";
 
 
 /**
@@ -8,16 +8,16 @@ import type { PacketConstructor } from "@shared/types/networking/IPacket";
  * Packets, once registered by the createPacket factory,
  * will automatically be added to this registry.
  * This allows for easy retrieval of packet classes
- * based on their ActionType.
+ * based on their ActionEnum.
  */
 export default class PacketRegistry {
-    private static registry = new Map<ActionType, PacketConstructor>();
+    private static registry = new Map<ActionEnum, PacketConstructor<ActionEnum>>();
     
-    static registerPacket(packetClass: PacketConstructor): void {
-        this.registry.set(packetClass.prototype.id, packetClass);
+    static registerPacket(packetClass: PacketConstructor<ActionEnum>): void {
+        this.registry.set(packetClass.id, packetClass);
     }
 
-    static getPacket(id: ActionType): PacketConstructor | undefined {
+    static getPacket(id: ActionEnum) {
         return this.registry.get(id);
     }
 }

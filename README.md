@@ -1,9 +1,7 @@
 # Evoku
-
-For more information, read the [wiki page](https://github.com/Teinc3/Evoku/wiki).
+This repository contains the source code, assets and documentation for the game Evoku.
 
 ## Development
-
 To launch both projects simultaneously, do:
 
 ```bash
@@ -21,3 +19,13 @@ ng serve
 ```bash
 npm run dev
 ```
+
+## Information
+- Documentation of internal API is organised into the [`docs`](/docs/) directory
+See the [API Documentation](/docs/Documentation.md) for more information.
+- For other non-technical plans, refer to the [wiki page](https://github.com/Teinc3/Evoku/wiki).
+
+
+## Contributors
+- Teinc3 (Main Developer)
+- nak (Graphics Designer)

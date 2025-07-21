@@ -1,5 +1,5 @@
-import type ICodec from "@shared/types/networking/ICodec";
-import type IPacketBuffer from "@shared/types/utils/IPacketBuffer";
+import type ICodec from "../../types/networking/ICodec";
+import type IPacketBuffer from "../../types/utils/IPacketBuffer";
 
 
 /**

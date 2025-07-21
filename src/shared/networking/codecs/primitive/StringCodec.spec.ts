@@ -1,6 +1,6 @@
 import StringCodec from './StringCodec';
-import PacketBuffer from '@shared/utils/PacketBuffer';
-import type IPacketBuffer from '@shared/types/utils/IPacketBuffer';
+import PacketBuffer from '../../../utils/PacketBuffer';
+import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
 
 
 describe('StringCodec', () => {
