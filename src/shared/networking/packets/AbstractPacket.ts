@@ -1,10 +1,10 @@
 import PacketBuffer from '../../utils/PacketBuffer';
 
 import type IPacketBuffer from '../../types/utils/IPacketBuffer';
+import type AugmentAction from '../../types/utils/AugmentAction';
 import type IPacket from '../../types/networking/IPacket';
-import type { CodecConstructor } from '../../types/networking/ICodec';
+import type { CustomCodecConstructor } from '../../types/networking/ICodec';
 import type ActionEnum from '../../types/enums/actions';
-import type ActionMap from '../../types/actionmap';
 
 
 /**
@@ -17,7 +17,7 @@ import type ActionMap from '../../types/actionmap';
 export default abstract class AbstractPacket<GenericAction extends ActionEnum>
 implements IPacket<GenericAction> { 
 
-  _data: ActionMap[GenericAction];
+  _data: AugmentAction<GenericAction>;
 
   /**
      * The unique identifier for the packet type.
@@ -32,21 +32,21 @@ implements IPacket<GenericAction> {
   /**
      * The codec used for encoding and decoding the packet's data.
      * 
-     * @type {CodecConstructor<ActionMap[GenericAction]>}
+     * @type {CustomCodecConstructor<AugmentAction<GenericAction>>}
      * @abstract
      * @readonly
      */
-  abstract readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
+  abstract readonly Codec: CustomCodecConstructor<AugmentAction<GenericAction>>;
 
-  constructor(data?: ActionMap[GenericAction]) {
-    this._data = data ?? {} as ActionMap[GenericAction];
+  constructor(data?: AugmentAction<GenericAction>) {
+    this._data = data ?? {} as AugmentAction<GenericAction>;
   }
 
-  get data(): ActionMap[GenericAction] {
+  get data(): AugmentAction<GenericAction> {
     return this._data;
   }
 
-  set data(value: ActionMap[GenericAction]) {
+  set data(value: AugmentAction<GenericAction>) {
     this._data = value;
   }
 
@@ -54,9 +54,9 @@ implements IPacket<GenericAction> {
      * Unwraps the provided packet buffer into Data bound by the packet's contract.
      * 
      * @param buffer 
-     * @returns {ActionMap[GenericAction]} The data decoded from the packet buffer.
+     * @returns {AugmentAction<GenericAction>} The data decoded from the packet buffer.
      */
-  unwrap(buffer: IPacketBuffer): ActionMap[GenericAction] {
+  unwrap(buffer: IPacketBuffer): AugmentAction<GenericAction> {
     const codecInstance = new this.Codec();
     this.data = codecInstance.decode(buffer);
     return this.data;
@@ -68,7 +68,7 @@ implements IPacket<GenericAction> {
      * @param {ActionMap[GenericAction]} data - The data to be wrapped in the packet.
      * @return {IPacketBuffer} The packet buffer containing the encoded data.
      */
-  wrap(data?: ActionMap[GenericAction]): IPacketBuffer {
+  wrap(data?: AugmentAction<GenericAction>): IPacketBuffer {
 
     if (!data && !this.data) {
       throw new Error('No data provided to wrap in packet buffer.');

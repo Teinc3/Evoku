@@ -1,55 +1,62 @@
 import createPacketCodec from './createPacketCodec';
-import { ByteCodec, StringCodec } from '../primitive';
+import { IntCodec } from '../primitive';
+import ActionCodec from '../custom/ActionCodec';
 import PacketBuffer from '../../../utils/PacketBuffer';
+import Networking from '../../../types/enums/actions/networking';
 
-import type IDataContract from '../../../types/contracts/IDataContract';
+import type AugmentAction from '../../../types/utils/AugmentAction';
 
 
-// Define a simple mock contract just for this test file
-interface MockContract extends IDataContract {
-  id: number;
-  name: string;
-}
-
+// We use a real contract from our application
+type AugmentedPingContract = AugmentAction<Networking.PING>;
 
 describe('createPacketCodec Factory', () => {
-  it('should return a class that correctly holds the provided codecMap', () => {
-    // 1. Define the codec map to pass to the factory
-    const mockCodecMap = {
-      id: ByteCodec,
-      name: StringCodec,
+  // Test 1: Verify the structure of the generated class
+  it('should return a class that combines the injected ActionCodec with the codecMap', () => {
+    // A. Define the codec map for the NON-action properties of the contract
+    const pingCodecMap = {
+      clientPing: IntCodec,
+      serverTime: IntCodec,
     };
 
-    // 2. Use the factory to create the Codec class
-    const MockPacketCodec = createPacketCodec<MockContract>(mockCodecMap);
+    // B. Use the factory to create the Codec class using a REAL action
+    // Coerce the type to Networking.PING
+    const PingPacketCodec = createPacketCodec<Networking.PING>(pingCodecMap);
 
-    // 3. Instantiate the generated class
-    const codecInstance = new MockPacketCodec();
+    // C. Instantiate the generated class
+    const codecInstance = new PingPacketCodec();
 
-    // 4. Assert that the codecMap property was assigned correctly
-    expect(codecInstance.codecMap).toBe(mockCodecMap);
-    expect(codecInstance.codecMap.id).toBe(ByteCodec);
+    // D. Assert that the final codecMap has the correct structure
+    expect(codecInstance.codecMap.action).toBe(ActionCodec);
+    expect(codecInstance.codecMap.clientPing).toBe(IntCodec);
+    expect(codecInstance.codecMap.serverTime).toBe(IntCodec);
   });
 
-  it('should create a functional codec that can encode and decode data', () => {
-    // 1. Define the map and create the Codec class
-    const mockCodecMap = {
-      id: ByteCodec,
-      name: StringCodec,
+  // Test 2: Verify the encode/decode logic of the generated class
+  it('should create a functional codec that can perform a full encode/decode round trip', () => {
+    // A. Define the map and create the Codec class
+    const pingCodecMap = {
+      clientPing: IntCodec,
+      serverTime: IntCodec,
     };
-    const MockPacketCodec = createPacketCodec<MockContract>(mockCodecMap);
-    const codecInstance = new MockPacketCodec();
+    const PingPacketCodec = createPacketCodec<Networking.PING>(pingCodecMap);
+    const codecInstance = new PingPacketCodec();
 
-    // 2. Create test data and a buffer
-    const testData: MockContract = { id: 42, name: 'test' };
+    // B. Create test data that matches the full AugmentedContract
+    const testData: AugmentedPingContract = {
+      action: Networking.PING, // Include the action property
+      clientPing: 53,
+      serverTime: 67890,
+    };
     const buffer = new PacketBuffer();
 
-    // 3. Perform the encode/decode round trip
+    // C. Perform the encode/decode round trip
     codecInstance.encode(buffer, testData);
     buffer.index = 0; // Reset for reading
     const decodedData = codecInstance.decode(buffer);
 
-    // 4. Assert that the data survived the round trip
+    // D. Assert that the data survived the round trip.
+    // This implicitly tests the custom `decode` logic that injects the action.
     expect(decodedData).toEqual(testData);
   });
 });

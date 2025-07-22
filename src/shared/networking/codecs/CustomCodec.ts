@@ -58,12 +58,6 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
     const data = {} as GenericContract; // Reset internal data
 
     for (const key in this.codecMap) {
-      // Do not decode the action key
-      // It is already decoded initially to determine the packet type
-      if (key === "action") {
-        continue;
-      }
-
       const Codec = this.codecMap[key];
       const codecInstance = new Codec();
       data[key] = codecInstance.decode(buffer);

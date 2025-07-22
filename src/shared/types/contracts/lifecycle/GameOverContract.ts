@@ -1,5 +1,5 @@
 import type IDataContract from "../IDataContract";
-import type GameOverReason from "../../../types/enums/GameOverReason";
+import type GameOverReason from "../../enums/GameOverReason";
 
 
 export default interface GameOverContract extends IDataContract {

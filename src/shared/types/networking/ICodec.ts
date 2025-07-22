@@ -9,6 +9,9 @@ export default interface ICodec<DataType> {
 
 export type CodecConstructor<DType> = new () => ICodec<DType>;
 
+export type CustomCodecConstructor<GenericContract extends IDataContract>
+  = new () => ICustomCodec<GenericContract>;
+
 export type CustomCodecMap<GenericContract extends IDataContract> = {
   [ContractKey in keyof GenericContract]: CodecConstructor<GenericContract[ContractKey]>
 };

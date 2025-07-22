@@ -52,6 +52,7 @@ describe('createActionPacket Factory', () => {
 
     // B. Create an instance with test data
     const packet = new MockSetCell({
+      action: Gameplay.SET_CELL,
       clientTime: 98765,
       actionID: 69,
       value: 1,
@@ -65,6 +66,7 @@ describe('createActionPacket Factory', () => {
     const unwrappedData = newPacket.unwrap(buffer);
 
     // D. Assert that all data, including injected fields, survived the round trip
+    expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.clientTime).toBe(packet.data.clientTime);
     expect(unwrappedData.actionID).toBe(packet.data.actionID);
     expect(unwrappedData.cellIndex).toBe(packet.data.cellIndex);
@@ -79,6 +81,7 @@ describe('createActionPacket Factory', () => {
     );
 
     const packet = new MockRejectAction({
+      action: Gameplay.REJECT_ACTION,
       actionID: 42,
       boardHash: 123456789
     });
@@ -88,6 +91,7 @@ describe('createActionPacket Factory', () => {
     const newPacket = new MockRejectAction();
     const unwrappedData = newPacket.unwrap(buffer);
 
+    expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.actionID).toBe(packet.data.actionID);
     expect(unwrappedData.boardHash).toBe(packet.data.boardHash);
   });

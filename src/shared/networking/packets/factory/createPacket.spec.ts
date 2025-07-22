@@ -17,6 +17,7 @@ describe('createPacket Factory', () => {
 
     // 2. Create an instance with some test data
     const packet = new MockPing({
+      action: Networking.PING,
       clientPing: 69,
       serverTime: 123456,
       // @ts-expect-error (2353)
@@ -28,12 +29,13 @@ describe('createPacket Factory', () => {
     expect(buffer.maxWritten).toBeGreaterThan(0);
 
     // 4. Unwrap the data from the buffer
-    // Reset the buffer index to read from the start
+    // Reset the buffer index to skip the action ID
     buffer.index = 0;
     const newPacket = new MockPing(); // Create an empty packet to unwrap into
     const unwrappedData = newPacket.unwrap(buffer);
 
     // 5. Assert that the data survived the round trip
+    expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.clientPing).toBe(packet.data.clientPing);
     expect(unwrappedData.serverTime).toBe(packet.data.serverTime);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +54,7 @@ describe('createPacket Factory', () => {
 
     // 2. Create an instance with some test data
     const packet = new MockSetCell({
+      action: Gameplay.CELL_SET,
       cellIndex: 5,
       value: 1,
       serverTime: 123456789,
@@ -64,12 +67,13 @@ describe('createPacket Factory', () => {
     expect(buffer.maxWritten).toBeGreaterThan(0);
 
     // 4. Unwrap the data from the buffer
-    // Reset the buffer index to read from the start
+    // Reset the buffer index 
     buffer.index = 0;
     const newPacket = new MockSetCell(); // Create an empty packet to unwrap into
     const unwrappedData = newPacket.unwrap(buffer);
 
     // 5. Assert that the data survived the round trip
+    expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.cellIndex).toBe(packet.data.cellIndex);
     expect(unwrappedData.value).toBe(packet.data.value);
     expect(unwrappedData.serverTime).toBe(packet.data.serverTime);
@@ -77,7 +81,9 @@ describe('createPacket Factory', () => {
     expect(unwrappedData.actionID).toBe(packet.data.actionID);
 
     // 6. Assert that the data is wrapped in the order we specify it to be in
+    // Also attach the action key at the start
     expect(Object.keys(unwrappedData)).toEqual([
+      'action',
       'cellIndex',
       'value',
       'serverTime',
@@ -95,6 +101,7 @@ describe('createPacket Factory', () => {
 
     // 2. Create an instance with some test data
     const packet = new MockMatchFound({
+      action: Lifecycle.MATCH_FOUND,
       myID: 0,
       players: [
         { playerID: 0, username: 'Player1' },
@@ -114,6 +121,7 @@ describe('createPacket Factory', () => {
     const unwrappedData = newPacket.unwrap(buffer);
 
     // 5. Assert that the data survived the round trip
+    expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.myID).toBe(packet.data.myID);
     expect(unwrappedData.players).toEqual(packet.data.players);
   })
