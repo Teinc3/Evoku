@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { CodecConstructor } from "../networking/ICodec";
 import type IDataContract from "../contracts/IDataContract";
 import type ValueContract from "../contracts/extendables/ValueContract";
@@ -21,7 +23,7 @@ export type ExtendableContractKeys = KeysToOmitMap<AllExtendableContracts>;
 export type RequiredInjectableKeys<T> = Extract<keyof T, keyof ExtendableContractKeys>;
 
 export type InjectableCodecMap = {
-  [K in keyof ExtendableContractKeys]: CodecConstructor<unknown>
+  [K in keyof ExtendableContractKeys]: CodecConstructor<any>
 };
 
 // collects any duplicate entries in a readonly tuple T
