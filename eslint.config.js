@@ -24,6 +24,14 @@ export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    settings: {
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+      }
+    },
     files: ["**/*.{js,cjs,ts}"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
@@ -45,21 +53,6 @@ export default defineConfig([
 
       // ## Import Rules ##
       "@typescript-eslint/consistent-type-imports": "error", // Enforce 'import type'
-      "import/no-restricted-paths": [
-        // Disallow '@shared' alias within the shared directory
-        "error",
-        {
-          zones: [
-            {
-              target: "./src/shared", // The directory where the rule applies
-              from: "./src/shared", // The source of imports to restrict
-              message:
-                "Use relative imports ('./' or '../') within the 'src/shared' directory.",
-            },
-          ],
-        },
-      ],
-
       "import/newline-after-import": ["error", {
         count: 2,
         exactCount: true,
@@ -151,6 +144,17 @@ export default defineConfig([
           format: null, // No specific format for imports
         },
       ],
+    }
+  },
+  {
+    files: ["./src/shared/**/*.ts"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        "patterns": [{
+          "group": ["@shared/**"],
+          "message": "Use relative imports ('../**') instead of '@shared/**' aliases."
+        }]
+      }]
     }
   },
   {
