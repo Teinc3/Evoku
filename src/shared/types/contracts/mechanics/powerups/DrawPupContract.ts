@@ -1,6 +1,6 @@
-import type { ActionContractC2S, ActionContractS2C } from "../../extendables/ActionContract";
-import type PUPContract from "../../extendables/PUPContract";
 import type IDataContract from "../../IDataContract";
+import type PUPContract from "../../extendables/PUPContract";
+import type { ActionContractC2S, ActionContractS2C } from "../../extendables/ActionContract";
 
 
 export interface DrawPupContract extends ActionContractC2S, IDataContract {}

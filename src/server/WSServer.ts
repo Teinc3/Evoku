@@ -1,6 +1,9 @@
-import express, { Application } from 'express';
-import { createServer, Server as HttpServer } from 'http';
 import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
+import express from 'express';
+
+import type { Server as HttpServer } from 'http';
+import type { Application } from 'express';
 
 
 /**
@@ -8,48 +11,48 @@ import { WebSocketServer } from 'ws';
  */
 export default class WSServer {
 
-    private app: Application;
-    private server: HttpServer;
-    private wss: WebSocketServer;
-    private readonly port: number;
+  private app: Application;
+  private server: HttpServer;
+  private wss: WebSocketServer;
+  private readonly port: number;
 
-    constructor(port: number) {
-        this.port = port;
-        this.app = express();
-        this.server = createServer(this.app);
-        this.wss = new WebSocketServer({ server: this.server });
+  constructor(port: number) {
+    this.port = port;
+    this.app = express();
+    this.server = createServer(this.app);
+    this.wss = new WebSocketServer({ server: this.server });
 
-        this.configureWebSockets();
-    }
+    this.configureWebSockets();
+  }
 
-    private configureWebSockets(): void {
-        this.wss.on('connection', (ws) => {
-            console.log('New WebSocket connection established');
+  private configureWebSockets(): void {
+    this.wss.on('connection', ws => {
+      console.log('New WebSocket connection established');
 
-            ws.on('message', (message) => {
-                console.log(`Received message: ${message}`);
-            });
+      ws.on('message', message => {
+        console.log(`Received message: ${message}`);
+      });
 
-            ws.on('close', () => {
-                console.log('WebSocket connection closed');
-            });
-        });
-    }
+      ws.on('close', () => {
+        console.log('WebSocket connection closed');
+      });
+    });
+  }
 
-    public start() {
-        this.server.listen(this.port, () => {
-            console.log(`WebSocket server is running on ws://localhost:${this.port}`);
-        });
-    }
+  public start() {
+    this.server.listen(this.port, () => {
+      console.log(`WebSocket server is running on ws://localhost:${this.port}`);
+    });
+  }
 
-    public close(): void {
-        this.wss.close(() => {
-            console.log('WebSocket server closed');
-        });
+  public close(): void {
+    this.wss.close(() => {
+      console.log('WebSocket server closed');
+    });
         
-        this.server.close(() => {
-            console.log('HTTP server closed');
-        });
-    }
+    this.server.close(() => {
+      console.log('HTTP server closed');
+    });
+  }
 
 }

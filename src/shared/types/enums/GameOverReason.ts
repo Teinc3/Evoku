@@ -1,8 +1,8 @@
 enum GameOverReason {
-    SCORE,
-    TIMEOUT,
-    FORFEIT,
-    SURRENDER
+  SCORE,
+  TIMEOUT,
+  FORFEIT,
+  SURRENDER
 }
 
 export default GameOverReason;

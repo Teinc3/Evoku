@@ -1,5 +1,6 @@
-import ShortCodec from './ShortCodec';
 import PacketBuffer from '../../../utils/PacketBuffer';
+import ShortCodec from './ShortCodec';
+
 import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
 
 

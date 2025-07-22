@@ -10,6 +10,6 @@ import type PlayerInfoContract from "./PlayerInfoContract";
  * - `players`: An array of player information contracts for the players in the match.
  */
 export default interface MatchFoundContract extends IDataContract {
-    myID: number; // Player's ID in the match
-    players: PlayerInfoContract[];
+  myID: number; // Player's ID in the match
+  players: PlayerInfoContract[];
 }

@@ -1,12 +1,16 @@
-import PlayerInfoContract from "../../../types/contracts/lifecycle/PlayerInfoContract";
-import CustomCodec from "../CustomCodec";
 import { ByteCodec, StringCodec } from "../primitive";
-import { ICustomCodec } from "../../../types/networking/ICodec";
+import CustomCodec from "../CustomCodec";
+
+import type { ICustomCodec } from "../../../types/networking/ICodec";
+import type PlayerInfoContract from "../../../types/contracts/lifecycle/PlayerInfoContract";
 
 
-export default class PlayerInfoCodec extends CustomCodec<PlayerInfoContract> implements ICustomCodec<PlayerInfoContract> {
-    readonly codecMap = {
-        playerID: ByteCodec,
-        username: StringCodec
-    }
+export default class PlayerInfoCodec extends CustomCodec<PlayerInfoContract>
+  implements ICustomCodec<PlayerInfoContract> {
+
+  readonly codecMap = {
+    playerID: ByteCodec,
+    username: StringCodec
+  }
+  
 }

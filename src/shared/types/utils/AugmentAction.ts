@@ -3,7 +3,7 @@ import type ActionMap from "../actionmap"
 
 
 type AugmentAction<GenericAction extends ActionEnum> = ActionMap[GenericAction] & {
-    action: GenericAction;
+  action: GenericAction;
 };
 
 export default AugmentAction;
