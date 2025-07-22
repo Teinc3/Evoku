@@ -14,8 +14,8 @@ export default interface IPacket<GenericAction extends ActionEnum> {
   get data(): ActionMap[GenericAction];
   set data(value: ActionMap[GenericAction]);
 
-    wrap: (data?: ActionMap[GenericAction]) => IPacketBuffer;
-    unwrap: (buffer: IPacketBuffer) => ActionMap[GenericAction];
+  wrap: (data?: ActionMap[GenericAction]) => IPacketBuffer;
+  unwrap: (buffer: IPacketBuffer) => ActionMap[GenericAction];
     
 }
 
