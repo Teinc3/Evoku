@@ -1,21 +1,21 @@
-import type ActionMap from '../actionmap';
-import type ActionEnum from '../enums/actions';
 import type IPacketBuffer from '../utils/IPacketBuffer';
+import type ActionEnum from '../enums/actions';
+import type ActionMap from '../actionmap';
 import type { CodecConstructor } from './ICodec';
 
 
 export default interface IPacket<GenericAction extends ActionEnum> {
     
-    _data: ActionMap[GenericAction];
+  _data: ActionMap[GenericAction];
 
-    readonly id: GenericAction;
-    readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
+  readonly id: GenericAction;
+  readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
 
-    get data(): ActionMap[GenericAction];
-    set data(value: ActionMap[GenericAction]);
+  get data(): ActionMap[GenericAction];
+  set data(value: ActionMap[GenericAction]);
 
-    wrap: (data: ActionMap[GenericAction]) => IPacketBuffer;
-    unwrap: (buffer: IPacketBuffer) => ActionMap[GenericAction];
+  wrap: (data: ActionMap[GenericAction]) => IPacketBuffer;
+  unwrap: (buffer: IPacketBuffer) => ActionMap[GenericAction];
     
 }
 
@@ -25,9 +25,9 @@ export default interface IPacket<GenericAction extends ActionEnum> {
  */
 export type PacketConstructor<GenericAction extends ActionEnum> = {
 
-    readonly id: GenericAction;
-    readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
+  readonly id: GenericAction;
+  readonly Codec: CodecConstructor<ActionMap[GenericAction]>;
 
-    new (data?: ActionMap[GenericAction]): IPacket<GenericAction>;
+  new (data?: ActionMap[GenericAction]): IPacket<GenericAction>;
 
 }

@@ -3,13 +3,13 @@ import Gameplay from "../../../types/enums/actions/mechanics/gameplay";
 
 
 export const SetCell = createActionPacket(
-    Gameplay.SET_CELL,
-    ['clientTime', 'actionID', 'cellIndex', 'value'],
-    {}
+  Gameplay.SET_CELL,
+  ['clientTime', 'actionID', 'cellIndex', 'value'],
+  {}
 );
 
 export const CellSet = createActionPacket(
-    Gameplay.CELL_SET,
-    ['serverTime', 'playerID', 'actionID', 'cellIndex', 'value'],
-    {}
+  Gameplay.CELL_SET,
+  ['serverTime', 'playerID', 'actionID', 'cellIndex', 'value'],
+  {}
 );

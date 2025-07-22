@@ -3,6 +3,6 @@ import type { PingContract, PongContract } from "../contracts/networking/PingPon
 
 
 export default interface NetworkingActionMap {
-    [Networking.PING]: PingContract;
-    [Networking.PONG]: PongContract;
+  [Networking.PING]: PingContract;
+  [Networking.PONG]: PongContract;
 }

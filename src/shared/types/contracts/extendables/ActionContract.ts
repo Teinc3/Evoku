@@ -1,12 +1,13 @@
 import type IExtendableContract from "../IExtendableContract";
 
+
 /**
  * The base contract for all actions.
  * 
  * This is used to define the structure of an action that can be performed in the game.
  */
 export default interface BaseActionContract extends IExtendableContract {
-    actionID: number;
+  actionID: number;
 }
 
 /**
@@ -14,8 +15,8 @@ export default interface BaseActionContract extends IExtendableContract {
  * This is broadcast by the server to all clients.
  */
 export interface ActionContractS2C extends BaseActionContract {
-    serverTime: number;
-    playerID: number;
+  serverTime: number;
+  playerID: number;
 }
 
 /**
@@ -23,5 +24,5 @@ export interface ActionContractS2C extends BaseActionContract {
  * This is sent by the client to the server.
  */
 export interface ActionContractC2S extends BaseActionContract {
-    clientTime: number;
+  clientTime: number;
 }

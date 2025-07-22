@@ -1,5 +1,6 @@
-import BoolCodec from './BoolCodec';
 import PacketBuffer from '../../../utils/PacketBuffer';
+import BoolCodec from './BoolCodec';
+
 import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
 
 

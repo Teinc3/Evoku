@@ -10,11 +10,11 @@ import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
  */
 export default class StringCodec extends AbstractCodec<string> {
     
-    encode(buffer: IPacketBuffer, data: string): number {
-        return buffer.writeString(data);
-    }
+  encode(buffer: IPacketBuffer, data: string): number {
+    return buffer.writeString(data);
+  }
 
-    decode(buffer: IPacketBuffer): string {
-        return buffer.readString();
-    }
+  decode(buffer: IPacketBuffer): string {
+    return buffer.readString();
+  }
 }

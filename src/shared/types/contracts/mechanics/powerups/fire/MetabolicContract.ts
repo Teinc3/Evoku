@@ -1,6 +1,6 @@
+import type IDataContract from "../../../IDataContract";
 import type PUPContract from "../../../extendables/PUPContract";
 import type { ActionContractC2S, ActionContractS2C } from "../../../extendables/ActionContract";
-import type IDataContract from "../../../IDataContract";
 
 
 export default interface MetabolicBaseContract extends PUPContract, IDataContract {}

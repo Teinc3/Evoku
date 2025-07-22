@@ -12,11 +12,11 @@ import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
  */
 export default class FloatCodec extends AbstractCodec<number> {
     
-    encode(buffer: IPacketBuffer, data: number): number {
-        return buffer.writeFloat(data);
-    }
+  encode(buffer: IPacketBuffer, data: number): number {
+    return buffer.writeFloat(data);
+  }
 
-    decode(buffer: IPacketBuffer): number {
-        return buffer.readFloat();
-    }
+  decode(buffer: IPacketBuffer): number {
+    return buffer.readFloat();
+  }
 }

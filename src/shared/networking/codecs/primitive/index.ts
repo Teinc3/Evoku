@@ -1,16 +1,16 @@
-import IntCodec from "./IntCodec";
 import StringCodec from "./StringCodec";
-import BoolCodec from "./BoolCodec";
-import FloatCodec from "./FloatCodec";
 import ShortCodec from "./ShortCodec";
+import IntCodec from "./IntCodec";
+import FloatCodec from "./FloatCodec";
 import ByteCodec from "./ByteCodec";
+import BoolCodec from "./BoolCodec";
 
 
 export {
-    IntCodec,
-    StringCodec,
-    BoolCodec,
-    FloatCodec,
-    ShortCodec,
-    ByteCodec
+  IntCodec,
+  StringCodec,
+  BoolCodec,
+  FloatCodec,
+  ShortCodec,
+  ByteCodec
 }
