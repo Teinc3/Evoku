@@ -3,13 +3,13 @@ import MetalPUP from "../../../../../types/enums/actions/mechanics/powerups/meta
 
 
 export const UseForge = createActionPacket(
-    MetalPUP.USE_FORGE, 
-    ['clientTime', 'actionID', 'pupID'],
-    {}
+  MetalPUP.USE_FORGE, 
+  ['clientTime', 'actionID', 'pupID'],
+  {}
 );
 
 export const ForgeUsed = createActionPacket(
-    MetalPUP.FORGE_USED, 
-    ['serverTime', 'playerID', 'actionID', 'pupID'],
-    {}
+  MetalPUP.FORGE_USED, 
+  ['serverTime', 'playerID', 'actionID', 'pupID'],
+  {}
 );

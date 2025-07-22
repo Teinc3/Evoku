@@ -3,13 +3,13 @@ import EarthPUP from "../../../../../types/enums/actions/mechanics/powerups/eart
 
 
 export const UseLandslide = createActionPacket(
-    EarthPUP.USE_LANDSLIDE,
-    ['clientTime', 'actionID', 'pupID', 'targetID'],
-    {}
+  EarthPUP.USE_LANDSLIDE,
+  ['clientTime', 'actionID', 'pupID', 'targetID'],
+  {}
 );
 
 export const LandslideUsed = createActionPacket(
-    EarthPUP.LANDSLIDE_USED,
-    ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex'], 
-    {}
+  EarthPUP.LANDSLIDE_USED,
+  ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex'], 
+  {}
 );

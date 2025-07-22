@@ -1,5 +1,5 @@
-import scrambler from '../../crypto/scramble/PacketScrambler'
 import { ByteCodec } from "../primitive";
+import scrambler from '../../crypto/scramble/PacketScrambler'
 
 import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
 import type ActionEnum from '../../../types/enums/actions';
@@ -10,11 +10,11 @@ import type ActionEnum from '../../../types/enums/actions';
  * to prevent static network analysis of packet contents.
  */
 export default class ActionCodec extends ByteCodec {
-    override encode(buffer: IPacketBuffer, data: ActionEnum): number {
-        return super.encode(buffer, scrambler.scrambleID(data));
-    }
+  override encode(buffer: IPacketBuffer, data: ActionEnum): number {
+    return super.encode(buffer, scrambler.scrambleID(data));
+  }
     
-    override decode(buffer: IPacketBuffer): ActionEnum {
-        return scrambler.unscrambleID(super.decode(buffer));
-    }
+  override decode(buffer: IPacketBuffer): ActionEnum {
+    return scrambler.unscrambleID(super.decode(buffer));
+  }
 }

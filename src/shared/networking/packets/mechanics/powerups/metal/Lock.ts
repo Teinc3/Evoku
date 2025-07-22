@@ -3,13 +3,13 @@ import MetalPUP from '../../../../../types/enums/actions/mechanics/powerups/meta
 
 
 export const UseLock = createActionPacket(
-    MetalPUP.USE_LOCK,
-    ['clientTime', 'actionID', 'pupID', 'targetID', 'value'],
-    {}
+  MetalPUP.USE_LOCK,
+  ['clientTime', 'actionID', 'pupID', 'targetID', 'value'],
+  {}
 );
 
 export const LockUsed = createActionPacket(
-    MetalPUP.LOCK_USED,
-    ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'value'],
-    {}
+  MetalPUP.LOCK_USED,
+  ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'value'],
+  {}
 );

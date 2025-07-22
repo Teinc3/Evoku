@@ -4,14 +4,14 @@ import type { InjectableCodecMap } from "../../../types/utils/CodecExtensionHelp
 
 
 const INJECTABLE_CODECS: InjectableCodecMap = {
-    serverTime: IntCodec,
-    clientTime: IntCodec,
-    actionID: ByteCodec,
-    pupID: ShortCodec,
-    playerID: ByteCodec,
-    targetID: ByteCodec,
-    cellIndex: ShortCodec,
-    value: ByteCodec
+  serverTime: IntCodec,
+  clientTime: IntCodec,
+  actionID: ByteCodec,
+  pupID: ShortCodec,
+  playerID: ByteCodec,
+  targetID: ByteCodec,
+  cellIndex: ShortCodec,
+  value: ByteCodec
 } as const;
 
 export default INJECTABLE_CODECS;

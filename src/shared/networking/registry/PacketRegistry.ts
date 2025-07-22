@@ -1,5 +1,5 @@
-import type ActionEnum from "../../types/enums/actions";
 import type { PacketConstructor } from "../../types/networking/IPacket";
+import type ActionEnum from "../../types/enums/actions";
 
 
 /**
@@ -11,13 +11,13 @@ import type { PacketConstructor } from "../../types/networking/IPacket";
  * based on their ActionEnum.
  */
 export default class PacketRegistry {
-    private static registry = new Map<ActionEnum, PacketConstructor<ActionEnum>>();
+  private static registry = new Map<ActionEnum, PacketConstructor<ActionEnum>>();
     
-    static registerPacket(packetClass: PacketConstructor<ActionEnum>): void {
-        this.registry.set(packetClass.id, packetClass);
-    }
+  static registerPacket(packetClass: PacketConstructor<ActionEnum>): void {
+    this.registry.set(packetClass.id, packetClass);
+  }
 
-    static getPacket(id: ActionEnum) {
-        return this.registry.get(id);
-    }
+  static getPacket(id: ActionEnum) {
+    return this.registry.get(id);
+  }
 }

@@ -1,12 +1,12 @@
-import { includeIgnoreFile } from "@eslint/compat";
-import css from "@eslint/css";
-import js from "@eslint/js";
-import stylistic from "@stylistic/eslint-plugin";
-import { defineConfig } from "eslint/config";
-import eslintPluginImport from "eslint-plugin-import";
-import globals from "globals";
-import tseslint from "typescript-eslint";
 import { fileURLToPath } from "url";
+import tseslint from "typescript-eslint";
+import globals from "globals";
+import eslintPluginImport from "eslint-plugin-import";
+import { defineConfig } from "eslint/config";
+import stylistic from "@stylistic/eslint-plugin";
+import js from "@eslint/js";
+import css from "@eslint/css";
+import { includeIgnoreFile } from "@eslint/compat";
 
 
 // import json from "@eslint/json";

@@ -1,5 +1,6 @@
-import StringCodec from './StringCodec';
 import PacketBuffer from '../../../utils/PacketBuffer';
+import StringCodec from './StringCodec';
+
 import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
 
 

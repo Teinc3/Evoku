@@ -10,11 +10,11 @@ import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
  */
 export default class BoolCodec extends AbstractCodec<boolean> {
     
-    encode(buffer: IPacketBuffer, data: boolean): number {
-        return buffer.writeBool(data);
-    }
+  encode(buffer: IPacketBuffer, data: boolean): number {
+    return buffer.writeBool(data);
+  }
 
-    decode(buffer: IPacketBuffer): boolean {
-        return buffer.readBool();
-    }
+  decode(buffer: IPacketBuffer): boolean {
+    return buffer.readBool();
+  }
 }

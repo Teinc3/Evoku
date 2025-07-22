@@ -3,13 +3,13 @@ import FirePUP from "../../../../../types/enums/actions/mechanics/powerups/fire"
 
 
 export const UseMetabolic = createActionPacket(
-    FirePUP.USE_METABOLIC,
-    ['clientTime', 'actionID', 'pupID'],
-    {}
+  FirePUP.USE_METABOLIC,
+  ['clientTime', 'actionID', 'pupID'],
+  {}
 );
 
 export const MetabolicUsed = createActionPacket(
-    FirePUP.METABOLIC_USED,
-    ['serverTime', 'playerID', 'actionID', 'pupID'],
-    {}
+  FirePUP.METABOLIC_USED,
+  ['serverTime', 'playerID', 'actionID', 'pupID'],
+  {}
 );

@@ -10,11 +10,11 @@ import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
  */
 export default class ShortCodec extends AbstractCodec<number> {
     
-    encode(buffer: IPacketBuffer, data: number): number {
-        return buffer.writeShort(data);
-    }
+  encode(buffer: IPacketBuffer, data: number): number {
+    return buffer.writeShort(data);
+  }
 
-    decode(buffer: IPacketBuffer): number {
-        return buffer.readShort();
-    }
+  decode(buffer: IPacketBuffer): number {
+    return buffer.readShort();
+  }
 }
