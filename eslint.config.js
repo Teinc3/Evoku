@@ -1,26 +1,47 @@
+import { includeIgnoreFile } from "@eslint/compat";
+import css from "@eslint/css";
 import js from "@eslint/js";
+import stylistic from "@stylistic/eslint-plugin";
+import { defineConfig } from "eslint/config";
+import eslintPluginImport from "eslint-plugin-import";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import eslintPluginImport from "eslint-plugin-import";
-import eslintConfigPrettier from "eslint-config-prettier";
-import json from "@eslint/json";
-import markdown from "@eslint/markdown";
-import css from "@eslint/css";
-import { defineConfig } from "eslint/config";
+import { fileURLToPath } from "url";
+
+
+// import json from "@eslint/json";
+// import markdown from "@eslint/markdown";
+
 
 export default defineConfig([
+  includeIgnoreFile(
+    fileURLToPath(new URL(".gitignore", import.meta.url)),
+    "Imported .gitignore patterns",
+  ),
   {
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
+    ignores: ["package-lock.json", "package.json"],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{js,cjs,ts}"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
     plugins: {
-      js,
       import: eslintPluginImport,
+      '@stylistic': stylistic,
     },
     rules: {
-      "no-var": "error", // Disallow 'var'
-      "prefer-const": "error", // Enforce 'const' for non-reassigned variables
+      "no-var": "error",
+      "prefer-const": "error",
+      "@stylistic/indent": ["error", 2],
+      "@stylistic/max-len": ["error", { code: 100 }],
+      "@stylistic/comma-dangle": ["error", "only-multiline"],
+      "@stylistic/arrow-parens": ["error", "as-needed"],
+      "@stylistic/object-curly-spacing": ["error", "always"],
+      "@stylistic/array-bracket-spacing": ["error", "never"],
+      "@typescript-eslint/no-empty-object-type": "off",
 
       // ## Import Rules ##
       "@typescript-eslint/consistent-type-imports": "error", // Enforce 'import type'
@@ -39,53 +60,53 @@ export default defineConfig([
         },
       ],
 
-      "import/order": [
-        "error",
-        {
-          // 1. Group imports into three main categories.
-          groups: [
-            ["builtin", "external"], // Group 1: Node.js built-ins and external libraries
-            "internal", // Group 2: Internal modules (@shared)
-            ["parent", "sibling", "index", "object"], // Group 3: Relative imports
-            "type", // Group 4: Type imports
-          ],
-          // Define how @shared should be treated
-          pathGroups: [
-            {
-              pattern: "@shared/**",
-              group: "internal",
-            },
-          ],
-          // Enforce a single empty line between each of the main groups
-          "newlines-between": "always",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true,
-          },
+      "import/newline-after-import": ["error", {
+        count: 2,
+        exactCount: true,
+        considerComments: true
+      }],
+      "import/no-useless-path-segments": ["error", {
+        noUselessIndex: true
+      }],
+      "import/prefer-default-export": ["error", { "target": "single" }],
+      "import/order": ["error", {
+        // 1. Group imports into three main categories.
+        groups: [
+          ["builtin", "external", "object"], // Group 1: JS built-ins and external libraries
+          ["internal", "index", "sibling", "parent"], // Group 2: Internal and relative imports
+          "type", // Group 3: Type imports
+        ],
+        sortTypesGroup: true,
+        // Define how @shared should be treated
+        pathGroups: [
+          {
+            pattern: "@shared/**",
+            group: "internal",
+          }
+        ],
+        distinctGroup: false,
+        // Enforce a single empty line between each of the main groups
+        "newlines-between": "always",
+        alphabetize: {
+          order: "desc", // Forces closest imports to be first
+          caseInsensitive: true,
         },
-      ],
+      }],
 
       // ## Spacing and Padding Rules ##
-      "padding-line-between-statements": [
+      "@stylistic/padding-line-between-statements": [
         "error",
-        // Always require a blank line after the import block
-        { blankLine: "always", prev: "import", next: "*" },
-        { blankLine: "any", prev: "import", next: "import" },
-
-        // 2. Enforce blank lines between top-level constructs (quite confusing so comment out for now)
-        /* {
+        // The new plugin allows types for blanklines
+        {
           blankLine: "always",
           prev: "*",
-          next: ["class", "function", "type"],
+          next: ["class", "function", "interface"],
         },
         {
           blankLine: "always",
-          prev: ["class", "function", "type"],
+          prev: ["class", "function", "interface"],
           next: "*",
         },
-
-        // Allow any number of lines between two export statements
-        { blankLine: "any", prev: "export", next: "export" }, */
       ],
 
       // ## Naming Convention Rules ##
@@ -102,9 +123,18 @@ export default defineConfig([
           leadingUnderscore: "allow", // Allow leading underscore for private variables
         },
         {
-          selector: "variable",
-          format: ["camelCase", "UPPER_CASE"], // Allow UPPER_CASE for constants
+          selector: ["variable"],
+          format: ["camelCase", "UPPER_CASE", "PascalCase"], // Allow UPPER_CASE for constants
           modifiers: ["const"], // Only apply to constants
+        },
+        {
+          selector: ["property"],
+          format: ["camelCase", "PascalCase"],
+          modifiers: ["readonly"]
+        },
+        {
+          selector: "enumMember",
+          format: ["UPPER_CASE"],
         },
         {
           selector: "objectLiteralProperty",
@@ -116,32 +146,42 @@ export default defineConfig([
           selector: ["typeLike", "class", "interface", "enum", "typeAlias"],
           format: ["PascalCase"],
         },
+        {
+          selector: "import",
+          format: null, // No specific format for imports
+        },
       ],
+    }
+  },
+  {
+    files: ["eslint.config.js"],
+    rules: {
+      // Turn off naming convention rules for the config file
+      "@typescript-eslint/naming-convention": "off",
     },
-    extends: ["js/recommended"],
   },
   {
-    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+    files: ["**/*.spec.ts"],
+    languageOptions: {
+      globals: { ...globals.jasmine, ...globals.jest },
+    }
   },
-  tseslint.configs.recommended,
-  {
-    files: ["**/*.json"],
-    plugins: { json },
-    language: "json/json",
-    extends: ["json/recommended"],
-  },
-  {
-    files: ["**/*.md"],
-    plugins: { markdown },
-    language: "markdown/gfm",
-    extends: ["markdown/recommended"],
-  },
+  // {
+  //   files: ["**/*.json"],
+  //   plugins: { json },
+  //   language: "json/json",
+  //   extends: ["json/recommended"],
+  // },
+  // {
+  //   files: ["**/*.md"],
+  //   plugins: { markdown },
+  //   language: "markdown/gfm",
+  //   extends: ["markdown/recommended"],
+  // },
   {
     files: ["**/*.css"],
     plugins: { css },
     language: "css/css",
     extends: ["css/recommended"],
   },
-  eslintConfigPrettier,
 ]);
