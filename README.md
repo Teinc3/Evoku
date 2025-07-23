@@ -21,8 +21,8 @@ npm run dev
 ```
 
 ## Information
-- Documentation of internal API is organised into the [`docs`](/docs/) directory
-See the [API Documentation](/docs/Documentation.md) for more information.
+- Documentation of the source code is organised into the [`docs`](/docs/) directory.
+See the [Main Documentation](/docs/README.md) for more information.
 - For other non-technical plans, refer to the [wiki page](https://github.com/Teinc3/Evoku/wiki).
 
 

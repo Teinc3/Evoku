@@ -6,21 +6,25 @@ import type ActionMap from '@shared/types/actionmap';
 
 
 /**
- * Wrapper for a ws WebSocket that automatically encodes/decodes packets.
+ * Wrapper for a server-side WebSocket that automatically encodes/decodes packets.
  */
-export default class GameSocket {
-  private ws: WebSocket;
+export default class ServerSocket {
   private packetIO: PacketIO;
 
-  constructor(ws: WebSocket) {
-    this.ws = ws;
+  constructor(
+    private ws: WebSocket,
+    private onPacketHandler: (data: ActionMap[ActionEnum]) => void
+  ) {
     this.packetIO = new PacketIO();
+    this.onPacketHandler.bind(this);
+
+    console.log('New WebSocket connection established');
   }
 
   /**
    * Send a contract object as a binary packet.
    */
-  send<GenericAction extends ActionEnum>(action: GenericAction, data: ActionMap[GenericAction]) {
+  public send<GenericAction extends ActionEnum>(action: GenericAction, data: ActionMap[GenericAction]) {
     const buffer = this.packetIO.encodePacket(action, data);
     this.ws.send(buffer);
   }
@@ -29,15 +33,18 @@ export default class GameSocket {
    * Listen for decoded packets. Handler receives the decoded contract object.
    */
   onPacket<T = unknown>(handler: (data: T) => void) {
-    this.ws.on('message', (message: WebSocket.RawData) => {
+    this.ws.on('message', (message: WebSocket.RawData, isBinary: boolean) => {
       try {
         // Only handle binary messages
-        if (message instanceof Buffer || message instanceof ArrayBuffer) {
+        if (isBinary) {
           const arrayBuffer = message instanceof Buffer
             ? message.buffer.slice(message.byteOffset, message.byteOffset + message.byteLength)
             : message;
           const data = this.packetIO.decodePacket(arrayBuffer as ArrayBuffer);
           handler(data as T);
+        } else {
+          // Close socket if non-binary message received
+          this.ws.close();
         }
       } catch (err) {
         // Optionally emit an error event or log

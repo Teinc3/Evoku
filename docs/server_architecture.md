@@ -6,7 +6,6 @@ This document outlines the file structure for the Evoku game server. Each direct
 
 ```
 src/server/
-├── index.ts
 ├── core/
 │   ├── HTTPServer.ts
 │   └── WSServer.ts
@@ -21,12 +20,13 @@ src/server/
 │   │   └── index.ts
 │   └── matchmaking/
 │       └── index.ts
-└── network/
-    ├── handlers/
-    │   ├── GameplayHandler.ts
-    │   ├── LifecycleHandler.ts
-    │   └── index.ts
-    └── GameSocket.ts
+├── network/
+│   ├── handlers/
+│   │   ├── GameplayHandler.ts
+│   │   ├── LifecycleHandler.ts
+│   │   └── index.ts
+│   └── ServerSocket.ts
+└── index.ts
 ```
 
 ## Directory Structure
@@ -69,7 +69,7 @@ Contains all logic related to managing game state, players, and rooms.
 
 Contains the logic for handling and routing incoming data packets.
 
-- GameSocket.ts: A wrapper around the WebSocket connection that automatically encodes/decodes packets into Data Contracts.
+- ServerSocket.ts: A wrapper around the WebSocket connection that automatically encodes/decodes packets into Data Contracts.
 It provides methods to send and receive packets, ensuring type safety.
 
 #### /handlers
