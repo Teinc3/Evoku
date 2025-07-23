@@ -1,7 +1,7 @@
 import { ByteCodec } from "../primitive";
-import scrambler from '../../crypto/scramble/PacketScrambler'
+import scrambler from '../../security/scramble'
 
-import type IPacketBuffer from "../../../types/utils/IPacketBuffer";
+import type IPacketBuffer from "../../../types/networking/IPacketBuffer";
 import type ActionEnum from '../../../types/enums/actions';
 
 

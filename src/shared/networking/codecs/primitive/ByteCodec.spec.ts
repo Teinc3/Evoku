@@ -1,7 +1,7 @@
-import PacketBuffer from '../../../utils/PacketBuffer';
+import PacketBuffer from '../../utils/PacketBuffer';
 import ByteCodec from './ByteCodec';
 
-import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
+import type IPacketBuffer from '../../../types/networking/IPacketBuffer';
 
 
 describe('ByteCodec', () => {

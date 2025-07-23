@@ -1,5 +1,5 @@
-import type IPacketBuffer from '../utils/IPacketBuffer';
 import type IDataContract from '../contracts/IDataContract';
+import type IPacketBuffer from './IPacketBuffer';
 
 
 export default interface ICodec<DataType> {

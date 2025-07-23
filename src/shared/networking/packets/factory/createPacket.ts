@@ -1,5 +1,5 @@
 import AbstractPacket from "../AbstractPacket";
-import PacketRegistry from "../../registry/PacketRegistry";
+import PacketRegistry from "../../registry";
 import createPacketCodec from "../../codecs/factory/createPacketCodec";
 
 import type AugmentAction from "../../../types/utils/AugmentAction";

@@ -1,7 +1,7 @@
-import PacketBuffer from '../../utils/PacketBuffer';
+import PacketBuffer from '../utils/PacketBuffer';
 
-import type IPacketBuffer from '../../types/utils/IPacketBuffer';
 import type AugmentAction from '../../types/utils/AugmentAction';
+import type IPacketBuffer from '../../types/networking/IPacketBuffer';
 import type IPacket from '../../types/networking/IPacket';
 import type { CustomCodecConstructor } from '../../types/networking/ICodec';
 import type ActionEnum from '../../types/enums/actions';

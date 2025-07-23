@@ -1,9 +1,9 @@
 import createArrayCodec from './createArrayCodec';
 import { ByteCodec, IntCodec, StringCodec } from '../primitive';
 import PlayerInfoCodec from '../custom/PlayerInfoCodec';
-import PacketBuffer from '../../../utils/PacketBuffer';
+import PacketBuffer from '../../utils/PacketBuffer';
 
-import type IPacketBuffer from '../../../types/utils/IPacketBuffer';
+import type IPacketBuffer from '../../../types/networking/IPacketBuffer';
 import type PlayerInfoContract from '../../../types/contracts/lifecycle/PlayerInfoContract';
 
 

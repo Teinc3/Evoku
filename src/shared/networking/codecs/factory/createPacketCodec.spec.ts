@@ -1,7 +1,7 @@
 import createPacketCodec from './createPacketCodec';
 import { IntCodec } from '../primitive';
 import ActionCodec from '../custom/ActionCodec';
-import PacketBuffer from '../../../utils/PacketBuffer';
+import PacketBuffer from '../../utils/PacketBuffer';
 import Networking from '../../../types/enums/actions/networking';
 
 import type AugmentAction from '../../../types/utils/AugmentAction';

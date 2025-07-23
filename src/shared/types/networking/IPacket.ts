@@ -1,6 +1,6 @@
-import type IPacketBuffer from '../utils/IPacketBuffer';
 import type AugmentAction from '../utils/AugmentAction';
 import type ActionEnum from '../enums/actions';
+import type IPacketBuffer from './IPacketBuffer';
 import type { CustomCodecConstructor } from './ICodec';
 
 
