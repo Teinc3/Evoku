@@ -11,3 +11,12 @@ Contents:
 - [Contracts](/docs/pipeline/Contracts.md)
 - [Packets](/docs/pipeline/Packets.md)
 - [Codecs](/docs/pipeline/Codecs.md)
+
+
+## Server Architecture
+Location: [`docs/server_architecture.md`](/docs/server_architecture.md)
+
+Contents:
+
+- [File Structure](/docs/server_architecture.md#file-structure)
+- [Directory Structure](/docs/server_architecture.md#directory-structure)

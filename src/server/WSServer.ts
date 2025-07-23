@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import express from 'express';
+import GameSocket from './GameSocket';
 
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';
@@ -28,12 +29,15 @@ export default class WSServer {
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
       console.log('New WebSocket connection established');
+      const socket = new GameSocket(ws);
 
-      ws.on('message', message => {
-        console.log(`Received message: ${message}`);
+      // Example: handle incoming packets
+      socket.onPacket((packet) => {
+        console.log('Received decoded packet:', packet);
+        // You can add routing/handling logic here
       });
 
-      ws.on('close', () => {
+      socket.on('close', () => {
         console.log('WebSocket connection closed');
       });
     });
