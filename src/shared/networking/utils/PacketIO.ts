@@ -6,6 +6,7 @@ import type ActionEnum from "../../types/enums/actions";
 import type ActionMap from "../../types/actionmap";
 // import type { SecurityModule } from "../security/SecurityModule";
 
+
 export default class PacketIO {
   // private security?: SecurityModule;
 
@@ -42,7 +43,7 @@ export default class PacketIO {
       throw new Error(`No packet registered for action: ${action}`);
     }
 
-    let buffer = new Packet({
+    const buffer = new Packet({
       action,
       ...dataContract
     }).wrap().buffer;

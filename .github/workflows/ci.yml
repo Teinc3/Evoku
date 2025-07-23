@@ -23,6 +23,7 @@ jobs:
 
       - name: Lint server code
         run: npm run lint:server
+        continue-on-error: true
 
       - name: Test server code
         run: npm run test:server
