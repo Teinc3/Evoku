@@ -10,22 +10,22 @@ src/server/
 │   ├── HTTPServer.ts
 │   └── WSServer.ts
 ├── game/
-│   ├── managers/
-│   │   ├── SessionManager.ts
-│   │   └── RoomManager.ts
-│   ├── models/
-│   │   ├── Session.ts
-│   │   └── Room.ts
 │   ├── logic/
 │   │   └── index.ts
 │   └── matchmaking/
 │       └── index.ts
-├── network/
-│   ├── handlers/
-│   │   ├── GameplayHandler.ts
-│   │   ├── LifecycleHandler.ts
-│   │   └── index.ts
+├── managers/
+│   ├── SessionManager.ts
+│   └── RoomManager.ts
+├── handlers/
+│   ├── GameplayHandler.ts
+│   ├── LifecycleHandler.ts
+│   └── index.ts
+├── models/
+│   ├── Session.ts
+│   ├── Room.ts
 │   └── ServerSocket.ts
+├── types/
 └── index.ts
 ```
 
@@ -43,19 +43,7 @@ Contains the foundational components for running the application.
 
 ### /game
 
-Contains all logic related to managing game state, players, and rooms.
-
-#### /managers
-
-- SessionManager.ts: The single source of truth for all active player sessions. Creates, manages, and destroys Session objects.
-
-- RoomManager.ts: Manages the lifecycle of all active game rooms. Creates, tracks, and destroys Room objects.
-
-#### /models
-
-- Session.ts: Represents a single connected player, wrapping their WebSocket connection and holding their state (e.g., nickname, online status, current room).
-
-- Room.ts: Represents a single game instance, containing the game state and the list of players in the match.
+Contains all logic related to managing game state.
 
 #### /logic
 
@@ -65,14 +53,24 @@ Contains all logic related to managing game state, players, and rooms.
 
 - index.ts: Manages the queue of players waiting for a game and is responsible for creating new rooms when a match is found.
 
-### /network
+### /managers
 
-Contains the logic for handling and routing incoming data packets.
+- SessionManager.ts: The single source of truth for all active player sessions. Creates, manages, and destroys Session objects.
+
+- RoomManager.ts: Manages the lifecycle of all active game rooms. Creates, tracks, and destroys Room objects.
+
+### /models
+
+Contains data models that represent the state of the certain objects in the game.
+
+- Session.ts: Represents a single connected player, wrapping their WebSocket connection and holding their state (e.g., nickname, online status, current room).
+
+- Room.ts: Represents a single game instance, containing the game state and the list of players in the match.
 
 - ServerSocket.ts: A wrapper around the WebSocket connection that automatically encodes/decodes packets into Data Contracts.
 It provides methods to send and receive packets, ensuring type safety.
 
-#### /handlers
+### /handlers
 
 - GameplayHandler.ts: Processes packets related to in-game actions (e.g., SET_CELL, USE_POWERUP).
 

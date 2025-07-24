@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import ServerSocket from '../networking/ServerSocket';
+import ServerSocket from '../models/ServerSocket';
 
 import type { Server as HttpServer } from 'http';
 
