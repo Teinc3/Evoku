@@ -1,5 +1,5 @@
-import HTTPServer from './core/HTTPServer';
 import WSServer from './core/WSServer';
+import HTTPServer from './core/HTTPServer';
 
 
 // Load configuration from environment variables

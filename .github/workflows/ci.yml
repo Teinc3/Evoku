@@ -28,6 +28,10 @@ jobs:
       - name: Test server code
         run: npm run test:server
 
+      - name: Fail if lint failed
+        if: steps.lint.outcome == 'failure'
+        run: exit 1
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

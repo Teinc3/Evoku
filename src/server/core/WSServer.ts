@@ -1,4 +1,5 @@
 import { WebSocketServer } from 'ws';
+
 import ServerSocket from '../models/ServerSocket';
 
 import type { Server as HttpServer } from 'http';
@@ -18,11 +19,11 @@ export default class WSServer {
 
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
-      const socket = new ServerSocket(ws, (data) => {
+      const socket = new ServerSocket(ws, data => {
         console.log('Received packet:', data);
       });
 
-      socket.onPacket((packet) => {
+      socket.onPacket(packet => {
         console.log('Received decoded packet:', packet);
       });
 
