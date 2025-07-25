@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CodecConstructor } from "../networking/ICodec";
-import type IDataContract from "../contracts/IDataContract";
+import type IDataContract from "../contracts/components/base/IDataContract";
 import type ValueContract from "../contracts/extendables/ValueContract";
 import type TargetContract from "../contracts/extendables/TargetContract";
 import type PUPContract from "../contracts/extendables/PUPContract";
