@@ -1,10 +1,5 @@
-import type NetworkingActionMap from "./networking";
-import type MechanicsActionMap from "./mechanics";
-import type LifecycleActionMap from "./lifecycle";
+import type SystemActionMap from "./system";
+import type MatchActionMap from "./match";
 
 
-export default interface ActionMap extends 
-  NetworkingActionMap,
-  MechanicsActionMap,
-  LifecycleActionMap
-{}
+export default interface ActionMap extends MatchActionMap, SystemActionMap {}

@@ -1,7 +1,7 @@
 import CustomCodec from "../CustomCodec";
 
 import type { CodecConstructor, CustomCodecMap } from "../../../types/networking/ICodec";
-import type IDataContract from "../../../types/contracts/IDataContract";
+import type IDataContract from "../../../types/contracts/components/base/IDataContract";
 
 
 /**

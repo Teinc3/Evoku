@@ -13,6 +13,8 @@ Each internal object handled through the Packet Pipeline is bound by a specific 
 which all extend [`IDataContract`](/src/shared/types/contracts/IDataContract.ts).
 The generic type of such objects is referred to as `GenericContract` in the codebase.
 
+Contracts are stored in the [`/src/shared/types/contracts/`](/src/shared/types/contracts/) directory.
+
 Example:
 ```ts
 export default abstract class CustomCodec<GenericContract extends IDataContract>
@@ -37,6 +39,11 @@ export default interface IDataContract {}
 All contracts must extend this base interface for consistency.
 
 #### AugmentAction
+
+AugmentAction is a utility type that extends a contract with an `action` property.
+It looks up the corresponding contract using the `ActionMap`.
+This type is used when coding packets to include the action (packetID) in the buffer.
+
 ```ts
 type AugmentAction<Action extends keyof ActionMap> = ActionMap[Action] & {
     action: ActionMap[Action]["action"];
@@ -57,6 +64,8 @@ export default interface IExtendableContract {}
 ```
 
 ## Contract Examples
+
+Contracts are stored and nested in a similar structure to that of `ActionEnum`.
 
 ### Simple Networking Contract
 ```ts

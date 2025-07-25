@@ -2,6 +2,8 @@
 
 Codecs are classes that serialize and deserialize different data types (DTypes) from/to binary buffers.
 
+Codecs are stored in the [`/src/shared/networking/codecs/`](/src/shared/networking/codecs/) directory.
+
 Every codec class must extend the base
 [`AbstractCodec`](/src/shared/networking/codecs/AbstractCodec.ts) class and implement the
 `encode` and `decode` methods, which are specified in the interface
