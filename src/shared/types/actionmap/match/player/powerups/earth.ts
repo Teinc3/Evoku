@@ -1,10 +1,10 @@
-import type EarthPUP from "../../../enums/actions/match/player/powerups/earth";
+import type EarthPUP from "../../../../enums/actions/match/player/powerups/earth";
 import type {
   LandslideContractS2C, LandslideContractC2S
-} from "../../../contracts/mechanics/powerups/earth/LandslideContract";
+} from "../../../../contracts/match/player/powerups/earth/LandslideContract";
 import type {
   ExcavateContractC2S, ExcavateContractS2C
-} from "../../../contracts/mechanics/powerups/earth/ExcavateContract";
+} from "../../../../contracts/match/player/powerups/earth/ExcavateContract";
 
 
 export default interface EarthPUPActionMap {
