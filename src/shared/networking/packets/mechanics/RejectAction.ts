@@ -1,10 +1,10 @@
 import createActionPacket from "../factory/createActionPacket";
 import { IntCodec } from "../../codecs/primitive";
-import Gameplay from "../../../types/enums/actions/mechanics/gameplay";
+import MechanicsActions from "../../../types/enums/actions/match/player/mechanics";
 
 
 export default createActionPacket(
-  Gameplay.REJECT_ACTION,
+  MechanicsActions.REJECT_ACTION,
   ['actionID'],
   {
     boardHash: IntCodec

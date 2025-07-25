@@ -1,5 +1,5 @@
 import createActionPacket from "../../../factory/createActionPacket";
-import EarthPUP from "../../../../../types/enums/actions/mechanics/powerups/earth";
+import EarthPUP from "../../../../../types/enums/actions/match/player/powerups/earth";
 
 
 export const UseExcavate = createActionPacket(

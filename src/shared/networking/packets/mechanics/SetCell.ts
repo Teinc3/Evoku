@@ -1,15 +1,15 @@
 import createActionPacket from "../factory/createActionPacket";
-import Gameplay from "../../../types/enums/actions/mechanics/gameplay";
+import MechanicsActions from "../../../types/enums/actions/match/player/mechanics";
 
 
 export const SetCell = createActionPacket(
-  Gameplay.SET_CELL,
+  MechanicsActions.SET_CELL,
   ['clientTime', 'actionID', 'cellIndex', 'value'],
   {}
 );
 
 export const CellSet = createActionPacket(
-  Gameplay.CELL_SET,
+  MechanicsActions.CELL_SET,
   ['serverTime', 'playerID', 'actionID', 'cellIndex', 'value'],
   {}
 );

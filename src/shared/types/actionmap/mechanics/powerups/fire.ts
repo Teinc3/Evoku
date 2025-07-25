@@ -1,4 +1,4 @@
-import type FirePUP from "../../../enums/actions/mechanics/powerups/fire";
+import type FirePUP from "../../../enums/actions/match/player/powerups/fire";
 import type { 
   MetabolicContractC2S, MetabolicContractS2C
 } from "../../../contracts/mechanics/powerups/fire/MetabolicContract";

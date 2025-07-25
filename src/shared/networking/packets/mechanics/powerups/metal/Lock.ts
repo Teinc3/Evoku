@@ -1,5 +1,5 @@
 import createActionPacket from '../../../factory/createActionPacket';
-import MetalPUP from '../../../../../types/enums/actions/mechanics/powerups/metal';
+import MetalPUP from '../../../../../types/enums/actions/match/player/powerups/metal';
 
 
 export const UseLock = createActionPacket(

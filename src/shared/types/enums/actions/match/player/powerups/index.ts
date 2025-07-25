@@ -5,6 +5,6 @@ import type FirePUP from "./fire";
 import type EarthPUP from "./earth";
 
 
-type Powerups = EarthPUP | FirePUP | WaterPUP | MetalPUP | WoodPUP;
+type PUPActions = EarthPUP | FirePUP | WaterPUP | MetalPUP | WoodPUP;
 
-export default Powerups;
+export default PUPActions;

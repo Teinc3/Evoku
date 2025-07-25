@@ -1,4 +1,4 @@
-import type WoodPUP from "../../../enums/actions/mechanics/powerups/wood";
+import type WoodPUP from "../../../enums/actions/match/player/powerups/wood";
 import type { 
   WisdomContractC2S, WisdomContractS2C 
 } from "../../../contracts/mechanics/powerups/wood/WisdomContract";

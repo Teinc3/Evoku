@@ -1,9 +1,9 @@
 import createPacket from "../factory/createPacket";
 import { ByteCodec } from "../../codecs/primitive";
 import createArrayCodec from "../../codecs/factory/createArrayCodec";
-import Lifecycle from "../../../types/enums/actions/lifecycle";
+import LifecycleActions from "../../../types/enums/actions/match/lifecycle";
 
 
-export default createPacket(Lifecycle.GAME_INIT, {
+export default createPacket(LifecycleActions.GAME_INIT, {
   cellValues: createArrayCodec(ByteCodec)
 })

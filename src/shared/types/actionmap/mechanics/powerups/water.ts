@@ -1,4 +1,4 @@
-import type WaterPUP from "../../../enums/actions/mechanics/powerups/water";
+import type WaterPUP from "../../../enums/actions/match/player/powerups/water";
 import type { 
   CryoContractC2S, CryoContractS2C 
 } from "../../../contracts/mechanics/powerups/water/CryoContract";

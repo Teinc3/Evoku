@@ -1,9 +1,9 @@
 import createPacket from "../factory/createPacket";
 import { ByteCodec } from "../../codecs/primitive";
-import Lifecycle from "../../../types/enums/actions/lifecycle";
+import LifecycleActions from "../../../types/enums/actions/match/lifecycle";
 
 
-export default createPacket(Lifecycle.GAME_OVER, {
+export default createPacket(LifecycleActions.GAME_OVER, {
   winnerID: ByteCodec,
   reason: ByteCodec
 })

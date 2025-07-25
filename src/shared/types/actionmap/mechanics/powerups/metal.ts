@@ -1,4 +1,4 @@
-import type MetalPUP from "../../../enums/actions/mechanics/powerups/metal";
+import type MetalPUP from "../../../enums/actions/match/player/powerups/metal";
 import type { 
   LockContractC2S, LockContractS2C
 } from "../../../contracts/mechanics/powerups/metal/LockContract";
