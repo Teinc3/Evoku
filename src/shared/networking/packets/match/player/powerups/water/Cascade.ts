@@ -1,15 +1,15 @@
 import createActionPacket from "../../../../factory/createActionPacket";
-import WaterPUP from "../../../../../../types/enums/actions/match/player/powerups/water";
+import WaterPUPActions from "../../../../../../types/enums/actions/match/player/powerups/water";
 
 
 export const UseCascade = createActionPacket(
-  WaterPUP.USE_CASCADE,
+  WaterPUPActions.USE_CASCADE,
   ['clientTime', 'actionID', 'pupID'],
   {}
 );
 
 export const CascadeUsed = createActionPacket(
-  WaterPUP.CASCADE_USED,
+  WaterPUPActions.CASCADE_USED,
   ['serverTime', 'playerID', 'actionID', 'pupID'],
   {}
 );

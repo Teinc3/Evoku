@@ -1,15 +1,15 @@
 import createActionPacket from "../../../../factory/createActionPacket";
-import FirePUP from "../../../../../../types/enums/actions/match/player/powerups/fire";
+import FirePUPActions from "../../../../../../types/enums/actions/match/player/powerups/fire";
 
 
 export const UseMetabolic = createActionPacket(
-  FirePUP.USE_METABOLIC,
+  FirePUPActions.USE_METABOLIC,
   ['clientTime', 'actionID', 'pupID'],
   {}
 );
 
 export const MetabolicUsed = createActionPacket(
-  FirePUP.METABOLIC_USED,
+  FirePUPActions.METABOLIC_USED,
   ['serverTime', 'playerID', 'actionID', 'pupID'],
   {}
 );

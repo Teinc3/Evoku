@@ -1,10 +1,10 @@
-import type WoodPUP from "./wood";
-import type WaterPUP from "./water";
-import type MetalPUP from "./metal";
-import type FirePUP from "./fire";
-import type EarthPUP from "./earth";
+import type WoodPUPActions from "./wood";
+import type WaterPUPActions from "./water";
+import type MetalPUPActions from "./metal";
+import type FirePUPActions from "./fire";
+import type EarthPUPActions from "./earth";
 
 
-type PUPActions = EarthPUP | FirePUP | WaterPUP | MetalPUP | WoodPUP;
+type PUPActions = EarthPUPActions | FirePUPActions | WaterPUPActions | MetalPUPActions | WoodPUPActions;
 
 export default PUPActions;

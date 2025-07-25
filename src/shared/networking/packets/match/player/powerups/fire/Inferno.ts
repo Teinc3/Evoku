@@ -1,15 +1,15 @@
 import createActionPacket from "../../../../factory/createActionPacket";
-import FirePUP from "../../../../../../types/enums/actions/match/player/powerups/fire";
+import FirePUPActions from "../../../../../../types/enums/actions/match/player/powerups/fire";
 
 
 export const UseInferno = createActionPacket(
-  FirePUP.USE_INFERNO,
+  FirePUPActions.USE_INFERNO,
   ['clientTime', 'actionID', 'pupID', 'targetID', 'cellIndex'],
   {}
 );
 
 export const InfernoUsed = createActionPacket(
-  FirePUP.INFERNO_USED,
+  FirePUPActions.INFERNO_USED,
   ['serverTime', 'playerID', 'actionID', 'pupID', 'targetID', 'cellIndex'],
   {}
 );

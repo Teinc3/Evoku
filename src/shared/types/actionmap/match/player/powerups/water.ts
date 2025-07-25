@@ -1,4 +1,4 @@
-import type WaterPUP from "../../../../enums/actions/match/player/powerups/water";
+import type WaterPUPActions from "../../../../enums/actions/match/player/powerups/water";
 import type { 
   CryoContractC2S, CryoContractS2C 
 } from "../../../../contracts/match/player/powerups/water/CryoContract";
@@ -8,8 +8,8 @@ import type {
 
 
 export default interface WaterPUPActionMap {
-  [WaterPUP.USE_CRYO]: CryoContractC2S;
-  [WaterPUP.CRYO_USED]: CryoContractS2C;
-  [WaterPUP.USE_CASCADE]: CascadeContractC2S;
-  [WaterPUP.CASCADE_USED]: CascadeContractS2C;
+  [WaterPUPActions.USE_CRYO]: CryoContractC2S;
+  [WaterPUPActions.CRYO_USED]: CryoContractS2C;
+  [WaterPUPActions.USE_CASCADE]: CascadeContractC2S;
+  [WaterPUPActions.CASCADE_USED]: CascadeContractS2C;
 }

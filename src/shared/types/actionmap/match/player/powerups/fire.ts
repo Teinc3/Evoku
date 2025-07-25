@@ -1,4 +1,4 @@
-import type FirePUP from "../../../../enums/actions/match/player/powerups/fire";
+import type FirePUPActions from "../../../../enums/actions/match/player/powerups/fire";
 import type { 
   MetabolicContractC2S, MetabolicContractS2C
 } from "../../../../contracts/match/player/powerups/fire/MetabolicContract";
@@ -8,8 +8,8 @@ import type {
 
 
 export default interface FirePUPActionMap {
-  [FirePUP.USE_INFERNO]: InfernoContractC2S;
-  [FirePUP.INFERNO_USED]: InfernoContractS2C;
-  [FirePUP.USE_METABOLIC]: MetabolicContractC2S;
-  [FirePUP.METABOLIC_USED]: MetabolicContractS2C;
+  [FirePUPActions.USE_INFERNO]: InfernoContractC2S;
+  [FirePUPActions.INFERNO_USED]: InfernoContractS2C;
+  [FirePUPActions.USE_METABOLIC]: MetabolicContractC2S;
+  [FirePUPActions.METABOLIC_USED]: MetabolicContractS2C;
 }
