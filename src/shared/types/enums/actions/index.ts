@@ -1,8 +1,7 @@
-import type Networking from "./networking";
-import type Mechanics from "./mechanics";
-import type Lifecycle from "./lifecycle";
+import type SystemActions from "./system";
+import type MatchActions from "./match";
 
 
-type ActionEnum = Networking | Mechanics | Lifecycle
+type ActionEnum = MatchActions | SystemActions;
 
 export default ActionEnum;

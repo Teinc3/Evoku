@@ -1,4 +1,4 @@
-import type IDataContract from '../contracts/IDataContract';
+import type IDataContract from '../contracts/components/base/IDataContract';
 import type IPacketBuffer from './IPacketBuffer';
 
 
