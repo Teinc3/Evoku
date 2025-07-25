@@ -2,11 +2,13 @@
 
 import type { CodecConstructor } from "../networking/ICodec";
 import type IDataContract from "../contracts/components/base/IDataContract";
-import type ValueContract from "../contracts/extendables/ValueContract";
-import type TargetContract from "../contracts/extendables/TargetContract";
-import type PUPContract from "../contracts/extendables/PUPContract";
-import type CellIndexContract from "../contracts/extendables/CellIndexContract";
-import type { ActionContractS2C, ActionContractC2S } from "../contracts/extendables/ActionContract";
+import type ValueContract from "../contracts/components/extendables/ValueContract";
+import type TargetContract from "../contracts/components/extendables/TargetContract";
+import type PUPContract from "../contracts/components/extendables/PUPContract";
+import type CellIndexContract from "../contracts/components/extendables/CellIndexContract";
+import type { 
+  ActionContractS2C, ActionContractC2S
+} from "../contracts/components/extendables/ActionContract";
 
 
 export type AllExtendableContracts
