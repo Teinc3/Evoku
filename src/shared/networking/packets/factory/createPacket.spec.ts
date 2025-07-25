@@ -1,23 +1,23 @@
 import { ByteCodec, IntCodec, ShortCodec } from '../../codecs/primitive';
 import createArrayCodec from '../../codecs/factory/createArrayCodec';
 import PlayerInfoCodec from '../../codecs/custom/PlayerInfoCodec';
-import Networking from '../../../types/enums/actions/networking';
-import Gameplay from '../../../types/enums/actions/mechanics/gameplay';
-import Lifecycle from '../../../types/enums/actions/lifecycle';
+import LobbyActions from '../../../types/enums/actions/system/lobby';
+import ProtocolActions from '../../../types/enums/actions/match/protocol';
+import MechanicsActions from '../../../types/enums/actions/match/player/mechanics';
 import createPacket from './createPacket';
 
 
 describe('createPacket Factory', () => {
   it('should create a packet class that can correctly wrap and unwrap its contract', () => {
     // 1. Define a representative packet using the factory
-    const MockPing = createPacket(Networking.PING, {
+    const MockPing = createPacket(ProtocolActions.PING, {
       serverTime: IntCodec,
       clientPing: IntCodec
     });
 
     // 2. Create an instance with some test data
     const packet = new MockPing({
-      action: Networking.PING,
+      action: ProtocolActions.PING,
       clientPing: 69,
       serverTime: 123456,
       // @ts-expect-error (2353)
@@ -44,7 +44,7 @@ describe('createPacket Factory', () => {
 
   it('should be able to create an action packet using barebones implementation', () => {
     // 1. Define an action packet by definining the codec structure completely by ourselves
-    const MockSetCell = createPacket(Gameplay.CELL_SET, {
+    const MockSetCell = createPacket(MechanicsActions.CELL_SET, {
       cellIndex: ShortCodec,
       value: ByteCodec,
       serverTime: IntCodec,
@@ -54,7 +54,7 @@ describe('createPacket Factory', () => {
 
     // 2. Create an instance with some test data
     const packet = new MockSetCell({
-      action: Gameplay.CELL_SET,
+      action: MechanicsActions.CELL_SET,
       cellIndex: 5,
       value: 1,
       serverTime: 123456789,
@@ -94,14 +94,14 @@ describe('createPacket Factory', () => {
 
   it('should be able to create a packet with complicated and nested custom codecs', () => {
     // 1. Define our own version of the MatchFound packet
-    const MockMatchFound = createPacket(Lifecycle.MATCH_FOUND, {
+    const MockMatchFound = createPacket(LobbyActions.MATCH_FOUND, {
       myID: ByteCodec,
       players: createArrayCodec(PlayerInfoCodec),
     })
 
     // 2. Create an instance with some test data
     const packet = new MockMatchFound({
-      action: Lifecycle.MATCH_FOUND,
+      action: LobbyActions.MATCH_FOUND,
       myID: 0,
       players: [
         { playerID: 0, username: 'Player1' },

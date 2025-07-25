@@ -1,6 +1,7 @@
 import { IntCodec } from '../../codecs/primitive';
 import INJECTABLE_CODECS from '../../codecs/custom/InjectableCodecs';
-import Gameplay from '../../../types/enums/actions/mechanics/gameplay';
+import ProtocolActions from '../../../types/enums/actions/match/protocol';
+import MechanicsActions from '../../../types/enums/actions/match/player/mechanics';
 import createActionPacket, { pickInjectables } from './createActionPacket';
 
 
@@ -45,14 +46,14 @@ describe('createActionPacket Factory', () => {
   it('should create a packet with both injected and specific codecs', () => {
     // A. Define a packet using the factory
     const MockSetCell = createActionPacket(
-      Gameplay.SET_CELL,
+      MechanicsActions.SET_CELL,
       ['clientTime', 'actionID', 'value', 'cellIndex'], // Fields to be auto-injected
       {}
     );
 
     // B. Create an instance with test data
     const packet = new MockSetCell({
-      action: Gameplay.SET_CELL,
+      action: MechanicsActions.SET_CELL,
       clientTime: 98765,
       actionID: 69,
       value: 1,
@@ -75,13 +76,13 @@ describe('createActionPacket Factory', () => {
 
   it('should create a packet with both injected and specific codecs and a custom codec map', () => {
     const MockRejectAction = createActionPacket(
-      Gameplay.REJECT_ACTION,
+      ProtocolActions.REJECT_ACTION,
       ['actionID'],
       { boardHash: IntCodec }
     );
 
     const packet = new MockRejectAction({
-      action: Gameplay.REJECT_ACTION,
+      action: ProtocolActions.REJECT_ACTION,
       actionID: 42,
       boardHash: 123456789
     });

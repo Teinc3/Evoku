@@ -2,13 +2,13 @@ import createPacketCodec from './createPacketCodec';
 import { IntCodec } from '../primitive';
 import ActionCodec from '../custom/ActionCodec';
 import PacketBuffer from '../../utils/PacketBuffer';
-import Networking from '../../../types/enums/actions/networking';
+import ProtocolActions from '../../../types/enums/actions/match/protocol';
 
 import type AugmentAction from '../../../types/utils/AugmentAction';
 
 
 // We use a real contract from our application
-type AugmentedPingContract = AugmentAction<Networking.PING>;
+type AugmentedPingContract = AugmentAction<ProtocolActions.PING>;
 
 describe('createPacketCodec Factory', () => {
   // Test 1: Verify the structure of the generated class
@@ -21,7 +21,7 @@ describe('createPacketCodec Factory', () => {
 
     // B. Use the factory to create the Codec class using a REAL action
     // Coerce the type to Networking.PING
-    const PingPacketCodec = createPacketCodec<Networking.PING>(pingCodecMap);
+    const PingPacketCodec = createPacketCodec<ProtocolActions.PING>(pingCodecMap);
 
     // C. Instantiate the generated class
     const codecInstance = new PingPacketCodec();
@@ -39,12 +39,12 @@ describe('createPacketCodec Factory', () => {
       clientPing: IntCodec,
       serverTime: IntCodec,
     };
-    const PingPacketCodec = createPacketCodec<Networking.PING>(pingCodecMap);
+    const PingPacketCodec = createPacketCodec<ProtocolActions.PING>(pingCodecMap);
     const codecInstance = new PingPacketCodec();
 
     // B. Create test data that matches the full AugmentedContract
     const testData: AugmentedPingContract = {
-      action: Networking.PING, // Include the action property
+      action: ProtocolActions.PING, // Include the action property
       clientPing: 53,
       serverTime: 67890,
     };

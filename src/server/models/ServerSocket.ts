@@ -24,7 +24,10 @@ export default class ServerSocket {
   /**
    * Send a contract object as a binary packet.
    */
-  public send<GenericAction extends ActionEnum>(action: GenericAction, data: ActionMap[GenericAction]) {
+  public send<GenericAction extends ActionEnum>(
+    action: GenericAction,
+    data: ActionMap[GenericAction]
+  ) {
     const buffer = this.packetIO.encodePacket(action, data);
     this.ws.send(buffer);
   }
@@ -46,7 +49,7 @@ export default class ServerSocket {
           // Close socket if non-binary message received
           this.ws.close();
         }
-      } catch (err) {
+      } catch {
         // Optionally emit an error event or log
         // console.error('Failed to decode packet:', err);
       }
@@ -63,7 +66,7 @@ export default class ServerSocket {
   /**
    * Proxy for adding event listeners.
    */
-  on(event: string, listener: (...args: any[]) => void) {
+  on(event: string, listener: (...args: unknown[]) => void) {
     this.ws.on(event, listener);
   }
 
