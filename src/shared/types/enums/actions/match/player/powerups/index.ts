@@ -5,6 +5,11 @@ import type FirePUPActions from "./fire";
 import type EarthPUPActions from "./earth";
 
 
-type PUPActions = EarthPUPActions | FirePUPActions | WaterPUPActions | MetalPUPActions | WoodPUPActions;
+type PUPActions = 
+    EarthPUPActions
+    | FirePUPActions
+    | WaterPUPActions
+    | MetalPUPActions
+    | WoodPUPActions;
 
 export default PUPActions;

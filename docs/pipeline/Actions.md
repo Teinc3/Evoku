@@ -5,7 +5,7 @@ They are used to define the structure and behavior of data contracts that are pa
 
 ## Action Categories
 
-Actions are stored in the [`/src/shared/types/action/`](/src/shared/types/action/) directory.
+Actions are stored in the [`/src/shared/types/action/`](/src/shared/types/enums/actions/) directory.
 
 ActionEnum is a type union of 2 categories of actions: `MatchActions` and `SystemActions`.
 These categories represent fundamentally, where an action is performed,
