@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CodecConstructor } from "../networking/ICodec";
-import type IDataContract from "../contracts/components/base/IDataContract";
 import type ValueContract from "../contracts/components/extendables/ValueContract";
 import type TargetContract from "../contracts/components/extendables/TargetContract";
 import type PUPContract from "../contracts/components/extendables/PUPContract";
@@ -9,6 +8,7 @@ import type CellIndexContract from "../contracts/components/extendables/CellInde
 import type { 
   ActionContractS2C, ActionContractC2S
 } from "../contracts/components/extendables/ActionContract";
+import type IDataContract from "../contracts/components/base/IDataContract";
 
 
 export type AllExtendableContracts

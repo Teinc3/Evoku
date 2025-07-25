@@ -3,5 +3,5 @@ import type HeartbeatContract from "../../contracts/system/session/HeartbeatCont
 
 
 export default interface SessionActionMap {
-    [SessionActions.HEARTBEAT]: HeartbeatContract
+  [SessionActions.HEARTBEAT]: HeartbeatContract
 }

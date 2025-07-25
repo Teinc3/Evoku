@@ -1,5 +1,5 @@
-import type MatchActions from "./match";
 import type SystemActions from "./system";
+import type MatchActions from "./match";
 
 
 type ActionEnum = MatchActions | SystemActions;

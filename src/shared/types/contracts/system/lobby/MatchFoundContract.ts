@@ -1,5 +1,5 @@
-import type IDataContract from "../../components/base/IDataContract";
 import type PlayerInfoContract from "../../components/custom/PlayerInfoContract";
+import type IDataContract from "../../components/base/IDataContract";
 
 
 /**
