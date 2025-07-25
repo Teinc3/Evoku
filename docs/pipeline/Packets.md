@@ -13,6 +13,8 @@ or created using any factory function that returns a packet instance.
 
 ## Packet Creation
 
+All Packets are stored in the [`/src/shared/networking/packets/`](/src/shared/networking/packets/) directory.
+
 ### Basic Packet Factory
 
 To create a basic packet with no automatic injection, you can use the
