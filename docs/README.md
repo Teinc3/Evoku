@@ -14,10 +14,10 @@ Contents:
 - [Codecs](/docs/pipeline/Codecs.md)
 
 
-## Server Architecture
-Location: [`docs/server_architecture.md`](/docs/server_architecture.md)
+## Server Documentation
+Location: [`docs/server/`](/docs/server/)
 
 Contents:
 
-- [File Structure](/docs/server_architecture.md#file-structure)
-- [Directory Structure](/docs/server_architecture.md#directory-structure)
+- [Server Architecture](/docs/server/Architecture.md)
+- [Handlers](/docs/server/Handlers.md)

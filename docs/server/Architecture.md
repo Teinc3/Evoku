@@ -11,16 +11,15 @@ src/server/
 │   └── WSServer.ts
 ├── game/
 │   ├── logic/
-│   │   └── index.ts
 │   └── matchmaking/
-│       └── index.ts
 ├── managers/
 │   ├── SessionManager.ts
 │   └── RoomManager.ts
 ├── handlers/
-│   ├── GameplayHandler.ts
-│   ├── LifecycleHandler.ts
-│   └── index.ts
+│   ├── match/
+│   ├── system/
+│   ├── EnumHandler.ts
+│   └── UnionHandler.ts
 ├── models/
 │   ├── Session.ts
 │   ├── Room.ts
@@ -72,8 +71,7 @@ It provides methods to send and receive packets, ensuring type safety.
 
 ### /handlers
 
-- GameplayHandler.ts: Processes packets related to in-game actions (e.g., SET_CELL, USE_POWERUP).
-
-- LifecycleHandler.ts: Processes packets related to the player's journey outside of a match (e.g., JOIN_QUEUE, LEAVE_QUEUE).
-
-- index.ts: Exports the main DataHandler (or PacketRouter), which receives all packets and delegates them to the appropriate specialized handler.
+- EnumHandler.ts: A base class for handling packets related to specific enum types.
+- UnionHandler.ts: A base class for triaging packets related to union types of enums to children handlers.
+- match/: Contains handlers for match-related actions, such as gameplay or lifecycle actions.
+- system/: Contains handlers for system non-match actions, such as player authentication and matchmaking.
