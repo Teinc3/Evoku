@@ -1,9 +1,9 @@
 import PacketIO from '@shared/networking/utils/PacketIO';
 
 import type WebSocket from 'ws';
+import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
 import type ActionMap from '@shared/types/actionmap';
-import type AugmentAction from '@shared/types/utils/AugmentAction';
 
 
 /**

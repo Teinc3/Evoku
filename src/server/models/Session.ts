@@ -1,12 +1,13 @@
 import { randomUUID, type UUID } from "crypto";
+
 import { 
-  isMatchActions, isSystemActions
+  isMatchActionsData, isSystemActions
 } from "@shared/types/utils/typeguards/actions";
 
-import type ServerSocket from "./ServerSocket";
-import type RoomModel from "./Room";
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
+import type ServerSocket from "./ServerSocket";
+import type RoomModel from "./Room";
 
 
 /**
@@ -90,8 +91,7 @@ export default class SessionModel {
     this.lastActiveTime = (new Date).getTime();
 
     // If packet is roompacket, route to room if exists, otherwise error out
-    if (isMatchActions(data.action)) {
-      // Forward to roomHandler
+    if (isMatchActionsData(data)) {
       if (this.room) {
         this.room.roomDataHandler.handleData(this, data);
       } else {

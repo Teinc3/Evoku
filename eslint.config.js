@@ -42,6 +42,10 @@ export default defineConfig([
     },
     rules: {
       "no-var": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }],
       "prefer-const": "error",
       "@stylistic/indent": ["error", 2],
       "@stylistic/max-len": ["error", { code: 100 }],

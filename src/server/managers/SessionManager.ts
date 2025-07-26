@@ -23,8 +23,8 @@ export default class SessionManager {
   public createSession(socket: ServerSocket): SessionModel {
     const session = new SessionModel(
       socket,
-      (session) => this.onDisconnect(session),
-      (session) => this.onDestroy(session),
+      session => this.onDisconnect(session),
+      session => this.onDestroy(session),
     );
     this.sessions.set(session.uuid, session);
     return session;
@@ -38,7 +38,7 @@ export default class SessionManager {
    * Event handler when the socket of a session disconnects.
    * @param session The session which socket disconnected.
    */
-  public onDisconnect(session: SessionModel): void {
+  public onDisconnect(_session: SessionModel): void {
     // TODO: Add sth here (idk what to add lol)
   }
 
