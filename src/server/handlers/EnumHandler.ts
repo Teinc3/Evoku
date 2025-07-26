@@ -5,27 +5,24 @@ import type SessionModel from "../models/Session";
 
 
 export default abstract class EnumHandler<GenericEnum extends ActionEnum>
-implements IDataHandler<GenericEnum> {
+  implements IDataHandler<GenericEnum> {
 
   /**
-     * A map of action handlers for the enum.
-     * Each key is an action from the enum, and each value is a corresponding handler fn.
-     * 
-     * @abstract
-     */
-  abstract readonly handlerMap: HandlerMap<GenericEnum>;
+   * A map of action handlers for the enum.
+   * Each key is an action from the enum, and each value is a corresponding handler fn.
+   * 
+   * @abstract
+   */
+  private handlerMap!: HandlerMap<GenericEnum>;
 
-  constructor() {
-    this.bindHandlers();
-  }
-
-  private bindHandlers(): void {
-    if (!this.handlerMap) {
-      throw new Error("Handler map is not defined");
-    }
+  public setHandlerMap(handlerMap: HandlerMap<GenericEnum>): void {
+    this.handlerMap = handlerMap;
 
     // Bind "this" context to every handle function
     for (const key in this.handlerMap) {
+      if (!this.handlerMap[key]) {
+        continue; // Typeguard
+      }
       this.handlerMap[key] = this.handlerMap[key].bind(this);
     }
   }

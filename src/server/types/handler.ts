@@ -11,7 +11,7 @@ export type HandleDataFn<GenericAction extends ActionEnum>
   = (session: SessionModel, data: AugmentAction<GenericAction>) => void;
 
 export type HandlerMap<T extends ActionEnum> = {
-  [K in T]: HandleDataFn<K>;
+  [K in T]?: HandleDataFn<K>;
 };
 
 // Define a type for the pair: a type guard and the handler it maps to.
