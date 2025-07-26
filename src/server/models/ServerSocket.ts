@@ -3,6 +3,7 @@ import PacketIO from '@shared/networking/utils/PacketIO';
 import type WebSocket from 'ws';
 import type ActionEnum from '@shared/types/enums/actions';
 import type ActionMap from '@shared/types/actionmap';
+import type AugmentAction from '@shared/types/utils/AugmentAction';
 
 
 /**
@@ -13,12 +14,8 @@ export default class ServerSocket {
 
   constructor(
     private ws: WebSocket,
-    private onPacketHandler: (data: ActionMap[ActionEnum]) => void
   ) {
     this.packetIO = new PacketIO();
-    this.onPacketHandler.bind(this);
-
-    console.log('New WebSocket connection established');
   }
 
   /**
@@ -33,21 +30,21 @@ export default class ServerSocket {
   }
 
   /**
-   * Listen for decoded packets. Handler receives the decoded contract object.
+   * Public function to attach a packet handler.
+   * Allows forwarding of all incoming packet data to a handler function.
    */
-  onPacket<T = unknown>(handler: (data: T) => void) {
+  public listen(handler: (data: AugmentAction<ActionEnum>) => void) {
+    this.ws.removeAllListeners('message'); // Prevent duplicate handlers
     this.ws.on('message', (message: WebSocket.RawData, isBinary: boolean) => {
       try {
-        // Only handle binary messages
         if (isBinary) {
           const arrayBuffer = message instanceof Buffer
             ? message.buffer.slice(message.byteOffset, message.byteOffset + message.byteLength)
             : message;
           const data = this.packetIO.decodePacket(arrayBuffer as ArrayBuffer);
-          handler(data as T);
+          handler(data);
         } else {
-          // Close socket if non-binary message received
-          this.ws.close();
+          this.close();
         }
       } catch {
         // Optionally emit an error event or log
@@ -58,16 +55,11 @@ export default class ServerSocket {
 
   /**
    * Proxy for closing the socket.
+   * This will remove all listeners and close the WebSocket connection.
    */
   close() {
+    this.ws.removeAllListeners();
     this.ws.close();
-  }
-
-  /**
-   * Proxy for adding event listeners.
-   */
-  on(event: string, listener: (...args: unknown[]) => void) {
-    this.ws.on(event, listener);
   }
 
   /**

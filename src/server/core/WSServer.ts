@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 
 import ServerSocket from '../models/ServerSocket';
+import SessionManager from '../managers/SessionManager';
 
 import type { Server as HttpServer } from 'http';
 
@@ -11,7 +12,10 @@ import type { Server as HttpServer } from 'http';
 export default class WSServer {
   private wss: WebSocketServer;
 
-  constructor(httpServer: HttpServer) {
+  constructor(
+    httpServer: HttpServer,
+    private sessionManager: SessionManager = new SessionManager()
+  ) {
     // Attach the WebSocket server to the provided HTTP server instance
     this.wss = new WebSocketServer({ server: httpServer });
     this.configureWebSockets();
@@ -19,17 +23,9 @@ export default class WSServer {
 
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
-      const socket = new ServerSocket(ws, data => {
-        console.log('Received packet:', data);
-      });
-
-      socket.onPacket(packet => {
-        console.log('Received decoded packet:', packet);
-      });
-
-      socket.on('close', () => {
-        console.log('WebSocket connection closed');
-      });
+      // Create a new ServerSocket instance and a SessionModel that wraps it
+      const socket = new ServerSocket(ws);
+      this.sessionManager.createSession(socket);
     });
   }
 

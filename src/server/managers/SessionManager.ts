@@ -8,14 +8,23 @@ import type ServerSocket from "../models/ServerSocket";
  * A global Session manager that handles all user sessions in game.
  */
 export default class SessionManager {
+  private cleanupInterval: NodeJS.Timeout | null;
+
   constructor (
     private sessions: Map<UUID, SessionModel> = new Map()
-  ) {}
+  ) {
+    // Start the cleanup interval
+    this.cleanupInterval = setInterval(
+      this.cleanupSessions.bind(this),
+      10 * 1000
+    ); // Check every 10 seconds
+  }
 
   public createSession(socket: ServerSocket): SessionModel {
     const session = new SessionModel(
       socket,
-      () => this.removeSession(session.uuid)
+      (session) => this.onDisconnect(session),
+      (session) => this.onDestroy(session),
     );
     this.sessions.set(session.uuid, session);
     return session;
@@ -25,11 +34,42 @@ export default class SessionManager {
     return this.sessions.get(uuid);
   }
 
-  public removeSession(uuid: UUID): void {
-    const session = this.sessions.get(uuid);
-    if (session) {
-      session.destroy(true);
-      this.sessions.delete(uuid);
+  /**
+   * Event handler when the socket of a session disconnects.
+   * @param session The session which socket disconnected.
+   */
+  public onDisconnect(session: SessionModel): void {
+    // TODO: Add sth here (idk what to add lol)
+  }
+
+  /**
+   * Event handler when a session is destroyed.
+   * @param session The session that was destroyed.
+   */
+  public onDestroy(session: SessionModel): void {
+    session.destroy(true);
+    this.sessions.delete(session.uuid);
+  }
+
+  /**
+   * Cleanup function to remove sessions that are no longer active.
+   * 
+   * Criteria for cleanup:
+   * - 30 seconds of socket inactivity: Socket closure and disconnection
+   * - 2 minutes of session inactivity: Session is permanently removed.
+   */
+  private cleanupSessions(): void {
+    const now = (new Date).getTime();
+    for (const session of this.sessions.values()) {
+      // Check if the session is inactive for more than 2 minutes
+      const lastActive = session.lastActiveTime;
+      const inactiveDuration = now - lastActive;
+
+      if (inactiveDuration > 2 * 60 * 1000) { // 2 minutes
+        session.destroy(true);
+      } else if (inactiveDuration > 30 * 1000 && session.socketInstance) {
+        session.disconnect(true);
+      }
     }
   }
 }

@@ -1,7 +1,12 @@
 import { randomUUID, type UUID } from "crypto";
+import { 
+  isMatchActions, isSystemActions
+} from "@shared/types/utils/typeguards/actions";
 
 import type ServerSocket from "./ServerSocket";
 import type RoomModel from "./Room";
+import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type ActionEnum from "@shared/types/enums/actions";
 
 
 /**
@@ -14,63 +19,90 @@ import type RoomModel from "./Room";
 export default class SessionModel {
 
   constructor(
-    public socket: ServerSocket | null, // Require a Socket to be initialised
-    private readonly onDestroy: () => void,
+    public socketInstance: ServerSocket | null, // Require a Socket to be initialised
+    private readonly onDisconnect: (session: SessionModel) => void,
+    private readonly onDestroy: (session: SessionModel) => void,
     public readonly uuid: UUID = randomUUID(),
-    // Optional account info, when the user authenticates using token or in game
-    // private accountInfo: AccountInfo | null = null,
     public room: RoomModel | null = null,
-    private reconnectionTimer: NodeJS.Timeout | null = null
+    public lastActiveTime: number = (new Date).getTime()
   ) {
     this.uuid = uuid;
     this.room = room;
     this.onDestroy = onDestroy.bind(this);
-  }
 
-  /**
-     * Handler when the socket of this session disconnects.
-     * Creates a 2 minute reconnection timer, after which,
-     * the session is permanently removed from the server.
-     */
-  public onDisconnect(): void {
-    this.socket = null; // Clear the socket reference
-    this.reconnectionTimer = setTimeout(() => {
-      this.destroy(); // Destroy the session first
-    }, 2 * 60 * 1000);
-  }
-
-  /**
-     * Handler when the socket of this session reconnects.
-     * Clears the reconnection timer and references the new socket.
-     */
-  public onReconnect(socket: ServerSocket): void {
-    // Plug in the new socket
-    this.socket = socket;
-
-    // Clear the reconnection timer if it exists
-    if (this.reconnectionTimer) {
-      clearTimeout(this.reconnectionTimer);
-      this.reconnectionTimer = null;
+    if (this.socketInstance) {
+      this.socketInstance.listen(this.routeData.bind(this));
     }
   }
 
-  public destroy(calledFromManager: boolean = false): void {
-    // Clear the reconnection timer if it exists
-    if (this.reconnectionTimer) {
-      clearTimeout(this.reconnectionTimer);
-      this.reconnectionTimer = null;
+  /**
+   * Disconnects the socket from this session.
+   * @param triggerEvent If the disconnect event should be triggered.
+   */
+  public disconnect(triggerEvent: boolean = false): void {
+    if (
+      this.socketInstance
+      && this.socketInstance.readyState === WebSocket.OPEN
+    ) {
+      // Removes socket references
+      this.socketInstance.close();
+      this.socketInstance = null;
     }
 
+    if (!triggerEvent) {
+      this.onDisconnect(this);
+    }
+  }
+
+  /**
+   * Destroys the session, cleaning up all resources.
+   * @param triggerEvent If the destroy event should be triggered.
+   */
+  public destroy(triggerEvent: boolean = false): void {
     // Remove all references
     if (this.room) {
       this.room.removeSession(this);
       this.room = null;
     }
-    this.socket = null;
+    this.socketInstance = null;
 
-    // If called from the SessionManager, do not call onDestroy
-    if (!calledFromManager) {
-      this.onDestroy();
+    if (!triggerEvent) {
+      this.onDestroy(this);
+    }
+  }
+
+  /**
+   * Sets a reconnecting socket back to this session.
+   * Clears the reconnection timer and references the new socket.
+   */
+  public reconnect(socket: ServerSocket): void {
+    // Plug in the new socket
+    this.socketInstance = socket;
+    this.socketInstance.listen(this.routeData.bind(this))
+  }
+
+  /**
+   * Routes incoming packet data to the appropriate handler.
+   * @param data The decoded packet data.
+   */
+  private routeData(data: AugmentAction<ActionEnum>): void {
+    // Update last active time
+    this.lastActiveTime = (new Date).getTime();
+
+    // If packet is roompacket, route to room if exists, otherwise error out
+    if (isMatchActions(data.action)) {
+      // Forward to roomHandler
+      if (this.room) {
+        this.room.roomDataHandler.handleData(this, data);
+      } else {
+        console.warn(`Session ${this.uuid} tried to send a system action without being in a room.`);
+      }
+    } else if (isSystemActions(data.action)) {
+      // TODO: Forward to systemHandler
+    } else {
+      // Error out
+      console.error(`Unknown action received: ${data.action}`);
+      this.socketInstance?.close();
     }
   }
 
