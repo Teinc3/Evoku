@@ -5,7 +5,7 @@ import type SessionModel from "../models/Session";
 
 
 export default abstract class EnumHandler<GenericEnum extends ActionEnum>
-  implements IDataHandler<GenericEnum> {
+implements IDataHandler<GenericEnum> {
 
   /**
    * A map of action handlers for the enum.

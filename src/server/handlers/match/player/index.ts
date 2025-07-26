@@ -3,9 +3,9 @@ import {
 } from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../../UnionHandler";
 
-import type PlayerActions from "@shared/types/enums/actions/match/player";
-import type MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
 import type PUPActions from "@shared/types/enums/actions/match/player/powerups";
+import type MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
+import type PlayerActions from "@shared/types/enums/actions/match/player";
 import type { default as IDataHandler, SomeHandlerMapEntry } from "../../../types/handler";
 
 

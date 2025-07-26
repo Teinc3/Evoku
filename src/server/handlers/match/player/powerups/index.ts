@@ -3,12 +3,12 @@ import {
 } from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../../../UnionHandler";
 
-import type PUPActions from "@shared/types/enums/actions/match/player/powerups/";
-import type FirePUPActions from "@shared/types/enums/actions/match/player/powerups/fire";
-import type WaterPUPActions from "@shared/types/enums/actions/match/player/powerups/water";
 import type WoodPUPActions from "@shared/types/enums/actions/match/player/powerups/wood";
+import type WaterPUPActions from "@shared/types/enums/actions/match/player/powerups/water";
 import type MetalPUPActions from "@shared/types/enums/actions/match/player/powerups/metal";
+import type FirePUPActions from "@shared/types/enums/actions/match/player/powerups/fire";
 import type EarthPUPActions from "@shared/types/enums/actions/match/player/powerups/earth";
+import type PUPActions from "@shared/types/enums/actions/match/player/powerups/";
 import type { 
   default as IDataHandler, SomeHandlerMapEntry
 } from "../../../../types/handler";
