@@ -1,11 +1,13 @@
 import { randomUUID, type UUID } from "crypto";
 
 import { 
-  isMatchActionsData, isSystemActions
+  isMatchActionsData, isSystemActionsData
 } from "@shared/types/utils/typeguards/actions";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type SystemActions from "@shared/types/enums/actions/system";
 import type ActionEnum from "@shared/types/enums/actions";
+import type IDataHandler from "../types/handler";
 import type ServerSocket from "./ServerSocket";
 import type RoomModel from "./Room";
 
@@ -18,16 +20,17 @@ import type RoomModel from "./Room";
  * @optional @param room - The room this session is currently in.
  */
 export default class SessionModel {
+  public readonly uuid: UUID;
 
   constructor(
     public socketInstance: ServerSocket | null, // Require a Socket to be initialised
     private readonly onDisconnect: (session: SessionModel) => void,
     private readonly onDestroy: (session: SessionModel) => void,
-    public readonly uuid: UUID = randomUUID(),
+    private readonly systemHandler: IDataHandler<SystemActions>,
     public room: RoomModel | null = null,
     public lastActiveTime: number = (new Date).getTime()
   ) {
-    this.uuid = uuid;
+    this.uuid = randomUUID();
     this.room = room;
     this.onDestroy = onDestroy.bind(this);
 
@@ -97,8 +100,8 @@ export default class SessionModel {
       } else {
         console.warn(`Session ${this.uuid} tried to send a system action without being in a room.`);
       }
-    } else if (isSystemActions(data.action)) {
-      // TODO: Forward to systemHandler
+    } else if (isSystemActionsData(data)) {
+      this.systemHandler.handleData(this, data);
     } else {
       // Error out
       console.error(`Unknown action received: ${data.action}`);

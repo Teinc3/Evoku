@@ -115,7 +115,7 @@ export default defineConfig([
           format: ["camelCase"],
         },
         {
-          selector: ["variable", "parameter", "property", "function", "method"],
+          selector: ["variable", "parameter", "function", "method"],
           format: ["camelCase"],
           leadingUnderscore: "allow", // Allow leading underscore for private variables
         },
@@ -125,9 +125,9 @@ export default defineConfig([
           modifiers: ["const"], // Only apply to constants
         },
         {
-          selector: ["property"],
+          selector: ["property", "parameterProperty"],
           format: ["camelCase", "PascalCase"],
-          modifiers: ["readonly"]
+          leadingUnderscore: "allow",
         },
         {
           selector: "enumMember",

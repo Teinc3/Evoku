@@ -1,12 +1,13 @@
 import MetalPUPActions from "@shared/types/enums/actions/match/player/powerups/metal";
 import EnumHandler from "../../../EnumHandler";
 
+import type RoomModel from "src/server/models/Room";
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SessionModel from "../../../../models/Session";
 
 
-export default class EarthPUPHandler extends EnumHandler<MetalPUPActions> {
-  constructor() {
+export default class MetalPUPHandler extends EnumHandler<MetalPUPActions> {
+  constructor(private readonly _room: RoomModel) {
     super();
 
     const handlerMap = {

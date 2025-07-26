@@ -1,6 +1,8 @@
 import SessionModel from "../models/Session";
 
 import type { UUID } from "crypto";
+import type SystemActions from "@shared/types/enums/actions/system";
+import type IDataHandler from "../types/handler";
 import type ServerSocket from "../models/ServerSocket";
 
 
@@ -8,11 +10,12 @@ import type ServerSocket from "../models/ServerSocket";
  * A global Session manager that handles all user sessions in game.
  */
 export default class SessionManager {
+  private sessions: Map<UUID, SessionModel>;
   private cleanupInterval: NodeJS.Timeout | null;
 
-  constructor (
-    private sessions: Map<UUID, SessionModel> = new Map()
-  ) {
+  constructor (private systemHandler: IDataHandler<SystemActions>) {
+    this.sessions = new Map();
+
     // Start the cleanup interval
     this.cleanupInterval = setInterval(
       this.cleanupSessions.bind(this),
@@ -25,6 +28,7 @@ export default class SessionManager {
       socket,
       session => this.onDisconnect(session),
       session => this.onDestroy(session),
+      this.systemHandler
     );
     this.sessions.set(session.uuid, session);
     return session;

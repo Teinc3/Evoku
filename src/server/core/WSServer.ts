@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 
 import ServerSocket from '../models/ServerSocket';
 import SessionManager from '../managers/SessionManager';
+import SystemHandler from '../handlers/system';
 
 import type { Server as HttpServer } from 'http';
 
@@ -11,14 +12,20 @@ import type { Server as HttpServer } from 'http';
  */
 export default class WSServer {
   private wss: WebSocketServer;
+  private sessionManager: SessionManager;
+  private systemHandler: SystemHandler;
 
   constructor(
     httpServer: HttpServer,
-    private sessionManager: SessionManager = new SessionManager()
   ) {
     // Attach the WebSocket server to the provided HTTP server instance
     this.wss = new WebSocketServer({ server: httpServer });
     this.configureWebSockets();
+
+    // Initialize custom server services
+    // Might attach more contexts in the future
+    this.systemHandler = new SystemHandler();
+    this.sessionManager = new SessionManager(this.systemHandler);
   }
 
   private configureWebSockets(): void {

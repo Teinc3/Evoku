@@ -2,18 +2,19 @@ import {
   isMechanicsActionsData, isPUPActionsData
 } from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../../UnionHandler";
+import PUPHandler from "./powerups";
+import MechanicsHandler from "./MechanicsHandler";
 
-import type PUPActions from "@shared/types/enums/actions/match/player/powerups";
-import type MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
+import type RoomModel from "src/server/models/Room";
 import type PlayerActions from "@shared/types/enums/actions/match/player";
-import type { default as IDataHandler, SomeHandlerMapEntry } from "../../../types/handler";
+import type { SomeHandlerMapEntry } from "../../../types/handler";
 
 
 export default class PlayerHandler extends UnionHandler<PlayerActions> {
-  constructor(
-    mechanicsHandler: IDataHandler<MechanicsActions>,
-    pupHandler: IDataHandler<PUPActions>
-  ) {
+  constructor(room: RoomModel) {
+    const mechanicsHandler = new MechanicsHandler(room);
+    const pupHandler = new PUPHandler(room);
+    
     super([
       [isMechanicsActionsData, mechanicsHandler],
       [isPUPActionsData, pupHandler]
