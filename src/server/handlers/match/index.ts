@@ -6,9 +6,9 @@ import ProtocolHandler from "./ProtocolHandler";
 import PlayerHandler from "./player";
 import LifecycleHandler from "./LifecycleHandler";
 
-import type RoomModel from "src/server/models/Room";
 import type MatchActions from "@shared/types/enums/actions/match";
 import type { SomeHandlerMapEntry } from "../../types/handler";
+import type RoomModel from "../../models/Room";
 
 
 export default class MatchHandler extends UnionHandler<MatchActions> {

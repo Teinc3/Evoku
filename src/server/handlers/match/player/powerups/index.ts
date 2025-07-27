@@ -8,9 +8,9 @@ import MetalPUPHandler from "./MetalPUPHandler";
 import FirePUPHandler from "./FirePUPHandler";
 import EarthPUPHandler from "./EarthPUPHandler";
 
-import type RoomModel from "src/server/models/Room";
 import type PUPActions from "@shared/types/enums/actions/match/player/powerups/";
 import type { SomeHandlerMapEntry } from "../../../../types/handler";
+import type RoomModel from "../../../../models/Room";
 
 
 export default class PUPHandler extends UnionHandler<PUPActions> {

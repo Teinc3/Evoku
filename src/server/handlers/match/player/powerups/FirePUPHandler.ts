@@ -1,9 +1,9 @@
 import FirePUPActions from "@shared/types/enums/actions/match/player/powerups/fire";
 import EnumHandler from "../../../EnumHandler";
 
-import type RoomModel from "src/server/models/Room";
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SessionModel from "../../../../models/Session";
+import type RoomModel from "../../../../models/Room";
 
 
 export default class FirePUPHandler extends EnumHandler<FirePUPActions> {

@@ -3,8 +3,8 @@ import UnionHandler from "../UnionHandler";
 import SessionHandler from "./SessionHandler";
 import LobbyHandler from "./LobbyHandler";
 
-import type { SomeHandlerMapEntry } from "src/server/types/handler";
 import type SystemActions from "@shared/types/enums/actions/system";
+import type { SomeHandlerMapEntry } from "../../types/handler";
 
 
 export default class SystemHandler extends UnionHandler<SystemActions> {

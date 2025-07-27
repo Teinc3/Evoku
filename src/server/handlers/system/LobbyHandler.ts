@@ -1,8 +1,8 @@
 import LobbyActions from "@shared/types/enums/actions/system/lobby";
 import EnumHandler from "../EnumHandler";
 
-import type SessionModel from "src/server/models/Session";
 import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type SessionModel from "../../models/Session";
 
 
 export default class LobbyHandler extends EnumHandler<LobbyActions> {
