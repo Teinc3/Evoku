@@ -18,11 +18,11 @@ export default class WoodPUPHandler extends EnumHandler<WoodPUPActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseEntangle(_session: SessionModel, _data: AugmentAction<WoodPUPActions>): void {
-    // Logic for handling use entangle action
+  private handleUseEntangle(_session: SessionModel, _data: AugmentAction<WoodPUPActions>): boolean {
+    return true;
   }
 
-  private handleUseWisdom(_session: SessionModel, _data: AugmentAction<WoodPUPActions>): void {
-    // Logic for handling use wisdom action
+  private handleUseWisdom(_session: SessionModel, _data: AugmentAction<WoodPUPActions>): boolean {
+    return true;
   }
 }

@@ -18,11 +18,11 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleSetCell(_session: SessionModel, _data: AugmentAction<MechanicsActions>): void {
-    // Logic for handling set cell action
+  private handleSetCell(_session: SessionModel, _data: AugmentAction<MechanicsActions>): boolean {
+    return true;
   }
 
-  private handleDrawPUP(_session: SessionModel, _data: AugmentAction<MechanicsActions>): void {
-    // Logic for handling draw PUP action
+  private handleDrawPUP(_session: SessionModel, _data: AugmentAction<MechanicsActions>): boolean {
+    return true;
   }
 }

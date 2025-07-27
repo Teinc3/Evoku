@@ -33,7 +33,7 @@ export default class ServerSocket {
    * Public function to attach a packet handler.
    * Allows forwarding of all incoming packet data to a handler function.
    */
-  public listen(handler: (data: AugmentAction<ActionEnum>) => void) {
+  public setListener(handler: (data: AugmentAction<ActionEnum>) => void) {
     this.ws.removeAllListeners('message'); // Prevent duplicate handlers
     this.ws.on('message', (message: WebSocket.RawData, isBinary: boolean) => {
       try {

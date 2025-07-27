@@ -16,7 +16,7 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleHeartbeat(_session: SessionModel, _data: AugmentAction<SessionActions>): void {
-    // Logic for handling heartbeat action
+  private handleHeartbeat(_session: SessionModel, _data: AugmentAction<SessionActions>): boolean {
+    return true;
   }
 }

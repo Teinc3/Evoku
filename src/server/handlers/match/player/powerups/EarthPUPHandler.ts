@@ -18,11 +18,17 @@ export default class EarthPUPHandler extends EnumHandler<EarthPUPActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseLandslide(_session: SessionModel, _data: AugmentAction<EarthPUPActions>): void {
-    // Logic for handling use landslide action
+  private handleUseLandslide(
+    _session: SessionModel,
+    _data: AugmentAction<EarthPUPActions>
+  ): boolean {
+    return true;
   }
 
-  private handleUseExcavate(_session: SessionModel, _data: AugmentAction<EarthPUPActions>): void {
-    // Logic for handling use excavate action
+  private handleUseExcavate(
+    _session: SessionModel,
+    _data: AugmentAction<EarthPUPActions>
+  ): boolean {
+    return true;
   }
 }

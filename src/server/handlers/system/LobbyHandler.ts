@@ -17,11 +17,11 @@ export default class LobbyHandler extends EnumHandler<LobbyActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleJoinQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): void {
-    // Logic for handling join queue action
+  private handleJoinQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): boolean {
+    return true;
   }
 
-  private handleLeaveQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): void {
-    // Logic for handling leave queue action
+  private handleLeaveQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): boolean {
+    return true;
   }
 }

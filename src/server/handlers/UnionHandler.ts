@@ -28,14 +28,13 @@ implements IDataHandler<GenericActionUnion> {
    * @param session The session object of the player.
    * @param data The augmented data packet.
    */
-  public handleData(session: SessionModel, data: AugmentAction<GenericActionUnion>): void {
+  public handleData(session: SessionModel, data: AugmentAction<GenericActionUnion>): boolean {
     for (const [typeGuard, handler] of this.handlerMap) {
       if (typeGuard(data)) {
         // The type guard has narrowed the type of 'data', so we can safely pass it.
-        handler.handleData(session, data);
-        return;
+        return handler.handleData(session, data);
       }
     }
-    console.warn(`No sub-handler found in ${this.constructor.name} for action: ${data.action}`);
+    return false;
   }
 }

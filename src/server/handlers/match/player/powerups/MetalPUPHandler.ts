@@ -18,11 +18,11 @@ export default class MetalPUPHandler extends EnumHandler<MetalPUPActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseLock(_session: SessionModel, _data: AugmentAction<MetalPUPActions>): void {
-    // Logic for handling use lock action
+  private handleUseLock(_session: SessionModel, _data: AugmentAction<MetalPUPActions>): boolean {
+    return true;
   }
 
-  private handleUseForge(_session: SessionModel, _data: AugmentAction<MetalPUPActions>): void {
-    // Logic for handling use forge action
+  private handleUseForge(_session: SessionModel, _data: AugmentAction<MetalPUPActions>): boolean {
+    return true;
   }
 }

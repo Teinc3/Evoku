@@ -18,11 +18,11 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseCryo(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): void {
-    // Logic for handling use cryo action
+  private handleUseCryo(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): boolean {
+    return true;
   }
 
-  private handleUseCascade(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): void {
-    // Logic for handling use cascade action
+  private handleUseCascade(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): boolean {
+    return true;
   }
 }

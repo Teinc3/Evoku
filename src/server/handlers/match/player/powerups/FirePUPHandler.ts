@@ -18,11 +18,14 @@ export default class FirePUPHandler extends EnumHandler<FirePUPActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseInferno(_session: SessionModel, _data: AugmentAction<FirePUPActions>): void {
-    // Logic for handling use inferno action
+  private handleUseInferno(_session: SessionModel, _data: AugmentAction<FirePUPActions>): boolean {
+    return true;
   }
 
-  private handleUseMetabolic(_session: SessionModel, _data: AugmentAction<FirePUPActions>): void {
-    // Logic for handling use metabolic action
+  private handleUseMetabolic(
+    _session: SessionModel,
+    _data: AugmentAction<FirePUPActions>
+  ): boolean {
+    return true;
   }
 }

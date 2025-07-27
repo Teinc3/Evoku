@@ -27,15 +27,14 @@ implements IDataHandler<GenericEnum> {
     }
   }
 
-  public handleData(session: SessionModel, data: AugmentAction<GenericEnum>): void {
+  public handleData(session: SessionModel, data: AugmentAction<GenericEnum>): boolean {
     const handler = this.handlerMap[data.action];
 
     if (handler) {
       // The data type is correctly inferred here because of how `action` and `handlerMap` are typed
-      handler(session, data);
+      return handler(session, data);
     } else {
-      // Probably OK but for debugging purposes
-      console.warn(`No handler found for action: ${data.action}`);
+      return false;
     }
   }
     

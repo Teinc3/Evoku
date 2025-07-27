@@ -35,7 +35,7 @@ export default class SessionModel {
     this.onDestroy = onDestroy.bind(this);
 
     if (this.socketInstance) {
-      this.socketInstance.listen(this.routeData.bind(this));
+      this.socketInstance.setListener(this.dataListener.bind(this));
     }
   }
 
@@ -82,30 +82,40 @@ export default class SessionModel {
   public reconnect(socket: ServerSocket): void {
     // Plug in the new socket
     this.socketInstance = socket;
-    this.socketInstance.listen(this.routeData.bind(this))
+    this.socketInstance.setListener(this.dataListener.bind(this))
   }
 
   /**
-   * Routes incoming packet data to the appropriate handler.
+   * Listener for incoming data that routes the packet to appropriate handlers.
    * @param data The decoded packet data.
    */
-  private routeData(data: AugmentAction<ActionEnum>): void {
-    // Update last active time
-    this.lastActiveTime = (new Date).getTime();
+  private dataListener(data: AugmentAction<ActionEnum>): void {    
+    // Try to route the packet
+    if (this.handleData(data)) {
+      // Update the last active time
+      this.lastActiveTime = (new Date).getTime();
+    } else {
+      // Error out and force disconnection
+      console.error(`Action failed: ${data.action}`);
+      this.disconnect(true);
+    }
+  }
 
-    // If packet is roompacket, route to room if exists, otherwise error out
+  /**
+   * Handles incoming data for the session.
+   * @param data The augmented action data.
+   */
+  private handleData(data: AugmentAction<ActionEnum>): boolean {
     if (isMatchActionsData(data)) {
       if (this.room) {
-        this.room.roomDataHandler.handleData(this, data);
+        return this.room.roomDataHandler.handleData(this, data);
       } else {
-        console.warn(`Session ${this.uuid} tried to send a system action without being in a room.`);
+        return false;
       }
     } else if (isSystemActionsData(data)) {
-      this.systemHandler.handleData(this, data);
+      return this.systemHandler.handleData(this, data);
     } else {
-      // Error out
-      console.error(`Unknown action received: ${data.action}`);
-      this.socketInstance?.close();
+      return false;
     }
   }
 

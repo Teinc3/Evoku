@@ -8,7 +8,7 @@ export default interface IDataHandler<GenericActionOrType extends ActionEnum> {
 }
 
 export type HandleDataFn<GenericAction extends ActionEnum> 
-  = (session: SessionModel, data: AugmentAction<GenericAction>) => void;
+  = (session: SessionModel, data: AugmentAction<GenericAction>) => boolean;
 
 export type HandlerMap<T extends ActionEnum> = {
   [K in T]?: HandleDataFn<K>;

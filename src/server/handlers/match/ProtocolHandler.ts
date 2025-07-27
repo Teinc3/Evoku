@@ -17,7 +17,7 @@ export default class ProtocolHandler extends EnumHandler<ProtocolActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handlePong(_session: SessionModel, _data: AugmentAction<ProtocolActions>): void {
-    // Logic for handling pong action
+  private handlePong(_session: SessionModel, _data: AugmentAction<ProtocolActions>): boolean {
+    return true;
   }
 }
