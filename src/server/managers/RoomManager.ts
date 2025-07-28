@@ -37,7 +37,6 @@ export default class RoomManager {
    * This is called periodically to clean up unused rooms.
    */
   private cleanupRooms(): void {
-    const now = Date.now();
     for (const [roomID, room] of this.rooms.entries()) {
       if (room.participants.size === 0) {
         this.rooms.delete(roomID);
