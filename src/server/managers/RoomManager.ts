@@ -3,9 +3,14 @@ import RoomModel from "../models/Room";
 
 export default class RoomManager {
   private rooms: Map<string, RoomModel>;
+  private roomCleanupTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.rooms = new Map();
+    this.roomCleanupTimer = setInterval(
+      this.cleanupRooms.bind(this),
+      10 * 60 * 1000 // Cleanup every 10 minutes
+    );
   }
 
   public createRoom(): RoomModel {
@@ -25,5 +30,18 @@ export default class RoomManager {
       roomID = Math.random().toString(36).substring(2, 7).toUpperCase();
     } while (this.rooms.has(roomID));
     return roomID;
+  }
+
+  /**
+   * Remove room references if they no longer have participants.
+   * This is called periodically to clean up unused rooms.
+   */
+  private cleanupRooms(): void {
+    const now = Date.now();
+    for (const [roomID, room] of this.rooms.entries()) {
+      if (room.participants.size === 0) {
+        this.rooms.delete(roomID);
+      }
+    }
   }
 }
