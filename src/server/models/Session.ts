@@ -4,9 +4,11 @@ import {
   isMatchActionsData, isSystemActionsData
 } from "@shared/types/utils/typeguards/actions";
 
+
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SystemActions from "@shared/types/enums/actions/system";
 import type ActionEnum from "@shared/types/enums/actions";
+import type ActionMap from "@shared/types/actionmap";
 import type IDataHandler from "../types/handler";
 import type ServerSocket from "./ServerSocket";
 import type RoomModel from "./Room";
@@ -119,4 +121,12 @@ export default class SessionModel {
     }
   }
 
+  public forward<GenericAction extends ActionEnum>(
+    action: GenericAction,
+    data: ActionMap[GenericAction]
+  ): void {
+    if (this.socketInstance) {
+      this.socketInstance.send(action, data);
+    }
+  }
 }

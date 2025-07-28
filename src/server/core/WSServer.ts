@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 
 import ServerSocket from '../models/ServerSocket';
 import SessionManager from '../managers/SessionManager';
+import RoomManager from '../managers/RoomManager';
 import SystemHandler from '../handlers/system';
 
 import type { Server as HttpServer } from 'http';
@@ -14,6 +15,7 @@ export default class WSServer {
   private wss: WebSocketServer;
   private sessionManager: SessionManager;
   private systemHandler: SystemHandler;
+  private roomManager: RoomManager;
 
   constructor(
     httpServer: HttpServer,
@@ -26,6 +28,7 @@ export default class WSServer {
     // Might attach more contexts in the future
     this.systemHandler = new SystemHandler();
     this.sessionManager = new SessionManager(this.systemHandler);
+    this.roomManager = new RoomManager();
   }
 
   private configureWebSockets(): void {
