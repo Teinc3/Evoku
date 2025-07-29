@@ -45,7 +45,7 @@ export default class SessionModel {
    * Disconnects the socket from this session.
    * @param triggerEvent If the disconnect event should be triggered.
    */
-  public disconnect(triggerEvent: boolean = false): void {
+  public disconnect(triggerEvent: boolean = true): void {
     if (
       this.socketInstance
       && this.socketInstance.readyState === WebSocket.OPEN
@@ -55,7 +55,7 @@ export default class SessionModel {
       this.socketInstance = null;
     }
 
-    if (!triggerEvent) {
+    if (triggerEvent) {
       this.onDisconnect(this);
     }
   }
@@ -64,7 +64,7 @@ export default class SessionModel {
    * Destroys the session, cleaning up all resources.
    * @param triggerEvent If the destroy event should be triggered.
    */
-  public destroy(triggerEvent: boolean = false): void {
+  public destroy(triggerEvent: boolean = true): void {
     // Remove all references
     if (this.room) {
       this.room.removeSession(this);
@@ -72,7 +72,7 @@ export default class SessionModel {
     }
     this.socketInstance = null;
 
-    if (!triggerEvent) {
+    if (triggerEvent) {
       this.onDestroy(this);
     }
   }

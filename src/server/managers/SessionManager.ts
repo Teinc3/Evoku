@@ -51,7 +51,6 @@ export default class SessionManager {
    * @param session The session that was destroyed.
    */
   public onDestroy(session: SessionModel): void {
-    session.destroy(true);
     this.sessions.delete(session.uuid);
   }
 
