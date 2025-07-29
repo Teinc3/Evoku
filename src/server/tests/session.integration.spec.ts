@@ -1,18 +1,22 @@
+/// <reference types="jest" />
+
 import { jest } from '@jest/globals';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
-import SessionManager from '../managers/SessionManager';
+import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import SessionModel from '../models/Session';
+import SessionManager from '../managers/SessionManager';
 
 import type { WebSocket } from 'ws';
-import type IDataContract from '@shared/types/contracts/components/base/IDataContract';
+import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type SystemActions from '@shared/types/enums/actions/system';
+import type IDataContract from '@shared/types/contracts/components/base/IDataContract';
 import type PacketIO from '@shared/networking/utils/PacketIO';
-import type ServerSocket from '../models/ServerSocket';
 import type IDataHandler from '../types/handler';
+import type ServerSocket from '../models/ServerSocket';
+
 
 // --- Type-Safe Mock Classes ---
-
 // A mock class for ServerSocket that satisfies its type.
 class MockServerSocket {
   close = jest.fn();
@@ -26,7 +30,7 @@ class MockServerSocket {
 
 // A mock class for the system handler that implements the IDataHandler interface.
 class MockSystemHandler implements IDataHandler<SystemActions> {
-  handleData = jest.fn(() => true);
+  handleData = jest.fn((_session: SessionModel, _data: AugmentAction<SystemActions>) => true);
 }
 
 
@@ -42,8 +46,6 @@ describe('SessionManager and Session Integration Test', () => {
     // Create new instances of our mocks for each test
     mockSocket = new MockServerSocket() as unknown as ServerSocket;
     mockHandler = new MockSystemHandler();
-    
-    // The constructor is now fully type-safe, no 'as any' needed.
     sessionManager = new SessionManager(mockHandler);
   });
 
@@ -110,6 +112,47 @@ describe('SessionManager and Session Integration Test', () => {
       
       // The socket should NOT be disconnected because the timer was reset
       expect(session.socketInstance).not.toBeNull();
+    });
+  });
+
+  describe('Piping Data to Handlers', () => {
+    it('should forward data to the system handler', () => {
+      const session = sessionManager.createSession(mockSocket);
+      const dataListener = (mockSocket as unknown as MockServerSocket)
+        .setListener.mock.calls[0][0] as (data: IDataContract) => void;
+
+      // Send a heartbeat action to the session
+      dataListener({ action: SessionActions.HEARTBEAT });
+
+      // The system handler should have received the data
+      expect(mockHandler.handleData).toHaveBeenCalledWith(
+        session,
+        expect.objectContaining({ action: SessionActions.HEARTBEAT })
+      );
+
+      // Now try to access the deepest handler in the chain (SessionHandler)
+      // We can use tsignore to access private properties 
+      // Actually we can't looks too complicated fuck it
+    });
+
+    it('should not have forwarded non-system data to the system handler', () => {
+      sessionManager.createSession(mockSocket);
+      const dataListener = (mockSocket as unknown as MockServerSocket)
+        .setListener.mock.calls[0][0] as (data: IDataContract) => void;
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Send a non-system action (e.g., MatchActions)
+      dataListener({ 
+        action: MechanicsActions.DRAW_PUP,
+      } as AugmentAction<MechanicsActions>);
+
+      // The system handler should not have been called
+      expect(mockHandler.handleData).not.toHaveBeenCalled();
+      // As we are not in a room, the console should give an error
+      // -3 is the value for DRAW_PUP
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Action failed: -3'));
+      errorSpy.mockRestore();
     });
   });
 });

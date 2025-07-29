@@ -1,10 +1,10 @@
 import { randomUUID, type UUID } from 'crypto';
 import { jest } from '@jest/globals';
 
-import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
-import RoomManager from '../managers/RoomManager';
+import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import RoomModel from '../models/Room';
+import RoomManager from '../managers/RoomManager';
 
 import type SessionModel from '../models/Session';
 
@@ -75,12 +75,12 @@ describe('RoomManager and Room Integration Test', () => {
 
   it('should automatically clean up a room after all participants have left', () => {
     const room = roomManager.createRoom();
-    const [uuid1, ] = generateUUIDs();
+    const [uuid1] = generateUUIDs();
     const session1 = new MockSession(uuid1) as unknown as SessionModel;
     room.addPlayers([session1]);
 
     // Verify the room exists initially
-    // @ts-ignore - Accessing private property for test purposes
+    // @ts-expect-error ts(2341)
     expect(roomManager.rooms.has(room.roomID)).toBe(true);
 
     // Remove the last participant
@@ -91,7 +91,7 @@ describe('RoomManager and Room Integration Test', () => {
     jest.advanceTimersByTime(10 * 60 * 1000 + 1); // 10 minutes
 
     // The room should now be removed from the manager
-    // @ts-ignore - Accessing private property for test purposes
+    // @ts-expect-error ts(2341)
     expect(roomManager.rooms.has(room.roomID)).toBe(false);
   });
 

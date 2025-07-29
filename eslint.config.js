@@ -19,7 +19,7 @@ export default defineConfig([
     "Imported .gitignore patterns",
   ),
   {
-    ignores: ["package-lock.json", "package.json"],
+    ignores: ["package-lock.json", "package.json", "jest.config.cjs"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
