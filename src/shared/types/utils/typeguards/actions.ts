@@ -122,3 +122,9 @@ export const isMechanicsActionsData = createDataGuard(isMechanicsActions);
 export const isPUPActionsData = createDataGuard(isPUPActions);
 export const isProtocolActionsData = createDataGuard(isProtocolActions);
 export const isLifecycleActionsData = createDataGuard(isLifecycleActions);
+
+export const isFirePUPActionsData = createDataGuard(isFirePUPActions);
+export const isWaterPUPActionsData = createDataGuard(isWaterPUPActions);
+export const isWoodPUPActionsData = createDataGuard(isWoodPUPActions);
+export const isMetalPUPActionsData = createDataGuard(isMetalPUPActions);
+export const isEarthPUPActionsData = createDataGuard(isEarthPUPActions);

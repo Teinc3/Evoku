@@ -1,5 +1,6 @@
 import { 
-  isMechanicsActionsData, isPUPActionsData
+  isEarthPUPActionsData, isFirePUPActionsData, isMetalPUPActionsData,
+  isWaterPUPActionsData, isWoodPUPActionsData
 } from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../../../UnionHandler";
 import WoodPUPHandler from "./WoodPUPHandler";
@@ -22,11 +23,11 @@ export default class PUPHandler extends UnionHandler<PUPActions> {
     const earthPUPHandler = new EarthPUPHandler(room);
 
     super([
-      [isMechanicsActionsData, firePUPHandler],
-      [isPUPActionsData, waterPUPHandler],
-      [isPUPActionsData, woodPUPHandler],
-      [isPUPActionsData, metalPUPHandler],
-      [isPUPActionsData, earthPUPHandler]
+      [isFirePUPActionsData, firePUPHandler],
+      [isWaterPUPActionsData, waterPUPHandler],
+      [isWoodPUPActionsData, woodPUPHandler],
+      [isMetalPUPActionsData, metalPUPHandler],
+      [isEarthPUPActionsData, earthPUPHandler]
     ] as SomeHandlerMapEntry<PUPActions>[]);
   }
 }
