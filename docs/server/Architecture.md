@@ -25,6 +25,7 @@ src/server/
 │   ├── Room.ts
 │   └── ServerSocket.ts
 ├── types/
+├── tests/
 └── index.ts
 ```
 
@@ -75,3 +76,9 @@ It provides methods to send and receive packets, ensuring type safety.
 - UnionHandler.ts: A base class for triaging packets related to union types of enums to children handlers.
 - match/: Contains handlers for match-related actions, such as gameplay or lifecycle actions.
 - system/: Contains handlers for system non-match actions, such as player authentication and matchmaking.
+
+### /tests
+
+Contains integration tests for server components and functionality.
+Note: Unit Tests are located alongside the module they test, in the same directory,
+while E2E tests are located in the `src/tests` directory.

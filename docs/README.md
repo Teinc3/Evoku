@@ -1,4 +1,4 @@
-# Documentation
+# Source Documentation
 
 Documentation of internal API is organised into the following sections:
 
@@ -21,3 +21,5 @@ Contents:
 
 - [Server Architecture](/docs/server/Architecture.md)
 - [Handlers](/docs/server/Handlers.md)
+- [Session](/docs/server/Session.md)
+- [Room](/docs/server/Room.md)
