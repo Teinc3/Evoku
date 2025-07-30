@@ -43,5 +43,8 @@ export default class WSServer {
     this.wss.close(() => {
       console.log('WebSocket server closed');
     });
+
+    this.roomManager.close();
+    this.sessionManager.close();
   }
 }

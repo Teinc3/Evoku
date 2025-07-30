@@ -92,4 +92,18 @@ export default class RoomModel {
     }
   }
 
+  /**
+   * Forcibly end the room, clearing all participants and states.
+   */
+  public close(): void {
+    // For everyone in the room, we remove their reference to the room
+    for (const session of this.participants.values()) {
+      session.room = null;
+    }
+
+    // Clear all participants, player states, and player map
+    this.participants.clear();
+    this.playerStates.clear();
+    this.playerMap.clear();
+  }
 }

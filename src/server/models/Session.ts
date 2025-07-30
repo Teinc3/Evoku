@@ -46,10 +46,7 @@ export default class SessionModel {
    * @param triggerEvent If the disconnect event should be triggered.
    */
   public disconnect(triggerEvent: boolean = true): void {
-    if (
-      this.socketInstance
-      && this.socketInstance.readyState === WebSocket.OPEN
-    ) {
+    if (this.socketInstance) {
       // Removes socket references
       this.socketInstance.close();
       this.socketInstance = null;
@@ -70,7 +67,11 @@ export default class SessionModel {
       this.room.removeSession(this);
       this.room = null;
     }
-    this.socketInstance = null;
+    
+    if (this.socketInstance) {
+      this.socketInstance.close();
+      this.socketInstance = null;
+    }
 
     if (triggerEvent) {
       this.onDestroy(this);

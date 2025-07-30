@@ -1,6 +1,7 @@
+import WebSocket from 'ws';
+
 import PacketIO from '@shared/networking/utils/PacketIO';
 
-import type WebSocket from 'ws';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
 import type ActionMap from '@shared/types/actionmap';
@@ -59,7 +60,10 @@ export default class ServerSocket {
    */
   close() {
     this.ws.removeAllListeners();
-    this.ws.close();
+
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.close();
+    }
   }
 
   /**

@@ -75,4 +75,17 @@ export default class SessionManager {
       }
     }
   }
+
+  public close(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+
+    // Close all sessions
+    for (const session of this.sessions.values()) {
+      session.destroy(true);
+    }
+    this.sessions.clear();
+  }
 }

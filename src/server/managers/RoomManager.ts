@@ -43,4 +43,13 @@ export default class RoomManager {
       }
     }
   }
+
+  public close(): void {
+    if (this.roomCleanupTimer) {
+      clearInterval(this.roomCleanupTimer);
+      this.roomCleanupTimer = null;
+    }
+    
+    this.rooms.clear();
+  }
 }
