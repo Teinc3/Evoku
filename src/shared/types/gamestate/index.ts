@@ -15,6 +15,8 @@ export interface BoardState {
   board: CellState[];
 }
 
+export type BoardCellStates = CellState[];
+
 export interface CellState {
   cellIndex: number; // Might not be necessary
   value: number;
