@@ -77,17 +77,17 @@ export default class RoomModel {
     options: BroadcastOptions = {}
   ) {
     const { to = 'all', exclude = new Set() } = options;
-    let recepients: SessionModel[];
+    let recipients: SessionModel[];
 
     if (to === 'all') {
-      recepients = Array.from(this.participants.values());
+      recipients = Array.from(this.participants.values());
     } else {
-      recepients = to.map(uuid => this.participants.get(uuid)).filter(Boolean) as SessionModel[];
+      recipients = to.map(uuid => this.participants.get(uuid)).filter(Boolean) as SessionModel[];
     }
 
-    for (const recepient of recepients) {
-      if (!exclude.has(recepient.uuid)) {
-        recepient.forward(action, data);
+    for (const recipient of recipients) {
+      if (!exclude.has(recipient.uuid)) {
+        recipient.forward(action, data);
       }
     }
   }

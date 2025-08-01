@@ -34,6 +34,7 @@ export default class SessionModel {
   ) {
     this.uuid = randomUUID();
     this.room = room;
+    this.onDisconnect = onDisconnect.bind(this);
     this.onDestroy = onDestroy.bind(this);
 
     if (this.socketInstance) {
@@ -85,7 +86,7 @@ export default class SessionModel {
   public reconnect(socket: ServerSocket): void {
     // Plug in the new socket
     this.socketInstance = socket;
-    this.socketInstance.setListener(this.dataListener.bind(this))
+    this.socketInstance.setListener(this.dataListener.bind(this));
   }
 
   /**
