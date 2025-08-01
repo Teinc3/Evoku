@@ -22,6 +22,7 @@ jobs:
         run: npm ci
 
       - name: Lint server code
+        id: lint
         run: npm run lint:server
 
       - name: Test server code

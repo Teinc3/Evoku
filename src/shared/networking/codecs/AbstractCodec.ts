@@ -1,4 +1,4 @@
-import type IPacketBuffer from "../../types/utils/IPacketBuffer";
+import type IPacketBuffer from "../../types/networking/IPacketBuffer";
 import type ICodec from "../../types/networking/ICodec";
 
 

@@ -19,11 +19,19 @@ export default defineConfig([
     "Imported .gitignore patterns",
   ),
   {
-    ignores: ["package-lock.json", "package.json"],
+    ignores: ["package-lock.json", "package.json", "jest.config.cjs"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    settings: {
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+      }
+    },
     files: ["**/*.{js,cjs,ts}"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
@@ -34,6 +42,10 @@ export default defineConfig([
     },
     rules: {
       "no-var": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }],
       "prefer-const": "error",
       "@stylistic/indent": ["error", 2],
       "@stylistic/max-len": ["error", { code: 100 }],
@@ -45,21 +57,6 @@ export default defineConfig([
 
       // ## Import Rules ##
       "@typescript-eslint/consistent-type-imports": "error", // Enforce 'import type'
-      "import/no-restricted-paths": [
-        // Disallow '@shared' alias within the shared directory
-        "error",
-        {
-          zones: [
-            {
-              target: "./src/shared", // The directory where the rule applies
-              from: "./src/shared", // The source of imports to restrict
-              message:
-                "Use relative imports ('./' or '../') within the 'src/shared' directory.",
-            },
-          ],
-        },
-      ],
-
       "import/newline-after-import": ["error", {
         count: 2,
         exactCount: true,
@@ -118,7 +115,7 @@ export default defineConfig([
           format: ["camelCase"],
         },
         {
-          selector: ["variable", "parameter", "property", "function", "method"],
+          selector: ["variable", "parameter", "function", "method"],
           format: ["camelCase"],
           leadingUnderscore: "allow", // Allow leading underscore for private variables
         },
@@ -128,9 +125,9 @@ export default defineConfig([
           modifiers: ["const"], // Only apply to constants
         },
         {
-          selector: ["property"],
+          selector: ["property", "parameterProperty"],
           format: ["camelCase", "PascalCase"],
-          modifiers: ["readonly"]
+          leadingUnderscore: "allow",
         },
         {
           selector: "enumMember",
@@ -151,6 +148,17 @@ export default defineConfig([
           format: null, // No specific format for imports
         },
       ],
+    }
+  },
+  {
+    files: ["./src/shared/**/*.ts"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        "patterns": [{
+          "group": ["@shared/**"],
+          "message": "Use relative imports ('../**') instead of '@shared/**' aliases."
+        }]
+      }]
     }
   },
   {

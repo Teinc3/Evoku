@@ -1,0 +1,31 @@
+import FirePUPActions from "@shared/types/enums/actions/match/player/powerups/fire";
+import EnumHandler from "../../../EnumHandler";
+
+import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type SessionModel from "../../../../models/Session";
+import type RoomModel from "../../../../models/Room";
+
+
+export default class FirePUPHandler extends EnumHandler<FirePUPActions> {
+  constructor(private readonly _room: RoomModel) {
+    super();
+
+    const handlerMap = {
+      [FirePUPActions.USE_INFERNO]: this.handleUseInferno,
+      [FirePUPActions.USE_METABOLIC]: this.handleUseMetabolic
+    };
+
+    this.setHandlerMap(handlerMap);
+  }
+
+  private handleUseInferno(_session: SessionModel, _data: AugmentAction<FirePUPActions>): boolean {
+    return true;
+  }
+
+  private handleUseMetabolic(
+    _session: SessionModel,
+    _data: AugmentAction<FirePUPActions>
+  ): boolean {
+    return true;
+  }
+}

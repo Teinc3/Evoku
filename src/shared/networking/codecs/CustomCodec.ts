@@ -1,6 +1,6 @@
 import AbstractCodec from "./AbstractCodec";
 
-import type IPacketBuffer from "../../types/utils/IPacketBuffer";
+import type IPacketBuffer from "../../types/networking/IPacketBuffer";
 import type { CustomCodecMap, ICustomCodec } from "../../types/networking/ICodec";
 import type IDataContract from "../../types/contracts/components/base/IDataContract";
 
@@ -58,12 +58,6 @@ export default abstract class CustomCodec<GenericContract extends IDataContract>
     const data = {} as GenericContract; // Reset internal data
 
     for (const key in this.codecMap) {
-      // Do not decode the action key
-      // It is already decoded initially to determine the packet type
-      if (key === "action") {
-        continue;
-      }
-
       const Codec = this.codecMap[key];
       const codecInstance = new Codec();
       data[key] = codecInstance.decode(buffer);

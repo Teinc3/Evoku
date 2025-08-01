@@ -6,4 +6,7 @@ module.exports = {
     '<rootDir>/src/server/**/*.spec.ts',
     '<rootDir>/src/shared/**/*.spec.ts'
   ],
+  moduleNameMapper: {
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+  }
 };
