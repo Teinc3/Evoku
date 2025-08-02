@@ -1,4 +1,6 @@
-import type { BoardCellStates } from "@shared/types/gamestate";
+import CellModel from "@shared/models/CellModel";
+
+import type { BoardCellStates } from "@shared/types/gamestate/board/cell";
 
 
 export default class BoardConverter {
@@ -10,11 +12,7 @@ export default class BoardConverter {
     return cellStates.map(cell => cell.value);
   }
 
-  static toBoardCellStates(cellValues: number[]): BoardCellStates {
-    return cellValues.map((value, index) => ({
-      cellIndex: index,
-      value: value,
-      fixed: value !== 0,
-    }));
+  static toBoardCellStates(cellValues: number[]) {
+    return cellValues.map((value) => (new CellModel(value, value !== 0)));
   }
 }

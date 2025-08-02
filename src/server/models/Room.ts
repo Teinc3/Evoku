@@ -1,7 +1,7 @@
 import MatchHandler from "../handlers/match";
 
 import type { UUID } from "crypto";
-import type PlayerState from "@shared/types/gamestate";
+import type IPlayerState from "@shared/types/gamestate";
 import type MatchActions from "@shared/types/enums/actions/match";
 import type ActionMap from "@shared/types/actionmap";
 import type IDataHandler from "../types/handler";
@@ -15,7 +15,7 @@ import type SessionModel from "./Session";
 export default class RoomModel {
   public roomDataHandler: IDataHandler<MatchActions>
   public participants: Map<UUID, SessionModel>
-  private playerStates: Map<number, PlayerState>;
+  private playerStates: Map<number, IPlayerState>;
   private playerMap: Map<number, UUID>;
   private playerIDCounter: number;
     
