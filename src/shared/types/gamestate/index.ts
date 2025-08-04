@@ -1,6 +1,6 @@
-import type IBoardState from "./board";
-import type PUPState from "./powerups";
 import type TimeSyncState from "./timesync";
+import type PUPState from "./powerups";
+import type IBoardState from "./board";
 
 
 export default interface IPlayerState {

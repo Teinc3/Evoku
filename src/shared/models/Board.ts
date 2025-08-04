@@ -1,16 +1,16 @@
-import BoardConverter from "@shared/mechanics/utils/BoardConverter";
+import BoardConverter from "../mechanics/utils/BoardConverter";
 
-import type IBoardState from "@shared/types/gamestate/board";
-import CellModel from "./CellModel";
+import type IBoardState from "../types/gamestate/board";
+import type BaseCellModel from "./Cell";
 
 
 /**
  * Model representing the state of a game board.
  */
-export default class BoardStateModel implements IBoardState {
+export default class BaseBoardModel implements IBoardState {
   static readonly GLOBAL_COOLDOWN_DURATION = 5000; // 5 seconds
 
-  public readonly board: CellModel[];
+  public readonly board: BaseCellModel[];
   public globalLastCooldownEnd: number;
 
   constructor(cellValues: number[] = []) {
@@ -36,10 +36,24 @@ export default class BoardStateModel implements IBoardState {
     const cell = this.board[cellIndex];
     if (cell.set(value, time)) {
       if (time !== undefined) {
-        this.globalLastCooldownEnd = time + BoardStateModel.GLOBAL_COOLDOWN_DURATION;
+        this.globalLastCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
       }
       return true;
     }
     return false;
+  }
+
+  /**
+   * When a cell is set, check for board objectives that might be completed.
+   */
+  public checkBoardObjectives(_cell: BaseCellModel): number {
+    // First, compare the new value to the ideal board state.
+    // Is it equal? If not, this move is wrong. No objective completed.
+
+    // Then, check for each row, column and box, if they have all 9 filled cells.
+    // Make sure that this objective has not already been completed.
+
+    // For now, return 0
+    return 0;
   }
 }

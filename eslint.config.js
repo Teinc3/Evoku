@@ -130,6 +130,11 @@ export default defineConfig([
           leadingUnderscore: "allow",
         },
         {
+          selector: "property",
+          modifiers: ["static"],
+          format: ["camelCase", "UPPER_CASE"],
+        },
+        {
           selector: "enumMember",
           format: ["UPPER_CASE"],
         },

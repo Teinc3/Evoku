@@ -1,6 +1,7 @@
-import ICellEffectState from "@shared/types/gamestate/board/effect";
+import type ICellEffectState from "../types/gamestate/board/effect";
 
-export default abstract class EffectModel implements ICellEffectState {
+
+export default abstract class BaseEffectModel implements ICellEffectState {
   constructor(
     public startedAt: number,
     public lastUntil?: number
