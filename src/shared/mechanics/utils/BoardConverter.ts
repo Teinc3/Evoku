@@ -1,5 +1,3 @@
-import BaseCellModel from "../../models/Cell";
-
 import type { BoardCellStates } from "../../types/gamestate/board/cell";
 
 
@@ -10,9 +8,5 @@ export default class BoardConverter {
 
   static toCellValues(cellStates: BoardCellStates): number[] {
     return cellStates.map(cell => cell.value);
-  }
-
-  static toBoardCellStates(cellValues: number[]) {
-    return cellValues.map(value => (new BaseCellModel(value, value !== 0)));
   }
 }

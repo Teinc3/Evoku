@@ -21,23 +21,7 @@ describe("BoardConverter", () => {
       expect(result).not.toContain("-");
     });
 
-    it("should convert the board array into cell states", () => {
-      const boardArray = BoardConverter.toBoardArray(sudokuGen.puzzle);
-      const cellStates = BoardConverter.toBoardCellStates(boardArray);
-      expect(cellStates).toHaveLength(81);
-
-      for (let i = 0; i < cellStates.length; i++) {
-        expect(cellStates[i]).toHaveProperty("cellIndex", i);
-        expect(cellStates[i]).toHaveProperty("value", boardArray[i]);
-        expect(cellStates[i]).toHaveProperty("fixed", boardArray[i] !== 0);
-      }
-    });
-
-    it("should convert cell states back to board array", () => {
-      const boardArray = BoardConverter.toBoardArray(sudokuGen.puzzle);
-      const cellStates = BoardConverter.toBoardCellStates(boardArray);
-      const convertedBackArray = BoardConverter.toCellValues(cellStates);
-      expect(convertedBackArray).toEqual(boardArray);
-    });
+    // Board cell states converter removed due to platform specific implementations
+    // Can be added in the future if needed
   });
 });

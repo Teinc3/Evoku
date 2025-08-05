@@ -8,12 +8,12 @@ export default abstract class BaseEffectModel implements ICellEffectState {
   ) {}
 
   /**
-   * Function to determine if the effect blocks setting a value.
+   * Function to determine if the effect allows setting a new value.
    */
-  public blockSetValue(time?: number): boolean {
+  public validateSetValue(time?: number): boolean {
     if (this.lastUntil && time !== undefined) {
-      return time < this.lastUntil;
+      return time >= this.lastUntil;
     }
-    return false;
+    return true;
   }
 }

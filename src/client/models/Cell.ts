@@ -1,0 +1,97 @@
+import BaseCellModel from "../../shared/models/Cell";
+
+import type BaseEffectModel from "../../shared/models/Effect";
+
+
+export interface IPendingCellState {
+  pendingValue: number;
+  pendingCooldownEnd: number;
+  pendingEffects: BaseEffectModel[];
+};
+
+
+/**
+ * Client-side implementation of CellModel with pending state for optimistic updates.
+ */
+export default class ClientCellModel extends BaseCellModel {
+  public pendingCellState: Partial<IPendingCellState>;
+
+  constructor(
+    value: number = 0,
+    fixed: boolean = false,
+    effects: BaseEffectModel[] = []
+  ) {
+    super(value, fixed, effects);
+    this.pendingCellState = {}; // Initialise with no pending properties
+  }
+
+  /**
+   * Set a pending value for optimistic updates while waiting for server confirmation.
+   * @param value The new value to set as pending.
+   * @param time Current client time (optional)
+   * @returns Whether the pending value was set.
+   */
+  public setPending(value: number, time?: number): boolean {
+    if (!this.validate(value, time)) {
+      return false;
+    }
+
+    this.pendingCellState.pendingValue = value;
+    if (time !== undefined) {
+      this.pendingCellState.pendingCooldownEnd = time + BaseCellModel.CELL_COOLDOWN_DURATION;
+    }
+    return true;
+  }
+
+  /**
+   * Confirm the pending value and make it the actual value.
+   * @param value The confirmed value from the server.
+   * @param time Server time
+   * @returns Whether the value was confirmed.
+   */
+  public confirmSet(value: number, time?: number): boolean {
+    this.clearPending();
+    
+    if (!this.validate(value, time)) {
+      return false;
+    }
+    
+    this.update(value, time);
+    return true;
+  }
+
+  /**
+   * Reject the pending value and restore the original state.
+   */
+  public rejectPending(): void {
+    // TODO: Here we might need to be more clear about which pending state we are rejecting
+    // As it stands, it clears everything that is pending
+    // But different things can be on pending at the same time, but coming from different actionIDs
+    this.clearPending();
+  }
+
+  /**
+   * Clear all pending state.
+   */
+  private clearPending(): void {
+    this.pendingCellState = {};
+  }
+
+  /**
+   * Get the current display value (pending if exists, otherwise actual).
+   */
+  public getDisplayValue(): number {
+    return this.pendingCellState.pendingValue ?? this.value;
+  }
+
+  /**
+   * Check if this cell has any pending changes.
+   */
+  public hasPending(): boolean {
+    return (
+      this.pendingCellState.pendingValue !== undefined
+      || this.pendingCellState.pendingCooldownEnd !== undefined
+      || this.pendingCellState.pendingEffects !== undefined
+    );
+  }
+}
