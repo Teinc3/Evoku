@@ -1,6 +1,6 @@
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
-import type SessionModel from "../models/Session";
+import type SessionModel from "../models/networking/Session";
 
 
 export default interface IDataHandler<GenericActionOrType extends ActionEnum> {

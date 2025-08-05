@@ -6,8 +6,8 @@ import FirePUPActions from '@shared/types/enums/actions/match/player/powerups/fi
 import SystemHandler from '../handlers/system';
 import MatchHandler from '../handlers/match';
 
-import type SessionModel from '../models/Session';
-import type RoomModel from '../models/Room';
+import type SessionModel from '../models/networking/Session';
+import type RoomModel from '../models/networking/Room';
 import type SessionHandler from '../handlers/system/SessionHandler';
 import type LobbyHandler from '../handlers/system/LobbyHandler';
 import type FirePUPHandler from '../handlers/match/player/powerups/FirePUPHandler';

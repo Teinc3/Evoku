@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
-import ServerSocket from '../models/ServerSocket';
+import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import WSServer from "./WSServer";

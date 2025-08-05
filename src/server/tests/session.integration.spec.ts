@@ -4,7 +4,7 @@ import { jest } from '@jest/globals';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import SessionModel from '../models/Session';
+import SessionModel from '../models/networking/Session';
 import SessionManager from '../managers/SessionManager';
 
 import type { WebSocket } from 'ws';
@@ -13,7 +13,7 @@ import type SystemActions from '@shared/types/enums/actions/system';
 import type IDataContract from '@shared/types/contracts/components/base/IDataContract';
 import type PacketIO from '@shared/networking/utils/PacketIO';
 import type IDataHandler from '../types/handler';
-import type ServerSocket from '../models/ServerSocket';
+import type ServerSocket from '../models/networking/ServerSocket';
 
 
 // --- Type-Safe Mock Classes ---

@@ -2,8 +2,8 @@ import WaterPUPActions from "@shared/types/enums/actions/match/player/powerups/w
 import EnumHandler from "../../../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type SessionModel from "../../../../models/Session";
-import type RoomModel from "../../../../models/Room";
+import type SessionModel from "../../../../models/networking/Session";
+import type RoomModel from "../../../../models/networking/Room";
 
 
 export default class WaterPUPHandler extends EnumHandler<WaterPUPActions> {

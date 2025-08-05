@@ -3,10 +3,10 @@ import { jest } from '@jest/globals';
 
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import RoomModel from '../models/Room';
+import RoomModel from '../models/networking/Room';
 import RoomManager from '../managers/RoomManager';
 
-import type SessionModel from '../models/Session';
+import type SessionModel from '../models/networking/Session';
 
 
 // Create a minimal mock of the SessionModel for this test's purposes.
