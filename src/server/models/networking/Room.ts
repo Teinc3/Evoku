@@ -15,8 +15,8 @@ import type SessionModel from "./Session";
 export default class RoomModel {
   public roomDataHandler: IDataHandler<MatchActions>
   public participants: Map<UUID, SessionModel>
+  public playerMap: Map<UUID, number>;
   private playerStates: Map<number, IPlayerState>;
-  private playerMap: Map<number, UUID>;
   private playerIDCounter: number;
     
   constructor(
@@ -42,7 +42,7 @@ export default class RoomModel {
       // Create playerID as key
       const playerID = this.playerIDCounter++;
       this.playerStates.set(playerID, { playerID });
-      this.playerMap.set(playerID, session.uuid);
+      this.playerMap.set(session.uuid, playerID);
     });
   }
 
@@ -55,14 +55,9 @@ export default class RoomModel {
     session.room = null; // Dereference the room from the session
 
     // Might have to check for / clear game state, and invoke lifecycles
-    // For now, we simply remove the state related to the session.
-    for (const [playerID, uuid] of this.playerMap.entries()) {
-      if (uuid === session.uuid) {
-        this.playerMap.delete(playerID);
-        // We do not remove the state, as it might be needed for history (like after a game ends)
-        break; 
-      }
-    }
+    // We do not remove the state, as it might be needed for history (like after a game ends)
+    this.playerMap.delete(session.uuid);
+
   }
 
   /**

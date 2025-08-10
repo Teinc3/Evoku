@@ -2,12 +2,15 @@ import WoodPUPActions from "@shared/types/enums/actions/match/player/powerups/wo
 import EnumHandler from "../../../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type { IMatchEnumHandler } from "../../../../types/handler";
 import type SessionModel from "../../../../models/networking/Session";
 import type RoomModel from "../../../../models/networking/Room";
 
 
-export default class WoodPUPHandler extends EnumHandler<WoodPUPActions> {
-  constructor(private readonly _room: RoomModel) {
+export default class WoodPUPHandler extends EnumHandler<WoodPUPActions>
+  implements IMatchEnumHandler<WoodPUPActions> {
+
+  constructor(public readonly room: RoomModel) {
     super();
 
     const handlerMap = {
@@ -25,4 +28,5 @@ export default class WoodPUPHandler extends EnumHandler<WoodPUPActions> {
   private handleUseWisdom(_session: SessionModel, _data: AugmentAction<WoodPUPActions>): boolean {
     return true;
   }
+  
 }
