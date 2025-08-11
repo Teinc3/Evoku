@@ -1,11 +1,10 @@
-import type { UUID } from "crypto";
-
+import MatchStatus from "../../types/enums/matchstatus";
 import MatchHandler from "../../handlers/match";
 import GameLogic from "../../game/logic";
 
+import type { UUID } from "crypto";
 import type MatchActions from "@shared/types/enums/actions/match";
 import type ActionMap from "@shared/types/actionmap";
-import MatchStatus from "../../types/enums/matchstatus";
 import type IDataHandler from "../../types/handler";
 import type BroadcastOptions from "../../types/broadcast";
 import type SessionModel from "./Session";

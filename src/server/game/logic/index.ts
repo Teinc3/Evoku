@@ -1,10 +1,10 @@
 import { getSudoku } from "sudoku-gen";
 
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
+import MatchStatus from "../../types/enums/matchstatus";
 import ServerBoardModel from "../../models/logic/Board";
 
 import type IPlayerState from "@shared/types/gamestate";
-import MatchStatus from "src/server/types/enums/matchstatus";
 
 
 /**
@@ -65,7 +65,10 @@ export default class GameLogic {
    */
   public removePlayer(playerID: number): boolean {
     const playerState = this.gameStates.get(playerID);
-    if (!playerState || !playerState.isAlive || this.matchStatusProvider() !== MatchStatus.PREINIT) {
+    if (
+      !playerState || !playerState.isAlive
+      || this.matchStatusProvider() !== MatchStatus.PREINIT
+    ) {
       return false; // Player not found or already dead
     }
 
