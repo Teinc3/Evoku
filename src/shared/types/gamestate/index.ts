@@ -1,16 +1,15 @@
-import type TimeSyncState from "./timesync";
 import type PUPState from "./powerups";
 import type IBoardState from "./board";
 
 
-export default interface IPlayerState {
+export default interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
   playerID: number;
-  gameState?: GameState;
-  timeSyncState?: TimeSyncState;
+  isAlive: boolean; // May use a status enum in the future if helpful.
+  gameState?: GameState<SpecificBoardState>;
 }
 
-export interface GameState {
-  boardState: IBoardState;
+export interface GameState<SpecificBoardState extends IBoardState = IBoardState> {
+  boardState: SpecificBoardState;
   pupProgress: number;
   powerups: Array<PUPState>;
 }
