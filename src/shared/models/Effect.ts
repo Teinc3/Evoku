@@ -16,4 +16,12 @@ export default abstract class BaseEffectModel implements ICellEffectState {
     }
     return true;
   }
+
+  /**
+   * Computes the effect's state hash.
+   * @returns A number representing the effect's state hash.
+   */
+  public computeHash(): number {
+    return (this.startedAt + (this.lastUntil ?? 0)) % 1000; // Example hash computation
+  }
 }

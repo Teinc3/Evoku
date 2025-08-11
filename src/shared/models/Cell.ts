@@ -60,4 +60,14 @@ export default class BaseCellModel implements ICellState {
       this.lastCooldownEnd = time + BaseCellModel.CELL_COOLDOWN_DURATION;
     }
   }
+
+  /**
+   * Computes a hash for each cell based on its state, properties and effects
+   * @returns The computed hash.
+   */
+  public computeHash(): number {
+    return this.effects.reduce((hash, effect) => {
+      return hash + effect.computeHash();
+    }, this.value + Number(this.fixed) + (this.lastCooldownEnd % 1000));
+  }
 }

@@ -65,4 +65,14 @@ export default abstract class BaseBoardModel<
     }
   }
 
+  /**
+   * Computes a hash of the board state, including all board and cell properties.
+   * @returns The computed hash of the board state.
+   */
+  public computeHash(): number {
+    return this.board.reduce((hash, cell, index) => {
+      return hash + index * cell.computeHash();
+    }, this.globalLastCooldownEnd % 1000);
+  }
+
 }

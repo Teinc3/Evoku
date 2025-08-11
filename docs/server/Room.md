@@ -66,7 +66,7 @@ Example usage to reject a player action:
 ```ts
 room.broadcast(ProtocolActions.REJECT_ACTION, {
   actionID: 3,
-  boardHash: 694208
+  gameStateHash: 694208
 }, { to: [uuid1] });
 ```
 

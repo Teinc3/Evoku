@@ -78,13 +78,13 @@ describe('createActionPacket Factory', () => {
     const MockRejectAction = createActionPacket(
       ProtocolActions.REJECT_ACTION,
       ['actionID'],
-      { boardHash: IntCodec }
+      { gameStateHash: IntCodec }
     );
 
     const packet = new MockRejectAction({
       action: ProtocolActions.REJECT_ACTION,
       actionID: 42,
-      boardHash: 123456789
+      gameStateHash: 123456789
     });
 
     const buffer = packet.wrap();
@@ -94,7 +94,7 @@ describe('createActionPacket Factory', () => {
 
     expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.actionID).toBe(packet.data.actionID);
-    expect(unwrappedData.boardHash).toBe(packet.data.boardHash);
+    expect(unwrappedData.gameStateHash).toBe(packet.data.gameStateHash);
   });
 
 });

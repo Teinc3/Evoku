@@ -7,5 +7,5 @@ export default interface RejectActionContract extends BaseActionContract {
      * to identify if the rejection is due to board states being out of sync.
      * The client will refresh the board if this hash does not match.
      */
-  boardHash: number;
+  gameStateHash: number;
 }

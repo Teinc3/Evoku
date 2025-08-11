@@ -140,7 +140,7 @@ describe('RoomManager and Room Integration Test', () => {
     it('should broadcast only to a specific list of session UUIDs', () => {
       room.broadcast(ProtocolActions.REJECT_ACTION, {
         actionID: 3,
-        boardHash: 694208
+        gameStateHash: 694208
       }, { to: [uuid1] });
 
       expect(session1.forward).toHaveBeenCalledTimes(1);
