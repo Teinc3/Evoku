@@ -4,7 +4,6 @@ import type IBoardState from "./board";
 
 export default interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
   playerID: number;
-  isAlive: boolean; // May use a status enum in the future if helpful.
   gameState?: GameState<SpecificBoardState>;
 }
 

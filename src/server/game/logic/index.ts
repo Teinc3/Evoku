@@ -5,33 +5,30 @@ import MatchStatus from "../../types/enums/matchstatus";
 import ServerBoardModel from "../../models/logic/Board";
 
 import type IPlayerState from "@shared/types/gamestate";
+import type { GameLogicCallbacks } from "../../types/gamelogic";
 
 
 /**
  * Centralised logical module, handling game mechanics and state interactions.
  */
+
 export default class GameLogic {
-  /**
-   * Base board and solution tuple
-   */
+  /** Base board and solution tuple */
   private readonly baseBoard: [number[], number[]];
-  /**
-   * Game state for each player.
-   */
+
+  /** Game state for each player */
   private readonly gameStates: Map<number, IPlayerState<ServerBoardModel>>;
-  /**
-   * Unique board solution (due to possible transformations of board structure) for each player.
-   */
+
+  /** Unique board solution (due to possible structural transformations) for each player */
   private readonly solutions = new Map<number, number[]>();
 
-  private readonly matchStatusProvider: () => MatchStatus;
+  /** Callbacks for game logic events. */
+  private callbacks!: GameLogicCallbacks;
 
   constructor(
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy",
-    statusProvider: () => MatchStatus
   ) {
     this.gameStates = new Map();
-    this.matchStatusProvider = statusProvider;
 
     // Initialise a board
     const board = getSudoku(difficulty);
@@ -39,7 +36,6 @@ export default class GameLogic {
       BoardConverter.toBoardArray(board.puzzle),
       BoardConverter.toBoardArray(board.solution)
     ];
-
   }
 
   /**
@@ -47,14 +43,11 @@ export default class GameLogic {
    * @returns Whether the player was successfully added.
    */
   public addPlayer(playerID: number): boolean {
-    if (this.matchStatusProvider() !== MatchStatus.PREINIT) {
+    if (this.callbacks.getMatchStatus() !== MatchStatus.PREINIT) {
       return false; // Cannot add players after game has started
     }
 
-    this.gameStates.set(playerID, {
-      playerID,
-      isAlive: true
-    });
+    this.gameStates.set(playerID, { playerID });
 
     return true;
   }
@@ -65,15 +58,18 @@ export default class GameLogic {
    */
   public removePlayer(playerID: number): boolean {
     const playerState = this.gameStates.get(playerID);
-    if (
-      !playerState || !playerState.isAlive
-      || this.matchStatusProvider() !== MatchStatus.PREINIT
-    ) {
+    if (!playerState || this.callbacks.getMatchStatus() !== MatchStatus.PREINIT) {
       return false; // Player not found or already dead
     }
 
-    playerState.isAlive = false; // Mark player as dead
     return true;
+  }
+
+  /**
+   * Set the callback functions for game events.
+   */
+  public setCallbacks(callbacks: GameLogicCallbacks): void {
+    this.callbacks = callbacks;
   }
 
   /**
@@ -82,18 +78,20 @@ export default class GameLogic {
    */
   public setCellValue(playerID: number, cellIndex: number, value: number): boolean {
     const playerState = this.gameStates.get(playerID);
-    if (!playerState || !playerState.isAlive) {
+    if (!playerState) {
       return false; // Player not found or already eliminated
     }
 
     const board = playerState.gameState!.boardState;
-    return board.setCell(cellIndex, value);
+    const result = board.setCell(cellIndex, value);
+    if (result) {
+      this.checkBoardProgresses([playerID]);
+    }
+    return result;
   }
 
-  /**
-   * Initialise the game state for all players
-   */
-  public initGameStates(): void {
+  /** Initialise the game state for all players, and return the initial board value */
+  public initGameStates(): number[] {
     // Notify all players of their initial game state
     for (const [playerID, playerState] of this.gameStates.entries()) {
       // Generate instances of board for each player
@@ -103,12 +101,14 @@ export default class GameLogic {
       playerState.gameState = {
         boardState: board,
         pupProgress: 0,
-        powerups: [] // Feature: Add entry powerups in the future.
+        powerups: [] // Feature TODO: Add entry powerups in the future.
       };
 
       // Also create a solution set for this player
       this.solutions.set(playerID, this.baseBoard[1]);
     }
+    
+    return this.baseBoard[0]; // Return the initial board value
   }
 
   /**
@@ -132,23 +132,35 @@ export default class GameLogic {
   public computeHash(): number {
     return Array.from(this.gameStates.entries()).reduce((acc, [playerID, state]) => {
       const playerBoardHash = state.gameState?.boardState.computeHash() ?? 0;
-      return acc + (playerID + 1) * (playerBoardHash + Number(state.isAlive));
+      return acc + (playerID + 1) * playerBoardHash;
     }, 0);
   }
 
   /**
-   * Check if a player has won the game.
-   * @returns The player ID of the winner, or false if no winner yet.
+   * Check board progress for specified players and report to lifecycle controller.
+   * @param playerIDs List of player IDs to check. If empty, checks all players.
    */
-  private checkAndDeclareWinner(): number | boolean {
-    const alivePlayers = Array.from(this.gameStates.entries())
-      .filter(([_, state]) => state.isAlive);
+  private checkBoardProgresses(playerIDs: number[] = []): void {
+    const playersToCheck = playerIDs.length > 0 
+      ? playerIDs 
+      : Array.from(this.gameStates.keys());
 
-    if (alivePlayers.length === 1) {
-      return alivePlayers[0][0];
+    const progressData: { playerID: number; progress: number }[] = [];
+
+    for (const playerID of playersToCheck) {
+      const state = this.gameStates.get(playerID);
+      if (state?.gameState) {
+        const solution = this.solutions.get(playerID);
+        if (solution) {
+          const progress = state.gameState.boardState.progress(solution);
+          progressData.push({ playerID, progress });
+        }
+      }
     }
 
-    return false; // No winner yet
+    if (progressData.length > 0) {
+      this.callbacks.onBoardProgressUpdate(progressData);
+    }
   }
 
 }

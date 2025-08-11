@@ -61,13 +61,18 @@ export default class BaseCellModel implements ICellState {
     }
   }
 
-  /**
-   * Computes a hash for each cell based on its state, properties and effects
-   * @returns The computed hash.
-   */
+  /** @returns The computed hash for each cell based on its properties and effects */
   public computeHash(): number {
     return this.effects.reduce((hash, effect) => {
       return hash + effect.computeHash();
     }, this.value + Number(this.fixed) + (this.lastCooldownEnd % 1000));
+  }
+
+  /** @returns Whether the cell contributes to board progress. */
+  public progress(solution: number, time?: number): boolean {
+    return !this.fixed && this.value === solution
+      && this.effects.reduce((progress, effect) => {
+        return progress + (effect.blockSetProgress(time) ? 0 : 1);
+      }, 0) === 0;
   }
 }

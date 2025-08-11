@@ -24,4 +24,13 @@ export default abstract class BaseEffectModel implements ICellEffectState {
   public computeHash(): number {
     return (this.startedAt + (this.lastUntil ?? 0)) % 1000; // Example hash computation
   }
+
+  /** 
+   * Checks if the effect blocks setting progress on a cell.
+   * @param time Optional, current time to check against the effect's duration.
+   * @returns Whether the effect blocks setting progress.
+  */
+  public blockSetProgress(time?: number): boolean {
+    return (time !== undefined && this.lastUntil !== undefined && time < this.lastUntil);
+  }
 }

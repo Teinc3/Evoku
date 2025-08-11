@@ -75,4 +75,13 @@ export default abstract class BaseBoardModel<
     }, this.globalLastCooldownEnd % 1000);
   }
 
+  /** @returns BoardProgress: Percentage (Rounded) of cells  */
+  public progress(solution: number[], time?: number): number {
+    return Math.round(this.board.reduce((progress, cell, index) => {
+      return progress + (cell.progress(solution[index], time) ? 1 : 0);
+    }, 0) / Math.min(this.board.reduce((total, cell) => {
+      return total + (cell.fixed ? 0 : 1);
+    }, 0), 1) * 100);
+  }
+
 }
