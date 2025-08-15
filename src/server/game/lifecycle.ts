@@ -4,7 +4,7 @@ import LifecycleActions from "../../shared/types/enums/actions/match/lifecycle";
 
 import type { GameLogicCallbacks } from "../types/gamelogic";
 import type RoomModel from "../models/networking/Room";
-import type GameLogic from "./logic";
+import type GameStateController from "./logic";
 
 
 /**
@@ -20,13 +20,13 @@ export default class LifecycleController {
 
   constructor(
     private readonly room: RoomModel,
-    private readonly logic: GameLogic
+    private readonly stateController: GameStateController
   ) {
     const callbacks: GameLogicCallbacks = {
       getMatchStatus: () => this.status,
       onBoardProgressUpdate: progressData => this.onBoardProgressUpdate(progressData)
     };
-    this.logic.setCallbacks(callbacks);
+    this.stateController.setCallbacks(callbacks);
   }
 
   public get matchStatus(): MatchStatus {
@@ -74,8 +74,11 @@ export default class LifecycleController {
 
     this.status = MatchStatus.ONGOING;
 
+    // Start the time synchronization service
+    this.room.timeService.startPingService();
+
     // Initialize players' boards from logic
-    const cellValues = this.logic.initGameStates();
+    const cellValues = this.stateController.initGameStates();
 
     // Broadcast initial board to each participant
     this.room.broadcast(LifecycleActions.GAME_INIT, { cellValues });

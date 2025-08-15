@@ -1,18 +1,19 @@
 import { getSudoku } from "sudoku-gen";
 
+import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import MatchStatus from "../../types/enums/matchstatus";
 import ServerBoardModel from "../../models/logic/Board";
 
+
 import type IPlayerState from "@shared/types/gamestate";
+import type ActionMap from "@shared/types/actionmap";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
+import type TimeService from "./timeservice";
 
 
-/**
- * Centralised logical module, handling game mechanics and state interactions.
- */
-
-export default class GameLogic {
+/** Centralised logical module, handling game mechanics and stateful interactions*/
+export default class GameStateController {
   /** Base board and solution tuple */
   private readonly baseBoard: [number[], number[]];
 
@@ -26,6 +27,7 @@ export default class GameLogic {
   private callbacks!: GameLogicCallbacks;
 
   constructor(
+    private readonly timeService: TimeService,
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy",
   ) {
     this.gameStates = new Map();
@@ -76,18 +78,46 @@ export default class GameLogic {
    * Apply a move to a player's board.
    * Returns whether the move was applied.
    */
-  public setCellValue(playerID: number, cellIndex: number, value: number): boolean {
+  public setCellValue(playerID: number, data: ActionMap[MechanicsActions.SET_CELL]): {
+    result: boolean;
+    serverTime?: number; // If result is true
+  } {
+    const { clientTime, cellIndex, value } = data;
     const playerState = this.gameStates.get(playerID);
     if (!playerState) {
-      return false; // Player not found or already eliminated
+      return { result: false }; // Player not found or already eliminated
     }
 
+    // For setCell, validate last action timing (but don't set the time yet)
+    const CELL_COOLDOWN_MS = 5000; // Example cooldown
+    const isValidTiming = this.timeService.validateActionTiming(
+      playerID,
+      MechanicsActions.SET_CELL,
+      clientTime,
+      CELL_COOLDOWN_MS
+    );
+    if (!isValidTiming) {
+      return { result: false }; // Timing validation failed
+    }
+
+    // Also try to set the cell value
     const board = playerState.gameState!.boardState;
     const result = board.setCell(cellIndex, value);
-    if (result) {
-      this.checkBoardProgresses([playerID]);
+
+    if (!result) {
+      return { result: false };
     }
-    return result;
+
+    // Update the last action time and obtain the server time
+    const serverTime = this.timeService.updateLastActionTime(
+      playerID,
+      MechanicsActions.SET_CELL,
+      clientTime
+    );
+    this.checkBoardProgresses([playerID]);
+
+    return { result: true, serverTime };
+
   }
 
   /** Initialise the game state for all players, and return the initial board value */

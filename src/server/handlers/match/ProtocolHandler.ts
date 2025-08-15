@@ -2,6 +2,7 @@ import ProtocolActions from "@shared/types/enums/actions/match/protocol";
 import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
+import type { PongContract } from "@shared/types/contracts/match/protocol/PingPongContract";
 import type { IMatchEnumHandler } from "../../types/handler";
 import type SessionModel from "../../models/networking/Session";
 import type RoomModel from "../../models/networking/Room";
@@ -20,7 +21,18 @@ export default class ProtocolHandler extends EnumHandler<ProtocolActions>
     this.setHandlerMap(handlerMap);
   }
 
-  private handlePong(_session: SessionModel, _data: AugmentAction<ProtocolActions>): boolean {
+  private handlePong(session: SessionModel, data: AugmentAction<ProtocolActions.PONG>): boolean {
+    const { clientTime, serverTime } = data as PongContract;
+    
+    // Get playerID from the room's player mapping
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined) {
+      return false; // Session not found in room
+    }
+    
+    // Update time synchronization for this player
+    this.room.timeService.handlePong(playerID, clientTime, serverTime);
+    
     return true;
   }
   

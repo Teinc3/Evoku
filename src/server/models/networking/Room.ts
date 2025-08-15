@@ -1,5 +1,6 @@
 import MatchHandler from "../../handlers/match";
-import GameLogic from "../../game/logic";
+import TimeService from "../../game/logic/timeservice";
+import GameStateController from "../../game/logic";
 import LifecycleController from "../../game/lifecycle";
 
 import type { UUID } from "crypto";
@@ -14,8 +15,9 @@ import type SessionModel from "./Session";
  * A model representing a room in the game.
  */
 export default class RoomModel {
-  public readonly logic: GameLogic;
+  public readonly stateController: GameStateController;
   public readonly lifecycle: LifecycleController;
+  public readonly timeService: TimeService;
   public readonly roomDataHandler: IDataHandler<MatchActions>
 
   public participants: Map<UUID, SessionModel>
@@ -28,8 +30,9 @@ export default class RoomModel {
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy"
   ) {
     this.roomDataHandler = new MatchHandler(this);
-    this.logic = new GameLogic(difficulty);
-    this.lifecycle = new LifecycleController(this, this.logic);
+    this.timeService = new TimeService(this);
+    this.stateController = new GameStateController(this.timeService, difficulty);
+    this.lifecycle = new LifecycleController(this, this.stateController);
 
     this.participants = new Map();
     this.playerMap = new Map();
@@ -49,7 +52,8 @@ export default class RoomModel {
       // Create playerID as key
       const playerID = this.playerIDCounter++;
       this.playerMap.set(session.uuid, playerID);
-      this.logic.addPlayer(playerID);
+      this.stateController.addPlayer(playerID);
+      this.timeService.addPlayer(playerID);
     });
 
     // Notify lifecycle controller that players joined
@@ -64,9 +68,11 @@ export default class RoomModel {
     this.participants.delete(session.uuid);
     const playerID = this.playerMap.get(session.uuid);
     if (playerID !== undefined) {
-      this.logic.removePlayer(playerID);
+      this.stateController.removePlayer(playerID);
       this.playerMap.delete(session.uuid);
+      this.timeService.removePlayer(playerID);
     }
+    
     session.room = null; // Dereference the room from the session
 
     // Notify lifecycle controller that a player left
@@ -113,6 +119,9 @@ export default class RoomModel {
   public close(): void {
     // Close the lifecycle controller first
     this.lifecycle.close();
+    
+    // Close the time service
+    this.timeService.close();
 
     // For everyone in the room, we remove their reference to the room
     for (const session of this.participants.values()) {

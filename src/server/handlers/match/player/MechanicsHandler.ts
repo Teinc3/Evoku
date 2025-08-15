@@ -31,14 +31,12 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       return false;
     }
 
-    const { clientTime, cellIndex, actionID, value } = data;
-    const serverTime = clientTime; // TODO: Implement server time synchronization (Filler)
-    const result = this.room.logic.setCellValue(playerID, cellIndex, value);
+    const { result, serverTime } = this.room.stateController.setCellValue(playerID, data);
 
     // Broadcast
     if (result) {
       this.room.broadcast(MechanicsActions.CELL_SET, {
-        serverTime,
+        serverTime: serverTime!,
         playerID,
         ...data
       });
@@ -46,14 +44,13 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       this.room.broadcast(
         ProtocolActions.REJECT_ACTION,
         {
-          actionID,
-          gameStateHash: this.room.logic.computeHash()
+          actionID: data.actionID,
+          gameStateHash: this.room.stateController.computeHash()
         },
         { to: [session.uuid] }
-      )
+      );
     }
 
-    //this.room.logAction(serverTime, playerID, result, data);
     return result;
   }
 
