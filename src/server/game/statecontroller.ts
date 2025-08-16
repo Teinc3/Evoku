@@ -2,13 +2,13 @@ import { getSudoku } from "sudoku-gen";
 
 import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
-import MatchStatus from "../../types/enums/matchstatus";
-import ServerBoardModel from "../../models/logic/Board";
+import MatchStatus from "../types/enums/matchstatus";
+import ServerBoardModel from "../models/logic/Board";
 
 
 import type IPlayerState from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
-import type { GameLogicCallbacks } from "../../types/gamelogic";
+import type { GameLogicCallbacks } from "../types/gamelogic";
 import type TimeService from "./timeservice";
 
 
@@ -88,27 +88,24 @@ export default class GameStateController {
       return { result: false }; // Player not found or already eliminated
     }
 
-    // For setCell, validate last action timing (but don't set the time yet)
-    const CELL_COOLDOWN_MS = 5000; // Example cooldown
-    const isValidTiming = this.timeService.validateActionTiming(
+    // First check sync-only timing validation
+    const estServerTime = this.timeService.assessTiming(
       playerID,
-      MechanicsActions.SET_CELL,
-      clientTime,
-      CELL_COOLDOWN_MS
+      clientTime
     );
-    if (!isValidTiming) {
-      return { result: false }; // Timing validation failed
+    if (estServerTime < 0) {
+      return { result: false }; // Sync timing validation failed
     }
 
-    // Also try to set the cell value
+    // Try to set the cell value with estimated server time for cooldown validation
     const board = playerState.gameState!.boardState;
-    const result = board.setCell(cellIndex, value);
+    const result = board.setCell(cellIndex, value, estServerTime);
 
     if (!result) {
-      return { result: false };
+      return { result: false }; // Cell setting failed (could be cooldown or validation)
     }
 
-    // Update the last action time and obtain the server time
+    // Update the last action time and obtain the actual server time
     const serverTime = this.timeService.updateLastActionTime(
       playerID,
       MechanicsActions.SET_CELL,

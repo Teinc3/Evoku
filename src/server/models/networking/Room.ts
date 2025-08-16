@@ -1,6 +1,8 @@
+import BiMap from "bidirectional-map";
+
 import MatchHandler from "../../handlers/match";
-import TimeService from "../../game/logic/timeservice";
-import GameStateController from "../../game/logic";
+import TimeService from "../../game/timeservice";
+import GameStateController from "../../game/statecontroller";
 import LifecycleController from "../../game/lifecycle";
 
 import type { UUID } from "crypto";
@@ -21,7 +23,7 @@ export default class RoomModel {
   public readonly roomDataHandler: IDataHandler<MatchActions>
 
   public participants: Map<UUID, SessionModel>
-  public playerMap: Map<UUID, number>;
+  public playerMap: BiMap<number>;
   private playerIDCounter: number;
     
   constructor(
@@ -35,7 +37,7 @@ export default class RoomModel {
     this.lifecycle = new LifecycleController(this, this.stateController);
 
     this.participants = new Map();
-    this.playerMap = new Map();
+    this.playerMap = new BiMap();
     this.playerIDCounter = 0;
   }
 
@@ -53,7 +55,7 @@ export default class RoomModel {
       const playerID = this.playerIDCounter++;
       this.playerMap.set(session.uuid, playerID);
       this.stateController.addPlayer(playerID);
-      this.timeService.addPlayer(playerID);
+      this.timeService.addPlayerSession(playerID);
     });
 
     // Notify lifecycle controller that players joined
@@ -70,7 +72,7 @@ export default class RoomModel {
     if (playerID !== undefined) {
       this.stateController.removePlayer(playerID);
       this.playerMap.delete(session.uuid);
-      this.timeService.removePlayer(playerID);
+      this.timeService.removePlayerSession(playerID);
     }
     
     session.room = null; // Dereference the room from the session
@@ -111,6 +113,13 @@ export default class RoomModel {
    */
   public getPlayerID(session: SessionModel): number | undefined {
     return this.playerMap.get(session.uuid);
+  }
+
+  /**
+   * Helper to resolve a session's UUID from a player ID.
+   */
+  public getSessionIDFromPlayerID(playerID: number): UUID | undefined {
+    return this.playerMap.getKey(playerID) as UUID | undefined;
   }
 
   /**

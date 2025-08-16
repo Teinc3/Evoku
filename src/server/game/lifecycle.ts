@@ -4,7 +4,7 @@ import LifecycleActions from "../../shared/types/enums/actions/match/lifecycle";
 
 import type { GameLogicCallbacks } from "../types/gamelogic";
 import type RoomModel from "../models/networking/Room";
-import type GameStateController from "./logic";
+import type GameStateController from "./statecontroller";
 
 
 /**
