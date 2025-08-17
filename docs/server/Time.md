@@ -1,59 +1,77 @@
 # Time Synchronization System
 
-This document outlines the time synchronization system used in Evoku to maintain accurate timing between clients and server for anti-cheat validation and smooth gameplay.
+This document describes Evoku's time synchronization system used to maintain accurate timing
+between clients and server for anti-cheat validation and smooth gameplay.
 
 ## Overview
 
-The TimeService manages client-server time synchronization using a ping-pong protocol with drift detection and anti-spam measures. It provides timing validation for player actions while remaining separate from game-specific cooldown logic.
+The TimeService coordinates client-server time synchronization using a ping–pong protocol, 
+with drift detection, rate-limiting, and anti-spam measures.
+It provides timing validation for player actions while remaining separate from game-specific cooldown logic.
 
-The system operates on player sessions rather than players directly, as sessions can disconnect and reconnect while the player remains in the game.
+The system operates on player sessions rather than players directly,
+as sessions can disconnect and reconnect while the player remains in the game.
 
-## Architecture
+## Modular Architecture
 
-The time synchronization system consists of:
+The system is implemented as a set of focused components:
 
-- **TimeService**: Core synchronization and validation logic
-- **Ping-Pong Protocol**: Establishes and maintains time offset measurements with individual intervals per session
-- **Action Timing Validation**: Prevents timing exploits and ensures fair gameplay
-- **Monotonic Time Enforcement**: Ensures logical consistency in action ordering
+- `TimeService` (src/server/game/time/index.ts): a facade coordinating the subsystems and exposing the public API
+- `SyncProfile` (src/server/models/networking/SyncProfile.ts): per-player synchronization data and conversions  
+- `PendingPingStore.ts`: pending ping storage and PONG validation (replay protection)
+- `PingCoordinator.ts`: global ping scheduling and sending
+- `ActionValidator.ts`: action timing validation and action history management
 
-## Key Components
+### File structure
 
-### Time Synchronization Protocol
+```
+src/server/game/time/
+├── index.ts              # Main TimeService facade
+├── PendingPingStore.ts   # PONG validation security
+├── PingCoordinator.ts    # Ping scheduling and sending
+└── ActionValidator.ts    # Timing validation and action history
 
-The system uses individual ping-pong exchanges for each player session to maintain accurate time synchronization:
+src/server/models/networking/
+└── SyncProfile.ts        # Per-player time synchronization
+```
 
-1. **Server sends PING**: Individual intervals per session (every 2 seconds) with current server timestamp
-2. **Client responds PONG**: Returns server timestamp + client timestamp  
-3. **Server calculates offset**: Determines time difference and network latency
-4. **Median filtering**: Uses last 5 samples to reduce noise from network jitter
+## Component Responsibilities
 
-### Session Management
+- TimeService (Facade)
+  - Provides a stable public API
+  - Coordinates the components and lifecycle (add/remove session, start/stop)
+  - Maintains backward compatibility by re-exporting important constants
 
-Player sessions are managed independently with immediate ping synchronization:
-- **Session Addition**: Immediately sends initial ping when game is initialized
-- **Individual Intervals**: Each session has its own ping interval for optimal timing
-- **Graceful Reconnection**: New sessions receive immediate sync without waiting for global interval
+- SyncProfile (src/server/models/networking/SyncProfile.ts)
+  - Stores per-player sync data (offset, RTT, samples)
+  - Computes median offset for noise resilience
+  - Converts between client and server time
+  - Computes cumulative drift since first sync
+  - See [SyncProfile.md](./SyncProfile.md) for detailed documentation
 
-### Validation Layers
+- PendingPingStore
+  - Tracks pending serverTime values sent to clients
+  - Validates and consumes PONG responses to prevent replay
+  - Removes old pings by age and enforces max stored count
 
-The TimeService provides multiple validation layers for incoming actions:
+- PingCoordinator
+  - Manages a single global ping interval for all sessions
+  - Ensures a minimum interval between pings to the same player (anti-simultaneous ping)
+  - Sends immediate pings for reconnecting players when appropriate
 
-#### 1. Sync Data Validation
-- Ensures player session has established time synchronization
-- Returns `TimeValidationReason.NO_SYNC_PROFILE` if no sync data exists
+- ActionValidator
+  - Enforces monotonic client timestamps
+  - Implements rate limiting (e.g., 5 actions within 500ms)
+  - Maintains per-player action history (capped)
+  - Checks cumulative drift against a configured threshold
 
-#### 2. Monotonic Client Time
-- Prevents replay attacks by requiring increasing client timestamps
-- Returns `TimeValidationReason.MONOTONIC_VIOLATION` if client time is not monotonic
+## Time Synchronization Protocol
 
-#### 3. Rate Limiting  
-- Prevents spam by limiting actions to 5 per 500ms window
-- Returns `TimeValidationReason.RATE_LIMIT` if rate limit exceeded
-
-#### 4. Cumulative Drift Detection
-- Detects clients with inconsistent time progression
-- Returns `TimeValidationReason.DRIFT_EXCEEDED` if drift exceeds 50ms over match lifecycle
+1. PingCoordinator sends a PING (serverTime) to a session.
+2. Client returns PONG containing the serverTime and the client's timestamp.
+3. PendingPingStore validates the incoming PONG serverTime (prevent replay).
+4. SyncProfile is updated with the measured offset and RTT; median filtering reduces jitter.
+5. ActionValidator uses SyncProfile to validate action timings (monotonicity, rate limits, drift).
 
 ## API Reference
 
@@ -78,9 +96,11 @@ assessTiming(playerID: number, clientTime: number): number
 // Commit successful action
 updateLastActionTime(playerID: number, action: PlayerActions, clientTime: number): number
 
-// Time conversion utilities
-clientToServerTime(playerID: number, clientTime: number): number
-serverToClientTime(playerID: number, serverTime: number): number
+// Get current ping (RTT) for a player
+getPlayerPing(playerID: number): number
+
+// Stop the ping service and clean up
+close(): void
 ```
 
 ### Return Values
@@ -103,87 +123,72 @@ enum TimeValidationReason {
 }
 ```
 
-## Configuration
+## Configuration Constants
 
-### Time Constants
+Key configuration values are re-exported by the facade for backward compatibility:
 
-```typescript
-MAX_CUMULATIVE_DRIFT = 50        // Maximum allowed drift (ms)
-MAX_ACTION_HISTORY_COUNT = 30    // Actions to retain per player
-PING_INTERVAL = 2000            // Ping frequency (ms)
-PING_SAMPLE_SIZE = 5            // Samples for median filtering
-MIN_ACTION_INTERVAL = {
-  actions: 5,                   // Maximum actions
-  interval: 500                 // Within timeframe (ms)
+- PING_INTERVAL = 2000 (ms)
+- PING_SAMPLE_SIZE = 5
+- MAX_PENDING_PINGS = 10
+- MAX_PING_AGE = 10000 (ms)
+- MIN_PING_INTERVAL = 500 (ms)
+- MIN_ACTION_INTERVAL = { actions: 5, interval: 500 } (ms)
+- MAX_CUMULATIVE_DRIFT = 50 (ms)
+- MAX_ACTION_HISTORY_COUNT = 30
+
+## Integration Example
+
+Typical usage from game logic:
+
+1. Validate synchronization and estimate server time:
+
+```ts
+const estServerTime = timeService.assessTiming(playerID, clientTime);
+if (estServerTime < 0) {
+  // handle validation error
 }
 ```
 
-## Integration with Game Logic
+2. Apply game logic using the estimated server time and on success commit the action:
 
-The TimeService focuses solely on client-server synchronization. Game-specific timing (cooldowns, durations) is handled by game state models:
-
-```typescript
-// 1. Validate synchronization
-const estServerTime = timeService.assessTiming(playerID, clientTime);
-if (estServerTime < 0) {
-  return { result: false }; // Sync failure
-}
-
-// 2. Apply game logic with estimated time
+```ts
 const success = gameState.performAction(action, estServerTime);
-if (!success) {
-  return { result: false }; // Game rule failure (e.g., cooldown)
+if (success) {
+  const serverTime = timeService.updateLastActionTime(playerID, action, clientTime);
 }
-
-// 3. Commit action if both validations pass
-const serverTime = timeService.updateLastActionTime(playerID, action, clientTime);
 ```
 
 ## Security Considerations
 
-### Anti-Cheat Measures
-
-- **Monotonic enforcement**: Prevents replay attacks
-- **Drift detection**: Identifies time manipulation attempts  
-- **Rate limiting**: Prevents action spam/flooding
-- **Median filtering**: Reduces impact of network manipulation
-
-### Timing Attack Prevention
-
-- Server time is authoritative for all game decisions
-- Client timestamps used only for validation, not game logic
-- Estimated server time includes anti-regression safeguards
-- Network latency variations handled gracefully
+- Server time is authoritative for all game decisions.
+- PendingPingStore prevents replay and simple spoofing of serverTime values.
+- Median filtering in SyncProfile reduces impact from transient jitter.
+- Multiple validation layers make timestamp manipulation and spam difficult to exploit.
 
 ## Performance Characteristics
 
-### Memory Usage
-- O(sessions) for synchronization data
-- O(actions) for recent action history (capped at 30 per session)
-- Individual ping intervals per session for optimal timing
-- Automatic cleanup when sessions disconnect
+- Memory:
+  - O(sessions) for SyncProfile instances;
+  - O(actions) per player bounded by MAX_ACTION_HISTORY_COUNT;
+  - O(pending) bounded per player.
+- Network: a single global ping tick reduces timer overhead; 
+per-player pings remain frequent enough for accurate sync but are rate-limited.
+- Complexity: median calculation is trivial for small sample sizes; action checks operate on bounded windows.
 
-### Network Overhead
-- 2-second ping interval per session (individual timing)
-- Immediate ping on session addition after game initialization
-- Minimal payload (timestamps only)
-- No additional synchronization during normal gameplay
+## Testing
 
-### Computational Complexity
-- O(1) for most timing operations
-- O(log n) for median calculation (n = 5 samples)
-- O(k) for rate limit checking (k = recent actions, max 5)
+- `timeservice.spec.ts` tests the facade end-to-end (ping/pong path, validation, timing conversions).
+- Individual components can be unit-tested independently (recommended for future work).
 
-## Monitoring and Debugging
+## File Reference / Quick Links
 
-### Key Metrics
-- Player ping/RTT values
-- Cumulative drift measurements
-- Rate limit violations per player
-- Sync establishment success rate
+- `src/server/game/time/index.ts` — facade (TimeService)
+- `src/server/models/networking/SyncProfile.ts` — per-player state ([docs](./SyncProfile.md))
+- `src/server/game/time/PendingPingStore.ts` — pong validation
+- `src/server/game/time/PingCoordinator.ts` — ping scheduling
+- `src/server/game/time/ActionValidator.ts` — action validation
 
-### Common Issues
-- **High ping**: Affects time conversion accuracy
-- **Clock drift**: Client/server time divergence over long sessions  
-- **Network jitter**: Causes temporary sync accuracy reduction
-- **Malicious clients**: Trigger validation failures and get rejected
+## Notes
+
+- TimeService uses globalThis.performance.now() to ensure Jest fake timers advance server time in tests.
+Avoid importing node:perf_hooks.performance directly in code that needs to be testable with Jest timers.

@@ -9,7 +9,7 @@ import ServerBoardModel from "../models/logic/Board";
 import type IPlayerState from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
 import type { GameLogicCallbacks } from "../types/gamelogic";
-import type TimeService from "./timeservice";
+import type TimeService from "./time";
 
 
 /** Centralised logical module, handling game mechanics and stateful interactions*/

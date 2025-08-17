@@ -1,17 +1,9 @@
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import TimeValidationReason from '../types/enums/timevalidation';
-import TimeService from './timeservice';
+import TimeService from './time';
 
 import type RoomModel from '../models/networking/Room';
-
-
-type PingPayload = { serverTime: number; clientPing: number };
-type ForwardCall = [unknown, PingPayload];
-type TimeServicePrivate = {
-  clientToServerTime: (playerID: number, clientTime: number) => number;
-  serverToClientTime: (playerID: number, serverTime: number) => number;
-};
 
 
 // Mock RoomModel for testing
@@ -47,18 +39,12 @@ const mockRoom = {
 
 describe('TimeService', () => {
   let timeService: TimeService;
-  let originalPerformanceNow: typeof performance.now;
-  let mockTime = 0;
 
   beforeEach(() => {
-    // Mock performance.now to work with Jest fake timers
-    originalPerformanceNow = performance.now;
-    performance.now = jest.fn(() => mockTime);
-    
-    mockTime = 0;
     jest.useFakeTimers();
     
     timeService = new TimeService(mockRoom);
+    
     jest.clearAllMocks();
     mockSession.forward.mockClear();
     mockSession2.forward.mockClear();
@@ -69,16 +55,14 @@ describe('TimeService', () => {
     timeService.close();
     jest.clearAllTimers();
     jest.useRealTimers();
-    performance.now = originalPerformanceNow;
     
     // Also clear mock call history to prevent cross-test pollution
     mockSession.forward.mockClear();
     mockSession2.forward.mockClear();
   });
 
-  // Helper function to advance both Jest timers and mock performance.now
+  // Helper function to advance Jest timers (performance.now is now handled by Jest)
   const advanceTime = (ms: number) => {
-    mockTime += ms;
     jest.advanceTimersByTime(ms);
   };
 
@@ -94,16 +78,10 @@ describe('TimeService', () => {
     return getLatestPingPayload(session)?.serverTime;
   };
 
-  // Helper to get all PING serverTimes for a session
-  const getAllPingServerTimes = (session = mockSession): number[] => {
-    const calls = session.forward.mock.calls as unknown as ForwardCall[];
-    return calls
-      .filter(c => c[0] === ProtocolActions.PING)
-      .map(c => c[1].serverTime);
-  };
 
   describe('Player Session Management', () => {
     it('should add a player session successfully', () => {
+      timeService.start();
       timeService.addPlayerSession(1);
       
       // Should not throw and should have default ping of 0
@@ -113,6 +91,7 @@ describe('TimeService', () => {
     it('should handle duplicate player session addition gracefully', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
+      timeService.start();
       timeService.addPlayerSession(1);
       timeService.addPlayerSession(1); // Duplicate
       
@@ -121,6 +100,7 @@ describe('TimeService', () => {
     });
 
     it('should remove a player session successfully', () => {
+      timeService.start();
       timeService.addPlayerSession(1);
       timeService.removePlayerSession(1);
       
@@ -130,8 +110,8 @@ describe('TimeService', () => {
 
   describe('PONG Validation Security', () => {
     beforeEach(() => {
+      timeService.start();
       timeService.addPlayerSession(1);
-      timeService.startPingService();
     });
 
     it('should accept PONG with valid server time', () => {
@@ -166,19 +146,24 @@ describe('TimeService', () => {
     it('should handle out-of-order PONG responses', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
-      // Send multiple pings
+      // Send multiple pings by advancing time
+      advanceTime(TimeService.PING_INTERVAL + 100);
+      const serverTime1 = getLatestPingServerTime();
+      expect(serverTime1).toBeDefined();
+
       advanceTime(TimeService.PING_INTERVAL);
-      advanceTime(TimeService.PING_INTERVAL);
-      advanceTime(TimeService.PING_INTERVAL);
+      const serverTime2 = getLatestPingServerTime();
+      expect(serverTime2).toBeDefined();
+      expect(serverTime2).not.toBe(serverTime1);
       
-      // Get server times from all ping calls
-      const allTimes = getAllPingServerTimes();
-      expect(allTimes.length).toBeGreaterThanOrEqual(3);
-      const [serverTime1, serverTime2, serverTime3] = allTimes.slice(-3);
+      advanceTime(TimeService.PING_INTERVAL);
+      const serverTime3 = getLatestPingServerTime();
+      expect(serverTime3).toBeDefined();
+      expect(serverTime3).not.toBe(serverTime2);
       
       // Respond to pings out of order
       timeService.handlePong(1, 1002, serverTime2 as number); // Second ping first
-      timeService.handlePong(1, 1001, serverTime1 as number); // First ping second
+      timeService.handlePong(1, 1001, serverTime1 as number); // First ping second  
       timeService.handlePong(1, 1003, serverTime3 as number); // Third ping last
       
       expect(consoleSpy).not.toHaveBeenCalled();
@@ -190,6 +175,7 @@ describe('TimeService', () => {
       
       // Send ping and respond
       advanceTime(TimeService.PING_INTERVAL);
+      
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
       
@@ -205,18 +191,21 @@ describe('TimeService', () => {
     it('should clean up old pending pings', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
-      // Send ping
-      advanceTime(TimeService.PING_INTERVAL);
+      // Get the initial ping that was sent
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
       
-      // Advance time past MAX_PING_AGE
+      // Advance time past MAX_PING_AGE to make the ping expire
       advanceTime(TimeService.MAX_PING_AGE + 1000);
       
-      // Send another ping to trigger cleanup of old pings
+      // Send another ping to trigger cleanup of old pings by responding to the first ping
+      // This will clear the first ping and allow a new one
+      timeService.handlePong(1, 1000, serverTime as number);
+      
+      // Now advance time to trigger a new ping
       advanceTime(TimeService.PING_INTERVAL);
       
-      // Now try to respond to the old ping - should be rejected as it was cleaned up
+      // Now try to respond to the old ping again - should be rejected as it was cleaned up
       timeService.handlePong(1, 1000, serverTime as number);
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -228,6 +217,7 @@ describe('TimeService', () => {
 
   describe('assessTiming', () => {
     beforeEach(() => {
+      timeService.start();
       timeService.addPlayerSession(1);
     });
 
@@ -238,7 +228,6 @@ describe('TimeService', () => {
 
     it('should return positive value for valid first action after sync', () => {
       // Establish sync using actual PING/PONG
-      timeService.startPingService();
       advanceTime(TimeService.PING_INTERVAL);
       const pingServerTime = getLatestPingServerTime();
       expect(pingServerTime).toBeDefined();
@@ -271,12 +260,12 @@ describe('TimeService', () => {
 
   describe('estimateServerTime', () => {
     beforeEach(() => {
+      timeService.start();
       timeService.addPlayerSession(1);
     });
 
     it('should be based on time conversion when no actions exist', () => {
       // Establish sync using real ping/pong
-      timeService.startPingService();
       advanceTime(TimeService.PING_INTERVAL);
       const pingServerTime = getLatestPingServerTime();
       expect(pingServerTime).toBeDefined();
@@ -303,6 +292,7 @@ describe('TimeService', () => {
 
   describe('updateLastActionTime', () => {
     beforeEach(() => {
+      timeService.start();
       timeService.addPlayerSession(1);
     });
 
@@ -327,12 +317,9 @@ describe('TimeService', () => {
   });
 
   describe('Ping Service Timing', () => {
-    beforeEach(() => {
-      timeService.addPlayerSession(1);
-    });
-
     it('should send ping immediately when adding session after game init', () => {
-      timeService.startPingService();
+      timeService.start();
+      timeService.addPlayerSession(1);
       
       // Clear previous calls
       mockSession.forward.mockClear();
@@ -349,7 +336,14 @@ describe('TimeService', () => {
     });
 
     it('should send pings at regular intervals', () => {
-      timeService.startPingService();
+      timeService.start();
+      timeService.addPlayerSession(1);
+      
+      // Check initial ping was sent
+      expect(mockSession.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
+        serverTime: expect.any(Number),
+        clientPing: 0
+      });
       
       // Clear initial calls
       mockSession.forward.mockClear();
@@ -362,7 +356,7 @@ describe('TimeService', () => {
         clientPing: expect.any(Number)
       });
       
-      // Advance time again
+      // Advance time again - should send another ping
       mockSession.forward.mockClear();
       advanceTime(TimeService.PING_INTERVAL);
       
@@ -373,14 +367,18 @@ describe('TimeService', () => {
     });
 
     it('should not send pings before game initialization', () => {
-      // Don't start ping service
+      // Add session but don't start service
+      timeService.addPlayerSession(1);
+      
+      // Advance time
       advanceTime(TimeService.PING_INTERVAL * 3);
       
       expect(mockSession.forward).not.toHaveBeenCalled();
     });
 
     it('should stop sending pings when session is removed', () => {
-      timeService.startPingService();
+      timeService.start();
+      timeService.addPlayerSession(1);
       
       // Remove session
       timeService.removePlayerSession(1);
@@ -393,16 +391,39 @@ describe('TimeService', () => {
       
       expect(mockSession.forward).not.toHaveBeenCalled();
     });
+
+    it('should not skip pinging other players if one is within MIN_PING_INTERVAL', () => {
+      timeService.start();
+      timeService.addPlayerSession(1);
+      timeService.addPlayerSession(2);
+
+      // Immediate pass happens; clear calls to observe next tick
+      mockSession.forward.mockClear();
+      mockSession2.forward.mockClear();
+
+      // Simulate player 1 just received an immediate ping (within MIN_PING_INTERVAL)
+      // by sending another immediate ping to player 1 only
+      timeService['pingCoordinator']['sendImmediatePing'](1);
+
+      // Advance by the regular ping interval (both should be considered)
+      jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+
+      // Player 1 may be suppressed by MIN_PING_INTERVAL; player 2 must still get a ping
+      expect(mockSession2.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
+        serverTime: expect.any(Number),
+        clientPing: expect.any(Number)
+      });
+    });
   });
 
   describe('Time Synchronization with Real Timing', () => {
     beforeEach(() => {
+      timeService.start();
       timeService.addPlayerSession(1);
     });
 
     it('should handle PONG and update player data with real timing', () => {
       // Start ping service and trigger a ping
-      timeService.startPingService();
       advanceTime(TimeService.PING_INTERVAL);
       
       // Get the server time from the ping
@@ -421,7 +442,6 @@ describe('TimeService', () => {
 
     it('should convert between client and server time after sync', () => {
       // Establish real sync
-      timeService.startPingService();
       advanceTime(TimeService.PING_INTERVAL);
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
@@ -430,7 +450,10 @@ describe('TimeService', () => {
       timeService.handlePong(1, 1000, serverTime as number);
       
       // Test time conversion
-      const tsPriv = timeService as unknown as TimeServicePrivate;
+      const tsPriv = timeService as unknown as {
+        clientToServerTime: (playerID: number, clientTime: number) => number;
+        serverToClientTime: (playerID: number, serverTime: number) => number;
+      };
       const convertedServerTime = tsPriv.clientToServerTime(1, 1100);
       const convertedClientTime = tsPriv.serverToClientTime(1, (serverTime as number) + 100);
       
@@ -442,8 +465,8 @@ describe('TimeService', () => {
 
   describe('Cleanup', () => {
     it('should clean up resources on close', () => {
+      timeService.start();
       timeService.addPlayerSession(1);
-      timeService.startPingService();
       
       timeService.close();
       

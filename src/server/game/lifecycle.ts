@@ -74,8 +74,8 @@ export default class LifecycleController {
 
     this.status = MatchStatus.ONGOING;
 
-    // Start the time synchronization service
-    this.room.timeService.startPingService();
+    // Initialise the timeservice
+    this.room.timeService.start();
 
     // Initialize players' boards from logic
     const cellValues = this.stateController.initGameStates();

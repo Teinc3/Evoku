@@ -1,7 +1,7 @@
 import BiMap from "bidirectional-map";
 
 import MatchHandler from "../../handlers/match";
-import TimeService from "../../game/timeservice";
+import TimeService from "../../game/time";
 import GameStateController from "../../game/statecontroller";
 import LifecycleController from "../../game/lifecycle";
 
