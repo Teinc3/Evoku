@@ -43,6 +43,8 @@ export default class PingCoordinator {
       return; // Don't send pings before game initialization
     }
 
+    // Immediate ping is only for reconnection purposes or is forced (probably by AC)
+    // So we don't enforce ping store limit
     const now = this.getServerTime();
     this.sendPingToPlayer(playerID, now);
   }
@@ -60,13 +62,17 @@ export default class PingCoordinator {
     const currentServerTime = this.getServerTime();
     
     for (const playerID of this.syncProfiles.keys()) {
-      // If we have already sent a ping to this player in the last 500ms
-      // Then we don't have to send another one, as it is redundant
-      // And also might contribute to network congestion
-      const lastPing = this.pendingPings.getLastPingTime(playerID)
+      // Circuit breaker: don't send if player has too many pending pings (laggy connection)
+      if (!this.pendingPings.canReceivePing(playerID)) {
+        continue; // Skip this player - they're likely experiencing lag
+      }
+
+      // Don't send if we sent a ping to this player very recently
+      const lastPing = this.pendingPings.getLastPingTime(playerID);
       if (lastPing && currentServerTime - lastPing < PingCoordinator.MIN_PING_INTERVAL) {
         continue;
       }
+
       this.sendPingToPlayer(playerID, currentServerTime);
     }
   }

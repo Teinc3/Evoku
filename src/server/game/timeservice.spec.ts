@@ -187,32 +187,6 @@ describe('TimeService', () => {
       );
       consoleSpy.mockRestore();
     });
-
-    it('should clean up old pending pings', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-      // Get the initial ping that was sent
-      const serverTime = getLatestPingServerTime();
-      expect(serverTime).toBeDefined();
-      
-      // Advance time past MAX_PING_AGE to make the ping expire
-      advanceTime(TimeService.MAX_PING_AGE + 1000);
-      
-      // Send another ping to trigger cleanup of old pings by responding to the first ping
-      // This will clear the first ping and allow a new one
-      timeService.handlePong(1, 1000, serverTime as number);
-      
-      // Now advance time to trigger a new ping
-      advanceTime(TimeService.PING_INTERVAL);
-      
-      // Now try to respond to the old ping again - should be rejected as it was cleaned up
-      timeService.handlePong(1, 1000, serverTime as number);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Player 1 sent PONG with invalid serverTime: ' + serverTime
-      );
-      consoleSpy.mockRestore();
-    });
   });
 
   describe('assessTiming', () => {
@@ -409,6 +383,46 @@ describe('TimeService', () => {
       jest.advanceTimersByTime(TimeService.PING_INTERVAL);
 
       // Player 1 may be suppressed by MIN_PING_INTERVAL; player 2 must still get a ping
+      expect(mockSession2.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
+        serverTime: expect.any(Number),
+        clientPing: expect.any(Number)
+      });
+    });
+
+    it('should stop sending pings to laggy players with too many pending pings', () => {
+      timeService.start();
+      timeService.addPlayerSession(1);
+      timeService.addPlayerSession(2);
+
+      // Clear initial pings
+      mockSession.forward.mockClear();
+      mockSession2.forward.mockClear();
+
+      // Simulate player 1 being laggy (no PONG responses) while player 2 responds normally
+      const maxPings = TimeService.MAX_PENDING_PINGS;
+      for (let i = 0; i < maxPings; i++) {
+        jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+        
+        // Player 2 responds to pings (not laggy)
+        const player2Ping = getLatestPingServerTime(mockSession2);
+        if (player2Ping !== undefined) {
+          timeService.handlePong(2, 1000 + i, player2Ping);
+        }
+        
+        // Player 1 does NOT respond (laggy)
+      }
+
+      // Clear all calls to see next behavior
+      mockSession.forward.mockClear();
+      mockSession2.forward.mockClear();
+
+      // Next ping interval should skip player 1 (at limit) but ping player 2
+      jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+
+      // Player 1 should not receive ping (circuit breaker active)
+      expect(mockSession.forward).not.toHaveBeenCalled();
+      
+      // Player 2 should still receive ping (not affected by player 1's lag)
       expect(mockSession2.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
         serverTime: expect.any(Number),
         clientPing: expect.any(Number)

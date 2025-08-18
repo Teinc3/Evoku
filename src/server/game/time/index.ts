@@ -22,7 +22,8 @@ export default class TimeService {
   // Exported constants for use in Tests
   static readonly MAX_ACTION_HISTORY_COUNT = ActionValidator.MAX_ACTION_HISTORY_COUNT;
   static readonly PING_INTERVAL = PingCoordinator.PING_INTERVAL;
-  static readonly MAX_PING_AGE = PendingPingStore.MAX_PING_AGE;
+  static readonly MIN_PING_INTERVAL = PingCoordinator.MIN_PING_INTERVAL;
+  static readonly MAX_PENDING_PINGS = PendingPingStore.MAX_PENDING_PINGS;
 
   private syncProfiles = new Map<number, SyncProfile>();
   private pendingPings = new PendingPingStore();
