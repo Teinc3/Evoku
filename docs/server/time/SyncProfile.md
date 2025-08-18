@@ -115,8 +115,4 @@ SyncProfile is used by:
 - Drift detection helps identify potential timing exploits
 - All time conversions assume server time is the authoritative source
 
-## Performance
 
-- Memory: O(1) per player session with bounded sample storage
-- Computation: O(log n) for median calculation (trivial for n=5)
-- Updates: Constant time offset and RTT updates

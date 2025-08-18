@@ -23,3 +23,4 @@ Contents:
 - [Handlers](/docs/server/Handlers.md)
 - [Session](/docs/server/Session.md)
 - [Room](/docs/server/Room.md)
+- [Time Synchronization System](/docs/server/time/) - Time sync, validation, and anti-cheat
