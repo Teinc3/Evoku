@@ -6,7 +6,7 @@
 enum TimeValidationReason {
   /** The player does not have any established synchronization profile */
   NO_SYNC_PROFILE = -1,
-  /** The player's client timestamp is not monotonically increasing */
+  /** The player's client timestamp is not monotonically increasing (Not STRICTLY) */
   MONOTONIC_VIOLATION = -2,
   /** The player has exceeded the rate limit for actions */
   RATE_LIMIT = -3,

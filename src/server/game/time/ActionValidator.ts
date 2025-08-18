@@ -39,7 +39,7 @@ export default class ActionValidator {
     if (actionHistory.length > 0) {
       // 1. Monotonic increase (any action type)
       const lastAction = actionHistory[actionHistory.length - 1];
-      if (clientTime <= lastAction.clientTime) {
+      if (clientTime < lastAction.clientTime) {
         return TimeValidationReason.MONOTONIC_VIOLATION;
       }
 
