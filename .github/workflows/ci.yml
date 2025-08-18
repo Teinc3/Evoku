@@ -26,7 +26,12 @@ jobs:
         run: npm run lint:server
 
       - name: Test server code
-        run: npm run test:server
+        run: npm run test:server-ci
+
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
