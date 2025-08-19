@@ -2,8 +2,8 @@ import BiMap from "bidirectional-map";
 
 import MatchHandler from "../../handlers/match";
 import TimeService from "../../game/time";
-import GameStateController from "../../game/statecontroller";
-import LifecycleController from "../../game/lifecycle";
+import GameStateController from "../../game/controllers/state";
+import LifecycleController from "../../game/controllers/lifecycle";
 
 import type { UUID } from "crypto";
 import type MatchActions from "@shared/types/enums/actions/match";

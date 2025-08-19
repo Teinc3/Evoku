@@ -2,14 +2,14 @@ import { getSudoku } from "sudoku-gen";
 
 import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
-import MatchStatus from "../types/enums/matchstatus";
-import ServerBoardModel from "../models/logic/Board";
+import MatchStatus from "../../types/enums/matchstatus";
+import ServerBoardModel from "../../models/logic/Board";
 
 
 import type IPlayerState from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
-import type { GameLogicCallbacks } from "../types/gamelogic";
-import type TimeService from "./time";
+import type TimeService from "../time";
+import type { GameLogicCallbacks } from "../../types/gamelogic";
 
 
 /** Centralised logical module, handling game mechanics and stateful interactions*/

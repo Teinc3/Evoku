@@ -1,10 +1,10 @@
-import MatchStatus from "../types/enums/matchstatus";
-import GameOverReason from "../../shared/types/enums/GameOverReason";
-import LifecycleActions from "../../shared/types/enums/actions/match/lifecycle";
+import MatchStatus from "../../types/enums/matchstatus";
+import GameOverReason from "../../../shared/types/enums/GameOverReason";
+import LifecycleActions from "../../../shared/types/enums/actions/match/lifecycle";
 
-import type { GameLogicCallbacks } from "../types/gamelogic";
-import type RoomModel from "../models/networking/Room";
-import type GameStateController from "./statecontroller";
+import type { GameLogicCallbacks } from "../../types/gamelogic";
+import type RoomModel from "../../models/networking/Room";
+import type GameStateController from "./state";
 
 
 /**

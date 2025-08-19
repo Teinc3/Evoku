@@ -2,25 +2,13 @@
 
 Documentation of internal API is organised into the following sections:
 
-## Pipeline Documentation
-Location: [`docs/pipeline`](/docs/pipeline/)
+## Data Pipeline
+Location: [`docs/pipeline`](/docs/pipeline/README.md)
 
-Contents:
-
-- [Actions](/docs/pipeline/Actions.md)
-- [ActionMap](/docs/pipeline/ActionMap.md)
-- [Contracts](/docs/pipeline/Contracts.md)
-- [Packets](/docs/pipeline/Packets.md)
-- [Codecs](/docs/pipeline/Codecs.md)
-
+A section dedicated to the data pipeline, 
+transforming internal Data in the form of specific contracts into packets for network transmission.
 
 ## Server Documentation
-Location: [`docs/server/`](/docs/server/)
+Location: [`docs/server/`](/docs/server/README.md)
 
-Contents:
-
-- [Server Architecture](/docs/server/Architecture.md)
-- [Handlers](/docs/server/Handlers.md)
-- [Session](/docs/server/Session.md)
-- [Room](/docs/server/Room.md)
-- [Time Synchronization System](/docs/server/time/) - Time sync, validation, and anti-cheat
+A section dedicated to the server-side implementation details, including architecture, handlers, and game logic.
