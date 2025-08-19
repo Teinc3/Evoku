@@ -27,3 +27,15 @@ A section dedicated to documenting the packet structure, creation, and data seri
 Path: [/docs/pipeline/Codecs.md](/docs/pipeline/Codecs.md)
 
 A section dedicated to documenting the codecs used for encoding and decoding data to/from binary format.
+
+## PacketIO
+Path: [/docs/pipeline/PacketIO.md](/docs/pipeline/PacketIO.md)
+
+Core serialization utility that handles encoding and decoding of game packets 
+between binary format and TypeScript objects. Provides type-safe packet transformation
+using the codec system and packet registry.
+
+## Security
+Path: [/docs/pipeline/security/README.md](/docs/pipeline/security/README.md)
+
+Security components for the data pipeline that provide packet protection and obfuscation mechanisms.

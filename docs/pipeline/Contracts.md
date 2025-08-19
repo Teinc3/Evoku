@@ -96,7 +96,7 @@ export default interface SetCellContract extends PlayerActionContract {
 2. All extendable/injectable contract fragments must extend `IExtendableContract`
 3. Use `AugmentAction` to ensure action property is correctly typed when passing into the pipeline
 
-### Performance Considerations
+### Best Practices
 - Group related and common fields into extendable contracts (`ActionContractS2C`)
 - Avoid deeply nesting structures - it will complicate serialisation
 
