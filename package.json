@@ -10,6 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",
     "test:client": "ng test",
+    "test:server-ci": "jest --config jest.config.cjs --coverage",
     "test:server": "jest --config jest.config.cjs",
     "format": "prettier --write .",
     "lint": "npm run lint:client && npm run lint:server",
