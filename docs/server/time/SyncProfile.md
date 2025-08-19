@@ -14,7 +14,7 @@ Each player session has its own `SyncProfile` instance that:
 
 ## Location
 
-**File:** `src/server/models/networking/SyncProfile.ts`
+**File:** `src/server/game/time/SyncProfile.ts`
 
 **Category:** Networking Model - represents per-session synchronization state
 

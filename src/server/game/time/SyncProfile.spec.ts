@@ -1,4 +1,4 @@
-import SyncProfile from '../../models/networking/SyncProfile';
+import SyncProfile from './SyncProfile';
 
 
 describe('SyncProfile', () => {

@@ -1,4 +1,4 @@
-import SyncProfile from "../../models/networking/SyncProfile";
+import SyncProfile from "./SyncProfile";
 import PingCoordinator from "./PingCoordinator";
 import PendingPingStore from "./PendingPingStore";
 import ActionValidator from "./ActionValidator";
