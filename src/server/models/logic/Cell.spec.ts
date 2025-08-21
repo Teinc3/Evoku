@@ -77,7 +77,7 @@ describe('ServerCellModel (server-specific tests)', () => {
       // Now on cooldown
       expect(effectCell.set(3, baseTime + 4000)).toBe(false);
 
-      // Both cooldown and second effect expired
+      // Both cooldown and second effect expired (but doesn't block)
       expect(effectCell.set(4, baseTime + 15000)).toBe(true);
     });
   });

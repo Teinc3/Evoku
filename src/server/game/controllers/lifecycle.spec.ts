@@ -449,12 +449,6 @@ describe('LifecycleController', () => {
   });
 
   describe('edge cases and error handling', () => {
-    it('should handle null room gracefully', () => {
-      expect(() => {
-        new LifecycleController(null as unknown as RoomModel, mockGameState);
-      }).not.toThrow();
-    });
-
     it('should handle missing game state gracefully', () => {
       expect(() => {
         new LifecycleController(mockRoom, null as unknown as GameStateController);

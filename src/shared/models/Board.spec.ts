@@ -1,4 +1,4 @@
-import MockEffect from './utils/MockEffect';
+import { createMockEffect } from './utils/MockEffect';
 import BaseCellModel from './Cell';
 import BaseBoardModel from './Board';
 
@@ -268,7 +268,7 @@ describe('BaseBoardModel', () => {
 
     it('should handle effects blocking progress', () => {
       const solution = new Array(standardBoardSize).fill(6);
-      const blockingEffect = new MockEffect(baseTime, baseTime + 3000);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 3000);
 
       board.board[0].value = 6;
       board.board[0].effects = [blockingEffect];
@@ -277,8 +277,8 @@ describe('BaseBoardModel', () => {
       const progressDuringEffect = board.progress(solution, baseTime + 1000);
       const progressAfterEffect = board.progress(solution, baseTime + 4000);
 
-      expect(typeof progressDuringEffect).toBe('number');
-      expect(typeof progressAfterEffect).toBe('number');
+      expect(progressDuringEffect).toBe(0);
+      expect(progressAfterEffect).toBeCloseTo(100/81, 0);
     });
 
     it('should handle mismatched solution array length', () => {
@@ -378,8 +378,8 @@ describe('BaseBoardModel', () => {
     });
 
     it('should handle effects across multiple cells', () => {
-      const effect1 = new MockEffect(baseTime, baseTime + 2000, true);
-      const effect2 = new MockEffect(baseTime, baseTime + 4000, false);
+      const effect1 = createMockEffect(baseTime, baseTime + 2000, true);
+      const effect2 = createMockEffect(baseTime, baseTime + 4000, false);
 
       board.board[0].effects = [effect1];
       board.board[1].effects = [effect2];
@@ -501,7 +501,7 @@ describe('BaseBoardModel', () => {
       // Set up complex state
       board.update(0, 5, baseTime);
       board.board[1].fixed = true;
-      board.board[2].effects = [new MockEffect(baseTime, baseTime + 1000)];
+      board.board[2].effects = [createMockEffect(baseTime, baseTime + 1000)];
       board.globalLastCooldownEnd = baseTime + 3000;
 
       const hash = board.computeHash();

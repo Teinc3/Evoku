@@ -58,14 +58,14 @@ describe('BaseEffectModel', () => {
       expect(blockingEffect.validateSetValue(baseTime + 6000)).toBe(true); // After effect
     });
 
-    it('should block when canBlockSet is true and no end time with time parameter', () => {
+    it('should block permanently when no end time with time parameter', () => {
       const permanentBlockingEffect = createMockEffect(baseTime, undefined, true, true);
 
       // When lastUntil is undefined and canBlockSet is true, condition becomes:
       // !true || (undefined !== undefined && ...) = false || false = false
       expect(permanentBlockingEffect.validateSetValue()).toBe(false);
       expect(permanentBlockingEffect.validateSetValue(baseTime + 1000)).toBe(false);
-      expect(permanentBlockingEffect.validateSetValue(baseTime + 10000)).toBe(false);
+      expect(permanentBlockingEffect.validateSetValue(baseTime + 100000)).toBe(false);
     });
 
     it('should handle edge case times with blocking capability', () => {
