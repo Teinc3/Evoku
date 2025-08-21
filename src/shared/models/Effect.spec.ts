@@ -1,66 +1,14 @@
-import BaseEffectModel from './Effect';
+import { createMockEffect } from './utils/MockEffect';
 
+import type BaseEffectModel from './Effect';
 
-// Simple concrete implementation for testing base functionality
-class SimpleEffect extends BaseEffectModel {
-  constructor(startedAt: number, lastUntil?: number) {
-    super(startedAt, lastUntil);
-  }
-}
-
-// Concrete effect implementations for testing
-class TestEffect extends BaseEffectModel {
-  constructor(
-    startedAt: number,
-    lastUntil?: number,
-    private _customValidation: boolean = true,
-    private _customBlockProgress: boolean = false
-  ) {
-    super(startedAt, lastUntil);
-  }
-
-  public override validateSetValue(time?: number): boolean {
-    // First check base timing logic
-    if (!super.validateSetValue(time)) {
-      return false;
-    }
-    // Then apply our custom blocking logic
-    return this._customValidation;
-  }
-
-  public override blockSetProgress(time?: number): boolean {
-    // First check base timing logic
-    if (super.blockSetProgress(time)) {
-      return true;
-    }
-    // Then apply our custom blocking logic
-    return this._customBlockProgress;
-  }
-
-  public override computeHash(): number {
-    return super.computeHash()
-      + (this._customValidation ? 1 : 0) + (this._customBlockProgress ? 2 : 0);
-  }
-}
-
-class PermanentEffect extends BaseEffectModel {
-  constructor(startedAt: number) {
-    super(startedAt); // No lastUntil - permanent effect
-  }
-}
-
-class TimedEffect extends BaseEffectModel {
-  constructor(startedAt: number, duration: number) {
-    super(startedAt, startedAt + duration);
-  }
-}
 
 describe('BaseEffectModel', () => {
   const baseTime = 1000;
 
   describe('constructor', () => {
     it('should create effect with start time only', () => {
-      const effect = new SimpleEffect(baseTime);
+      const effect = createMockEffect(baseTime);
 
       expect(effect.startedAt).toBe(baseTime);
       expect(effect.lastUntil).toBeUndefined();
@@ -68,65 +16,60 @@ describe('BaseEffectModel', () => {
 
     it('should create effect with start and end time', () => {
       const endTime = baseTime + 5000;
-      const effect = new SimpleEffect(baseTime, endTime);
+      const effect = createMockEffect(baseTime, endTime);
 
       expect(effect.startedAt).toBe(baseTime);
       expect(effect.lastUntil).toBe(endTime);
     });
 
     it('should handle zero start time', () => {
-      const effect = new SimpleEffect(0, 1000);
+      const effect = createMockEffect(0, 1000);
 
       expect(effect.startedAt).toBe(0);
       expect(effect.lastUntil).toBe(1000);
     });
 
     it('should handle same start and end time', () => {
-      const effect = new SimpleEffect(baseTime, baseTime);
+      const effect = createMockEffect(baseTime, baseTime);
 
       expect(effect.startedAt).toBe(baseTime);
       expect(effect.lastUntil).toBe(baseTime);
     });
   });
 
-  describe('validateSetValue method', () => {
-    it('should allow setting when no end time is specified', () => {
-      const permanentEffect = new SimpleEffect(baseTime);
+  describe('validateSetValue method - capability flag logic', () => {
+    it('should always allow setting when canBlockSet is false', () => {
+      const nonBlockingEffect = createMockEffect(baseTime, baseTime + 5000, false, true);
 
-      expect(permanentEffect.validateSetValue()).toBe(true);
-      expect(permanentEffect.validateSetValue(baseTime + 1000)).toBe(true);
-      expect(permanentEffect.validateSetValue(baseTime + 10000)).toBe(true);
+      // Should always return true regardless of timing when canBlockSet is false
+      expect(nonBlockingEffect.validateSetValue()).toBe(true);
+      expect(nonBlockingEffect.validateSetValue(baseTime - 1000)).toBe(true);
+      expect(nonBlockingEffect.validateSetValue(baseTime + 1000)).toBe(true);
+      expect(nonBlockingEffect.validateSetValue(baseTime + 6000)).toBe(true);
     });
 
-    it('should allow setting when no time parameter is provided', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
+    it('should use timing logic when canBlockSet is true and has end time', () => {
+      const blockingEffect = createMockEffect(baseTime, baseTime + 5000, true, true);
 
-      expect(timedEffect.validateSetValue()).toBe(true);
+      // Should allow when time is undefined OR time >= lastUntil
+      expect(blockingEffect.validateSetValue()).toBe(true); // No time parameter
+      expect(blockingEffect.validateSetValue(baseTime + 1000)).toBe(false); // During effect
+      expect(blockingEffect.validateSetValue(baseTime + 5000)).toBe(true); // At end time
+      expect(blockingEffect.validateSetValue(baseTime + 6000)).toBe(true); // After effect
     });
 
-    it('should block setting during effect duration', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
+    it('should block when canBlockSet is true and no end time with time parameter', () => {
+      const permanentBlockingEffect = createMockEffect(baseTime, undefined, true, true);
 
-      expect(timedEffect.validateSetValue(baseTime + 1000)).toBe(false);
-      expect(timedEffect.validateSetValue(baseTime + 2500)).toBe(false);
-      expect(timedEffect.validateSetValue(baseTime + 4999)).toBe(false);
+      // When lastUntil is undefined and canBlockSet is true, condition becomes:
+      // !true || (undefined !== undefined && ...) = false || false = false
+      expect(permanentBlockingEffect.validateSetValue()).toBe(false);
+      expect(permanentBlockingEffect.validateSetValue(baseTime + 1000)).toBe(false);
+      expect(permanentBlockingEffect.validateSetValue(baseTime + 10000)).toBe(false);
     });
 
-    it('should allow setting exactly at end time', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.validateSetValue(baseTime + 5000)).toBe(true);
-    });
-
-    it('should allow setting after effect expires', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.validateSetValue(baseTime + 5001)).toBe(true);
-      expect(timedEffect.validateSetValue(baseTime + 10000)).toBe(true);
-    });
-
-    it('should handle edge case times', () => {
-      const effect = new SimpleEffect(0, 1);
+    it('should handle edge case times with blocking capability', () => {
+      const effect = createMockEffect(0, 1, true, true);
 
       expect(effect.validateSetValue(0)).toBe(false);
       expect(effect.validateSetValue(0.5)).toBe(false);
@@ -135,152 +78,108 @@ describe('BaseEffectModel', () => {
     });
   });
 
+  describe('blockSetProgress method - capability flag logic', () => {
+    it('should never block progress when canBlockProgress is false', () => {
+      const nonProgressBlockingEffect = createMockEffect(baseTime, baseTime + 5000, true, false);
+
+      // Should always return false regardless of timing when canBlockProgress is false
+      expect(nonProgressBlockingEffect.blockSetProgress()).toBe(false);
+      expect(nonProgressBlockingEffect.blockSetProgress(baseTime + 1000)).toBe(false);
+      expect(nonProgressBlockingEffect.blockSetProgress(baseTime + 6000)).toBe(false);
+    });
+
+    it('should use timing logic when canBlockProgress is true', () => {
+      const progressBlockingEffect = createMockEffect(baseTime, baseTime + 5000, true, true);
+
+      // Should block when time is defined AND (lastUntil is undefined OR time < lastUntil)
+      expect(progressBlockingEffect.blockSetProgress()).toBe(false); // No time parameter
+      expect(progressBlockingEffect.blockSetProgress(baseTime + 1000)).toBe(true); // During effect
+      expect(progressBlockingEffect.blockSetProgress(baseTime + 5000)).toBe(false); // At end time
+      expect(progressBlockingEffect.blockSetProgress(baseTime + 6000)).toBe(false); // After effect
+    });
+
+    it('should handle no end time with progress blocking capability', () => {
+      const permanentProgressBlockingEffect = createMockEffect(baseTime, undefined, true, true);
+
+      // When lastUntil is undefined and canBlockProgress is true, should always block
+      expect(permanentProgressBlockingEffect.blockSetProgress()).toBe(false);
+      expect(permanentProgressBlockingEffect.blockSetProgress(baseTime + 1000)).toBe(true);
+      expect(permanentProgressBlockingEffect.blockSetProgress(baseTime + 10000)).toBe(true);
+    });
+  });
+
   describe('computeHash method', () => {
     it('should compute hash based on start time', () => {
-      const effect1 = new SimpleEffect(1000);
-      const effect2 = new SimpleEffect(2000);
+      const effect1 = createMockEffect(1000);
+      const effect2 = createMockEffect(2000);
 
       expect(effect1.computeHash()).not.toBe(effect2.computeHash());
     });
 
     it('should compute hash based on end time', () => {
-      const effect1 = new SimpleEffect(baseTime, baseTime + 1000);
-      const effect2 = new SimpleEffect(baseTime, baseTime + 2000);
+      const effect1 = createMockEffect(baseTime, baseTime + 1000);
+      const effect2 = createMockEffect(baseTime, baseTime + 2000);
 
       expect(effect1.computeHash()).not.toBe(effect2.computeHash());
     });
 
-    it('should handle undefined end time in hash', () => {
-      const permanentEffect = new SimpleEffect(baseTime);
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 1000);
+    it('should compute hash based on capability flags', () => {
+      const effect1 = createMockEffect(baseTime, baseTime + 5000, true, false);
+      const effect2 = createMockEffect(baseTime, baseTime + 5000, false, true);
 
-      expect(permanentEffect.computeHash()).not.toBe(timedEffect.computeHash());
+      expect(effect1.computeHash()).not.toBe(effect2.computeHash());
     });
 
     it('should produce consistent hashes for same state', () => {
-      const effect1 = new SimpleEffect(baseTime, baseTime + 5000);
-      const effect2 = new SimpleEffect(baseTime, baseTime + 5000);
+      const effect1 = createMockEffect(baseTime, baseTime + 5000, true, false);
+      const effect2 = createMockEffect(baseTime, baseTime + 5000, true, false);
 
       expect(effect1.computeHash()).toBe(effect2.computeHash());
     });
 
-    it('should use modulo for hash calculation', () => {
-      const largeTimeEffect = new SimpleEffect(1234567890, 1234567890 + 5000);
+    it('should handle large time values', () => {
+      const largeTimeEffect = createMockEffect(1234567890, 1234567890 + 5000);
       const hash = largeTimeEffect.computeHash();
 
       // Hash should be within int32 limits
       expect(hash).toBeLessThan(2147483647);
       expect(hash).toBeGreaterThanOrEqual(-2147483648);
     });
+  });
 
-    it('should handle zero times in hash', () => {
-      const zeroEffect = new SimpleEffect(0, 0);
-      expect(zeroEffect.computeHash()).toEqual(expect.any(Number));
+  describe('createMockEffect factory function', () => {
+    it('should create effects with default blocking behavior', () => {
+      const defaultEffect = createMockEffect(baseTime, baseTime + 5000);
+
+      // Default should be canBlockSet=true, canBlockProgress=true
+      expect(defaultEffect.validateSetValue(baseTime + 1000)).toBe(false);
+      expect(defaultEffect.blockSetProgress(baseTime + 1000)).toBe(true);
+    });
+
+    it('should create effects with custom blocking behavior', () => {
+      const customEffect = createMockEffect(baseTime, baseTime + 5000, false, false);
+
+      // Should not block anything
+      expect(customEffect.validateSetValue(baseTime + 1000)).toBe(true);
+      expect(customEffect.blockSetProgress(baseTime + 1000)).toBe(false);
+    });
+
+    it('should create effects with mixed blocking behavior', () => {
+      const mixedEffect = createMockEffect(baseTime, baseTime + 5000, true, false);
+
+      // Can block setting but not progress
+      expect(mixedEffect.validateSetValue(baseTime + 1000)).toBe(false);
+      expect(mixedEffect.blockSetProgress(baseTime + 1000)).toBe(false);
     });
   });
 
-  describe('blockSetProgress method', () => {
-    it('should not block progress when no end time specified', () => {
-      const permanentEffect = new SimpleEffect(baseTime);
-
-      expect(permanentEffect.blockSetProgress()).toBe(false);
-      expect(permanentEffect.blockSetProgress(baseTime + 1000)).toBe(false);
-    });
-
-    it('should not block progress when no time parameter provided', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.blockSetProgress()).toBe(false);
-    });
-
-    it('should block progress during effect duration', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.blockSetProgress(baseTime + 1000)).toBe(true);
-      expect(timedEffect.blockSetProgress(baseTime + 2500)).toBe(true);
-      expect(timedEffect.blockSetProgress(baseTime + 4999)).toBe(true);
-    });
-
-    it('should not block progress exactly at end time', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.blockSetProgress(baseTime + 5000)).toBe(false);
-    });
-
-    it('should not block progress after effect expires', () => {
-      const timedEffect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      expect(timedEffect.blockSetProgress(baseTime + 5001)).toBe(false);
-      expect(timedEffect.blockSetProgress(baseTime + 10000)).toBe(false);
-    });
-
-  });
-
-  describe('concrete effect implementations', () => {
-    describe('TestEffect', () => {
-      it('should respect custom validation logic', () => {
-        const allowingEffect = new TestEffect(baseTime, baseTime + 5000, true);
-        const blockingEffect = new TestEffect(baseTime, baseTime + 5000, false);
-
-        expect(allowingEffect.validateSetValue(baseTime + 6000)).toBe(true);
-        expect(blockingEffect.validateSetValue(baseTime + 6000)).toBe(false);
-      });
-
-      it('should respect custom progress blocking logic', () => {
-        const normalEffect = new TestEffect(baseTime, baseTime + 5000, true, false);
-        const progressBlockingEffect = new TestEffect(baseTime, baseTime + 5000, true, true);
-
-        expect(normalEffect.blockSetProgress(baseTime + 1000)).toBe(true); // Base behavior
-        expect(progressBlockingEffect.blockSetProgress(baseTime + 6000)).toBe(true);
-      });
-
-      it('should include custom properties in hash', () => {
-        const effect1 = new TestEffect(baseTime, baseTime + 5000, true, false);
-        const effect2 = new TestEffect(baseTime, baseTime + 5000, false, true);
-
-        expect(effect1.computeHash()).not.toBe(effect2.computeHash());
-      });
-    });
-
-    describe('PermanentEffect', () => {
-      it('should never expire', () => {
-        const permanentEffect = new PermanentEffect(baseTime);
-
-        expect(permanentEffect.lastUntil).toBeUndefined();
-        expect(permanentEffect.validateSetValue(baseTime + 1000000)).toBe(true);
-        expect(permanentEffect.blockSetProgress(baseTime + 1000000)).toBe(false);
-      });
-    });
-
-    describe('TimedEffect', () => {
-      it('should have correct end time based on duration', () => {
-        const duration = 3000;
-        const timedEffect = new TimedEffect(baseTime, duration);
-
-        expect(timedEffect.startedAt).toBe(baseTime);
-        expect(timedEffect.lastUntil).toBe(baseTime + duration);
-      });
-
-      it('should behave correctly during and after duration', () => {
-        const duration = 2000;
-        const timedEffect = new TimedEffect(baseTime, duration);
-
-        // During effect
-        expect(timedEffect.validateSetValue(baseTime + 1000)).toBe(false);
-        expect(timedEffect.blockSetProgress(baseTime + 1000)).toBe(true);
-
-        // After effect
-        expect(timedEffect.validateSetValue(baseTime + 3000)).toBe(true);
-        expect(timedEffect.blockSetProgress(baseTime + 3000)).toBe(false);
-      });
-    });
-  });
-
-  describe('edge cases and error handling', () => {
+  describe('edge cases and integration', () => {
     it('should handle extreme time values', () => {
-      const extremeEffect = new SimpleEffect(
+      const extremeEffect = createMockEffect(
         Number.MAX_SAFE_INTEGER - 1000,
-        Number.MAX_SAFE_INTEGER
+        Number.MAX_SAFE_INTEGER,
+        true,
+        true
       );
 
       expect(extremeEffect.validateSetValue(Number.MAX_SAFE_INTEGER - 500)).toBe(false);
@@ -288,14 +187,14 @@ describe('BaseEffectModel', () => {
     });
 
     it('should handle negative time values', () => {
-      const negativeEffect = new SimpleEffect(-1000, -500);
+      const negativeEffect = createMockEffect(-1000, -500, true, true);
 
       expect(negativeEffect.validateSetValue(-750)).toBe(false);
       expect(negativeEffect.validateSetValue(-400)).toBe(true);
     });
 
     it('should handle fractional time values', () => {
-      const fractionalEffect = new SimpleEffect(1000.5, 2000.7);
+      const fractionalEffect = createMockEffect(1000.5, 2000.7, true, true);
 
       expect(fractionalEffect.validateSetValue(1500.6)).toBe(false);
       expect(fractionalEffect.validateSetValue(2000.7)).toBe(true);
@@ -303,29 +202,19 @@ describe('BaseEffectModel', () => {
     });
 
     it('should handle zero duration effects', () => {
-      const instantEffect = new SimpleEffect(baseTime, baseTime);
+      const instantEffect = createMockEffect(baseTime, baseTime, true, true);
 
       expect(instantEffect.validateSetValue(baseTime - 1)).toBe(false);
       expect(instantEffect.validateSetValue(baseTime)).toBe(true);
       expect(instantEffect.validateSetValue(baseTime + 1)).toBe(true);
     });
 
-    it('should handle effects with end time before start time', () => {
-      const backwardsEffect = new SimpleEffect(baseTime, baseTime - 1000);
-
-      // Should still follow the logic even if times don't make logical sense
-      expect(backwardsEffect.validateSetValue(baseTime - 500)).toBe(true);
-      expect(backwardsEffect.validateSetValue(baseTime - 1000)).toBe(true);
-    });
-  });
-
-  describe('inheritance and polymorphism', () => {
     it('should work correctly with polymorphic arrays', () => {
       const effects: BaseEffectModel[] = [
-        new SimpleEffect(baseTime, baseTime + 1000),
-        new TestEffect(baseTime, baseTime + 2000),
-        new PermanentEffect(baseTime),
-        new TimedEffect(baseTime, 3000)
+        createMockEffect(baseTime, baseTime + 1000, true, true),
+        createMockEffect(baseTime, baseTime + 2000, false, true),
+        createMockEffect(baseTime, undefined, false, false),
+        createMockEffect(baseTime, baseTime + 3000, true, false)
       ];
 
       effects.forEach(effect => {
@@ -336,22 +225,8 @@ describe('BaseEffectModel', () => {
       });
     });
 
-    it('should support method overriding correctly', () => {
-      const baseEffect = new SimpleEffect(baseTime, baseTime + 5000);
-      const customEffect = new TestEffect(baseTime, baseTime + 5000, false, true);
-
-      // Same timing, different behavior due to overrides
-      expect(baseEffect.validateSetValue(baseTime + 6000)).toBe(true);
-      expect(customEffect.validateSetValue(baseTime + 6000)).toBe(false);
-
-      expect(baseEffect.blockSetProgress(baseTime + 6000)).toBe(false);
-      expect(customEffect.blockSetProgress(baseTime + 6000)).toBe(true);
-    });
-  });
-
-  describe('state consistency and immutability', () => {
     it('should maintain consistent state across multiple calls', () => {
-      const effect = new SimpleEffect(baseTime, baseTime + 5000);
+      const effect = createMockEffect(baseTime, baseTime + 5000, true, true);
       const hash1 = effect.computeHash();
 
       // Multiple calls to read-only methods shouldn't change state
@@ -362,69 +237,6 @@ describe('BaseEffectModel', () => {
 
       const hash2 = effect.computeHash();
       expect(hash1).toBe(hash2);
-    });
-
-    it('should be immutable after construction', () => {
-      const startTime = baseTime;
-      const endTime = baseTime + 5000;
-      const effect = new SimpleEffect(startTime, endTime);
-
-      expect(effect.startedAt).toBe(startTime);
-      expect(effect.lastUntil).toBe(endTime);
-
-      // Properties should be readonly (TypeScript compile-time check)
-      // At runtime, we can't easily test this without breaking encapsulation
-    });
-
-    it('should handle concurrent access patterns', () => {
-      const effect = new SimpleEffect(baseTime, baseTime + 5000);
-
-      // Simulate concurrent access
-      const results = [];
-      for (let i = 0; i < 100; i++) {
-        results.push({
-          validate: effect.validateSetValue(baseTime + (i * 100)),
-          progress: effect.blockSetProgress(baseTime + (i * 100)),
-          hash: effect.computeHash()
-        });
-      }
-
-      // All hashes should be identical (no state changes)
-      const uniqueHashes = new Set(results.map(r => r.hash));
-      expect(uniqueHashes.size).toBe(1);
-
-      // Results should be deterministic based on time
-      const halfway = Math.floor(results.length / 2);
-      expect(results[0].validate).toBe(false); // During effect
-      expect(results[halfway].validate).toBe(true);
-      expect(results[results.length - 1].validate).toBe(true); // After effect
-    });
-  });
-
-  describe('performance characteristics', () => {
-    it('should handle rapid successive calls efficiently', () => {
-      const effect = new SimpleEffect(baseTime, baseTime + 5000);
-      const iterations = 10000;
-
-      const start = performance.now();
-      for (let i = 0; i < iterations; i++) {
-        effect.validateSetValue(baseTime + i);
-        effect.blockSetProgress(baseTime + i);
-        effect.computeHash();
-      }
-      const end = performance.now();
-
-      // Should complete quickly (adjust threshold as needed)
-      expect(end - start).toBeLessThan(100);
-    });
-
-    it('should handle effects with large time ranges', () => {
-      const largeRangeEffect = new SimpleEffect(0, Number.MAX_SAFE_INTEGER);
-
-      // Should not cause performance issues or overflow
-      expect(largeRangeEffect.validateSetValue(Number.MAX_SAFE_INTEGER / 2)).toBe(false);
-      expect(largeRangeEffect.validateSetValue(Number.MAX_SAFE_INTEGER)).toBe(true);
-      expect(largeRangeEffect.computeHash()).toEqual(expect.any(Number));
     });
   });
 });

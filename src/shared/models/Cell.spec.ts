@@ -1,4 +1,4 @@
-import MockEffect from './utils/MockEffect';
+import { createMockEffect } from './utils/MockEffect';
 import BaseCellModel from './Cell';
 
 
@@ -19,7 +19,7 @@ describe('BaseCellModel', () => {
     });
 
     it('should create cell with provided values', () => {
-      const effect = new MockEffect(100, 200);
+      const effect = createMockEffect(100, 200);
       const customCell = new BaseCellModel(5, true, [effect]);
 
       expect(customCell.value).toBe(5);
@@ -74,7 +74,7 @@ describe('BaseCellModel', () => {
     });
 
     it('should validate with effects blocking', () => {
-      const blockingEffect = new MockEffect(baseTime, baseTime + 3000, true);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 3000, true);
       const effectCell = new BaseCellModel(0, false, [blockingEffect]);
 
       expect(effectCell.validate(5, baseTime + 1000)).toBe(false);
@@ -82,8 +82,8 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle multiple effects', () => {
-      const allowingEffect = new MockEffect(baseTime, baseTime + 2000, false);
-      const blockingEffect = new MockEffect(baseTime, baseTime + 5000, true);
+      const allowingEffect = createMockEffect(baseTime, baseTime + 2000, false);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 5000, true);
       const effectCell = new BaseCellModel(0, false, [allowingEffect, blockingEffect]);
 
       expect(effectCell.validate(5, baseTime + 3000)).toBe(false); // Blocked by second
@@ -164,7 +164,7 @@ describe('BaseCellModel', () => {
 
     it('should include effects in hash', () => {
       const cellWithoutEffects = new BaseCellModel(5);
-      const effect = new MockEffect(100, 200);
+      const effect = createMockEffect(100, 200);
       const cellWithEffects = new BaseCellModel(5, false, [effect]);
 
       expect(cellWithoutEffects.computeHash()).not.toBe(cellWithEffects.computeHash());
@@ -181,8 +181,8 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle effects in hash computation', () => {
-      const effect1 = new MockEffect(100, 200, false, false);
-      const effect2 = new MockEffect(100, 200, true, false);
+      const effect1 = createMockEffect(100, 200, false, false);
+      const effect2 = createMockEffect(100, 200, true, false);
       const cell1 = new BaseCellModel(5, false, [effect1]);
       const cell2 = new BaseCellModel(5, false, [effect2]);
 
@@ -212,7 +212,7 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle effects blocking progress', () => {
-      const progressBlockingEffect = new MockEffect(baseTime, baseTime + 3000, false, true);
+      const progressBlockingEffect = createMockEffect(baseTime, baseTime + 3000, false, true);
       const effectCell = new BaseCellModel(5, false, [progressBlockingEffect]);
 
       expect(effectCell.progress(5, baseTime + 1000)).toBe(false);
@@ -220,8 +220,8 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle multiple effects for progress', () => {
-      const normalEffect = new MockEffect(baseTime, baseTime + 2000, false, false);
-      const blockingEffect = new MockEffect(baseTime, baseTime + 3000, false, true);
+      const normalEffect = createMockEffect(baseTime, baseTime + 2000, false, false);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 3000, false, true);
       const effectCell = new BaseCellModel(5, false, [normalEffect, blockingEffect]);
 
       expect(effectCell.progress(5, baseTime + 1000)).toBe(false); // Blocked
@@ -272,7 +272,7 @@ describe('BaseCellModel', () => {
     });
 
     it('should work with single effect', () => {
-      const effect = new MockEffect(baseTime, baseTime + 2000, true);
+      const effect = createMockEffect(baseTime, baseTime + 2000, true);
       const effectCell = new BaseCellModel(0, false, [effect]);
 
       expect(effectCell.validate(5, baseTime + 1000)).toBe(false);
@@ -280,8 +280,8 @@ describe('BaseCellModel', () => {
     });
 
     it('should work with multiple effects', () => {
-      const effect1 = new MockEffect(baseTime, baseTime + 2000, true, false);
-      const effect2 = new MockEffect(baseTime, baseTime + 3000, false, true);
+      const effect1 = createMockEffect(baseTime, baseTime + 2000, true, false);
+      const effect2 = createMockEffect(baseTime, baseTime + 3000, false, true);
       const effectCell = new BaseCellModel(5, false, [effect1, effect2]);
 
       // Blocked by first effect
@@ -294,10 +294,10 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle effects with no end time', () => {
-      const permanentEffect = new MockEffect(baseTime); // No lastUntil
+      const permanentEffect = createMockEffect(baseTime); // No lastUntil
       const effectCell = new BaseCellModel(0, false, [permanentEffect]);
 
-      expect(effectCell.validate(5, baseTime + 10000)).toBe(true);
+      expect(effectCell.validate(5, baseTime + 10000)).toBe(false); // Permanent effect still active
     });
   });
 
@@ -368,7 +368,7 @@ describe('BaseCellModel', () => {
     });
 
     it('should handle effect lifecycle', () => {
-      const shortEffect = new MockEffect(baseTime, baseTime + 1000, true);
+      const shortEffect = createMockEffect(baseTime, baseTime + 1000, true);
       cell.effects = [shortEffect];
 
       expect(cell.validate(5, baseTime + 500)).toBe(false);

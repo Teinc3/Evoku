@@ -1,7 +1,7 @@
 import BaseEffectModel from "../Effect";
 
 
-export default class MockEffect extends BaseEffectModel {
+class MockEffect extends BaseEffectModel {
   constructor(
     startedAt: number,
     lastUntil?: number,
@@ -11,23 +11,32 @@ export default class MockEffect extends BaseEffectModel {
     super(startedAt, lastUntil);
   }
 
-  public override validateSetValue(time?: number): boolean {
-    if (this._canBlockSet) {
-      // Let internal logic figure out validation
-      return super.validateSetValue(time);
-    }
-    return true; // Always allow if effect can't block
+  protected get canBlockSet(): boolean {
+    return this._canBlockSet;
   }
 
-  public override blockSetProgress(time?: number): boolean {
-    if (this._canBlockProgress) {
-      // Let internal logic figure out blocking
-      return super.blockSetProgress(time);
-    }
-    return false; // Always disallow blocking if can't block progress
-  }
-
-  public override computeHash(): number {
-    return super.computeHash() + (this._canBlockSet ? 1 : 0) + (this._canBlockProgress ? 2 : 0);
+  protected get canBlockProgress(): boolean {
+    return this._canBlockProgress;
   }
 }
+
+/**
+ * Factory function to create MockEffect instances with configurable blocking behavior.
+ * 
+ * @param startedAt - Timestamp when the effect started
+ * @param lastUntil - Optional timestamp when the effect ends
+ * @param canBlockSet - Whether this effect can block setting new values (default: true)
+ * @param canBlockProgress - Whether this effect can block progress contribution (default: true)
+ * @returns A new MockEffect instance
+ */
+export function createMockEffect(
+  startedAt: number,
+  lastUntil?: number,
+  canBlockSet: boolean = true,
+  canBlockProgress: boolean = true
+): BaseEffectModel {
+  return new MockEffect(startedAt, lastUntil, canBlockSet, canBlockProgress);
+}
+
+// Keep the class as default export for backward compatibility during transition
+export default MockEffect;

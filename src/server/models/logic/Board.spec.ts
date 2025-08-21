@@ -1,4 +1,4 @@
-import MockEffect from '@shared/models/utils/MockEffect';
+import { createMockEffect } from '@shared/models/utils/MockEffect';
 import ServerCellModel from './Cell';
 import ServerBoardModel from './Board';
 
@@ -96,7 +96,7 @@ describe('ServerBoardModel (server-specific tests)', () => {
 
     it('should handle complex effect and cooldown interactions', () => {
       // Create board with effects on specific cells
-      const blockingEffect = new MockEffect(baseTime, baseTime + 3000, true);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 3000, true);
       board.board[5].effects.push(blockingEffect);
 
       // Try to set affected cell
@@ -145,6 +145,6 @@ describe('ServerBoardModel (server-specific tests)', () => {
     });
   });
 
-  // Note: Core functionality (validation, hashing, progress, etc.) is tested in shared/models/Board.spec.ts
+  // Note: Core functionality is tested in the base class' unit test
   // These tests focus only on server-specific extensions like global cooldown management
 });

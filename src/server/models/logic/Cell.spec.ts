@@ -1,4 +1,4 @@
-import MockEffect from '@shared/models/utils/MockEffect';
+import { createMockEffect } from '@shared/models/utils/MockEffect';
 import ServerCellModel from './Cell';
 
 
@@ -64,8 +64,8 @@ describe('ServerCellModel (server-specific tests)', () => {
     });
 
     it('should handle complex effect and cooldown interactions', () => {
-      const shortEffect = new MockEffect(baseTime, baseTime + 2000, true);
-      const longEffect = new MockEffect(baseTime, baseTime + 8000, false);
+      const shortEffect = createMockEffect(baseTime, baseTime + 2000, true);
+      const longEffect = createMockEffect(baseTime, baseTime + 8000, false);
       const effectCell = new ServerCellModel(0, false, [shortEffect, longEffect]);
 
       // Blocked by first effect
@@ -82,6 +82,6 @@ describe('ServerCellModel (server-specific tests)', () => {
     });
   });
 
-  // Note: Core functionality (validation, hashing, progress, etc.) is tested in shared/models/Cell.spec.ts
+  // Note: Core functionality is tested in the base class' unit test
   // These tests focus only on server-specific extensions like cooldown management
 });
