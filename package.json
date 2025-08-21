@@ -12,20 +12,9 @@
     "test:client": "ng test",
     "test:server-ci": "jest --config jest.config.cjs --coverage",
     "test:server": "jest --config jest.config.cjs",
-    "format": "prettier --write .",
     "lint": "npm run lint:client && npm run lint:server",
     "lint:client": "ng lint",
     "lint:server": "npx eslint ."
-  },
-  "prettier": {
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
   },
   "private": true,
   "dependencies": {
