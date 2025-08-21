@@ -20,13 +20,16 @@ which provides an environment for connected clients to play against each other.
 
 ## Logic-related Models
 
+*Server models extend shared base classes from the gamestate package. For base functionality, see [Game State Models](/docs/gamestate/models/README.md).*
+
 ### Server Board
 Path: [/docs/server/models/logic/Board.md](/docs/server/models/logic/Board.md)
 
-This section documents the **ServerBoardModel** class, which stores and handles the game board state on the server.
+This section documents the **ServerBoardModel** class, which extends BaseBoardModel 
+to provide server-authoritative board operations with validation and objective tracking.
 
 ### Server Cell
 Path: [/docs/server/models/logic/Cell.md](/docs/server/models/logic/Cell.md)
 
-This section documents the **ServerCellModel** class,
-which stores and handles the state of a single cell on the server game board.
+This section documents the **ServerCellModel** class, which extends BaseCellModel
+to provide server-authoritative cell operations with cooldown management and validation.
