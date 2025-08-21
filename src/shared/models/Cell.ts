@@ -30,7 +30,7 @@ export default class BaseCellModel implements ICellState {
    */
   public validate(value: number, time?: number): boolean {
     // Universal Validation
-    if (value < 0 || value > 9 || this.fixed) {
+    if (!Number.isInteger(value) || value < 0 || value > 9 || this.fixed) {
       return false;
     }
 
@@ -63,16 +63,19 @@ export default class BaseCellModel implements ICellState {
 
   /** @returns The computed hash for each cell based on its properties and effects */
   public computeHash(): number {
-    return this.effects.reduce((hash, effect) => {
-      return hash + effect.computeHash();
-    }, this.value + Number(this.fixed) + (this.lastCooldownEnd % 1000));
+    let h = 17;
+    h = (h * 31 + this.value) | 0;
+    h = (h * 31 + (this.fixed ? 1 : 0)) | 0;
+    h = (h * 31 + (this.lastCooldownEnd | 0)) | 0;
+    for (const effect of this.effects) {
+      h = (h * 31 + effect.computeHash()) | 0;
+    }
+    return h | 0; // Convert uint32 to int32
   }
 
   /** @returns Whether the cell contributes to board progress. */
   public progress(solution: number, time?: number): boolean {
     return !this.fixed && this.value === solution
-      && this.effects.reduce((progress, effect) => {
-        return progress + (effect.blockSetProgress(time) ? 0 : 1);
-      }, 0) === 0;
+      && this.effects.every(effect => !effect.blockSetProgress(time));
   }
 }

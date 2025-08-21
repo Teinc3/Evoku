@@ -22,7 +22,10 @@ export default abstract class BaseEffectModel implements ICellEffectState {
    * @returns A number representing the effect's state hash.
    */
   public computeHash(): number {
-    return (this.startedAt + (this.lastUntil ?? 0)) % 1000; // Example hash computation
+    let h = 13;
+    h = (h * 31 + (this.startedAt | 0)) | 0;
+    h = (h * 31 + ((this.lastUntil ?? 0) | 0)) | 0;
+    return h | 0; // Convert uint32 to int32
   }
 
   /** 

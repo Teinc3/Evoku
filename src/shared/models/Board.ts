@@ -10,7 +10,8 @@ export default abstract class BaseBoardModel<
 > implements IBoardState {
 
   static readonly GLOBAL_COOLDOWN_DURATION = 5000; // 5 seconds
-  abstract readonly CellModelClass: CellModelConstructor<PlatformSpecificCellModel>;
+  // @eslint-disable-next-line @typescript-eslint/naming-convention
+  abstract get CellModelClass(): CellModelConstructor<PlatformSpecificCellModel>;
 
   public readonly board: PlatformSpecificCellModel[];
   public globalLastCooldownEnd: number;
@@ -37,7 +38,7 @@ export default abstract class BaseBoardModel<
    */
   public validate(cellIndex: number, value: number, time?: number): boolean {
     // Universal checks
-    if (cellIndex < 0 || cellIndex >= this.board.length) {
+    if (!Number.isInteger(value) || cellIndex < 0 || cellIndex >= this.board.length) {
       return false;
     }
 
@@ -70,18 +71,30 @@ export default abstract class BaseBoardModel<
    * @returns The computed hash of the board state.
    */
   public computeHash(): number {
-    return this.board.reduce((hash, cell, index) => {
-      return hash + index * cell.computeHash();
-    }, this.globalLastCooldownEnd % 1000);
+    let h = 23;
+    h = (h * 31 + (this.globalLastCooldownEnd | 0)) | 0;
+    for (let i = 0; i < this.board.length; i++) {
+      // incorporate index and cell hash with mixing, not plain multiply
+      h = (h * 31 + (i + 1)) | 0;
+      h = (h * 31 + this.board[i].computeHash()) | 0;
+    }
+    return h | 0; // Convert uint32 to int32
   }
 
   /** @returns BoardProgress: Percentage (Rounded) of cells  */
   public progress(solution: number[], time?: number): number {
-    return Math.round(this.board.reduce((progress, cell, index) => {
-      return progress + (cell.progress(solution[index], time) ? 1 : 0);
-    }, 0) / Math.min(this.board.reduce((total, cell) => {
-      return total + (cell.fixed ? 0 : 1);
-    }, 0), 1) * 100);
+    const correct = this.board.reduce((count, cell, index) => {
+      return count + (cell.progress(solution[index], time) ? 1 : 0);
+    }, 0)
+
+    const total = this.board.reduce((count, cell) => {
+      return count + (cell.fixed ? 0 : 1);
+    }, 0);
+
+    if (total === 0) {
+      return 100;
+    }
+    return Math.round(correct / total * 100);
   }
 
 }
