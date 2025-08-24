@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
-import ServerSocket from '../models/ServerSocket';
+import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import WSServer from "./WSServer";
@@ -24,7 +24,7 @@ jest.mock('ws', () => ({
 // Mock our internal classes. We want to spy on their methods.
 jest.mock('../managers/SessionManager');
 jest.mock('../managers/RoomManager');
-jest.mock('../models/ServerSocket');
+jest.mock('../models/networking/ServerSocket');
 
 describe('WSServer Integration Test', () => {
   let httpServer: HttpServer;

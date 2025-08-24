@@ -7,6 +7,6 @@ export default createActionPacket(
   ProtocolActions.REJECT_ACTION,
   ['actionID'],
   {
-    boardHash: IntCodec,
+    gameStateHash: IntCodec,
   }
 );

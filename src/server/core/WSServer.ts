@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 
-import ServerSocket from '../models/ServerSocket';
+import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import SystemHandler from '../handlers/system';

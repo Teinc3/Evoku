@@ -25,7 +25,6 @@ describe('pickInjectables', () => {
     // D. Assertions
     // Check that the output contains all the keys that it was supposed to select
     expect(Object.keys(selectedCodecs)).toEqual(
-      // @ts-expect-error (2345)
       expect.arrayContaining(allInjectableKeys.filter(key => keysToPick.includes(key)))
     );
 
@@ -33,8 +32,9 @@ describe('pickInjectables', () => {
     expect(Object.keys(selectedCodecs).length).toBe(selectedKeys.length);
 
     // Explicitly check that the invalid key was not included in the output
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((selectedCodecs as any)[keyThatIsNotInjectable]).toBeUndefined();
+    expect((
+      selectedCodecs as unknown as Record<string, unknown>
+    )[keyThatIsNotInjectable]).toBeUndefined();
   });
 });
 
@@ -78,13 +78,13 @@ describe('createActionPacket Factory', () => {
     const MockRejectAction = createActionPacket(
       ProtocolActions.REJECT_ACTION,
       ['actionID'],
-      { boardHash: IntCodec }
+      { gameStateHash: IntCodec }
     );
 
     const packet = new MockRejectAction({
       action: ProtocolActions.REJECT_ACTION,
       actionID: 42,
-      boardHash: 123456789
+      gameStateHash: 123456789
     });
 
     const buffer = packet.wrap();
@@ -94,7 +94,7 @@ describe('createActionPacket Factory', () => {
 
     expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.actionID).toBe(packet.data.actionID);
-    expect(unwrappedData.boardHash).toBe(packet.data.boardHash);
+    expect(unwrappedData.gameStateHash).toBe(packet.data.gameStateHash);
   });
 
 });

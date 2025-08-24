@@ -11,7 +11,7 @@ import EarthPUPHandler from "./EarthPUPHandler";
 
 import type PUPActions from "@shared/types/enums/actions/match/player/powerups/";
 import type { SomeHandlerMapEntry } from "../../../../types/handler";
-import type RoomModel from "../../../../models/Room";
+import type RoomModel from "../../../../models/networking/Room";
 
 
 export default class PUPHandler extends UnionHandler<PUPActions> {

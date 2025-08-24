@@ -8,7 +8,7 @@ import LifecycleHandler from "./LifecycleHandler";
 
 import type MatchActions from "@shared/types/enums/actions/match";
 import type { SomeHandlerMapEntry } from "../../types/handler";
-import type RoomModel from "../../models/Room";
+import type RoomModel from "../../models/networking/Room";
 
 
 export default class MatchHandler extends UnionHandler<MatchActions> {

@@ -10,9 +10,12 @@ src/server/
 │   ├── HTTPServer.ts
 │   └── WSServer.ts
 ├── game/
-│   ├── logic/
-│   └── matchmaking/
+│   ├── controllers/
+│   │   ├── lifecycle.ts
+│   │   └── state.ts
+│   └── time/
 ├── managers/
+│   ├── MatchmakingManager.ts
 │   ├── SessionManager.ts
 │   └── RoomManager.ts
 ├── handlers/
@@ -21,11 +24,16 @@ src/server/
 │   ├── EnumHandler.ts
 │   └── UnionHandler.ts
 ├── models/
-│   ├── Session.ts
-│   ├── Room.ts
-│   └── ServerSocket.ts
-├── types/
+│   ├── networking/
+│   │   ├── Session.ts
+│   │   ├── Room.ts
+│   │   ├── SyncProfile.ts
+│   │   └── ServerSocket.ts
+│   └── logic/
+│       ├── Board.ts
+│       └── Cell.ts
 ├── tests/
+├── types/
 └── index.ts
 ```
 
@@ -45,15 +53,24 @@ Contains the foundational components for running the application.
 
 Contains all logic related to managing game state.
 
-#### /logic
+#### /controllers
 
-- index.ts: Contains the pure, state-agnostic game rules and logic (e.g., how to calculate scores, validate a move).
+- state.ts: GameStateController holds the current state of the game and manages state through exposing a public API.
+
+- lifecycle.ts: LifecycleController controls the lifecycle of the game,
+including game initialisations, phase transitions, and result declarations.
+
+#### /time
+
+Holds TimeService, a facade comprising timing-related utilities and logic.
 
 #### /matchmaking
 
 - index.ts: Manages the queue of players waiting for a game and is responsible for creating new rooms when a match is found.
 
 ### /managers
+
+- MatchmakingManager.ts (TBD): Responsible for managing the matchmaking process, including player grouping and room creation.
 
 - SessionManager.ts: The single source of truth for all active player sessions. Creates, manages, and destroys Session objects.
 
@@ -63,12 +80,20 @@ Contains all logic related to managing game state.
 
 Contains data models that represent the state of the certain objects in the game.
 
+#### /networking
+
 - Session.ts: Represents a single connected player, wrapping their WebSocket connection and holding their state (e.g., nickname, online status, current room).
 
 - Room.ts: Represents a single game instance, containing the game state and the list of players in the match.
 
 - ServerSocket.ts: A wrapper around the WebSocket connection that automatically encodes/decodes packets into Data Contracts.
 It provides methods to send and receive packets, ensuring type safety.
+
+#### /logic
+
+- Board.ts: Represents the game board, holding the state of all cells and providing methods to manipulate the board (e.g., placing a piece, checking for a win).
+
+- Cell.ts: Represents a single cell on the game board, holding its state (e.g., occupied by which player) and providing methods to manipulate the cell.
 
 ### /handlers
 

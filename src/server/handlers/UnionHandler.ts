@@ -2,7 +2,7 @@ import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
 import type IDataHandler from "../types/handler";
 import type { SomeHandlerMapEntry } from "../types/handler";
-import type SessionModel from "../models/Session";
+import type SessionModel from "../models/networking/Session";
 
 
 /**

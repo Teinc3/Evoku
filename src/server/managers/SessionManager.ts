@@ -1,9 +1,9 @@
-import SessionModel from "../models/Session";
+import SessionModel from "../models/networking/Session";
 
 import type { UUID } from "crypto";
 import type SystemActions from "@shared/types/enums/actions/system";
 import type IDataHandler from "../types/handler";
-import type ServerSocket from "../models/ServerSocket";
+import type ServerSocket from "../models/networking/ServerSocket";
 
 
 /**

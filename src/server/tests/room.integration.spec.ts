@@ -3,10 +3,10 @@ import { jest } from '@jest/globals';
 
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import RoomModel from '../models/Room';
+import RoomModel from '../models/networking/Room';
 import RoomManager from '../managers/RoomManager';
 
-import type SessionModel from '../models/Session';
+import type SessionModel from '../models/networking/Session';
 
 
 // Create a minimal mock of the SessionModel for this test's purposes.
@@ -140,7 +140,7 @@ describe('RoomManager and Room Integration Test', () => {
     it('should broadcast only to a specific list of session UUIDs', () => {
       room.broadcast(ProtocolActions.REJECT_ACTION, {
         actionID: 3,
-        boardHash: 694208
+        gameStateHash: 694208
       }, { to: [uuid1] });
 
       expect(session1.forward).toHaveBeenCalledTimes(1);

@@ -92,7 +92,7 @@ deserialization of arbitrary JavaScript objects to and from JSON format, which i
 - **Fields**: inherited from contract naming conventions
 - **Factory Functions**: `create{Type}Codec` (e.g., `createArrayCodec`)
 
-### Performance Considerations
+### Best Practices
 - Use the smallest appropriate codec for each field type (e.g., `ByteCodec` for small integers)
 - Avoid deeply nested structures in custom codecs to simplify serialization
 - Declare codecs for automatic injection in [`INJECTABLE_CODECS`](/src/shared/networking/codecs/custom/InjectableCodecs.ts)

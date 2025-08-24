@@ -125,9 +125,14 @@ export default defineConfig([
           modifiers: ["const"], // Only apply to constants
         },
         {
-          selector: ["property", "parameterProperty"],
+          selector: ["property", "parameterProperty", "classicAccessor"],
           format: ["camelCase", "PascalCase"],
           leadingUnderscore: "allow",
+        },
+        {
+          selector: "property",
+          modifiers: ["static"],
+          format: ["camelCase", "UPPER_CASE"],
         },
         {
           selector: "enumMember",

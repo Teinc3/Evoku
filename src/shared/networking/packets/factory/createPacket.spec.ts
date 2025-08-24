@@ -38,8 +38,9 @@ describe('createPacket Factory', () => {
     expect(unwrappedData.action).toBe(packet.data.action);
     expect(unwrappedData.clientPing).toBe(packet.data.clientPing);
     expect(unwrappedData.serverTime).toBe(packet.data.serverTime);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((unwrappedData as any).thisAttributeIsNotInTheContract).toBeUndefined();
+    expect((
+      unwrappedData as unknown as Record<string, unknown>
+    )['thisAttributeIsNotInTheContract']).toBeUndefined();
   });
 
   it('should be able to create an action packet using barebones implementation', () => {
