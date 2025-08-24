@@ -6,7 +6,7 @@ import ClientCellModel from "./Cell";
  * Client-side implementation of BoardModel with pending state for optimistic updates.
  */
 export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
-  // @eslint-disable-next-line @typescript-eslint/naming-convention
+   
   get CellModelClass(): typeof ClientCellModel {
     return ClientCellModel;
   }

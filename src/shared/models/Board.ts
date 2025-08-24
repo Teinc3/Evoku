@@ -10,7 +10,7 @@ export default abstract class BaseBoardModel<
 > implements IBoardState {
 
   static readonly GLOBAL_COOLDOWN_DURATION = 5000; // 5 seconds
-  // @eslint-disable-next-line @typescript-eslint/naming-convention
+   
   abstract get CellModelClass(): CellModelConstructor<PlatformSpecificCellModel>;
 
   public readonly board: PlatformSpecificCellModel[];

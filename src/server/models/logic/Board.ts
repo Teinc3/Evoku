@@ -6,7 +6,7 @@ import ServerCellModel from "./Cell";
  * Server-side implementation of BoardModel with authoritative game logic.
  */
 export default class ServerBoardModel extends BaseBoardModel<ServerCellModel> {
-  // @eslint-disable-next-line @typescript-eslint/naming-convention
+   
   get CellModelClass(): typeof ServerCellModel {
     return ServerCellModel;
   }

@@ -9,7 +9,7 @@ class TestCellModel extends BaseCellModel {
 }
 
 class TestBoardModel extends BaseBoardModel<TestCellModel> {
-  // @eslint-disable-next-line @typescript-eslint/naming-convention
+   
   get CellModelClass(): typeof TestCellModel {
     return TestCellModel;
   }

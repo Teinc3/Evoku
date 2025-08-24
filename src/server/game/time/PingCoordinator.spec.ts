@@ -2,8 +2,8 @@ import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import PingCoordinator from './PingCoordinator';
 import PendingPingStore from './PendingPingStore';
 
-import type SyncProfile from './SyncProfile';
 import type RoomModel from '../../models/networking/Room';
+import type SyncProfile from './SyncProfile';
 
 
 interface MockSession {

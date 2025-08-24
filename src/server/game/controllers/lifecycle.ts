@@ -38,16 +38,16 @@ export default class LifecycleController {
     if (this.status !== MatchStatus.PREINIT || this.room.participants.size < 2 || this.startTimer) {
       return;
     }
-this.startTimer = setTimeout(() => {
-  this.startTimer = null;
-  try {
-    this.initGame();
-  } catch (error) {
-    console.error('Game initialization failed:', error);
-    this.status = MatchStatus.ENDED;
-    // Optionally notify participants of initialization failure
-  }
-}, 5000);
+    this.startTimer = setTimeout(() => {
+      this.startTimer = null;
+      try {
+        this.initGame();
+      } catch (error) {
+        console.error('Game initialization failed:', error);
+        this.status = MatchStatus.ENDED;
+        // Optionally notify participants of initialization failure
+      }
+    }, 5000);
   }
 
   /** Declare victory for the remaining player if one leaves. */
