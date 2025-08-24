@@ -2,7 +2,7 @@ import TimeValidationReason from "../../types/enums/timevalidation";
 
 import type PlayerActions from "@shared/types/enums/actions/match/player";
 import type { PlayerActionData } from "../../types/time";
-import type SyncProfile from "../../models/networking/SyncProfile";
+import type SyncProfile from "./SyncProfile";
 
 
 /**
