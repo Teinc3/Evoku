@@ -8,7 +8,7 @@
     "dev:server": "NODE_ENV=development tsx watch src/server/index.ts",
     "build": "npm run build:client && npm run build:server",
     "build:client": "ng build --configuration production",
-    "build:server": "NODE_ENV=production tsx src/server/index.ts",
+    "build:server": "tsc --project tsconfig.server.json",
     "start": "concurrently \"npx serve -s dist/evoku -l 4200\" \"node dist/server/index.js\"",
     "watch": "ng build --watch --configuration development",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",

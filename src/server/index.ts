@@ -5,7 +5,11 @@ import HTTPServer from './core/HTTPServer';
 
 // Load environment variables based on NODE_ENV
 loadEnvironment();
-const PORT = parseInt(getRequiredEnv('BACKEND_PORT'));
+const portStr = getRequiredEnv('BACKEND_PORT');
+const PORT = Number.parseInt(portStr, 10);
+if (Number.isNaN(PORT) || PORT < 0 || PORT > 65535) {
+  throw new Error(`Invalid BACKEND_PORT: "${portStr}". Must be an integer between 0 and 65535.`);
+}
 
 function bootstrap() {
   // Create and start the HTTP server

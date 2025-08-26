@@ -62,7 +62,7 @@ function parseEnvFile(content: string): Record<string, string> {
       continue;
     }
     
-    const match = line.match(/^([^=]+)=(.*)$/);
+    const match = line.match(/^([^=\s]+)=(.*)$/);
     if (match) {
       const [, key, value] = match;
       result[key.trim()] = value.trim();
