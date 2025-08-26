@@ -42,4 +42,6 @@ testem.log
 Thumbs.db
 
 # Environment variables
-.env
+.env.local
+.env.*.local
+# Note: .env, .env.development, .env.production are tracked for team consistency

@@ -1,9 +1,11 @@
+import { loadEnvironment, getRequiredEnv } from '../shared/utils/environment';
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';
 
 
-// Load configuration from environment variables
-const PORT = parseInt(process.env['BACKEND_PORT'] || '8745');
+// Load environment variables based on NODE_ENV
+loadEnvironment();
+const PORT = parseInt(getRequiredEnv('BACKEND_PORT'));
 
 function bootstrap() {
   // Create and start the HTTP server

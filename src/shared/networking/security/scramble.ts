@@ -8,7 +8,7 @@ export class PacketScrambler {
   private unscrambleMap: Map<number, ActionEnum> | null = null;
 
   constructor() {
-    const seed = process.env['PACKET_SCRAMBLER_SEED'];
+    const seed = process.env['NG_APP_PACKET_SCRAMBLER_SEED'];
 
     // Only initialize the mapping if a seed is provided.
     // If no seed exists, the maps remain null, and IDs pass through unchanged.
