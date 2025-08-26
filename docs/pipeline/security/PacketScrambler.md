@@ -28,7 +28,7 @@ PacketScrambler implements a security-through-obscurity mechanism that:
 - **Range Preservation:** Maintains byte-range constraints (-128 to 127)
 
 ### Seed Management
-- **Environment Integration:** Uses `PACKET_SCRAMBLER_SEED` environment variable
+- **Environment Integration:** Uses `NG_APP_PACKET_SCRAMBLER_SEED` environment variable
 - **Deterministic Generation:** Same seed produces identical mappings
 - **Graceful Degradation:** No scrambling when seed unavailable
 - **Security Isolation:** Seed-based separation between environments
@@ -51,7 +51,7 @@ constructor()
 Creates a new PacketScrambler instance and initializes mappings if seed available.
 
 **Environment Variable:**
-- `PACKET_SCRAMBLER_SEED` - String seed for deterministic random mapping
+- `NG_APP_PACKET_SCRAMBLER_SEED` - String seed for deterministic random mapping
 
 **Initialization Behavior:**
 - **Seed Present:** Creates scramble/unscramble mapping tables
@@ -186,9 +186,8 @@ PacketScrambler is **not** a cryptographic security measure:
 ### Best Practices
 ```typescript
 // Environment-specific seeds
-// Development: PACKET_SCRAMBLER_SEED=dev_seed_123
-// Production: PACKET_SCRAMBLER_SEED=prod_seed_xyz
-// Testing: PACKET_SCRAMBLER_SEED=test_seed_abc
+// Development: NG_APP_PACKET_SCRAMBLER_SEED=dev_seed_123
+// Production: NG_APP_PACKET_SCRAMBLER_SEED=prod_seed_xyz
 
 // Seed rotation (manual process)
 // Periodically update seeds across environments
@@ -211,7 +210,7 @@ PacketScrambler is **not** a cryptographic security measure:
 describe('PacketScrambler', () => {
   beforeEach(() => {
     // Set test seed
-    process.env.PACKET_SCRAMBLER_SEED = 'test_seed_123';
+    process.env.NG_APP_PACKET_SCRAMBLER_SEED = 'test_seed_123';
   });
   
   it('should scramble and unscramble IDs consistently');
@@ -249,13 +248,13 @@ const scrambledID = clientScrambler.scrambleID(action);
 ### Development Workflow
 ```bash
 # Set scrambling seed in environment
-export PACKET_SCRAMBLER_SEED="development_seed_2024"
+export NG_APP_PACKET_SCRAMBLER_SEED="development_seed_2024"
 
 # Run application with scrambling enabled
 npm start
 
 # Disable scrambling for debugging
-unset PACKET_SCRAMBLER_SEED
+unset NG_APP_PACKET_SCRAMBLER_SEED
 npm start
 ```
 

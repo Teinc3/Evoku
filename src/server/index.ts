@@ -1,9 +1,15 @@
+import { loadEnvironment, getRequiredEnv } from '../shared/utils/environment';
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';
 
 
-// Load configuration from environment variables
-const PORT = parseInt(process.env['BACKEND_PORT'] || '8745');
+// Load environment variables based on NODE_ENV
+loadEnvironment();
+const portStr = getRequiredEnv('BACKEND_PORT');
+const PORT = Number.parseInt(portStr, 10);
+if (Number.isNaN(PORT) || PORT < 0 || PORT > 65535) {
+  throw new Error(`Invalid BACKEND_PORT: "${portStr}". Must be an integer between 0 and 65535.`);
+}
 
 function bootstrap() {
   // Create and start the HTTP server
