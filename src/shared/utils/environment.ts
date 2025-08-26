@@ -50,7 +50,6 @@ export function loadEnvironment(
 
 /**
  * Simple .env file parser
- */
 function parseEnvFile(content: string): Record<string, string> {
   const result: Record<string, string> = {};
   
@@ -62,14 +61,20 @@ function parseEnvFile(content: string): Record<string, string> {
       continue;
     }
     
-    const match = line.match(/^([^=\s]+)=(.*)$/);
+    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
     if (match) {
       const [, key, value] = match;
+      // Validate key format
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+        console.warn(`Invalid environment variable key: ${key}`);
+        continue;
+      }
       result[key.trim()] = value.trim();
     }
   }
   
   return result;
+}
 }
 
 /**
