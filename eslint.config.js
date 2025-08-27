@@ -7,10 +7,9 @@ import stylistic from "@stylistic/eslint-plugin";
 import js from "@eslint/js";
 import css from "@eslint/css";
 import { includeIgnoreFile } from "@eslint/compat";
-
-
-// import json from "@eslint/json";
-// import markdown from "@eslint/markdown";
+import angularTemplateParser from "@angular-eslint/template-parser";
+import angularEslintTemplate from "@angular-eslint/eslint-plugin-template";
+import angularEslintPlugin from "@angular-eslint/eslint-plugin";
 
 
 export default defineConfig([
@@ -18,11 +17,34 @@ export default defineConfig([
     fileURLToPath(new URL(".gitignore", import.meta.url)),
     "Imported .gitignore patterns",
   ),
+
   {
     ignores: ["package-lock.json", "package.json", "jest.config.cjs"],
   },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+
+  // JS recommended (JS only) — no spreading
+  { files: ["**/*.{js,mjs,cjs}"], ...js.configs.recommended },
+
+  // TypeScript base recommended (scoped to TS files only)
+  // Adds TS plugin + rules for *.ts without requiring parserOptions.project
+  ...tseslint.configs.recommended.map(config => ({
+    ...config,
+    files: ["**/*.ts"],
+  })),
+
+  // Angular template HTML files
+  {
+    files: ["src/client/**/*.html"],
+    languageOptions: { parser: angularTemplateParser },
+    plugins: { "@angular-eslint/template": angularEslintTemplate },
+    rules: {
+      "@angular-eslint/template/banana-in-box": "error",
+      "@angular-eslint/template/no-negated-async": "error",
+      "@angular-eslint/template/use-track-by-function": "warn",
+    }
+  },
+
+  // Common rules for JS + TS that do NOT require TS type info
   {
     settings: {
       "import/resolver": {
@@ -32,20 +54,17 @@ export default defineConfig([
         },
       }
     },
-    files: ["**/*.{js,cjs,ts}"],
+    files: ["**/*.{js,mjs,cjs,ts}"],
+    ignores: ["**/*.html", "**/*.css", "**/*.scss"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
     plugins: {
       import: eslintPluginImport,
-      '@stylistic': stylistic,
+      "@stylistic": stylistic,
     },
     rules: {
       "no-var": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { 
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }],
       "prefer-const": "error",
       "@stylistic/indent": ["error", 2],
       "@stylistic/max-len": ["error", { code: 100 }],
@@ -53,124 +72,133 @@ export default defineConfig([
       "@stylistic/arrow-parens": ["error", "as-needed"],
       "@stylistic/object-curly-spacing": ["error", "always"],
       "@stylistic/array-bracket-spacing": ["error", "never"],
-      "@typescript-eslint/no-empty-object-type": "off",
 
-      // ## Import Rules ##
-      "@typescript-eslint/consistent-type-imports": "error", // Enforce 'import type'
-      "import/newline-after-import": ["error", {
-        count: 2,
-        exactCount: true,
-        considerComments: true
-      }],
-      "import/no-useless-path-segments": ["error", {
-        noUselessIndex: true
-      }],
-      "import/prefer-default-export": ["error", { "target": "single" }],
-      "import/order": ["error", {
-        // 1. Group imports into three main categories.
-        groups: [
-          ["builtin", "external", "object"], // Group 1: JS built-ins and external libraries
-          ["internal", "index", "sibling", "parent"], // Group 2: Internal and relative imports
-          "type", // Group 3: Type imports
-        ],
-        sortTypesGroup: true,
-        // Define how @shared should be treated
-        pathGroups: [
-          {
-            pattern: "@shared/**",
-            group: "internal",
-          }
-        ],
-        distinctGroup: false,
-        // Enforce a single empty line between each of the main groups
-        "newlines-between": "always",
-        alphabetize: {
-          order: "desc", // Forces closest imports to be first
-          caseInsensitive: true,
-        },
-      }],
-
-      // ## Spacing and Padding Rules ##
-      "@stylistic/padding-line-between-statements": [
-        "error",
-        // The new plugin allows types for blanklines
-        {
-          blankLine: "always",
-          prev: "*",
-          next: ["class", "function", "interface"],
-        },
-        {
-          blankLine: "always",
-          prev: ["class", "function", "interface"],
-          next: "*",
-        },
+      // Import Rules (safe without TS type info)
+      "import/newline-after-import": [
+        "error", 
+        { 
+          count: 2, 
+          exactCount: true, 
+          considerComments: true 
+        }
       ],
+      "import/no-useless-path-segments": [
+        "error", 
+        { noUselessIndex: true }
+      ],
+      "import/prefer-default-export": [
+        "error", 
+        { target: "single" }
+      ],
+      "import/order": [
+        "error", 
+        {
+          groups: [
+            ["builtin", "external", "object"],
+            ["internal", "index", "sibling", "parent"],
+            "type",
+          ],
+          sortTypesGroup: true,
+          pathGroups: [{ 
+            pattern: "@shared/**", 
+            group: "internal" 
+          }],
+          distinctGroup: false,
+          "newlines-between": "always",
+          alphabetize: { 
+            order: "desc", 
+            caseInsensitive: true 
+          },
+        }
+      ],
+    }
+  },
 
-      // ## Naming Convention Rules ##
+  // TS typed rules (use project service to auto-discover tsconfigs)
+  {
+    files: ["**/*.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
+      },
+    },
+    plugins: { "@typescript-eslint": tseslint.plugin },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_"
+      }],
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/naming-convention": [
         "error",
-        // Default for variables and properties is camelCase
-        {
-          selector: "default",
-          format: ["camelCase"],
+        { 
+          selector: "default", 
+          format: ["camelCase"] 
         },
-        {
-          selector: ["variable", "parameter", "function", "method"],
-          format: ["camelCase"],
-          leadingUnderscore: "allow", // Allow leading underscore for private variables
+        { 
+          selector: ["variable", "parameter", "function", "method"], 
+          format: ["camelCase"], 
+          leadingUnderscore: "allow" 
         },
-        {
-          selector: ["variable"],
-          format: ["camelCase", "UPPER_CASE", "PascalCase"], // Allow UPPER_CASE for constants
-          modifiers: ["const"], // Only apply to constants
+        { 
+          selector: ["variable"], 
+          format: ["camelCase", "UPPER_CASE", "PascalCase"], 
+          modifiers: ["const"] 
         },
-        {
-          selector: ["property", "parameterProperty", "classicAccessor"],
-          format: ["camelCase", "PascalCase"],
-          leadingUnderscore: "allow",
+        { 
+          selector: ["property", "parameterProperty", "classicAccessor"], 
+          format: ["camelCase", "PascalCase"], 
+          leadingUnderscore: "allow" 
         },
-        {
-          selector: "property",
-          modifiers: ["static"],
-          format: ["camelCase", "UPPER_CASE"],
+        { 
+          selector: "property", 
+          modifiers: ["static"], 
+          format: ["camelCase", "UPPER_CASE"] 
         },
-        {
-          selector: "enumMember",
-          format: ["UPPER_CASE"],
+        { 
+          selector: "enumMember", 
+          format: ["UPPER_CASE"] 
         },
-        {
-          selector: "objectLiteralProperty",
-          format: ["camelCase", "UPPER_CASE"],
-          modifiers: ["requiresQuotes"],
+        { 
+          selector: "objectLiteralProperty", 
+          format: ["camelCase", "UPPER_CASE"], 
+          modifiers: ["requiresQuotes"] 
         },
-        // Enforce PascalCase for classes, interfaces, enums, etc.
-        {
-          selector: ["typeLike", "class", "interface", "enum", "typeAlias"],
-          format: ["PascalCase"],
+        { 
+          selector: ["typeLike", "class", "interface", "enum", "typeAlias"], 
+          format: ["PascalCase"] 
         },
-        {
-          selector: "import",
-          format: null, // No specific format for imports
+        { 
+          selector: "import", 
+          format: null 
         },
       ],
     }
   },
+
   {
     files: ["./src/shared/**/*.ts"],
     rules: {
-      "no-restricted-imports": ["error", {
-        "patterns": [{
-          "group": ["@shared/**"],
-          "message": "Use relative imports ('../**') instead of '@shared/**' aliases."
-        }]
-      }]
+      "no-restricted-imports": [
+        "error", 
+        {
+          patterns: [{
+            group: ["@shared/**"],
+            message: "Use relative imports ('../**') instead of '@shared/**' aliases."
+          }]
+        }
+      ]
     }
   },
+
+  // Allow JS config file to skip TS naming rule if it ever applies
   {
     files: ["eslint.config.js"],
     rules: {
-      // Turn off naming convention rules for the config file
-      "@typescript-eslint/naming-convention": "off",
+      "@typescript-eslint/naming-convention": "off"
     },
   },
   {
@@ -179,22 +207,45 @@ export default defineConfig([
       globals: { ...globals.jasmine, ...globals.jest },
     }
   },
-  // {
-  //   files: ["**/*.json"],
-  //   plugins: { json },
-  //   language: "json/json",
-  //   extends: ["json/recommended"],
-  // },
-  // {
-  //   files: ["**/*.md"],
-  //   plugins: { markdown },
-  //   language: "markdown/gfm",
-  //   extends: ["markdown/recommended"],
-  // },
+  // Angular client TypeScript files
   {
-    files: ["**/*.css"],
+    files: ["src/client/**/*.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
+        sourceType: "module",
+      },
+    },
+    plugins: { "@angular-eslint": angularEslintPlugin },
+    rules: {
+      "@angular-eslint/directive-selector": [
+        "error", 
+        { 
+          type: "attribute", 
+          prefix: "app", 
+          style: "camelCase" 
+        }
+      ],
+      "@angular-eslint/component-selector": [
+        "error", 
+        { 
+          type: "element", 
+          prefix: "app", 
+          style: "kebab-case" 
+        }
+      ],
+      "@angular-eslint/no-empty-lifecycle-method": "error",
+      "@angular-eslint/use-lifecycle-interface": "error",
+    }
+  },
+
+  // CSS
+  {
+    files: ["**/*.css", "**/*.scss"],
     plugins: { css },
     language: "css/css",
     extends: ["css/recommended"],
-  },
+  }
 ]);
