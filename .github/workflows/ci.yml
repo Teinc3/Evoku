@@ -21,9 +21,9 @@ jobs:
       - name: Install dependencies reliably
         run: npm ci
 
-      - name: Lint server code
+      - name: Lint code
         id: lint
-        run: npm run lint:server
+        run: npm run lint
 
       - name: Test server code
         run: npm run test:server-ci
