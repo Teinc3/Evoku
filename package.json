@@ -15,9 +15,7 @@
     "test:client": "ng test",
     "test:server": "jest --config jest.config.cjs",
     "test:server-ci": "jest --config jest.config.cjs --coverage",
-    "lint": "npm run lint:client && npm run lint:server",
-    "lint:client": "ng lint",
-    "lint:server": "npx eslint ."
+    "lint": "npx eslint ."
   },
   "private": true,
   "dependencies": {
@@ -36,6 +34,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@angular-eslint/eslint-plugin": "^20.2.0",
+    "@angular-eslint/eslint-plugin-template": "^20.2.0",
+    "@angular-eslint/template-parser": "^20.2.0",
     "@angular/build": "^20.0.5",
     "@angular/cli": "^20.0.5",
     "@angular/compiler-cli": "^20.0.0",
@@ -52,6 +53,8 @@
     "@types/node": "^24.0.13",
     "@types/seedrandom": "^3.0.8",
     "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
     "bidirectional-map": "^1.1.1",
     "concurrently": "^9.2.0",
     "eslint": "^9.31.0",

@@ -1,0 +1,13 @@
+/* TypeScript configuration for server-side code */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/server",
+    "types": ["node", "jest"],
+    "composite": true
+  },
+  "include": [
+    "src/server/**/*.ts",
+    "src/shared/**/*.ts"
+  ]
+}
