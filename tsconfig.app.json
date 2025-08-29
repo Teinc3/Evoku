@@ -8,6 +8,10 @@
     "composite": true
   },
   "include": [
-    "src/client/**/*.ts"
+    "src/client/**/*.ts",
+    "src/shared/**/*.ts"
+  ],
+  "exclude": [
+    "src/server/**/*.ts"
   ]
 }
