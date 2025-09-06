@@ -1,14 +1,16 @@
 import seedrandom from 'seedrandom';
 
+import clientConfig from '../../../../config/client.json' with { type: 'json' };
+
 import type ActionEnum from '../../types/enums/actions';
 
 
-export class PacketScrambler {
+class PacketScrambler {
   private scrambleMap: Map<ActionEnum, number> | null = null;
   private unscrambleMap: Map<number, ActionEnum> | null = null;
 
   constructor() {
-    const seed = process.env['NG_APP_PACKET_SCRAMBLER_SEED'];
+    const seed = clientConfig.security.packetScramblerSeed;
 
     // Only initialize the mapping if a seed is provided.
     // If no seed exists, the maps remain null, and IDs pass through unchanged.
@@ -87,4 +89,5 @@ export class PacketScrambler {
 }
 
 // Export as a singleton instance for global use
-export default new PacketScrambler();
+const packetScrambler = new PacketScrambler();
+export { packetScrambler as default, PacketScrambler };

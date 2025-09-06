@@ -1,19 +1,19 @@
-import { loadEnvironment, getRequiredEnv } from '../shared/utils/environment';
-import WSServer from './core/WSServer';
-import HTTPServer from './core/HTTPServer';
+import 'dotenv/config';
+
+import serverConfig from '../../config/server.json' with { type: 'json' };
+import WSServer from './core/WSServer.ts';
+import HTTPServer from './core/HTTPServer.ts';
 
 
-// Load environment variables based on NODE_ENV
-loadEnvironment();
-const portStr = getRequiredEnv('BACKEND_PORT');
-const PORT = Number.parseInt(portStr, 10);
-if (Number.isNaN(PORT) || PORT < 0 || PORT > 65535) {
-  throw new Error(`Invalid BACKEND_PORT: "${portStr}". Must be an integer between 0 and 65535.`);
+// Determine port preference: explicit env override OR config
+const port = serverConfig.port;
+if (port < 0 || port > 65535) {
+  throw new Error(`Invalid port resolved: "${port}". Must be an integer between 0 and 65535.`);
 }
 
 function bootstrap() {
   // Create and start the HTTP server
-  const httpServer = new HTTPServer(PORT);
+  const httpServer = new HTTPServer(port);
   httpServer.start();
 
   // Create the WebSocket server

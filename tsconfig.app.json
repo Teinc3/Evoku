@@ -5,13 +5,19 @@
   "compilerOptions": {
     "outDir": "./dist/client",
     "types": ["jasmine"],
-    "composite": true
+    "composite": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
   "include": [
     "src/client/**/*.ts",
-    "src/shared/**/*.ts"
+    "src/shared/**/*.ts",
+    "config/client.json"
   ],
   "exclude": [
+    /* Shared bundle tests only run on jest */
+    "src/shared/**/*.spec.ts",
     "src/server/**/*.ts"
   ]
 }

@@ -12,9 +12,11 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "target": "ES2024",
-    "module": "preserve",
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["src/shared/*"]
