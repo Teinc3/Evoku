@@ -12,8 +12,6 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,

@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:client": "ng serve --configuration development",
-    "dev:server": "NODE_ENV=development tsx watch src/server/index.ts",
+    "dev:client": "ng serve",
+    "dev:server": "tsx watch src/server/index.ts",
     "build": "ng build",
     "start": "concurrently \"npx serve -s dist/evoku -l 4200\" \"tsx src/server/index.ts\"",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",
@@ -24,6 +24,7 @@
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "seedrandom": "^3.0.5",
