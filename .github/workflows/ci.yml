@@ -1,8 +1,10 @@
 name: Continuous Integration
 
 on:
+  push:
+    branches: [master] # Lint on pushes to master (i.e. PRs)
   pull_request:
-    branches: [master] # Correct for your repository
+    branches: [master] # Lint on PR updates targeting master
 
 jobs:
   validate-server:
