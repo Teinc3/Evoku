@@ -19,6 +19,14 @@ jobs:
           # Using v24 as requested for native TypeScript execution
           node-version: '24' 
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies reliably
         run: npm ci
       
