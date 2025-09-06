@@ -14,14 +14,14 @@ const mockPrng = jest.fn();
 /**
  * Helper to create a PacketScrambler instance with a provided seed *without*
  * relying on process.env. We mock the JSON config module that the
- * implementation imports: '../../../../config/client.json'. Each invocation
+ * implementation imports: '@config/client.json'. Each invocation
  * resets modules so the fresh mock is picked up.
  */
 function createScrambler(seed?: string) {
   jest.resetModules();
   // Re‑mock seedrandom after reset
   jest.doMock('seedrandom', () => jest.fn(() => mockPrng));
-  jest.doMock('../../../../config/client.json', () => ({
+  jest.doMock('@config/client.json', () => ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     __esModule: true,
     default: {

@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
 import serverConfig from '../../config/server.json' with { type: 'json' };
-import WSServer from './core/WSServer.ts';
-import HTTPServer from './core/HTTPServer.ts';
+import WSServer from './core/WSServer';
+import HTTPServer from './core/HTTPServer';
 
 
 // Determine port preference: explicit env override OR config

@@ -10,8 +10,8 @@ Non-secret configuration lives in version-controlled JSON; secrets live only in 
 
 ## Usage
 ```ts
-import serverConfig from '../../config/server.json' with { type: 'json' };
-import clientConfig from '../../config/client.json' with { type: 'json' };
+import serverConfig from '@config/server.json' with { type: 'json' };
+import clientConfig from '@config/client.json' with { type: 'json' };
 ```
 
 Client configuration is frozen and injected:

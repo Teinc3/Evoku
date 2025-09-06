@@ -1,6 +1,6 @@
 import seedrandom from 'seedrandom';
 
-import clientConfig from '../../../../config/client.json' with { type: 'json' };
+import clientConfig from '@config/client.json' with { type: 'json' };
 
 import type ActionEnum from '../../types/enums/actions';
 

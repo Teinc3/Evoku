@@ -8,5 +8,6 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@config/(.*)$': '<rootDir>/config/$1',
   }
 };

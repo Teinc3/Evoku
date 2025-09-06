@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
-import deepFreeze from '../../../shared/utils/deepFreeze';
-import configData from '../../../../config/client.json' with { type: 'json' };
+import deepFreeze from '@shared/utils/deepFreeze';
+import configData from '@config/client.json' with { type: 'json' };
 
 
 export const AppConfig = deepFreeze(configData);

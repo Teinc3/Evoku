@@ -19,7 +19,8 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@config/*": ["config/*"]
     }
   },
   "angularCompilerOptions": {
