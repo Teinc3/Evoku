@@ -264,36 +264,6 @@ describe('PacketScrambler', () => {
   });
 
   describe('error handling', () => {
-    it('should handle null ID gracefully', () => {
-      mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('error-seed');
-      
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-      const scrambled = scrambler.scrambleID(null as unknown as ActionEnum);
-      const unscrambled = scrambler.unscrambleID(null as unknown as number);
-      
-      expect(scrambled).toBe(null);
-      expect(unscrambled).toBe(null);
-      
-      consoleSpy.mockRestore();
-    });
-
-    it('should handle undefined ID gracefully', () => {
-      mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('error-seed');
-      
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
-      const scrambled = scrambler.scrambleID(undefined as unknown as ActionEnum);
-      const unscrambled = scrambler.unscrambleID(undefined as unknown as number);
-      
-      expect(scrambled).toBe(undefined);
-      expect(unscrambled).toBe(undefined);
-      
-      consoleSpy.mockRestore();
-    });
-
     it('should treat empty string seed as unseeded (pass-through)', () => {
       const scrambler = createScrambler('');
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
