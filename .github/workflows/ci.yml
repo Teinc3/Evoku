@@ -1,8 +1,10 @@
 name: Continuous Integration
 
 on:
+  push:
+    branches: [master] # Lint on pushes to master (i.e. PRs)
   pull_request:
-    branches: [master] # Correct for your repository
+    branches: [master] # Lint on PR updates targeting master
 
 jobs:
   validate-server:
@@ -16,6 +18,14 @@ jobs:
         with:
           # Using v24 as requested for native TypeScript execution
           node-version: '24' 
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies reliably
         run: npm ci
