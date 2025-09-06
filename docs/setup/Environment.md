@@ -19,7 +19,7 @@ Everything else lives in JSON config and is typed.
 ## Setup
 1. Copy `.env.example` to `.env` if secrets are needed and fill them in.
 2. Adjust `config/server.json` / `config/client.json` for non-secret values.
-  For more details see [`docs/Config.md`](Config.md).
+  For more details see [`docs/setup/Config.md`](Config.md).
 
 ## Troubleshooting
 * Invalid JSON: fix and rebuild.

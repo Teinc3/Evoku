@@ -2,6 +2,12 @@
 
 Documentation of internal API is organised into the following sections:
 
+## Setup & Configuration
+Location: [`docs/setup/`](/docs/setup/README.md)
+
+Configuration management, environment setup, and deployment documentation.
+Covers the modern JSON-based configuration system, environment variable handling, and TypeScript configuration.
+
 ## Data Pipeline
 Location: [`docs/pipeline`](/docs/pipeline/README.md)
 
