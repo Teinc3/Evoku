@@ -17,6 +17,7 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
   }
 
   private handleHeartbeat(_session: SessionModel, _data: AugmentAction<SessionActions>): boolean {
+    // Handle heartbeat - could implement actual heartbeat logic here
     return true;
   }
 }

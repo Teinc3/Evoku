@@ -33,6 +33,7 @@ export default class WSServer {
 
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
+      ws.binaryType = 'arraybuffer';
       // Create a new ServerSocket instance and a SessionModel that wraps it
       const socket = new ServerSocket(ws);
       this.sessionManager.createSession(socket);

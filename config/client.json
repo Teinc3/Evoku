@@ -1,6 +1,15 @@
 {
-  "api": { 
-    "uri": "ws://localhost:8745/ws" 
+  "networking": {
+    "ws": {
+      "uri": "ws://localhost:8745/ws",
+      "timeoutMs": 5000
+    },
+    "service": {
+      "autoReconnect": true,
+      "backoffMs": 500,
+      "backoffMaxMs": 5000,
+      "pingIntervalMs": 10000
+    }
   },
   "security": { 
     "packetScramblerSeed": "dev-scrambler-seed-123" 
