@@ -1,0 +1,8 @@
+{
+  "api": { 
+    "uri": "ws://localhost:8745/ws" 
+  },
+  "security": { 
+    "packetScramblerSeed": "dev-scrambler-seed-123" 
+  }
+}

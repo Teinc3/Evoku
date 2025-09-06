@@ -4,7 +4,7 @@ import PlayerInfoCodec from '../custom/PlayerInfoCodec';
 import PacketBuffer from '../../utils/PacketBuffer';
 
 import type IPacketBuffer from '../../../types/networking/IPacketBuffer';
-import type PlayerInfoContract from '../../../types/contracts/lifecycle/PlayerInfoContract';
+import type PlayerInfoContract from '../../../types/contracts/components/custom/PlayerInfoContract';
 
 
 describe('createArrayCodec Factory', () => {
@@ -86,7 +86,6 @@ describe('createArrayCodec Factory', () => {
     const decodedData = codec.decode(buffer);
 
     // Assert that the decoded data does NOT equal the original data
-    // @ts-expect-error 2345
     expect(decodedData).not.toEqual(data);
 
     // Assert what the data actually became (TextEncoder by js' goofy type coercion)

@@ -1,7 +1,6 @@
 name: Continuous Integration
 
 on:
-  push:
   pull_request:
     branches: [master] # Correct for your repository
 
@@ -20,6 +19,9 @@ jobs:
 
       - name: Install dependencies reliably
         run: npm ci
+      
+      - name: Run TS Compiler
+        run: npm run comp
 
       - name: Lint code
         id: lint

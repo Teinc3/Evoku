@@ -42,6 +42,6 @@ testem.log
 Thumbs.db
 
 # Environment variables
-.env.local
-.env.*.local
-# Note: .env, .env.development, .env.production are tracked for team consistency
+.env
+# Keep example schema tracked
+!.env.example
