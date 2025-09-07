@@ -2,6 +2,9 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 module.exports = function (config) {
+  const isCI = process.env.CI === 'true';
+  const projectName = process.env.npm_package_name || 'evoku';
+
   config.set({
     basePath: '',
     frameworks: ['jasmine'],
@@ -24,7 +27,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/evoku'),
+      dir: require('path').join(__dirname, `./coverage/${projectName}`),
       subdir: '.',
       reporters: [
         { type: 'html' },
@@ -33,6 +36,16 @@ module.exports = function (config) {
     },
     reporters: ['progress', 'kjhtml'],
     browsers: ['FirefoxHeadless'],
-    restartOnFileChange: true
+    // Timeout settings for better CI reliability
+    browserNoActivityTimeout: isCI ? 60000 : 30000, // 60s in CI, 30s locally
+    captureTimeout: isCI ? 60000 : 30000,
+    // Firefox-specific settings
+    customLaunchers: {
+      FirefoxHeadless: {
+        base: 'Firefox',
+        flags: ['--headless', '--disable-gpu']
+      }
+    },
+    restartOnFileChange: !isCI // Disable in CI to prevent hanging
   });
 };
