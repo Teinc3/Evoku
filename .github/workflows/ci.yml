@@ -37,8 +37,8 @@ jobs:
         id: lint
         run: npm run lint
 
-      - name: Test server code
-        run: npm run test:server-ci
+      - name: Test code
+        run: npm run test-ci
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5

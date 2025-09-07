@@ -7,7 +7,9 @@
     "composite": true,
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
   },
   "include": [
     "src/server/**/*.ts",
