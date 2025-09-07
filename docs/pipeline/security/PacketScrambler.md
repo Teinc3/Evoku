@@ -59,11 +59,11 @@ Creates a new PacketScrambler instance and initializes mappings if seed availabl
 
 ### Scrambling Operations
 
-#### scrambleID(devID: ActionEnum): number
+#### scrambleID(packetID: ActionEnum): number
 Converts a development packet ID to its scrambled network equivalent.
 
 **Parameters:**
-- `devID` - The internal, static packet ID from development
+- `packetID` - The internal, static packet ID from development
 
 **Returns:** The scrambled packet ID for network transmission
 
@@ -72,10 +72,10 @@ Converts a development packet ID to its scrambled network equivalent.
 import scrambler from '@shared/networking/security/scramble';
 
 // Scramble a packet ID before sending
-const devID = ProtocolActions.PING; // e.g., 42
-const networkID = scrambler.scrambleID(devID); // e.g., -73
+const packetID = ProtocolActions.PING; // e.g., 42
+const networkID = scrambler.scrambleID(packetID); // e.g., -73
 
-// networkID is sent over the network instead of devID
+// networkID is sent over the network instead of packetID
 ```
 
 **Behavior:**
@@ -97,23 +97,24 @@ import scrambler from '@shared/networking/security/scramble';
 
 // Unscramble received packet ID
 const receivedID = -73; // From network
-const devID = scrambler.unscrambleID(receivedID); // 42 (ProtocolActions.PING)
+const packetID = scrambler.unscrambleID(receivedID); // 42 (ProtocolActions.PING)
 
-// Use devID for internal packet processing
+// Use packetID for internal packet processing
 ```
 
 **Behavior:**
 - **With Seed:** Returns mapped original ID
 - **Without Seed:** Returns scrambled ID unchanged  
 - **Unknown ID:** Logs warning and returns scrambled ID
+- **Validation:** Checks if unscrambled ID is a valid ActionEnum
 
 ## Implementation Details
 
 ### BiMap Usage
-The scrambler uses a bidirectional map (BiMap) to maintain one-to-one correspondence between development and scrambled IDs:
+The scrambler uses a bidirectional map (BiMap<number>) to maintain one-to-one correspondence between development and scrambled IDs:
 
 ```typescript
-private map: BiMap<ActionEnum> | undefined;
+private map: BiMap<number> | undefined;
 ```
 
 This allows efficient forward (scramble) and reverse (unscramble) lookups without maintaining separate maps.
@@ -159,10 +160,10 @@ The scrambler works within the constraints of packet encoding:
 #### Missing Mappings
 ```typescript
 // Scramble operation with unknown ID
-const scrambled = this.scrambleMap.get(devID);
+const scrambled = this.map.get(packetID.toString());
 if (scrambled === undefined) {
-  console.warn(`PacketScrambler: No mapping for devID ${devID}. Is it within a Byte range?`);
-  return devID; // Fallback for safety
+  console.warn(`PacketScrambler: No mapping for packetID ${packetID} found.`);
+  return packetID; // Fallback for safety
 }
 ```
 

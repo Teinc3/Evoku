@@ -32,31 +32,35 @@ const lifecycleActionValues = new Set(Object.values(LifecycleActions));
 
 
 // --- High-Performance Type Guards ---
-export function isSystemActions(action: unknown): action is SystemActions {
+export function isActionEnum(action: number): action is ActionEnum {
+  return isMatchActions(action) || isSystemActions(action);
+}
+
+export function isSystemActions(action: number): action is SystemActions {
   return isLobbyActions(action) || isSessionActions(action);
 }
 
-export function isLobbyActions(action: unknown): action is LobbyActions {
+export function isLobbyActions(action: number): action is LobbyActions {
   return lobbyActionValues.has(action as LobbyActions);
 }
 
-export function isSessionActions(action: unknown): action is SessionActions {
+export function isSessionActions(action: number): action is SessionActions {
   return sessionActionValues.has(action as SessionActions);
 }
 
-export function isMatchActions(action: unknown): action is MatchActions {
+export function isMatchActions(action: number): action is MatchActions {
   return isPlayerActions(action) || isProtocolActions(action) || isLifecycleActions(action);
 }
 
-export function isPlayerActions(action: unknown): action is PlayerActions {
+export function isPlayerActions(action: number): action is PlayerActions {
   return isMechanicsActions(action) || isPUPActions(action);
 }
 
-export function isMechanicsActions(action: unknown): action is MechanicsActions {
+export function isMechanicsActions(action: number): action is MechanicsActions {
   return mechanicsActionValues.has(action as MechanicsActions);
 }
 
-export function isPUPActions(action: unknown): action is PUPActions {
+export function isPUPActions(action: number): action is PUPActions {
   return isFirePUPActions(action)
       || isWaterPUPActions(action)
       || isWoodPUPActions(action)
@@ -64,31 +68,31 @@ export function isPUPActions(action: unknown): action is PUPActions {
       || isEarthPUPActions(action);
 }
 
-export function isFirePUPActions(action: unknown): action is FirePUPActions {
+export function isFirePUPActions(action: number): action is FirePUPActions {
   return firePUPActionValues.has(action as FirePUPActions);
 }
 
-export function isWaterPUPActions(action: unknown): action is WaterPUPActions {
+export function isWaterPUPActions(action: number): action is WaterPUPActions {
   return waterPUPActionValues.has(action as WaterPUPActions);
 }
 
-export function isWoodPUPActions(action: unknown): action is WoodPUPActions {
+export function isWoodPUPActions(action: number): action is WoodPUPActions {
   return woodPUPActionValues.has(action as WoodPUPActions);
 }
 
-export function isMetalPUPActions(action: unknown): action is MetalPUPActions {
+export function isMetalPUPActions(action: number): action is MetalPUPActions {
   return metalPUPActionValues.has(action as MetalPUPActions);
 }
 
-export function isEarthPUPActions(action: unknown): action is EarthPUPActions {
+export function isEarthPUPActions(action: number): action is EarthPUPActions {
   return earthPUPActionValues.has(action as EarthPUPActions);
 }
 
-export function isProtocolActions(action: unknown): action is ProtocolActions {
+export function isProtocolActions(action: number): action is ProtocolActions {
   return protocolActionValues.has(action as ProtocolActions);
 }
 
-export function isLifecycleActions(action: unknown): action is LifecycleActions {
+export function isLifecycleActions(action: number): action is LifecycleActions {
   return lifecycleActionValues.has(action as LifecycleActions);
 }
 
@@ -102,9 +106,9 @@ export function isLifecycleActions(action: unknown): action is LifecycleActions 
  * @returns A new type guard that narrows the type of the entire packet object.
  */
 function createDataGuard<GenericActionOrType extends ActionEnum>(
-  enumGuard: (action: unknown) => action is GenericActionOrType
-): (packet: { action: unknown }) => packet is AugmentAction<GenericActionOrType> {
-  return (packet: { action: unknown }): packet is AugmentAction<GenericActionOrType> => {
+  enumGuard: (action: number) => action is GenericActionOrType
+): (packet: { action: number }) => packet is AugmentAction<GenericActionOrType> {
+  return (packet: { action: number }): packet is AugmentAction<GenericActionOrType> => {
     return enumGuard(packet.action);
   };
 }

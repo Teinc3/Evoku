@@ -2,12 +2,13 @@ import seedrandom from 'seedrandom';
 import BiMap from 'bidirectional-map';
 
 import clientConfig from '@config/client.json' with { type: 'json' };
+import { isActionEnum } from '../../types/utils/typeguards/actions';
 
 import type ActionEnum from '../../types/enums/actions';
 
 
 class PacketScrambler {
-  private map: BiMap<ActionEnum> | undefined;
+  private map: BiMap<number> | undefined;
 
   constructor() {
     const seed = clientConfig.security.packetScramblerSeed;
@@ -45,20 +46,20 @@ class PacketScrambler {
 
   /**
      * Takes a static development ID and returns its scrambled version for network transmission.
-     * @param devID The internal, static packet ID.
+     * @param packetID The internal, static packet ID.
      * @returns The scrambled packet ID.
      */
-  public scrambleID(devID: ActionEnum): number {
+  public scrambleID(packetID: ActionEnum): number {
     // If the map doesn't exist, return the ID unchanged.
     if (!this.map) {
-      return devID;
+      return packetID;
     }
 
-    const scrambled = this.map.get(devID.toString());
+    const scrambled = this.map.get(packetID.toString());
 
     if (scrambled === undefined) {
-      console.warn(`PacketScrambler: No mapping for devID ${devID}. Is it within a Byte range?`);
-      return devID; // Fallback for safety
+      console.warn(`PacketScrambler: No mapping for packetID ${packetID} found.`);
+      return packetID; // Fallback for safety
     }
 
     return scrambled;
@@ -82,7 +83,14 @@ class PacketScrambler {
       return scrambledID; // Fallback for safety
     }
 
-    return parseInt(original);
+    const packetID = parseInt(original);
+    if (!isActionEnum(packetID)) {
+      console.warn(
+        `PacketScrambler: Unscrambled ID ${scrambledID} to invalid ActionEnum ${packetID}.`
+      );
+    }
+
+    return packetID;
   }
 }
 
