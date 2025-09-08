@@ -1,99 +1,139 @@
-import SessionActions from "../../enums/actions/system/session";
-import LobbyActions from "../../enums/actions/system/lobby";
-import ProtocolActions from "../../enums/actions/match/protocol";
-import WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
-import WaterPUPActions from "../../enums/actions/match/player/powerups/water";
-import MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
-import FirePUPActions from "../../enums/actions/match/player/powerups/fire";
-import EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
-import MechanicsActions from "../../enums/actions/match/player/mechanics";
-import LifecycleActions from "../../enums/actions/match/lifecycle";
-
 import type AugmentAction from "../AugmentAction";
 import type SystemActions from "../../enums/actions/system";
 import type PUPActions from "../../enums/actions/match/player/powerups";
 import type PlayerActions from "../../enums/actions/match/player";
 import type MatchActions from "../../enums/actions/match";
 import type ActionEnum from "../../enums/actions";
+import type SessionActions from "../../enums/actions/system/session";
+import type LobbyActions from "../../enums/actions/system/lobby";
+import type ProtocolActions from "../../enums/actions/match/protocol";
+import type LifecycleActions from "../../enums/actions/match/lifecycle";
+import type MechanicsActions from "../../enums/actions/match/player/mechanics";
+import type FirePUPActions from "../../enums/actions/match/player/powerups/fire";
+import type WaterPUPActions from "../../enums/actions/match/player/powerups/water";
+import type WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
+import type MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
+import type EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
 
 
-// --- Pre-computed Sets for O(1) Lookups ---
-// This work is done only once when the module is loaded.
-const lobbyActionValues = new Set(Object.values(LobbyActions));
-const sessionActionValues = new Set(Object.values(SessionActions));
-const mechanicsActionValues = new Set(Object.values(MechanicsActions));
-const firePUPActionValues = new Set(Object.values(FirePUPActions));
-const waterPUPActionValues = new Set(Object.values(WaterPUPActions));
-const woodPUPActionValues = new Set(Object.values(WoodPUPActions));
-const metalPUPActionValues = new Set(Object.values(MetalPUPActions));
-const earthPUPActionValues = new Set(Object.values(EarthPUPActions));
-const protocolActionValues = new Set(Object.values(ProtocolActions));
-const lifecycleActionValues = new Set(Object.values(LifecycleActions));
+// --- Optimized Range-Based Action Type System ---
+// Instead of multiple Sets, use range checks for better performance and memory efficiency.
+// Each enum category uses distinct, non-overlapping numeric ranges.
+
+interface ActionRange {
+  readonly min: number;
+  readonly max: number;
+}
+
+const ACTION_RANGES = {
+  PROTOCOL: { min: -12, max: -10 } as ActionRange,      // PING, PONG, REJECT_ACTION
+  SESSION: { min: -20, max: -20 } as ActionRange,       // HEARTBEAT
+  LOBBY: { min: -53, max: -50 } as ActionRange,         // JOIN_QUEUE, LEAVE_QUEUE, QUEUE_UPDATE, MATCH_FOUND
+  LIFECYCLE: { min: -61, max: -60 } as ActionRange,     // GAME_INIT, GAME_OVER
+  MECHANICS: { min: -4, max: -1 } as ActionRange,       // SET_CELL, CELL_SET, DRAW_PUP, PUP_DRAWN
+  WATER_PUP: { min: 10, max: 13 } as ActionRange,       // USE_CRYO, CRYO_USED, USE_CASCADE, CASCADE_USED
+  FIRE_PUP: { min: 20, max: 23 } as ActionRange,        // USE_INFERNO, INFERNO_USED, USE_METABOLIC, METABOLIC_USED
+  WOOD_PUP: { min: 30, max: 33 } as ActionRange,        // USE_ENTANGLE, ENTANGLE_USED, USE_WISDOM, WISDOM_USED
+  METAL_PUP: { min: 40, max: 43 } as ActionRange,       // USE_LOCK, LOCK_USED, USE_FORGE, FORGE_USED
+  EARTH_PUP: { min: 50, max: 53 } as ActionRange,       // USE_LANDSLIDE, LANDSLIDE_USED, USE_EXCAVATE, EXCAVATE_USED
+} as const;
+
+/**
+ * Fast range check utility - single comparison for each bound
+ */
+function inRange(value: number, range: ActionRange): boolean {
+  return value >= range.min && value <= range.max;
+}
 
 
-// --- High-Performance Type Guards ---
+// --- High-Performance Range-Based Type Guards ---
+// Optimized version that eliminates multiple function calls
+
 export function isActionEnum(action: number): action is ActionEnum {
-  return isMatchActions(action) || isSystemActions(action);
+  // Single comprehensive check - avoid hierarchical calls for performance
+  return (action >= -61 && action <= -60) ||  // Lifecycle
+         (action >= -53 && action <= -50) ||  // Lobby  
+         (action === -20) ||                  // Session
+         (action >= -12 && action <= -10) ||  // Protocol
+         (action >= -4 && action <= -1) ||    // Mechanics
+         (action >= 10 && action <= 13) ||    // Water PUP
+         (action >= 20 && action <= 23) ||    // Fire PUP
+         (action >= 30 && action <= 33) ||    // Wood PUP
+         (action >= 40 && action <= 43) ||    // Metal PUP
+         (action >= 50 && action <= 53);      // Earth PUP
 }
 
 export function isSystemActions(action: number): action is SystemActions {
-  return isLobbyActions(action) || isSessionActions(action);
+  return (action >= -53 && action <= -50) ||  // Lobby
+         (action === -20);                     // Session
 }
 
 export function isLobbyActions(action: number): action is LobbyActions {
-  return lobbyActionValues.has(action as LobbyActions);
+  return inRange(action, ACTION_RANGES.LOBBY);
 }
 
 export function isSessionActions(action: number): action is SessionActions {
-  return sessionActionValues.has(action as SessionActions);
+  return inRange(action, ACTION_RANGES.SESSION);
 }
 
 export function isMatchActions(action: number): action is MatchActions {
-  return isPlayerActions(action) || isProtocolActions(action) || isLifecycleActions(action);
+  return (action >= -61 && action <= -60) ||  // Lifecycle
+         (action >= -12 && action <= -10) ||  // Protocol
+         (action >= -4 && action <= -1) ||    // Mechanics
+         (action >= 10 && action <= 13) ||    // Water PUP
+         (action >= 20 && action <= 23) ||    // Fire PUP
+         (action >= 30 && action <= 33) ||    // Wood PUP
+         (action >= 40 && action <= 43) ||    // Metal PUP
+         (action >= 50 && action <= 53);      // Earth PUP
 }
 
 export function isPlayerActions(action: number): action is PlayerActions {
-  return isMechanicsActions(action) || isPUPActions(action);
+  return (action >= -4 && action <= -1) ||    // Mechanics
+         (action >= 10 && action <= 13) ||    // Water PUP
+         (action >= 20 && action <= 23) ||    // Fire PUP
+         (action >= 30 && action <= 33) ||    // Wood PUP
+         (action >= 40 && action <= 43) ||    // Metal PUP
+         (action >= 50 && action <= 53);      // Earth PUP
 }
 
 export function isMechanicsActions(action: number): action is MechanicsActions {
-  return mechanicsActionValues.has(action as MechanicsActions);
+  return inRange(action, ACTION_RANGES.MECHANICS);
 }
 
 export function isPUPActions(action: number): action is PUPActions {
-  return isFirePUPActions(action)
-      || isWaterPUPActions(action)
-      || isWoodPUPActions(action)
-      || isMetalPUPActions(action)
-      || isEarthPUPActions(action);
+  return (action >= 10 && action <= 13) ||    // Water PUP
+         (action >= 20 && action <= 23) ||    // Fire PUP
+         (action >= 30 && action <= 33) ||    // Wood PUP
+         (action >= 40 && action <= 43) ||    // Metal PUP
+         (action >= 50 && action <= 53);      // Earth PUP
 }
 
 export function isFirePUPActions(action: number): action is FirePUPActions {
-  return firePUPActionValues.has(action as FirePUPActions);
+  return inRange(action, ACTION_RANGES.FIRE_PUP);
 }
 
 export function isWaterPUPActions(action: number): action is WaterPUPActions {
-  return waterPUPActionValues.has(action as WaterPUPActions);
+  return inRange(action, ACTION_RANGES.WATER_PUP);
 }
 
 export function isWoodPUPActions(action: number): action is WoodPUPActions {
-  return woodPUPActionValues.has(action as WoodPUPActions);
+  return inRange(action, ACTION_RANGES.WOOD_PUP);
 }
 
 export function isMetalPUPActions(action: number): action is MetalPUPActions {
-  return metalPUPActionValues.has(action as MetalPUPActions);
+  return inRange(action, ACTION_RANGES.METAL_PUP);
 }
 
 export function isEarthPUPActions(action: number): action is EarthPUPActions {
-  return earthPUPActionValues.has(action as EarthPUPActions);
+  return inRange(action, ACTION_RANGES.EARTH_PUP);
 }
 
 export function isProtocolActions(action: number): action is ProtocolActions {
-  return protocolActionValues.has(action as ProtocolActions);
+  return inRange(action, ACTION_RANGES.PROTOCOL);
 }
 
 export function isLifecycleActions(action: number): action is LifecycleActions {
-  return lifecycleActionValues.has(action as LifecycleActions);
+  return inRange(action, ACTION_RANGES.LIFECYCLE);
 }
 
 // --- Generic Wrapper to Create Data-Level Guards ---
