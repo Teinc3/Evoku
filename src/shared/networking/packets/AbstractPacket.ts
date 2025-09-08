@@ -20,22 +20,22 @@ implements IPacket<GenericAction> {
   _data: AugmentAction<GenericAction>;
 
   /**
-     * The unique identifier for the packet type.
-     * This should be defined in subclasses to specify the packet's action type.
-     * 
-     * @type {GenericAction}
-     * @abstract
-     * @readonly
-     */
+   * The unique identifier for the packet type.
+   * This should be defined in subclasses to specify the packet's action type.
+   * 
+   * @type {GenericAction}
+   * @abstract
+   * @readonly
+   */
   abstract readonly id: GenericAction;
 
   /**
-     * The codec used for encoding and decoding the packet's data.
-     * 
-     * @type {CustomCodecConstructor<AugmentAction<GenericAction>>}
-     * @abstract
-     * @readonly
-     */
+   * The codec used for encoding and decoding the packet's data.
+   * 
+   * @type {CustomCodecConstructor<AugmentAction<GenericAction>>}
+   * @abstract
+   * @readonly
+   */
   abstract readonly Codec: CustomCodecConstructor<AugmentAction<GenericAction>>;
 
   constructor(data?: AugmentAction<GenericAction>) {
@@ -51,11 +51,11 @@ implements IPacket<GenericAction> {
   }
 
   /**
-     * Unwraps the provided packet buffer into Data bound by the packet's contract.
-     * 
-     * @param buffer 
-     * @returns {AugmentAction<GenericAction>} The data decoded from the packet buffer.
-     */
+   * Unwraps the provided packet buffer into Data bound by the packet's contract.
+   * 
+   * @param buffer 
+   * @returns {AugmentAction<GenericAction>} The data decoded from the packet buffer.
+   */
   unwrap(buffer: IPacketBuffer): AugmentAction<GenericAction> {
     const codecInstance = new this.Codec();
     this.data = codecInstance.decode(buffer);
@@ -63,11 +63,11 @@ implements IPacket<GenericAction> {
   }
 
   /**
-     * Wraps the provided data, bound by the packet's contract, into a packet buffer.
-     * 
-     * @param {ActionMap[GenericAction]} data - The data to be wrapped in the packet.
-     * @return {IPacketBuffer} The packet buffer containing the encoded data.
-     */
+   * Wraps the provided data, bound by the packet's contract, into a packet buffer.
+   * 
+   * @param {ActionMap[GenericAction]} data - The data to be wrapped in the packet.
+   * @return {IPacketBuffer} The packet buffer containing the encoded data.
+   */
   wrap(data?: AugmentAction<GenericAction>): IPacketBuffer {
 
     if (!data && !this.data) {

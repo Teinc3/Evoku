@@ -1,5 +1,5 @@
 import AbstractPacket from "../AbstractPacket";
-import PacketRegistry from "../../registry";
+import packetRegistry from "../../registry";
 import createPacketCodec from "../../codecs/factory/createPacketCodec";
 
 import type AugmentAction from "../../../types/utils/AugmentAction";
@@ -33,7 +33,7 @@ export default function createPacket<GenericAction extends ActionEnum>(
 
     static {
       // Register the packet class in the PacketRegistry upon creation of packet
-      PacketRegistry.registerPacket(GenericPacket as unknown as PacketConstructor<ActionEnum>);
+      packetRegistry.registerPacket(GenericPacket as unknown as PacketConstructor<ActionEnum>);
     }
   } as PacketConstructor<GenericAction>;
 }
