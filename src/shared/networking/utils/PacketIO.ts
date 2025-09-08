@@ -1,5 +1,5 @@
 import PacketBuffer from "./PacketBuffer";
-import PacketRegistry from "../registry";
+import packetRegistry from "../registry";
 import ActionCodec from "../codecs/custom/ActionCodec";
 
 import type ActionEnum from "../../types/enums/actions";
@@ -25,7 +25,7 @@ export default class PacketIO {
     packetBuffer.write(buffer);
 
     const action = (new ActionCodec).decode(packetBuffer);
-    const Packet = PacketRegistry.getPacket(action);
+    const Packet = packetRegistry.getPacket(action);
     if (!Packet) {
       throw new Error(`No packet registered for action: ${action}`);
     }
@@ -40,7 +40,7 @@ export default class PacketIO {
     GenericAction extends ActionEnum,
     GenericContract extends ActionMap[GenericAction]
   >(action: GenericAction, dataContract: GenericContract) {
-    const Packet = PacketRegistry.getPacket(action);
+    const Packet = packetRegistry.getPacket(action);
     if (!Packet) {
       throw new Error(`No packet registered for action: ${action}`);
     }

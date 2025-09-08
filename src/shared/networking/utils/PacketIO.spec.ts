@@ -1,6 +1,6 @@
 import PacketIO from './PacketIO';
 import PacketBuffer from './PacketBuffer';
-import PacketRegistry from '../registry';
+import packetRegistry from '../registry';
 import LifecycleActions from '../../types/enums/actions/match/lifecycle';
 
 import type ActionEnum from '../../types/enums/actions';
@@ -19,7 +19,13 @@ jest.mock('./PacketBuffer', () => {
 });
 
 jest.mock('../registry', () => ({
-  getPacket: jest.fn()
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: {
+    registerPacket: jest.fn(),
+    getPacket: jest.fn()
+  },
+  PacketRegistry: jest.fn()
 }));
 
 jest.mock('../codecs/custom/ActionCodec', () => {
@@ -27,6 +33,7 @@ jest.mock('../codecs/custom/ActionCodec', () => {
     decode: mockDecodeMethod
   }));
 });
+
 
 describe('PacketIO', () => {
   let packetIO: PacketIO;
@@ -60,7 +67,7 @@ describe('PacketIO', () => {
     
     // Reset and setup all mocks
     (PacketBuffer as jest.Mock).mockImplementation(() => mockPacketBuffer);
-    (PacketRegistry.getPacket as jest.Mock).mockReturnValue(mockPacketClass);
+    (packetRegistry.getPacket as jest.Mock).mockReturnValue(mockPacketClass);
     
     packetIO = new PacketIO();
   });
@@ -84,7 +91,7 @@ describe('PacketIO', () => {
       expect(PacketBuffer).toHaveBeenCalledWith(10);
       expect(mockPacketBuffer.write).toHaveBeenCalledWith(buffer);
       expect(mockDecodeMethod).toHaveBeenCalledWith(mockPacketBuffer);
-      expect(PacketRegistry.getPacket).toHaveBeenCalledWith(LifecycleActions.GAME_INIT);
+      expect(packetRegistry.getPacket).toHaveBeenCalledWith(LifecycleActions.GAME_INIT);
       expect(mockPacketClass).toHaveBeenCalled();
       expect(mockPacket.unwrap).toHaveBeenCalledWith(mockPacketBuffer);
     });
@@ -102,7 +109,7 @@ describe('PacketIO', () => {
     });
 
     it('should throw error for unregistered action', () => {
-      (PacketRegistry.getPacket as jest.Mock).mockReturnValue(null);
+      (packetRegistry.getPacket as jest.Mock).mockReturnValue(null);
       const buffer = new ArrayBuffer(10);
 
       expect(() => packetIO.decodePacket(buffer)).toThrow(
@@ -156,7 +163,7 @@ describe('PacketIO', () => {
       
       const result = packetIO.encodePacket(action, dataContract);
 
-      expect(PacketRegistry.getPacket).toHaveBeenCalledWith(action);
+      expect(packetRegistry.getPacket).toHaveBeenCalledWith(action);
       expect(mockPacketClass).toHaveBeenCalledWith({
         action,
         data: 'test'
@@ -166,7 +173,7 @@ describe('PacketIO', () => {
     });
 
     it('should throw error for unregistered action', () => {
-      (PacketRegistry.getPacket as jest.Mock).mockReturnValue(null);
+      (packetRegistry.getPacket as jest.Mock).mockReturnValue(null);
       const action = -999 as ActionEnum; // Non-existent action ID
       const dataContract = { data: 'test' };
 
@@ -222,7 +229,7 @@ describe('PacketIO', () => {
       const errorMockClass = jest.fn().mockImplementation(() => {
         throw new Error('Constructor error');
       });
-      (PacketRegistry.getPacket as jest.Mock).mockReturnValueOnce(errorMockClass);
+      (packetRegistry.getPacket as jest.Mock).mockReturnValueOnce(errorMockClass);
 
       const action = LifecycleActions.GAME_INIT as ActionEnum;
       const dataContract = { data: 'test' };
@@ -298,7 +305,7 @@ describe('PacketIO', () => {
     });
 
     it('should handle null action in encode', () => {
-      (PacketRegistry.getPacket as jest.Mock).mockReturnValue(null);
+      (packetRegistry.getPacket as jest.Mock).mockReturnValue(null);
       const dataContract = { data: 'test' };
       
       expect(() => packetIO.encodePacket(null as unknown as ActionEnum, dataContract))
@@ -306,7 +313,7 @@ describe('PacketIO', () => {
     });
 
     it('should handle undefined action in encode', () => {
-      (PacketRegistry.getPacket as jest.Mock).mockReturnValue(null);
+      (packetRegistry.getPacket as jest.Mock).mockReturnValue(null);
       const dataContract = { data: 'test' };
 
       expect(() => packetIO.encodePacket(undefined as unknown as ActionEnum, dataContract))

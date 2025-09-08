@@ -1,5 +1,10 @@
 import 'dotenv/config';
 
+
+import "@shared/networking/packets"
+
+
+// Register all packets
 import serverConfig from '../../config/server.json' with { type: 'json' };
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';

@@ -1,5 +1,10 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 
+
+import "@shared/networking/packets"
+
+
+// Register all packets
 import appConfig from './app/app.config';
 import App from './app/app';
 
