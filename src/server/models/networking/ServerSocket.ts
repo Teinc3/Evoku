@@ -48,7 +48,6 @@ export default class ServerSocket {
           this.close();
         }
       } catch {
-        // Optionally emit an error event or log
         // console.error('Failed to decode packet:', err);
       }
     });

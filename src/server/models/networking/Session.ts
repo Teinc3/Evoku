@@ -99,7 +99,7 @@ export default class SessionModel {
       // Update the last active time
       this.lastActiveTime = (new Date).getTime();
     } else {
-      // Error out and force disconnection
+      // Log the error and force disconnection
       console.error(`Action failed: ${data.action}`);
       this.disconnect(true);
     }

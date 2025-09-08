@@ -8,7 +8,7 @@
       "autoReconnect": true,
       "backoffMs": 500,
       "backoffMaxMs": 5000,
-      "pingIntervalMs": 10000
+      "pingIntervalMs": 15000
     }
   },
   "security": { 

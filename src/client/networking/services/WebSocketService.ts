@@ -1,4 +1,4 @@
-import ProtocolActions from '@shared/types/enums/actions/match/protocol';
+import SessionActions from '@shared/types/enums/actions/system/session';
 import clientConfig from '@config/client.json' with { type: 'json' };
 import ClientSocket from '../transport/ClientSocket';
 import ClientPacketHandler from '../handlers/ClientPacketHandler';
@@ -21,6 +21,8 @@ export default class WebSocketService {
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   public latencyMs: number | null;
+  private lastPacketSentAt: number;
+  private disconnectCallback: (() => void) | null = null;
 
   constructor() {
     this.socket = new ClientSocket();
@@ -31,6 +33,7 @@ export default class WebSocketService {
     this.pingTimer = null;
     this.lastPingAt = null;
     this.latencyMs = null;
+    this.lastPacketSentAt = 0;
   }
 
   /**
@@ -61,10 +64,10 @@ export default class WebSocketService {
   }
 
   /**
-   * Get the packet handler instance for direct access to handlers
+   * Set a callback to be called when the socket disconnects
    */
-  getPacketHandler(): ClientPacketHandler {
-    return this.packetHandler;
+  setDisconnectCallback(callback: () => void): void {
+    this.disconnectCallback = callback;
   }
 
   /**
@@ -81,6 +84,7 @@ export default class WebSocketService {
 
     try {
       this.socket.send(action, data);
+      this.lastPacketSentAt = Date.now();
     } catch (error) {
       // If send fails, add back to queue for retry
       this.queue.push([action, data]);
@@ -116,6 +120,11 @@ export default class WebSocketService {
     if (clientConfig.networking.service.autoReconnect) {
       this.scheduleReconnect();
     }
+
+    // Notify any listeners about the disconnect
+    if (this.disconnectCallback) {
+      this.disconnectCallback();
+    }
   };
 
   private handleError = (error: Event): void => {
@@ -149,13 +158,19 @@ export default class WebSocketService {
         return;
       }
 
-      try {
-        this.lastPingAt = Date.now();
-        this.send(ProtocolActions.PONG, {} as ActionMap[typeof ProtocolActions.PONG]);
-      } catch (error) {
-        console.error('Failed to send ping:', error);
+      const now = Date.now();
+      const timeSinceLastPacket = now - this.lastPacketSentAt;
+
+      // Send HEARTBEAT if it's been 15 seconds since last packet
+      if (timeSinceLastPacket >= 15 * 1000) {
+        try {
+          this.lastPingAt = now;
+          this.send(SessionActions.HEARTBEAT, {});
+        } catch (error) {
+          console.error('Failed to send heartbeat:', error);
+        }
       }
-    }, clientConfig.networking.service.pingIntervalMs);
+    }, 5000); // Check every 5 seconds
   }
 
   private scheduleReconnect(): void {

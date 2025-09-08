@@ -1,6 +1,7 @@
 export default interface IPacketBuffer {
 
   get buffer(): ArrayBuffer;
+  get nonResizeableBuffer(): ArrayBuffer;
   get dataView(): DataView;
   get index(): number;
   set index(newIndex: number);

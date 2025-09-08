@@ -43,7 +43,7 @@ describe('PacketIO', () => {
     write: jest.MockedFunction<(buffer: ArrayBuffer) => void>;
   };
   let mockPacket: {
-    wrap: jest.MockedFunction<() => { buffer: ArrayBuffer }>;
+    wrap: jest.MockedFunction<() => { buffer: ArrayBuffer; nonResizeableBuffer: ArrayBuffer }>;
     unwrap: jest.MockedFunction<() => unknown>;
   };
   let mockPacketClass: jest.MockedFunction<(...args: unknown[]) => typeof mockPacket>;
@@ -59,7 +59,10 @@ describe('PacketIO', () => {
     };
     
     mockPacket = {
-      wrap: jest.fn().mockReturnValue({ buffer: new ArrayBuffer(10) }),
+      wrap: jest.fn().mockReturnValue({ 
+        buffer: new ArrayBuffer(10),
+        nonResizeableBuffer: new ArrayBuffer(10)
+      }),
       unwrap: jest.fn()
     };
     
@@ -245,7 +248,10 @@ describe('PacketIO', () => {
       
       // Setup mocks for encoding
       const encodedBuffer = new ArrayBuffer(20);
-      mockPacket.wrap.mockReturnValue({ buffer: encodedBuffer });
+      mockPacket.wrap.mockReturnValue({ 
+        buffer: encodedBuffer,
+        nonResizeableBuffer: encodedBuffer
+      });
       
       // Setup mocks for decoding
       mockPacket.unwrap.mockReturnValue({ action: LifecycleActions.GAME_INIT, ...originalData });

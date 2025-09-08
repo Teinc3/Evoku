@@ -213,6 +213,7 @@ export default class NetworkStatusComponent implements OnInit {
   ngOnInit() {
     this.updateConnectionStatus();
     this.addLog('Component initialized', 'info');
+    this.setupDisconnectHandler();
   }
 
   private updateConnectionStatus() {
@@ -250,10 +251,28 @@ export default class NetworkStatusComponent implements OnInit {
     try {
       // Send a ping packet as a test
       this.networkService.send(SessionActions.HEARTBEAT, {});
-      this.addLog('Test ping sent', 'success');
+      this.addLog('Test heartbeat sent', 'success');
     } catch (error) {
       this.addLog(`Failed to send test packet: ${error}`, 'error');
     }
+  }
+
+  private setupDisconnectHandler() {
+    // Set up disconnect callback to handle socket disconnections
+    this.networkService.getNetworkService().setDisconnectCallback(() => {
+      this.handleDisconnect();
+    });
+  }
+
+  private handleDisconnect() {
+    // Update connection status
+    this.isConnected = false;
+
+    // Add log entry for disconnect
+    this.addLog('Socket disconnected from server', 'error');
+
+    // Force UI update
+    this.updateConnectionStatus();
   }
 
   private addLog(message: string, type: string = 'info') {
