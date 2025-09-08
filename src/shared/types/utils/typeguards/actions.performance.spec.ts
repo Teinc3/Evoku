@@ -1,3 +1,15 @@
+
+// Import all enum values for testing
+import SessionActions from '../../enums/actions/system/session';
+import LobbyActions from '../../enums/actions/system/lobby';
+import ProtocolActions from '../../enums/actions/match/protocol';
+import WoodPUPActions from '../../enums/actions/match/player/powerups/wood';
+import WaterPUPActions from '../../enums/actions/match/player/powerups/water';
+import MetalPUPActions from '../../enums/actions/match/player/powerups/metal';
+import FirePUPActions from '../../enums/actions/match/player/powerups/fire';
+import EarthPUPActions from '../../enums/actions/match/player/powerups/earth';
+import MechanicsActions from '../../enums/actions/match/player/mechanics';
+import LifecycleActions from '../../enums/actions/match/lifecycle';
 import { 
   isActionEnum, 
   isSystemActions, 
@@ -16,18 +28,6 @@ import {
   isEarthPUPActions
 } from './actions';
 
-// Import all enum values for testing
-import LobbyActions from '../../enums/actions/system/lobby';
-import SessionActions from '../../enums/actions/system/session';
-import ProtocolActions from '../../enums/actions/match/protocol';
-import LifecycleActions from '../../enums/actions/match/lifecycle';
-import MechanicsActions from '../../enums/actions/match/player/mechanics';
-import FirePUPActions from '../../enums/actions/match/player/powerups/fire';
-import WaterPUPActions from '../../enums/actions/match/player/powerups/water';
-import WoodPUPActions from '../../enums/actions/match/player/powerups/wood';
-import MetalPUPActions from '../../enums/actions/match/player/powerups/metal';
-import EarthPUPActions from '../../enums/actions/match/player/powerups/earth';
-
 describe('ActionEnum Type Guards Performance & Correctness', () => {
   // Collect all valid action values (numeric only)
   const allValidActions = [
@@ -44,7 +44,9 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
   ] as number[];
 
   // Test values that should NOT be valid actions
-  const invalidActions = [-100, -99, 0, 1, 5, 14, 15, 19, 24, 25, 29, 34, 35, 39, 44, 45, 49, 54, 55, 100];
+  const invalidActions = [
+    -100, -99, 0, 1, 5, 14, 15, 19, 24, 25, 29, 34, 35, 39, 44, 45, 49, 54, 55, 100
+  ];
 
   describe('Correctness Tests', () => {
     it('should correctly identify all valid actions', () => {
@@ -60,7 +62,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
     });
 
     it('should correctly categorize lobby actions', () => {
-      const lobbyValues = Object.values(LobbyActions).filter(v => typeof v === 'number') as number[];
+      const lobbyValues = Object.values(LobbyActions)
+        .filter(v => typeof v === 'number') as number[];
       for (const action of lobbyValues) {
         expect(isLobbyActions(action)).toBe(true);
         expect(isSystemActions(action)).toBe(true);
@@ -69,7 +72,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
     });
 
     it('should correctly categorize session actions', () => {
-      const sessionValues = Object.values(SessionActions).filter(v => typeof v === 'number') as number[];
+      const sessionValues = Object.values(SessionActions)
+        .filter(v => typeof v === 'number') as number[];
       for (const action of sessionValues) {
         expect(isSessionActions(action)).toBe(true);
         expect(isSystemActions(action)).toBe(true);
@@ -78,7 +82,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
     });
 
     it('should correctly categorize protocol actions', () => {
-      const protocolValues = Object.values(ProtocolActions).filter(v => typeof v === 'number') as number[];
+      const protocolValues = Object.values(ProtocolActions)
+        .filter(v => typeof v === 'number') as number[];
       for (const action of protocolValues) {
         expect(isProtocolActions(action)).toBe(true);
         expect(isMatchActions(action)).toBe(true);
@@ -87,7 +92,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
     });
 
     it('should correctly categorize lifecycle actions', () => {
-      const lifecycleValues = Object.values(LifecycleActions).filter(v => typeof v === 'number') as number[];
+      const lifecycleValues = Object.values(LifecycleActions)
+        .filter(v => typeof v === 'number') as number[];
       for (const action of lifecycleValues) {
         expect(isLifecycleActions(action)).toBe(true);
         expect(isMatchActions(action)).toBe(true);
@@ -96,7 +102,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
     });
 
     it('should correctly categorize mechanics actions', () => {
-      const mechanicsValues = Object.values(MechanicsActions).filter(v => typeof v === 'number') as number[];
+      const mechanicsValues = Object.values(MechanicsActions)
+        .filter(v => typeof v === 'number') as number[];
       for (const action of mechanicsValues) {
         expect(isMechanicsActions(action)).toBe(true);
         expect(isPlayerActions(action)).toBe(true);
@@ -107,11 +114,31 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
 
     it('should correctly categorize powerup actions', () => {
       const pupActionSets = [
-        { values: Object.values(FirePUPActions).filter(v => typeof v === 'number') as number[], guard: isFirePUPActions },
-        { values: Object.values(WaterPUPActions).filter(v => typeof v === 'number') as number[], guard: isWaterPUPActions },
-        { values: Object.values(WoodPUPActions).filter(v => typeof v === 'number') as number[], guard: isWoodPUPActions },
-        { values: Object.values(MetalPUPActions).filter(v => typeof v === 'number') as number[], guard: isMetalPUPActions },
-        { values: Object.values(EarthPUPActions).filter(v => typeof v === 'number') as number[], guard: isEarthPUPActions },
+        { 
+          values: Object.values(FirePUPActions)
+            .filter(v => typeof v === 'number') as number[], 
+          guard: isFirePUPActions 
+        },
+        { 
+          values: Object.values(WaterPUPActions)
+            .filter(v => typeof v === 'number') as number[], 
+          guard: isWaterPUPActions 
+        },
+        { 
+          values: Object.values(WoodPUPActions)
+            .filter(v => typeof v === 'number') as number[], 
+          guard: isWoodPUPActions 
+        },
+        { 
+          values: Object.values(MetalPUPActions)
+            .filter(v => typeof v === 'number') as number[], 
+          guard: isMetalPUPActions 
+        },
+        { 
+          values: Object.values(EarthPUPActions)
+            .filter(v => typeof v === 'number') as number[], 
+          guard: isEarthPUPActions 
+        },
       ];
 
       for (const { values, guard } of pupActionSets) {
@@ -159,7 +186,8 @@ describe('ActionEnum Type Guards Performance & Correctness', () => {
       }
       
       const end = performance.now();
-      console.log(`Batch performance: ${(end - start).toFixed(2)}ms for ${ITERATIONS * allValidActions.length} checks`);
+      const totalChecks = ITERATIONS * allValidActions.length;
+      console.log(`Batch performance: ${(end - start).toFixed(2)}ms for ${totalChecks} checks`);
     });
   });
 });

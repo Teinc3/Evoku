@@ -1,19 +1,19 @@
 import type AugmentAction from "../AugmentAction";
-import type SystemActions from "../../enums/actions/system";
-import type PUPActions from "../../enums/actions/match/player/powerups";
-import type PlayerActions from "../../enums/actions/match/player";
-import type MatchActions from "../../enums/actions/match";
-import type ActionEnum from "../../enums/actions";
 import type SessionActions from "../../enums/actions/system/session";
 import type LobbyActions from "../../enums/actions/system/lobby";
+import type SystemActions from "../../enums/actions/system";
 import type ProtocolActions from "../../enums/actions/match/protocol";
-import type LifecycleActions from "../../enums/actions/match/lifecycle";
-import type MechanicsActions from "../../enums/actions/match/player/mechanics";
-import type FirePUPActions from "../../enums/actions/match/player/powerups/fire";
-import type WaterPUPActions from "../../enums/actions/match/player/powerups/water";
 import type WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
+import type WaterPUPActions from "../../enums/actions/match/player/powerups/water";
 import type MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
+import type FirePUPActions from "../../enums/actions/match/player/powerups/fire";
 import type EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
+import type PUPActions from "../../enums/actions/match/player/powerups";
+import type MechanicsActions from "../../enums/actions/match/player/mechanics";
+import type PlayerActions from "../../enums/actions/match/player";
+import type LifecycleActions from "../../enums/actions/match/lifecycle";
+import type MatchActions from "../../enums/actions/match";
+import type ActionEnum from "../../enums/actions";
 
 
 // --- Optimized Range-Based Action Type System ---
@@ -28,14 +28,14 @@ interface ActionRange {
 const ACTION_RANGES = {
   PROTOCOL: { min: -12, max: -10 } as ActionRange,      // PING, PONG, REJECT_ACTION
   SESSION: { min: -20, max: -20 } as ActionRange,       // HEARTBEAT
-  LOBBY: { min: -53, max: -50 } as ActionRange,         // JOIN_QUEUE, LEAVE_QUEUE, QUEUE_UPDATE, MATCH_FOUND
+  LOBBY: { min: -53, max: -50 } as ActionRange,         // JOIN_QUEUE, LEAVE_QUEUE, etc.
   LIFECYCLE: { min: -61, max: -60 } as ActionRange,     // GAME_INIT, GAME_OVER
-  MECHANICS: { min: -4, max: -1 } as ActionRange,       // SET_CELL, CELL_SET, DRAW_PUP, PUP_DRAWN
-  WATER_PUP: { min: 10, max: 13 } as ActionRange,       // USE_CRYO, CRYO_USED, USE_CASCADE, CASCADE_USED
-  FIRE_PUP: { min: 20, max: 23 } as ActionRange,        // USE_INFERNO, INFERNO_USED, USE_METABOLIC, METABOLIC_USED
-  WOOD_PUP: { min: 30, max: 33 } as ActionRange,        // USE_ENTANGLE, ENTANGLE_USED, USE_WISDOM, WISDOM_USED
-  METAL_PUP: { min: 40, max: 43 } as ActionRange,       // USE_LOCK, LOCK_USED, USE_FORGE, FORGE_USED
-  EARTH_PUP: { min: 50, max: 53 } as ActionRange,       // USE_LANDSLIDE, LANDSLIDE_USED, USE_EXCAVATE, EXCAVATE_USED
+  MECHANICS: { min: -4, max: -1 } as ActionRange,       // SET_CELL, CELL_SET, etc.
+  waterPup: { min: 10, max: 13 } as ActionRange,        // USE_CRYO, etc.
+  firePup: { min: 20, max: 23 } as ActionRange,         // USE_INFERNO, etc.
+  woodPup: { min: 30, max: 33 } as ActionRange,         // USE_ENTANGLE, etc.
+  metalPup: { min: 40, max: 43 } as ActionRange,        // USE_LOCK, etc.
+  earthPup: { min: 50, max: 53 } as ActionRange,        // USE_LANDSLIDE, etc.
 } as const;
 
 /**
@@ -109,23 +109,23 @@ export function isPUPActions(action: number): action is PUPActions {
 }
 
 export function isFirePUPActions(action: number): action is FirePUPActions {
-  return inRange(action, ACTION_RANGES.FIRE_PUP);
+  return inRange(action, ACTION_RANGES.firePup);
 }
 
 export function isWaterPUPActions(action: number): action is WaterPUPActions {
-  return inRange(action, ACTION_RANGES.WATER_PUP);
+  return inRange(action, ACTION_RANGES.waterPup);
 }
 
 export function isWoodPUPActions(action: number): action is WoodPUPActions {
-  return inRange(action, ACTION_RANGES.WOOD_PUP);
+  return inRange(action, ACTION_RANGES.woodPup);
 }
 
 export function isMetalPUPActions(action: number): action is MetalPUPActions {
-  return inRange(action, ACTION_RANGES.METAL_PUP);
+  return inRange(action, ACTION_RANGES.metalPup);
 }
 
 export function isEarthPUPActions(action: number): action is EarthPUPActions {
-  return inRange(action, ACTION_RANGES.EARTH_PUP);
+  return inRange(action, ACTION_RANGES.earthPup);
 }
 
 export function isProtocolActions(action: number): action is ProtocolActions {
