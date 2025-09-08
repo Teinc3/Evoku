@@ -3,6 +3,7 @@ import 'dotenv/config';
 import serverConfig from '../../config/server.json' with { type: 'json' };
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';
+import PacketRegistry from '@shared/networking/registry';
 
 
 // Determine port preference: explicit env override OR config
@@ -11,7 +12,10 @@ if (port < 0 || port > 65535) {
   throw new Error(`Invalid port resolved: "${port}". Must be an integer between 0 and 65535.`);
 }
 
-function bootstrap() {
+async function bootstrap() {
+  // Pre-load all packets to ensure they're registered
+  await PacketRegistry.ensurePacketsLoaded();
+  
   // Create and start the HTTP server
   const httpServer = new HTTPServer(port);
   httpServer.start();
@@ -32,4 +36,7 @@ function bootstrap() {
   });
 }
 
-bootstrap();
+bootstrap().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});

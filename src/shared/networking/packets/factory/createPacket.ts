@@ -31,6 +31,8 @@ export default function createPacket<GenericAction extends ActionEnum>(
       createPacketCodec(codecMap) as CustomCodecConstructor<AugmentAction<GenericAction>>
     );
 
+    static readonly id = action;
+
     static {
       // Register the packet class in the PacketRegistry upon creation of packet
       PacketRegistry.registerPacket(GenericPacket as unknown as PacketConstructor<ActionEnum>);

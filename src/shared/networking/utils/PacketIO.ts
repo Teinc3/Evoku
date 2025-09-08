@@ -54,4 +54,39 @@ export default class PacketIO {
     // }
     return buffer;
   }
+
+  /**
+   * Async versions that ensure packets are loaded before use.
+   * These provide a safety net if auto-loading hasn't completed.
+   */
+  async decodePacketAsync(buffer: ArrayBuffer) {
+    const packetBuffer = new PacketBuffer(buffer.byteLength);
+    packetBuffer.write(buffer);
+
+    const action = (new ActionCodec).decode(packetBuffer);
+    const Packet = await PacketRegistry.getPacketAsync(action);
+    if (!Packet) {
+      throw new Error(`No packet registered for action: ${action}`);
+    }
+
+    packetBuffer.index = 0;
+    const data = (new Packet).unwrap(packetBuffer);
+    return data;
+  }
+
+  async encodePacketAsync<
+    GenericAction extends ActionEnum,
+    GenericContract extends ActionMap[GenericAction]
+  >(action: GenericAction, dataContract: GenericContract) {
+    const Packet = await PacketRegistry.getPacketAsync(action);
+    if (!Packet) {
+      throw new Error(`No packet registered for action: ${action}`);
+    }
+
+    const buffer = new Packet({
+      action,
+      ...dataContract
+    }).wrap().buffer;
+    return buffer;
+  }
 }
