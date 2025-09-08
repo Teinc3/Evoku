@@ -13,7 +13,7 @@ import type ActionMap from '@shared/types/actionmap';
  * heartbeat/latency, offline send queue, and auto-reconnection.
  * Built on top of the transport-only ClientSocket.
  */
-export default class NetworkService {
+export default class WebSocketService {
   private socket: ClientSocket;
   private packetHandler: ClientPacketHandler;
   private queue: Array<[ActionEnum, ActionMap[ActionEnum]]>;
@@ -59,11 +59,6 @@ export default class NetworkService {
     this.clearTimers();
     this.socket.close(code, reason);
   }
-
-  /* Packet handling is now managed through the composite handler architecture.
-     The ClientPacketHandler automatically routes packets to the appropriate
-     system or match handlers based on action type. No manual subscription
-     is needed - handlers are always active and filter relevant packets. */
 
   /**
    * Get the packet handler instance for direct access to handlers
@@ -117,7 +112,7 @@ export default class NetworkService {
 
   private handleClose = (): void => {
     this.clearTimers();
-    
+
     if (clientConfig.networking.service.autoReconnect) {
       this.scheduleReconnect();
     }
@@ -156,7 +151,7 @@ export default class NetworkService {
 
       try {
         this.lastPingAt = Date.now();
-        this.send(ProtocolActions.PING, {} as ActionMap[typeof ProtocolActions.PING]);
+        this.send(ProtocolActions.PONG, {} as ActionMap[typeof ProtocolActions.PONG]);
       } catch (error) {
         console.error('Failed to send ping:', error);
       }

@@ -2,11 +2,11 @@ import ProtocolActions from "@shared/types/enums/actions/match/protocol";
 import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type NetworkService from "../../services/NetworkService";
+import type WebSocketService from "../../services/WebSocketService";
 
 
 export default class ProtocolHandler extends EnumHandler<ProtocolActions> {
-  constructor(private networkService: NetworkService) {
+  constructor(private networkService: WebSocketService) {
     super();
 
     const handlerMap = {

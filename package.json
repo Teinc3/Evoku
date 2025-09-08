@@ -12,7 +12,7 @@
     "dev:server": "tsx watch src/server/index.ts",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",
     "test-ci": "npm run test:server-ci && npm run test:client-ci",
-    "test:client": "ng test",
+    "test:client": "ng test --watch=false",
     "test:server": "jest --config jest.config.cjs",
     "test:client-ci": "CI=true ng test --watch=false --code-coverage",
     "test:server-ci": "jest --config jest.config.cjs --coverage",

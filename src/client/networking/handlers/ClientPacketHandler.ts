@@ -6,7 +6,7 @@ import SystemHandler from "./system";
 import MatchHandler from "./match";
 
 import type ActionEnum from "@shared/types/enums/actions";
-import type NetworkService from "../services/NetworkService";
+import type WebSocketService from "../services/WebSocketService";
 import type { SomeClientHandlerMapEntry } from "../../types/networking";
 
 
@@ -15,7 +15,7 @@ import type { SomeClientHandlerMapEntry } from "../../types/networking";
  * to the appropriate sub-handlers based on action type.
  */
 export default class ClientPacketHandler extends UnionHandler<ActionEnum> {
-  constructor(networkService: NetworkService) {
+  constructor(networkService: WebSocketService) {
     const systemHandler = new SystemHandler();
     const matchHandler = new MatchHandler(networkService);
 
