@@ -3,11 +3,7 @@ import 'dotenv/config';
 import serverConfig from '../../config/server.json' with { type: 'json' };
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';
-import PacketRegistry from '../shared/networking/registry';
 
-
-// Initialize packet registry early
-PacketRegistry.initialize().catch(console.warn);
 
 // Determine port preference: explicit env override OR config
 const port = serverConfig.port;

@@ -19,10 +19,7 @@ jest.mock('./PacketBuffer', () => {
 });
 
 jest.mock('../registry', () => ({
-  getPacket: jest.fn(),
-  getRegisteredCount: jest.fn(() => 1), // Mock as having packets
-  isInitialized: jest.fn(() => true), // Mock as already initialized
-  initialize: jest.fn()
+  getPacket: jest.fn()
 }));
 
 jest.mock('../codecs/custom/ActionCodec', () => {
