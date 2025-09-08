@@ -26,6 +26,7 @@ export default function createPacket<GenericAction extends ActionEnum>(
 
   return class GenericPacket extends AbstractPacket<GenericAction>
     implements IPacket<GenericAction> {
+    static readonly id = action;
     readonly id = action;
     readonly Codec = (
       createPacketCodec(codecMap) as CustomCodecConstructor<AugmentAction<GenericAction>>
