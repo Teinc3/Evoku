@@ -188,7 +188,7 @@ packetBuffer.write(buffer);
 ### Packet Resolution
 ```typescript
 // Get packet class from registry
-const Packet = PacketRegistry.getPacket(action);
+const Packet = packetRegistry.getPacket(action);
 if (!Packet) {
   throw new Error(`No packet registered for action: ${action}`);
 }
