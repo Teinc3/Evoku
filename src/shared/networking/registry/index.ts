@@ -22,5 +22,5 @@ class PacketRegistry {
   }
 }
 
-const packetRegistry = new PacketRegistry()
+const packetRegistry = new PacketRegistry();
 export { packetRegistry as default, PacketRegistry };
