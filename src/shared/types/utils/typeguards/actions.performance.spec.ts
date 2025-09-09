@@ -4,8 +4,11 @@ import {
   isMatchActions,
   isPlayerActions,
   isPUPActions,
-  isFirePUPActions
+  isFirePUPActions,
+  isActionOfType,
+  getAvailableActionTypes
 } from './actions';
+
 
 describe('ActionEnum Type Guards Performance', () => {
   it('should correctly identify action types without hierarchical function calls', () => {
@@ -59,5 +62,43 @@ describe('ActionEnum Type Guards Performance', () => {
     
     // The optimization should complete in reasonable time (less than 100ms for this test)
     expect(duration).toBeLessThan(100);
+  });
+
+  it('should support generic type checking with string type names', () => {
+    const firePUPAction = 20;
+    
+    // Test the generic function
+    expect(isActionOfType(firePUPAction, 'ActionEnum')).toBe(true);
+    expect(isActionOfType(firePUPAction, 'MatchActions')).toBe(true);
+    expect(isActionOfType(firePUPAction, 'PlayerActions')).toBe(true);
+    expect(isActionOfType(firePUPAction, 'PUPActions')).toBe(true);
+    expect(isActionOfType(firePUPAction, 'FirePUPActions')).toBe(true);
+    expect(isActionOfType(firePUPAction, 'SystemActions')).toBe(false);
+    
+    // Test with invalid type name
+    expect(isActionOfType(firePUPAction, 'NonExistentType')).toBe(false);
+  });
+
+  it('should provide list of available action types', () => {
+    const availableTypes = getAvailableActionTypes();
+    
+    expect(availableTypes).toContain('ActionEnum');
+    expect(availableTypes).toContain('SystemActions');
+    expect(availableTypes).toContain('MatchActions');
+    expect(availableTypes).toContain('PlayerActions');
+    expect(availableTypes).toContain('PUPActions');
+    expect(availableTypes).toContain('FirePUPActions');
+    expect(availableTypes).toContain('WaterPUPActions');
+    expect(availableTypes).toContain('WoodPUPActions');
+    expect(availableTypes).toContain('MetalPUPActions');
+    expect(availableTypes).toContain('EarthPUPActions');
+    expect(availableTypes).toContain('MechanicsActions');
+    expect(availableTypes).toContain('ProtocolActions');
+    expect(availableTypes).toContain('LifecycleActions');
+    expect(availableTypes).toContain('LobbyActions');
+    expect(availableTypes).toContain('SessionActions');
+    
+    // Should have exactly 15 types
+    expect(availableTypes).toHaveLength(15);
   });
 });
