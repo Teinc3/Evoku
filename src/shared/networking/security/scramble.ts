@@ -2,7 +2,7 @@ import seedrandom from 'seedrandom';
 import BiMap from 'bidirectional-map';
 
 import clientConfig from '@config/client.json' with { type: 'json' };
-import { isActionEnum } from '../../types/utils/typeguards/actions';
+import ActionGuard from '../../types/utils/typeguards/actions';
 
 import type ActionEnum from '../../types/enums/actions';
 
@@ -84,7 +84,7 @@ class PacketScrambler {
     }
 
     const packetID = parseInt(original);
-    if (!isActionEnum(packetID)) {
+    if (!ActionGuard.isActionEnum(packetID)) {
       console.warn(
         `PacketScrambler: Unscrambled ID ${scrambledID} to invalid ActionEnum ${packetID}.`
       );

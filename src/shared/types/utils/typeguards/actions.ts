@@ -1,134 +1,232 @@
-import SessionActions from "../../enums/actions/system/session";
-import LobbyActions from "../../enums/actions/system/lobby";
-import ProtocolActions from "../../enums/actions/match/protocol";
-import WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
-import WaterPUPActions from "../../enums/actions/match/player/powerups/water";
-import MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
-import FirePUPActions from "../../enums/actions/match/player/powerups/fire";
-import EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
-import MechanicsActions from "../../enums/actions/match/player/mechanics";
-import LifecycleActions from "../../enums/actions/match/lifecycle";
+import SessionActionsEnum from "../../enums/actions/system/session";
+import LobbyActionsEnum from "../../enums/actions/system/lobby";
+import ProtocolActionsEnum from "../../enums/actions/match/protocol";
+import WoodPUPActionsEnum from "../../enums/actions/match/player/powerups/wood";
+import WaterPUPActionsEnum from "../../enums/actions/match/player/powerups/water";
+import MetalPUPActionsEnum from "../../enums/actions/match/player/powerups/metal";
+import FirePUPActionsEnum from "../../enums/actions/match/player/powerups/fire";
+import EarthPUPActionsEnum from "../../enums/actions/match/player/powerups/earth";
+import MechanicsActionsEnum from "../../enums/actions/match/player/mechanics";
+import LifecycleActionsEnum from "../../enums/actions/match/lifecycle";
 
 import type AugmentAction from "../AugmentAction";
+import type SessionActions from "../../enums/actions/system/session";
+import type LobbyActions from "../../enums/actions/system/lobby";
 import type SystemActions from "../../enums/actions/system";
+import type ProtocolActions from "../../enums/actions/match/protocol";
+import type WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
+import type WaterPUPActions from "../../enums/actions/match/player/powerups/water";
+import type MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
+import type FirePUPActions from "../../enums/actions/match/player/powerups/fire";
+import type EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
 import type PUPActions from "../../enums/actions/match/player/powerups";
+import type MechanicsActions from "../../enums/actions/match/player/mechanics";
 import type PlayerActions from "../../enums/actions/match/player";
+import type LifecycleActions from "../../enums/actions/match/lifecycle";
 import type MatchActions from "../../enums/actions/match";
 import type ActionEnum from "../../enums/actions";
 
 
-// --- Pre-computed Sets for O(1) Lookups ---
-// This work is done only once when the module is loaded.
-const lobbyActionValues = new Set(Object.values(LobbyActions));
-const sessionActionValues = new Set(Object.values(SessionActions));
-const mechanicsActionValues = new Set(Object.values(MechanicsActions));
-const firePUPActionValues = new Set(Object.values(FirePUPActions));
-const waterPUPActionValues = new Set(Object.values(WaterPUPActions));
-const woodPUPActionValues = new Set(Object.values(WoodPUPActions));
-const metalPUPActionValues = new Set(Object.values(MetalPUPActions));
-const earthPUPActionValues = new Set(Object.values(EarthPUPActions));
-const protocolActionValues = new Set(Object.values(ProtocolActions));
-const lifecycleActionValues = new Set(Object.values(LifecycleActions));
-
-
-// --- High-Performance Type Guards ---
-export function isActionEnum(action: number): action is ActionEnum {
-  return isMatchActions(action) || isSystemActions(action);
-}
-
-export function isSystemActions(action: number): action is SystemActions {
-  return isLobbyActions(action) || isSessionActions(action);
-}
-
-export function isLobbyActions(action: number): action is LobbyActions {
-  return lobbyActionValues.has(action as LobbyActions);
-}
-
-export function isSessionActions(action: number): action is SessionActions {
-  return sessionActionValues.has(action as SessionActions);
-}
-
-export function isMatchActions(action: number): action is MatchActions {
-  return isPlayerActions(action) || isProtocolActions(action) || isLifecycleActions(action);
-}
-
-export function isPlayerActions(action: number): action is PlayerActions {
-  return isMechanicsActions(action) || isPUPActions(action);
-}
-
-export function isMechanicsActions(action: number): action is MechanicsActions {
-  return mechanicsActionValues.has(action as MechanicsActions);
-}
-
-export function isPUPActions(action: number): action is PUPActions {
-  return isFirePUPActions(action)
-      || isWaterPUPActions(action)
-      || isWoodPUPActions(action)
-      || isMetalPUPActions(action)
-      || isEarthPUPActions(action);
-}
-
-export function isFirePUPActions(action: number): action is FirePUPActions {
-  return firePUPActionValues.has(action as FirePUPActions);
-}
-
-export function isWaterPUPActions(action: number): action is WaterPUPActions {
-  return waterPUPActionValues.has(action as WaterPUPActions);
-}
-
-export function isWoodPUPActions(action: number): action is WoodPUPActions {
-  return woodPUPActionValues.has(action as WoodPUPActions);
-}
-
-export function isMetalPUPActions(action: number): action is MetalPUPActions {
-  return metalPUPActionValues.has(action as MetalPUPActions);
-}
-
-export function isEarthPUPActions(action: number): action is EarthPUPActions {
-  return earthPUPActionValues.has(action as EarthPUPActions);
-}
-
-export function isProtocolActions(action: number): action is ProtocolActions {
-  return protocolActionValues.has(action as ProtocolActions);
-}
-
-export function isLifecycleActions(action: number): action is LifecycleActions {
-  return lifecycleActionValues.has(action as LifecycleActions);
-}
-
-// --- Generic Wrapper to Create Data-Level Guards ---
-
 /**
- * A higher-order function that takes a simple enum type guard and returns a new
- * type guard that operates on the full packet object (`AugmentAction`).
+ * ActionGuard
  *
- * @param enumGuard The simple type guard for the action enum (e.g., `isSystemActions`).
- * @returns A new type guard that narrows the type of the entire packet object.
+ * Centralized type guards for Action enums and packet-level guards.
+ *
+ * - Provides fast runtime Set-based checks for a variety of action unions.
+ * - Uses a small compile-time helper `composeExhaustive` to assert that
+ *   composite arrays are exhaustively composed from leaf arrays (so you
+ *   get a compile error when a subgroup is accidentally omitted).
  */
-function createDataGuard<GenericActionOrType extends ActionEnum>(
-  enumGuard: (action: number) => action is GenericActionOrType
-): (packet: { action: number }) => packet is AugmentAction<GenericActionOrType> {
-  return (packet: { action: number }): packet is AugmentAction<GenericActionOrType> => {
-    return enumGuard(packet.action);
-  };
+export default class ActionGuard {
+  /**
+   * Small generic helper used at declaration sites to compose arrays while
+   * asserting exhaustiveness of the resulting union.
+   *
+   * Type-level behaviour
+   * - Whole: the union type we expect to cover (e.g. MatchActions)
+   * - Parts: a tuple of readonly arrays whose element types should together
+   *   cover Whole.
+   *
+   * The conditional type forces a compile-time error on the call site when
+   * some members of `Whole` are not present in the union of `Parts`.
+   *
+   * Runtime behaviour: returns a flat readonly array of the provided parts.
+   * No runtime checks or allocations beyond the single flat() call.
+   *
+   * Example:
+   *   ActionGuard.composeExhaustive<MatchActions>()(
+   *     ActionGuard.playerActionsArr,
+   *     ActionGuard.protocolActionsArr,
+   *     ActionGuard.lifecycleActionsArr
+   *   );
+   */
+  private static readonly composeExhaustive = <Whole>() =>
+    <Parts extends readonly (readonly Whole[])[]>(
+      ...parts: Parts & (
+        [Whole] extends [Parts[number][number]]
+          ? unknown
+          : ["Missing union members", Exclude<Whole, Parts[number][number]>]
+      )
+    ) => parts.flat() as readonly Whole[];
+
+  // --- Leaf arrays (preserve literal members) ---
+  private static readonly lobbyActionsArr = Object.values(LobbyActionsEnum)
+    .filter((v): v is LobbyActions => typeof v === 'number');
+  private static readonly sessionActionsArr = Object.values(SessionActionsEnum)
+    .filter((v): v is SessionActions => typeof v === 'number');
+  private static readonly mechanicsActionsArr = Object.values(MechanicsActionsEnum)
+    .filter((v): v is MechanicsActions => typeof v === 'number');
+  private static readonly firePUPActionsArr = Object.values(FirePUPActionsEnum)
+    .filter((v): v is FirePUPActions => typeof v === 'number');
+  private static readonly waterPUPActionsArr = Object.values(WaterPUPActionsEnum)
+    .filter((v): v is WaterPUPActions => typeof v === 'number');
+  private static readonly woodPUPActionsArr = Object.values(WoodPUPActionsEnum)
+    .filter((v): v is WoodPUPActions => typeof v === 'number');
+  private static readonly metalPUPActionsArr = Object.values(MetalPUPActionsEnum)
+    .filter((v): v is MetalPUPActions => typeof v === 'number');
+  private static readonly earthPUPActionsArr = Object.values(EarthPUPActionsEnum)
+    .filter((v): v is EarthPUPActions => typeof v === 'number');
+  private static readonly protocolActionsArr = Object.values(ProtocolActionsEnum)
+    .filter((v): v is ProtocolActions => typeof v === 'number');
+  private static readonly lifecycleActionsArr = Object.values(LifecycleActionsEnum)
+    .filter((v): v is LifecycleActions => typeof v === 'number');
+
+  // --- Composite arrays with inline exhaustiveness checking ---
+  private static readonly pupActionsArr = ActionGuard.composeExhaustive<PUPActions>()(
+    ActionGuard.firePUPActionsArr,
+    ActionGuard.waterPUPActionsArr,
+    ActionGuard.woodPUPActionsArr,
+    ActionGuard.metalPUPActionsArr,
+    ActionGuard.earthPUPActionsArr,
+  );
+  private static readonly playerActionsArr = ActionGuard.composeExhaustive<PlayerActions>()(
+    ActionGuard.mechanicsActionsArr,
+    ActionGuard.pupActionsArr,
+  );
+  private static readonly matchActionsArr = ActionGuard.composeExhaustive<MatchActions>()(
+    ActionGuard.playerActionsArr,
+    ActionGuard.protocolActionsArr,
+    ActionGuard.lifecycleActionsArr, // remove one to trigger error here
+  );
+  private static readonly systemActionsArr = ActionGuard.composeExhaustive<SystemActions>()(
+    ActionGuard.lobbyActionsArr,
+    ActionGuard.sessionActionsArr,
+  );
+  private static readonly actionEnumArr = ActionGuard.composeExhaustive<ActionEnum>()(
+    ActionGuard.systemActionsArr,
+    ActionGuard.matchActionsArr,
+  );
+
+  // --- Runtime Sets (O(1) lookups) built from arrays ---
+  private static readonly lobbyActionValues = new Set(ActionGuard.lobbyActionsArr);
+  private static readonly sessionActionValues = new Set(ActionGuard.sessionActionsArr);
+  private static readonly mechanicsActionValues = new Set(ActionGuard.mechanicsActionsArr);
+  private static readonly firePUPActionValues = new Set(ActionGuard.firePUPActionsArr);
+  private static readonly waterPUPActionValues = new Set(ActionGuard.waterPUPActionsArr);
+  private static readonly woodPUPActionValues = new Set(ActionGuard.woodPUPActionsArr);
+  private static readonly metalPUPActionValues = new Set(ActionGuard.metalPUPActionsArr);
+  private static readonly earthPUPActionValues = new Set(ActionGuard.earthPUPActionsArr);
+  private static readonly protocolActionValues = new Set(ActionGuard.protocolActionsArr);
+  private static readonly lifecycleActionValues = new Set(ActionGuard.lifecycleActionsArr);
+  private static readonly pupActionValues = new Set(ActionGuard.pupActionsArr);
+  private static readonly playerActionValues = new Set(ActionGuard.playerActionsArr);
+  private static readonly matchActionValues = new Set(ActionGuard.matchActionsArr);
+  private static readonly systemActionValues = new Set(ActionGuard.systemActionsArr);
+  private static readonly actionEnumValues = new Set(ActionGuard.actionEnumArr);
+
+  // --- Type Guard Methods ---
+
+  static isActionEnum(action: number): action is ActionEnum {
+    return ActionGuard.actionEnumValues.has(action);
+  }
+
+  static isSystemActions(action: number): action is SystemActions {
+    return ActionGuard.systemActionValues.has(action);
+  }
+
+  static isLobbyActions(action: number): action is LobbyActions {
+    return ActionGuard.lobbyActionValues.has(action);
+  }
+
+  static isSessionActions(action: number): action is SessionActions {
+    return ActionGuard.sessionActionValues.has(action);
+  }
+
+  static isMatchActions(action: number): action is MatchActions {
+    return ActionGuard.matchActionValues.has(action);
+  }
+
+  static isPlayerActions(action: number): action is PlayerActions {
+    return ActionGuard.playerActionValues.has(action);
+  }
+
+  static isMechanicsActions(action: number): action is MechanicsActions {
+    return ActionGuard.mechanicsActionValues.has(action);
+  }
+
+  static isPUPActions(action: number): action is PUPActions {
+    return ActionGuard.pupActionValues.has(action);
+  }
+
+  static isFirePUPActions(action: number): action is FirePUPActions {
+    return ActionGuard.firePUPActionValues.has(action);
+  }
+
+  static isWaterPUPActions(action: number): action is WaterPUPActions {
+    return ActionGuard.waterPUPActionValues.has(action);
+  }
+
+  static isWoodPUPActions(action: number): action is WoodPUPActions {
+    return ActionGuard.woodPUPActionValues.has(action);
+  }
+
+  static isMetalPUPActions(action: number): action is MetalPUPActions {
+    return ActionGuard.metalPUPActionValues.has(action);
+  }
+
+  static isEarthPUPActions(action: number): action is EarthPUPActions {
+    return ActionGuard.earthPUPActionValues.has(action);
+  }
+
+  static isProtocolActions(action: number): action is ProtocolActions {
+    return ActionGuard.protocolActionValues.has(action);
+  }
+
+  static isLifecycleActions(action: number): action is LifecycleActions {
+    return ActionGuard.lifecycleActionValues.has(action);
+  }
+
+  // --- Data-Level Guards for Operating on Packet Objects ---
+
+  /**
+   * A generic helper that creates a type guard for packet objects (`AugmentAction`).
+   * 
+   * @param enumGuard The simple type guard for the action enum.
+   * @returns A new type guard that narrows the type of the entire packet object.
+   */
+  private static createDataGuard<GenericActionOrType extends ActionEnum>(
+    enumGuard: (action: number) => action is GenericActionOrType
+  ): (packet: { action: number }) => packet is AugmentAction<GenericActionOrType> {
+    return (packet: { action: number }): packet is AugmentAction<GenericActionOrType> => {
+      return enumGuard(packet.action);
+    };
+  }
+
+  // Data-level guards using the helper
+  static isSystemActionsData = ActionGuard.createDataGuard(ActionGuard.isSystemActions);
+  static isLobbyActionsData = ActionGuard.createDataGuard(ActionGuard.isLobbyActions);
+  static isSessionActionsData = ActionGuard.createDataGuard(ActionGuard.isSessionActions);
+
+  static isMatchActionsData = ActionGuard.createDataGuard(ActionGuard.isMatchActions);
+  static isPlayerActionsData = ActionGuard.createDataGuard(ActionGuard.isPlayerActions);
+  static isMechanicsActionsData = ActionGuard.createDataGuard(ActionGuard.isMechanicsActions);
+  static isPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isPUPActions);
+  static isProtocolActionsData = ActionGuard.createDataGuard(ActionGuard.isProtocolActions);
+  static isLifecycleActionsData = ActionGuard.createDataGuard(ActionGuard.isLifecycleActions);
+
+  static isFirePUPActionsData = ActionGuard.createDataGuard(ActionGuard.isFirePUPActions);
+  static isWaterPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isWaterPUPActions);
+  static isWoodPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isWoodPUPActions);
+  static isMetalPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isMetalPUPActions);
+  static isEarthPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isEarthPUPActions);
 }
-
-
-// --- Exported Data-Level Guards for Use in Application Code ---
-
-export const isSystemActionsData = createDataGuard(isSystemActions);
-export const isLobbyActionsData = createDataGuard(isLobbyActions);
-export const isSessionActionsData = createDataGuard(isSessionActions);
-
-export const isMatchActionsData = createDataGuard(isMatchActions);
-export const isPlayerActionsData = createDataGuard(isPlayerActions);
-export const isMechanicsActionsData = createDataGuard(isMechanicsActions);
-export const isPUPActionsData = createDataGuard(isPUPActions);
-export const isProtocolActionsData = createDataGuard(isProtocolActions);
-export const isLifecycleActionsData = createDataGuard(isLifecycleActions);
-
-export const isFirePUPActionsData = createDataGuard(isFirePUPActions);
-export const isWaterPUPActionsData = createDataGuard(isWaterPUPActions);
-export const isWoodPUPActionsData = createDataGuard(isWoodPUPActions);
-export const isMetalPUPActionsData = createDataGuard(isMetalPUPActions);
-export const isEarthPUPActionsData = createDataGuard(isEarthPUPActions);

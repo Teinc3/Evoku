@@ -1,6 +1,4 @@
-import { 
-  isMechanicsActionsData, isPUPActionsData
-} from "@shared/types/utils/typeguards/actions";
+import ActionGuard from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../../UnionHandler";
 import PUPHandler from "./powerups";
 import MechanicsHandler from "./MechanicsHandler";
@@ -16,8 +14,8 @@ export default class PlayerHandler extends UnionHandler<PlayerActions> {
     const pupHandler = new PUPHandler(room);
     
     super([
-      [isMechanicsActionsData, mechanicsHandler],
-      [isPUPActionsData, pupHandler]
+      [ActionGuard.isMechanicsActionsData, mechanicsHandler],
+      [ActionGuard.isPUPActionsData, pupHandler]
     ] as SomeHandlerMapEntry<PlayerActions>[]);
   }
 }
