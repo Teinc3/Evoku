@@ -268,23 +268,6 @@ describe('WebSocketService', () => {
     }));
   });
 
-  describe('Queue management', () => {
-    it('should flush queue when becoming ready', fakeAsync(async () => {
-      // Send message while offline
-      service.send(SessionActions.HEARTBEAT, {});
-      expect(service['queue']).toEqual([[SessionActions.HEARTBEAT, {}]]);
-
-      // Connect and verify queue is flushed
-      const connectPromise = service.connect();
-
-      // Simulate WebSocket opening
-      await mockClientSocket.connect();
-
-      await connectPromise;
-      expect(service['queue']).toEqual([]);
-    }));
-  });
-
   describe('Cleanup', () => {
     it('should clear timers and queue on destroy', () => {
       service['pingTimer'] = setInterval(() => {}, 1000);

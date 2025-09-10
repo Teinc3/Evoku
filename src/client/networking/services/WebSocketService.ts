@@ -49,7 +49,6 @@ export default class WebSocketService {
     this.socket.setListener(this.handlePacket);
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
-    this.flushQueue();
     this.startHeartbeat();
   }
 
@@ -128,23 +127,6 @@ export default class WebSocketService {
   private handleError = (error: Event): void => {
     console.error('WebSocket error:', error);
   };
-
-  private flushQueue(): void {
-    if (!this.ready) {
-      return;
-    }
-
-    for (const [action, data] of this.queue) {
-      try {
-        this.socket.send(action, data);
-      } catch (error) {
-        console.error(`Failed to send queued action ${String(action)}:`, error);
-        // Keep remaining items in queue for next flush attempt
-        break;
-      }
-    }
-    this.queue.length = 0;
-  }
 
   private startHeartbeat(): void {
     if (this.pingTimer) {
