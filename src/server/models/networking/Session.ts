@@ -1,8 +1,6 @@
 import { randomUUID, type UUID } from "crypto";
 
-import { 
-  isMatchActionsData, isSystemActionsData
-} from "@shared/types/utils/typeguards/actions";
+import ActionGuard from "@shared/types/utils/typeguards/actions";
 
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
@@ -110,13 +108,13 @@ export default class SessionModel {
    * @param data The augmented action data.
    */
   private handleData(data: AugmentAction<ActionEnum>): boolean {
-    if (isMatchActionsData(data)) {
+    if (ActionGuard.isMatchActionsData(data)) {
       if (this.room) {
         return this.room.roomDataHandler.handleData(this, data);
       } else {
         return false;
       }
-    } else if (isSystemActionsData(data)) {
+    } else if (ActionGuard.isSystemActionsData(data)) {
       return this.systemHandler.handleData(this, data);
     } else {
       return false;

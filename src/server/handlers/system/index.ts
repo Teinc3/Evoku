@@ -1,4 +1,4 @@
-import { isLobbyActionsData, isSessionActionsData } from "@shared/types/utils/typeguards/actions";
+import ActionGuard from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../UnionHandler";
 import SessionHandler from "./SessionHandler";
 import LobbyHandler from "./LobbyHandler";
@@ -13,8 +13,8 @@ export default class SystemHandler extends UnionHandler<SystemActions> {
     const lobbyHandler = new LobbyHandler();
 
     super([
-      [isSessionActionsData, sessionHandler],
-      [isLobbyActionsData, lobbyHandler]
+      [ActionGuard.isSessionActionsData, sessionHandler],
+      [ActionGuard.isLobbyActionsData, lobbyHandler]
     ] as SomeHandlerMapEntry<SystemActions>[]);
   }
 }
