@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import { APP_CONFIG } from '../config';
 import WebSocketService from '../../networking/services/WebSocketService';
 
 import type ActionEnum from '@shared/types/enums/actions';
@@ -8,42 +7,28 @@ import type ActionMap from '@shared/types/actionmap';
 
 
 /**
- * Angular service wrapper for WebSocketService
+ * Angular service wrapper for APIService and WebSocketService
+ * Currently, only WebSocketService is implemented.
  * Provides global access to network functionality throughout the application
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export default class NetworkService {
-  private readonly _config = inject(APP_CONFIG);
-  private wsService: WebSocketService | null = null;
+  private readonly wsService: WebSocketService;
 
-  constructor() {
-    this.initializeNetworkService();
+  constructor(wsService?: WebSocketService) {
+    this.wsService = wsService ?? new WebSocketService();
   }
 
-  /** Get the websocket service instance */
-  getWSService(): WebSocketService {
-    if (!this.wsService) {
-      throw new Error('WebSocketService not initialized');
-    }
-    return this.wsService;
-  }
-
-  /** Initialize the network service with configuration */
-  private initializeNetworkService(): void {
-    // WebSocketService handles its own configuration internally
-    this.wsService = new WebSocketService();
-  }
+  getWSService(): WebSocketService { return this.wsService; }
 
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {
-    return this.getWSService().connect();
+    return this.wsService.connect();
   }
 
   /** Disconnect from the WebSocket server */
   disconnect(code?: number, reason?: string): void {
-    this.getWSService().disconnect(code, reason);
+    this.wsService.disconnect(code, reason);
   }
 
   /** Send an action packet to the server */
@@ -51,11 +36,11 @@ export default class NetworkService {
     action: GenericAction,
     data: ActionMap[GenericAction]
   ): void {
-    this.getWSService().send(action, data);
+    this.wsService.send(action, data);
   }
 
   /** Get current connection status */
   get isConnected(): boolean {
-    return this.getWSService().ready;
+    return this.wsService.ready;
   }
 }

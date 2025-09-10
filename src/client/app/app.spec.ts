@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
+import WebSocketService from '../networking/services/WebSocketService';
+import NetworkService from './services/network.service';
 import { APP_CONFIG, AppConfig } from './config';
 import App from './app';
 
@@ -10,6 +12,8 @@ describe('App', () => {
       imports: [App],
       providers: [
         { provide: APP_CONFIG, useValue: AppConfig },
+        { provide: WebSocketService, useFactory: () => new WebSocketService() },
+        NetworkService
       ],
     }).compileComponents();
   });

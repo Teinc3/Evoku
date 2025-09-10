@@ -216,20 +216,16 @@ export default class NetworkStatusComponent implements OnInit {
     this.isConnected = this.networkService.isConnected;
   }
 
-  connect() {
+  async connect() {
+    this.addLog('Connection attempt initiated', 'info');
     try {
-      this.networkService.connect();
-      this.addLog('Connection attempt initiated', 'info');
-      // Update status after a short delay to allow connection to establish
-      setTimeout(() => {
-        this.updateConnectionStatus();
-        this.addLog(
-          this.isConnected ? 'Successfully connected' : 'Connection failed',
-          this.isConnected ? 'success' : 'error'
-        );
-      }, 1000);
+      await this.networkService.connect();
+      this.updateConnectionStatus();
+      this.addLog('Successfully connected', 'success');
     } catch (error) {
-      this.addLog(`Connection error: ${error}`, 'error');
+      this.updateConnectionStatus();
+      const msg = error instanceof Error ? error.message : String(error);
+      this.addLog(`Connection failed: ${msg}`, 'error');
     }
   }
 

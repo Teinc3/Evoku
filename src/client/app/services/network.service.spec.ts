@@ -3,8 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import SessionActions from '@shared/types/enums/actions/system/session';
 import NetworkService from './network.service';
 import { APP_CONFIG } from '../config';
+import WebSocketService from '../../networking/services/WebSocketService';
 
-import type WebSocketService from '../../networking/services/WebSocketService';
+
+// Removed separate type import; class imported above for DI
 
 
 // Mock configuration data
@@ -60,23 +62,17 @@ describe('NetworkService', () => {
   let mockWebSocketService: MockWebSocketService;
 
   beforeEach(() => {
-    // Create mock WebSocketService
     mockWebSocketService = new MockWebSocketService();
 
     TestBed.configureTestingModule({
       providers: [
         NetworkService,
-        {
-          provide: APP_CONFIG,
-          useValue: mockConfig
-        }
+        { provide: APP_CONFIG, useValue: mockConfig },
+        { provide: WebSocketService, useFactory: () => mockWebSocketService }
       ]
     });
 
     service = TestBed.inject(NetworkService);
-
-    // Replace the internal WebSocketService with our mock
-    service['wsService'] = mockWebSocketService as unknown as WebSocketService;
   });
 
   describe('Basic functionality', () => {
@@ -85,8 +81,7 @@ describe('NetworkService', () => {
     });
 
     it('should provide access to WebSocketService instance', () => {
-      const wsService = service.getWSService();
-      expect(wsService).toBe(mockWebSocketService);
+      expect(service.getWSService()).toBe(mockWebSocketService as unknown as WebSocketService);
     });
   });
 
