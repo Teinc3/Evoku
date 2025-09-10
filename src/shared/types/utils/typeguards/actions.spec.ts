@@ -1,21 +1,4 @@
-import {
-  isActionEnum,
-  isSystemActions,
-  isLobbyActions,
-  isSessionActions,
-  isMatchActions,
-  isPlayerActions,
-  isMechanicsActions,
-  isPUPActions,
-  isFirePUPActions,
-  isWaterPUPActions,
-  isWoodPUPActions,
-  isMetalPUPActions,
-  isEarthPUPActions,
-  isProtocolActions,
-  isLifecycleActions,
-  ActionGuard
-} from './actions';
+import ActionGuard from './actions';
 
 
 describe('Action Type Guards', () => {
@@ -23,58 +6,58 @@ describe('Action Type Guards', () => {
     it('should correctly identify Fire PUP actions', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       
-      expect(isFirePUPActions(firePUPAction)).toBe(true);
-      expect(isFirePUPActions(-50)).toBe(false); // Lobby action
-      expect(isFirePUPActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isFirePUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isFirePUPActions(-50)).toBe(false); // Lobby action
+      expect(ActionGuard.isFirePUPActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify Lobby actions', () => {
       const lobbyAction = -50; // JOIN_QUEUE from LobbyActions
       
-      expect(isLobbyActions(lobbyAction)).toBe(true);
-      expect(isLobbyActions(20)).toBe(false); // Fire PUP action
-      expect(isLobbyActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isLobbyActions(lobbyAction)).toBe(true);
+      expect(ActionGuard.isLobbyActions(20)).toBe(false); // Fire PUP action
+      expect(ActionGuard.isLobbyActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify System actions', () => {
       const lobbyAction = -50; // JOIN_QUEUE from LobbyActions
       
-      expect(isSystemActions(lobbyAction)).toBe(true);
-      expect(isSystemActions(20)).toBe(false); // Fire PUP action
-      expect(isSystemActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isSystemActions(lobbyAction)).toBe(true);
+      expect(ActionGuard.isSystemActions(20)).toBe(false); // Fire PUP action
+      expect(ActionGuard.isSystemActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify PUP actions', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       
-      expect(isPUPActions(firePUPAction)).toBe(true);
-      expect(isPUPActions(-50)).toBe(false); // Lobby action
-      expect(isPUPActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isPUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPUPActions(-50)).toBe(false); // Lobby action
+      expect(ActionGuard.isPUPActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify Player actions', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       
-      expect(isPlayerActions(firePUPAction)).toBe(true);
-      expect(isPlayerActions(-50)).toBe(false); // Lobby action
-      expect(isPlayerActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isPlayerActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPlayerActions(-50)).toBe(false); // Lobby action
+      expect(ActionGuard.isPlayerActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify Match actions', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       
-      expect(isMatchActions(firePUPAction)).toBe(true);
-      expect(isMatchActions(-50)).toBe(false); // Lobby action
-      expect(isMatchActions(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isMatchActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isMatchActions(-50)).toBe(false); // Lobby action
+      expect(ActionGuard.isMatchActions(999)).toBe(false); // Invalid action
     });
 
     it('should correctly identify ActionEnum', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       const lobbyAction = -50; // JOIN_QUEUE from LobbyActions
       
-      expect(isActionEnum(firePUPAction)).toBe(true);
-      expect(isActionEnum(lobbyAction)).toBe(true);
-      expect(isActionEnum(999)).toBe(false); // Invalid action
+      expect(ActionGuard.isActionEnum(firePUPAction)).toBe(true);
+      expect(ActionGuard.isActionEnum(lobbyAction)).toBe(true);
+      expect(ActionGuard.isActionEnum(999)).toBe(false); // Invalid action
     });
   });
 
@@ -83,42 +66,42 @@ describe('Action Type Guards', () => {
       const firePUPAction = 20; // USE_INFERNO from FirePUPActions
       
       // Should be true for all parent categories
-      expect(isFirePUPActions(firePUPAction)).toBe(true);
-      expect(isPUPActions(firePUPAction)).toBe(true);
-      expect(isPlayerActions(firePUPAction)).toBe(true);
-      expect(isMatchActions(firePUPAction)).toBe(true);
-      expect(isActionEnum(firePUPAction)).toBe(true);
+      expect(ActionGuard.isFirePUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPlayerActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isMatchActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isActionEnum(firePUPAction)).toBe(true);
       
       // Should be false for non-parent categories
-      expect(isSystemActions(firePUPAction)).toBe(false);
-      expect(isLobbyActions(firePUPAction)).toBe(false);
-      expect(isSessionActions(firePUPAction)).toBe(false);
-      expect(isMechanicsActions(firePUPAction)).toBe(false);
-      expect(isWaterPUPActions(firePUPAction)).toBe(false);
-      expect(isWoodPUPActions(firePUPAction)).toBe(false);
-      expect(isMetalPUPActions(firePUPAction)).toBe(false);
-      expect(isEarthPUPActions(firePUPAction)).toBe(false);
-      expect(isProtocolActions(firePUPAction)).toBe(false);
-      expect(isLifecycleActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isSystemActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isLobbyActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isSessionActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isMechanicsActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isWaterPUPActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isWoodPUPActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isMetalPUPActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isEarthPUPActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isProtocolActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isLifecycleActions(firePUPAction)).toBe(false);
     });
 
     it('should maintain proper hierarchy for Lobby actions', () => {
       const lobbyAction = -50; // JOIN_QUEUE from LobbyActions
       
       // Should be true for all parent categories
-      expect(isLobbyActions(lobbyAction)).toBe(true);
-      expect(isSystemActions(lobbyAction)).toBe(true);
-      expect(isActionEnum(lobbyAction)).toBe(true);
+      expect(ActionGuard.isLobbyActions(lobbyAction)).toBe(true);
+      expect(ActionGuard.isSystemActions(lobbyAction)).toBe(true);
+      expect(ActionGuard.isActionEnum(lobbyAction)).toBe(true);
       
       // Should be false for non-parent categories
-      expect(isMatchActions(lobbyAction)).toBe(false);
-      expect(isPlayerActions(lobbyAction)).toBe(false);
-      expect(isPUPActions(lobbyAction)).toBe(false);
-      expect(isFirePUPActions(lobbyAction)).toBe(false);
-      expect(isSessionActions(lobbyAction)).toBe(false);
-      expect(isMechanicsActions(lobbyAction)).toBe(false);
-      expect(isProtocolActions(lobbyAction)).toBe(false);
-      expect(isLifecycleActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isMatchActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isPlayerActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isPUPActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isFirePUPActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isSessionActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isMechanicsActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isProtocolActions(lobbyAction)).toBe(false);
+      expect(ActionGuard.isLifecycleActions(lobbyAction)).toBe(false);
     });
   });
 
@@ -137,12 +120,17 @@ describe('Action Type Guards', () => {
     it('should maintain backward compatibility with individual functions', () => {
       const firePUPAction = 20;
       
-      // Static class methods should give same results as individual functions
-      expect(ActionGuard.isFirePUPActions(firePUPAction)).toBe(isFirePUPActions(firePUPAction));
-      expect(ActionGuard.isPUPActions(firePUPAction)).toBe(isPUPActions(firePUPAction));
-      expect(ActionGuard.isPlayerActions(firePUPAction)).toBe(isPlayerActions(firePUPAction));
-      expect(ActionGuard.isMatchActions(firePUPAction)).toBe(isMatchActions(firePUPAction));
-      expect(ActionGuard.isActionEnum(firePUPAction)).toBe(isActionEnum(firePUPAction));
+      // Static class methods should give same results as individual functions would have
+      expect(ActionGuard.isFirePUPActions(firePUPAction))
+        .toBe(ActionGuard.isFirePUPActions(firePUPAction));
+      expect(ActionGuard.isPUPActions(firePUPAction))
+        .toBe(ActionGuard.isPUPActions(firePUPAction));
+      expect(ActionGuard.isPlayerActions(firePUPAction))
+        .toBe(ActionGuard.isPlayerActions(firePUPAction));
+      expect(ActionGuard.isMatchActions(firePUPAction))
+        .toBe(ActionGuard.isMatchActions(firePUPAction));
+      expect(ActionGuard.isActionEnum(firePUPAction))
+        .toBe(ActionGuard.isActionEnum(firePUPAction));
     });
   });
 
@@ -152,26 +140,26 @@ describe('Action Type Guards', () => {
       const firePUPAction = 20; // Assuming this is a Fire PUP action
 
       // All these should return true for a Fire PUP action
-      expect(isActionEnum(firePUPAction)).toBe(true);
-      expect(isMatchActions(firePUPAction)).toBe(true);
-      expect(isPlayerActions(firePUPAction)).toBe(true);
-      expect(isPUPActions(firePUPAction)).toBe(true);
-      expect(isFirePUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isActionEnum(firePUPAction)).toBe(true);
+      expect(ActionGuard.isMatchActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPlayerActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isPUPActions(firePUPAction)).toBe(true);
+      expect(ActionGuard.isFirePUPActions(firePUPAction)).toBe(true);
 
       // These should return false
-      expect(isSystemActions(firePUPAction)).toBe(false);
+      expect(ActionGuard.isSystemActions(firePUPAction)).toBe(false);
     });
 
     it('should maintain type safety and correctness', () => {
       // Test with invalid action number
       const invalidAction = 999;
 
-      expect(isActionEnum(invalidAction)).toBe(false);
-      expect(isSystemActions(invalidAction)).toBe(false);
-      expect(isMatchActions(invalidAction)).toBe(false);
-      expect(isPlayerActions(invalidAction)).toBe(false);
-      expect(isPUPActions(invalidAction)).toBe(false);
-      expect(isFirePUPActions(invalidAction)).toBe(false);
+      expect(ActionGuard.isActionEnum(invalidAction)).toBe(false);
+      expect(ActionGuard.isSystemActions(invalidAction)).toBe(false);
+      expect(ActionGuard.isMatchActions(invalidAction)).toBe(false);
+      expect(ActionGuard.isPlayerActions(invalidAction)).toBe(false);
+      expect(ActionGuard.isPUPActions(invalidAction)).toBe(false);
+      expect(ActionGuard.isFirePUPActions(invalidAction)).toBe(false);
     });
 
     it('should demonstrate performance improvement with direct Set lookups', () => {
@@ -182,11 +170,11 @@ describe('Action Type Guards', () => {
       
       for (let i = 0; i < iterations; i++) {
         // Each function now does direct Set lookups instead of calling other functions
-        isActionEnum(testAction);
-        isMatchActions(testAction);
-        isPlayerActions(testAction);
-        isPUPActions(testAction);
-        isFirePUPActions(testAction);
+        ActionGuard.isActionEnum(testAction);
+        ActionGuard.isMatchActions(testAction);
+        ActionGuard.isPlayerActions(testAction);
+        ActionGuard.isPUPActions(testAction);
+        ActionGuard.isFirePUPActions(testAction);
       }
       
       const end = performance.now();
@@ -203,21 +191,21 @@ describe('Action Type Guards', () => {
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle extreme number values', () => {
-      expect(isActionEnum(Number.MAX_SAFE_INTEGER)).toBe(false);
-      expect(isActionEnum(Number.MIN_SAFE_INTEGER)).toBe(false);
-      expect(isActionEnum(Infinity)).toBe(false);
-      expect(isActionEnum(-Infinity)).toBe(false);
-      expect(isActionEnum(NaN)).toBe(false);
+      expect(ActionGuard.isActionEnum(Number.MAX_SAFE_INTEGER)).toBe(false);
+      expect(ActionGuard.isActionEnum(Number.MIN_SAFE_INTEGER)).toBe(false);
+      expect(ActionGuard.isActionEnum(Infinity)).toBe(false);
+      expect(ActionGuard.isActionEnum(-Infinity)).toBe(false);
+      expect(ActionGuard.isActionEnum(NaN)).toBe(false);
     });
 
     it('should handle type coercion consistently', () => {
       // These should all be false since they're not valid action numbers
-      expect(isActionEnum(null as unknown as number)).toBe(false);
-      expect(isActionEnum(undefined as unknown as number)).toBe(false);
-      expect(isActionEnum('' as unknown as number)).toBe(false);
-      expect(isActionEnum('20' as unknown as number)).toBe(false);
-      expect(isActionEnum([] as unknown as number)).toBe(false);
-      expect(isActionEnum({} as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum(null as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum(undefined as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum('' as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum('20' as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum([] as unknown as number)).toBe(false);
+      expect(ActionGuard.isActionEnum({} as unknown as number)).toBe(false);
     });
 
     it('should maintain consistency across all type guards', () => {
@@ -225,21 +213,21 @@ describe('Action Type Guards', () => {
       
       testValues.forEach(value => {
         // If it's not a valid ActionEnum, no other type guard should return true
-        if (!isActionEnum(value as unknown as number)) {
-          expect(isSystemActions(value as unknown as number)).toBe(false);
-          expect(isMatchActions(value as unknown as number)).toBe(false);
-          expect(isPlayerActions(value as unknown as number)).toBe(false);
-          expect(isPUPActions(value as unknown as number)).toBe(false);
-          expect(isFirePUPActions(value as unknown as number)).toBe(false);
-          expect(isLobbyActions(value as unknown as number)).toBe(false);
-          expect(isSessionActions(value as unknown as number)).toBe(false);
-          expect(isMechanicsActions(value as unknown as number)).toBe(false);
-          expect(isWaterPUPActions(value as unknown as number)).toBe(false);
-          expect(isWoodPUPActions(value as unknown as number)).toBe(false);
-          expect(isMetalPUPActions(value as unknown as number)).toBe(false);
-          expect(isEarthPUPActions(value as unknown as number)).toBe(false);
-          expect(isProtocolActions(value as unknown as number)).toBe(false);
-          expect(isLifecycleActions(value as unknown as number)).toBe(false);
+        if (!ActionGuard.isActionEnum(value as unknown as number)) {
+          expect(ActionGuard.isSystemActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isMatchActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isPlayerActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isPUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isFirePUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isLobbyActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isSessionActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isMechanicsActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isWaterPUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isWoodPUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isMetalPUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isEarthPUPActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isProtocolActions(value as unknown as number)).toBe(false);
+          expect(ActionGuard.isLifecycleActions(value as unknown as number)).toBe(false);
         }
       });
     });
@@ -254,12 +242,12 @@ describe('Action Type Guards', () => {
       
       for (let i = 0; i < iterations; i++) {
         // Test all type guards to ensure consistent O(1) performance
-        isActionEnum(firePUPAction);
-        isSystemActions(firePUPAction);
-        isMatchActions(firePUPAction);
-        isPlayerActions(firePUPAction);
-        isPUPActions(firePUPAction);
-        isFirePUPActions(firePUPAction);
+        ActionGuard.isActionEnum(firePUPAction);
+        ActionGuard.isSystemActions(firePUPAction);
+        ActionGuard.isMatchActions(firePUPAction);
+        ActionGuard.isPlayerActions(firePUPAction);
+        ActionGuard.isPUPActions(firePUPAction);
+        ActionGuard.isFirePUPActions(firePUPAction);
       }
       
       const end = performance.now();
