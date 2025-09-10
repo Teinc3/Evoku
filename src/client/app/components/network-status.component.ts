@@ -23,10 +23,6 @@ import type { OnInit } from '@angular/core';
         <span class="status-text">{{ isConnected ? 'Connected' : 'Disconnected' }}</span>
       </div>
 
-      <div class="connection-info" *ngIf="this.networkService.latency">
-        <p><strong>Latency:</strong> {{ this.networkService.latency }}</p>
-      </div>
-
       <div class="actions">
         <button
           class="btn btn-primary"

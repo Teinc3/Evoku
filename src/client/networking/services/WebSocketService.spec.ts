@@ -1,5 +1,5 @@
-// eslint-disable-next-line import/newline-after-import
 import { fakeAsync } from '@angular/core/testing';
+
 
 // eslint-disable-next-line import/newline-after-import
 import '@shared/networking/packets';
@@ -115,21 +115,18 @@ let mockClientPacketHandler: MockClientPacketHandler;
 let originalWebSocket: typeof WebSocket;
 
 // Import the actual classes to mock them
-import ClientSocket from '../transport/ClientSocket';
-import ClientPacketHandler from '../handlers/ClientPacketHandler';
 import WebSocketService from './WebSocketService';
+
+import type ClientSocket from '../transport/ClientSocket';
+import type ClientPacketHandler from '../handlers/ClientPacketHandler';
 
 
 describe('WebSocketService', () => {
   let service: WebSocketService;
-  let _originalClientSocket: typeof ClientSocket;
-  let _originalClientPacketHandler: typeof ClientPacketHandler;
 
   beforeAll(() => {
     // Store original constructors
     originalWebSocket = (window as Window & { WebSocket: typeof WebSocket }).WebSocket;
-    _originalClientSocket = ClientSocket;
-    _originalClientPacketHandler = ClientPacketHandler;
     // Mock Date.now() globally
     spyOn(Date, 'now').and.returnValue(1000);
   });
