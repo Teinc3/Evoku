@@ -18,13 +18,7 @@ export default class ProtocolHandler extends EnumHandler<ProtocolActions> {
   }
 
   private handlePing(_data: AugmentAction<ProtocolActions.PING>): void {
-    // Handle server ping - calculate latency and respond with PONG
-    if (this.networkService?.lastPingAt !== undefined && this.networkService.lastPingAt !== null) {
-      this.networkService.latencyMs = Date.now() - this.networkService.lastPingAt;
-      this.networkService.lastPingAt = null;
-    }
-
-    console.debug('Received ping from server, latency:', this.networkService.latencyMs);
+    // Handle server ping - could implement latency calculation here
     // TODO: Send PONG response when PONG action is implemented
   }
 

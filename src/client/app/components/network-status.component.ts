@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
-import NetworkService from './services/network.service';
+import NetworkService from '../services/network.service';
 
 import type { OnInit } from '@angular/core';
 
@@ -259,7 +259,7 @@ export default class NetworkStatusComponent implements OnInit {
 
   private setupDisconnectHandler() {
     // Set up disconnect callback to handle socket disconnections
-    this.networkService.getNetworkService().setDisconnectCallback(() => {
+    this.networkService.getWSService().setDisconnectCallback(() => {
       this.handleDisconnect();
     });
   }

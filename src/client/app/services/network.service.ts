@@ -16,34 +16,34 @@ import type ActionMap from '@shared/types/actionmap';
 })
 export default class NetworkService {
   private readonly _config = inject(APP_CONFIG);
-  private networkService: WebSocketService | null = null;
+  private wsService: WebSocketService | null = null;
 
   constructor() {
     this.initializeNetworkService();
   }
 
-  /** Get the network service instance */
-  getNetworkService(): WebSocketService {
-    if (!this.networkService) {
+  /** Get the websocket service instance */
+  getWSService(): WebSocketService {
+    if (!this.wsService) {
       throw new Error('WebSocketService not initialized');
     }
-    return this.networkService;
+    return this.wsService;
   }
 
   /** Initialize the network service with configuration */
   private initializeNetworkService(): void {
     // WebSocketService handles its own configuration internally
-    this.networkService = new WebSocketService();
+    this.wsService = new WebSocketService();
   }
 
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {
-    return this.getNetworkService().connect();
+    return this.getWSService().connect();
   }
 
   /** Disconnect from the WebSocket server */
   disconnect(code?: number, reason?: string): void {
-    this.getNetworkService().disconnect(code, reason);
+    this.getWSService().disconnect(code, reason);
   }
 
   /** Send an action packet to the server */
@@ -51,16 +51,11 @@ export default class NetworkService {
     action: GenericAction,
     data: ActionMap[GenericAction]
   ): void {
-    this.getNetworkService().send(action, data);
+    this.getWSService().send(action, data);
   }
 
   /** Get current connection status */
   get isConnected(): boolean {
-    return this.getNetworkService().ready;
-  }
-
-  /** Get current latency */
-  get latency(): number | null {
-    return this.getNetworkService().latencyMs;
+    return this.getWSService().ready;
   }
 }

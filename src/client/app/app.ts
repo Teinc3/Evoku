@@ -1,7 +1,7 @@
 import { RouterOutlet } from '@angular/router';
 import { Component } from '@angular/core';
 
-import NetworkStatusComponent from './network-status.component';
+import NetworkStatusComponent from './components/network-status.component';
 
 
 @Component({

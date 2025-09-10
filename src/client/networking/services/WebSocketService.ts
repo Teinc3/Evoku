@@ -20,19 +20,17 @@ export default class WebSocketService {
   private reconnectTimer: ReturnType<typeof setTimeout> | null;
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
-  public latencyMs: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
 
-  constructor() {
-    this.socket = new ClientSocket();
-    this.packetHandler = new ClientPacketHandler(this);
+  constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
+    this.socket = socket || new ClientSocket();
+    this.packetHandler = packetHandler || new ClientPacketHandler(this);
 
     this.queue = [];
     this.reconnectTimer = null;
     this.pingTimer = null;
     this.lastPingAt = null;
-    this.latencyMs = null;
     this.lastPacketSentAt = 0;
   }
 
