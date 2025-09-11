@@ -14,7 +14,7 @@ Consult the developer if you want to suggest a better way of doing something tha
 or which goes against the provided task-specific instructions by the developer.
 However, the developer always has the final say on how the project should look like.
 
-Copilt Instructions may become outdated overtime due to new features and changes.
+Copilt Instructions may become outdated over time due to new features and changes.
 If you notice any outdated information, notify the developer so that they can update it.
 Anything that is not mentioned here can  be found in documentation files within the `/docs` directory, or the codebase.
 
@@ -27,7 +27,7 @@ on the classic puzzle through evolutionary powerups.
 
 ### Theme
 Evoku's core central theme focuses on the balance of the Yin and Yang forces.
-It also has an auxilliary theme of the Five Elements/Agents (Fire, Water, Wood, Metal, Earth).
+It also has an auxiliary theme of the Five Elements/Agents (Fire, Water, Wood, Metal, Earth).
 Due to this it has an artistically Eastern and mystical aesthetic, which is shown in the UI design and background art.
 
 #### Powerup Theme
@@ -40,7 +40,7 @@ The game can have a total of 5 phases, each representing one of the Five Element
 Using a powerup of a certain element during a phase of the same element will amplify its effect,
 while using a powerup of the element which the current phase's element overcomes will weaken its effect.
 
-The Game Loop comprises of 3 phases, 
+The Game Loop comprises 3 phases, 
 and an element is randomly selected for each phase (but it only appears once per match).
 
 The pace of the game will change depending on the phase.
@@ -74,7 +74,7 @@ When the user suggests implementing Time Attack mode, ask them if they should up
 
 ### General Guidelines
 - Reference existing code and `eslint.config.js` configuration for style consistency.
-  Most common pitfalls include 100 char limit, import spacing/ordering and use of disallowed types (`any`)
+  Most common pitfalls include 100-char line limit, import spacing/ordering and use of disallowed types (`any`)
 - Read documentation regarding code that you will interact and modify with (for the selected task)
   and familiarise yourself with the context, before making any changes
 
@@ -163,7 +163,7 @@ as maybe they will be relevant at the time of their suggestion.
 To make sure the code is working correctly and meets quality standards, several checks can be performed.
 
 You are encouraged to run these checks but **ONLY AFTER** you have finished the majority of the changes,
-as every time you run a check, the user has to give you permission to run commands on your machine,
+as every time you run a check, the developer has to give you permission to run commands on their machine,
 which can be quite disruptive to their asynchronous workflow.
 
 #### Compilation
@@ -202,6 +202,20 @@ This may cause failure issues when working on headless agent mode,
 so you must make sure your code abides by all checks before attempting to commit your code.
 
 The pre-commit hook runs all of the above checks (compilation, linting, and testing).
+
+
+## Github Issues Workflow
+If you are assigned to a Github Issue and working with headless agent mode, note the following rules:
+
+- The master branch is protected and cannot be pushed to directly.
+- When you create a PR, assign the correct labels and a milestone if applicable.
+  You can reference the base issue you have been assigned to, for the labels and milestone to assign to the PR.
+  You will also need to move the Issue to "In Progress" and/or "In Review" column for the Issue's Project status.
+  **DO NOT** add the PR to the project board - the Issue is sufficient.
+- Please, **ALWAYS MARK YOUR PR AS READY FOR REVIEW** when you are done with the changes...
+- When you write closing keywords in the PR description, insert a line break and then reference the issue.
+  Example: `Closes: \n - #59`.
+  This allows the developer to read the Issue title directly from the PR description.
 
 
 ## Technical Information
