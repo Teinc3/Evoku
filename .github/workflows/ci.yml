@@ -7,7 +7,7 @@ on:
     branches: [master] # Lint on PR updates targeting master
 
 jobs:
-  validate-server:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
