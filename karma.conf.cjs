@@ -12,7 +12,8 @@ module.exports = function (config) {
       require('karma-jasmine'),
       require('karma-firefox-launcher'),
       require('karma-jasmine-html-reporter'),
-      require('karma-coverage')
+      require('karma-coverage'),
+      require('karma-junit-reporter')
     ],
     client: {
       jasmine: {
@@ -31,10 +32,20 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
-        { type: 'text-summary' }
+        { type: 'text-summary' },
+        { type: 'lcov' }
       ]
     },
-    reporters: ['progress', 'kjhtml'],
+    junitReporter: {
+      outputDir: require('path').join(__dirname, `./coverage/${projectName}`),
+      outputFile: 'test-results.xml',
+      suite: '',
+      useBrowserName: false,
+      nameFormatter: undefined,
+      classNameFormatter: undefined,
+      properties: {}
+    },
+    reporters: isCI ? ['progress', 'coverage', 'junit'] : ['progress', 'kjhtml'],
     browsers: ['FirefoxHeadless'],
     // Timeout settings for better CI reliability
     browserNoActivityTimeout: isCI ? 60000 : 30000, // 60s in CI, 30s locally
