@@ -1,4 +1,5 @@
 import { default as packetRegistry, PacketRegistry } from ".";
+import { createSpy, spyOnMethod } from '../../types/test-utils/cross-framework';
 
 import type { PacketConstructor } from '../../types/networking/IPacket';
 import type ICodec from '../../types/networking/ICodec';
@@ -12,7 +13,7 @@ class MockPacket {
 
   constructor(id: ActionEnum = 1 as ActionEnum) {
     this.id = id;
-    this.Codec = { decode: jest.fn(), encode: jest.fn() };
+    this.Codec = { decode: createSpy('decode'), encode: createSpy('encode') };
   }
 }
 

@@ -1,4 +1,5 @@
 import { createMockEffect } from './utils/MockEffect';
+import { expectToBeOfType } from '../types/test-utils/cross-framework';
 
 import type BaseEffectModel from './Effect';
 
@@ -219,9 +220,9 @@ describe('BaseEffectModel', () => {
 
       effects.forEach(effect => {
         expect(effect.startedAt).toBe(baseTime);
-        expect(effect.validateSetValue(baseTime + 5000)).toEqual(expect.any(Boolean));
-        expect(effect.blockSetProgress(baseTime + 5000)).toEqual(expect.any(Boolean));
-        expect(effect.computeHash()).toEqual(expect.any(Number));
+        expectToBeOfType(effect.validateSetValue(baseTime + 5000), Boolean);
+        expectToBeOfType(effect.blockSetProgress(baseTime + 5000), Boolean);
+        expectToBeOfType(effect.computeHash(), Number);
       });
     });
 

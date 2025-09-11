@@ -85,8 +85,8 @@ describe('createArrayCodec Factory', () => {
     buffer.index = 0;
     const decodedData = codec.decode(buffer);
 
-    // Assert that the decoded data does NOT equal the original data
-    expect(decodedData).not.toEqual(data);
+    // Assert that the decoded data does NOT equal the original data  
+    expect(decodedData).not.toEqual(data as any);
 
     // Assert what the data actually became (TextEncoder by js' goofy type coercion)
     expect(decodedData).toEqual(['one', '2', 'three']);

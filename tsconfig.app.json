@@ -17,8 +17,7 @@
     "config/client.json"
   ],
   "exclude": [
-    /* Shared bundle tests only run on jest */
-    "src/shared/**/*.spec.ts",
+    /* Shared unit tests now run in both Jest (server) and Karma/Jasmine (client) environments */
     "src/server/**/*.ts"
   ]
 }

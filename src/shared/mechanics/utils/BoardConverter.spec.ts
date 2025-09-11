@@ -1,6 +1,7 @@
 import { getSudoku } from "sudoku-gen";
 
 import BoardConverter from "./BoardConverter";
+import { expectToHaveLength } from "../../types/test-utils/cross-framework";
 
 
 describe("BoardConverter", () => {
@@ -16,9 +17,9 @@ describe("BoardConverter", () => {
       expect(sudokuGen.puzzle).not.toContain('0');
 
       const result = BoardConverter.toBoardArray(sudokuGen.puzzle);
-      expect(result).toHaveLength(81);
+      expectToHaveLength(result, 81);
       expect(result).toContain(0);
-      expect(result).not.toContain("-");
+      expect(result).not.toContain('-' as any);
     });
 
     it("should convert board cell states to values array", () => {
@@ -32,14 +33,14 @@ describe("BoardConverter", () => {
       const result = BoardConverter.toCellValues(mockCellStates);
       
       expect(result).toEqual([1, 0, 5, 9]);
-      expect(result).toHaveLength(4);
+      expectToHaveLength(result, 4);
     });
 
     it("should handle empty cell states array", () => {
       const result = BoardConverter.toCellValues([]);
       
       expect(result).toEqual([]);
-      expect(result).toHaveLength(0);
+      expectToHaveLength(result, 0);
     });
 
     it("should handle single cell state", () => {
@@ -50,7 +51,7 @@ describe("BoardConverter", () => {
       const result = BoardConverter.toCellValues(mockCellState);
       
       expect(result).toEqual([7]);
-      expect(result).toHaveLength(1);
+      expectToHaveLength(result, 1);
     });
   });
 });

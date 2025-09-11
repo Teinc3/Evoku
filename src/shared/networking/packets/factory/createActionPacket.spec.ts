@@ -24,9 +24,11 @@ describe('pickInjectables', () => {
 
     // D. Assertions
     // Check that the output contains all the keys that it was supposed to select
-    expect(Object.keys(selectedCodecs)).toEqual(
-      expect.arrayContaining(allInjectableKeys.filter(key => keysToPick.includes(key)))
-    );
+    const expectedKeys = allInjectableKeys.filter(key => keysToPick.includes(key));
+    const actualKeys = Object.keys(selectedCodecs);
+    expectedKeys.forEach(key => {
+      expect(actualKeys).toContain(key);
+    });
 
     // Check that the number of keys is correct (it shouldn't have added the invalid key)
     expect(Object.keys(selectedCodecs).length).toBe(selectedKeys.length);

@@ -1,6 +1,7 @@
 import { createMockEffect } from './utils/MockEffect';
 import BaseCellModel from './Cell';
 import BaseBoardModel from './Board';
+import { expectToHaveLength, expectToBeOfType, spyOnMethod } from '../types/test-utils/cross-framework';
 
 
 // Concrete implementation for testing since BaseBoardModel is abstract
@@ -36,7 +37,7 @@ describe('BaseBoardModel', () => {
       const values = [1, 2, 3, 0, 0, 0, 7, 8, 9];
       const customBoard = new TestBoardModel(values);
 
-      expect(customBoard.board).toHaveLength(9);
+      expectToHaveLength(customBoard.board, 9);
       expect(customBoard.board[0].value).toBe(1);
       expect(customBoard.board[1].value).toBe(2);
       expect(customBoard.board[2].value).toBe(3);
@@ -141,12 +142,14 @@ describe('BaseBoardModel', () => {
     });
 
     it('should call cell update method', () => {
-      const spy = jest.spyOn(board.board[0], 'update');
+      const spy = spyOnMethod(board.board[0], 'update');
 
       board.update(0, 5, baseTime);
 
       expect(spy).toHaveBeenCalledWith(5, baseTime);
-      spy.mockRestore();
+      if (spy.mockRestore) {
+        spy.mockRestore();
+      }
     });
   });
 
@@ -193,13 +196,13 @@ describe('BaseBoardModel', () => {
 
     it('should handle empty board', () => {
       const emptyBoard = new TestBoardModel();
-      expect(emptyBoard.computeHash()).toEqual(expect.any(Number));
+      expectToBeOfType(emptyBoard.computeHash(), Number);
     });
 
     it('should handle large boards', () => {
       const largeValues = new Array(1000).fill(0).map((_, i) => i % 10);
       const largeBoard = new TestBoardModel(largeValues);
-      expect(largeBoard.computeHash()).toEqual(expect.any(Number));
+      expectToBeOfType(largeBoard.computeHash(), Number);
     });
   });
 
@@ -417,8 +420,8 @@ describe('BaseBoardModel', () => {
 
       expect(emptyBoard.validate(0, 5, baseTime)).toBe(false);
       expect(() => emptyBoard.update(0, 5, baseTime)).toThrow();
-      expect(emptyBoard.computeHash()).toEqual(expect.any(Number));
-      expect(emptyBoard.progress([], baseTime)).toEqual(expect.any(Number));
+      expectToBeOfType(emptyBoard.computeHash(), Number);
+      expectToBeOfType(emptyBoard.progress([], baseTime), Number);
     });
 
     it('should handle extreme time values', () => {
@@ -436,8 +439,8 @@ describe('BaseBoardModel', () => {
         const values = new Array(size).fill(0);
         const testBoard = new TestBoardModel(values);
 
-        expect(testBoard.board).toHaveLength(size);
-        expect(testBoard.computeHash()).toEqual(expect.any(Number));
+        expectToHaveLength(testBoard.board, size);
+        expectToBeOfType(testBoard.computeHash(), Number);
 
         if (size > 0) {
           expect(testBoard.validate(0, 5, baseTime)).toBe(true);
