@@ -1,11 +1,13 @@
 import MatchStatus from '../../types/enums/matchstatus';
 import GameStateController from './state';
 
+import type IPlayerState from '@shared/types/gamestate';
 import type { 
   SetCellContract
 } from '@shared/types/contracts/match/player/mechanics/SetCellContract';
 import type TimeService from '../time';
 import type { GameLogicCallbacks } from '../../types/gamelogic';
+import type ServerBoardModel from '../../models/logic/Board';
 
 
 // Mock the board converter
@@ -361,6 +363,102 @@ describe('GameStateController', () => {
 
       expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
         { playerID, progress: 100 }
+      ]);
+    });
+  });
+
+  describe('checkBoardProgresses (private method)', () => {
+    beforeEach(() => {
+      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
+      gameState.addPlayer(1);
+      gameState.addPlayer(2);
+      gameState.initGameStates();
+    });
+
+    it('should check progress for specific players when playerIDs provided', () => {
+      mockServerBoardModel.progress.mockReturnValue(45);
+      
+      // Access private method via type assertion
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses([1]);
+
+      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
+        { playerID: 1, progress: 45 }
+      ]);
+    });
+
+    it('should check progress for all players when no playerIDs provided', () => {
+      mockServerBoardModel.progress.mockReturnValue(45);
+      
+      // Access private method via type assertion
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses();
+
+      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
+        { playerID: 1, progress: 45 },
+        { playerID: 2, progress: 45 }
+      ]);
+    });
+
+    it('should handle player without gameState', () => {
+      mockServerBoardModel.progress.mockReturnValue(45);
+      
+      // Manually remove gameState from player 1
+      const gameStates = (gameState as unknown as { 
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(1);
+      if (playerState) {
+        delete playerState.gameState;
+      }
+
+      // Access private method via type assertion - check only player 1
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses([1]);
+
+      // Should not call callback since player 1 has no gameState
+      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should handle player without solution', () => {
+      mockServerBoardModel.progress.mockReturnValue(45);
+      
+      // Manually remove solution for player 1
+      const solutions = (gameState as unknown as { solutions: Map<number, number[]> }).solutions;
+      solutions.delete(1);
+
+      // Access private method via type assertion - check only player 1
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses([1]);
+
+      // Should not call callback since player 1 has no solution
+      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should not call callback when no progress data available', () => {
+      // Clear all players
+      const gameStates = (gameState as unknown as { 
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      gameStates.clear();
+
+      // Access private method via type assertion
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses();
+
+      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should handle empty playerIDs array', () => {
+      mockServerBoardModel.progress.mockReturnValue(45);
+      
+      // Access private method via type assertion
+      (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
+        .checkBoardProgresses([]);
+
+      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
+        { playerID: 1, progress: 45 },
+        { playerID: 2, progress: 45 }
       ]);
     });
   });

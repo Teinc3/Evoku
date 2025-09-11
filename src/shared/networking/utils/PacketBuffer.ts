@@ -28,6 +28,10 @@ export default class PacketBuffer implements IPacketBuffer {
     return this._buffer
   }
 
+  get nonResizeableBuffer(): ArrayBuffer {
+    return this._buffer.slice(0, this._maxWritten);
+  }
+
   get dataView(): DataView {
     return this._dataView;
   }

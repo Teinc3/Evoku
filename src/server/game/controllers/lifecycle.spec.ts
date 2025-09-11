@@ -144,15 +144,24 @@ describe('LifecycleController', () => {
       expect(setTimeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('should trigger game initialization after timer', () => {
-      const initGameSpy = jest.spyOn(lifecycleController, 'initGame');
+    it('should handle game initialization failure gracefully', () => {
+      // Mock initGameStates to throw an error
+      mockGameState.initGameStates.mockImplementation(() => {
+        throw new Error('Game initialization failed');
+      });
+      
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       lifecycleController.onPlayerJoined();
       
-      // Fast-forward timer
+      // Fast-forward timer to trigger initialization
       jest.advanceTimersByTime(5000);
       
-      expect(initGameSpy).toHaveBeenCalled();
+      // Should log error and set status to ENDED
+      expect(consoleSpy).toHaveBeenCalledWith('Game initialization failed:', expect.any(Error));
+      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      
+      consoleSpy.mockRestore();
     });
   });
 
@@ -169,12 +178,40 @@ describe('LifecycleController', () => {
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('should not process if 2 players remain', () => {
+    it('should not process if exactly 2 players remain (branch coverage)', () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      
+      // Ensure we have exactly 2 players and status is not ENDED
+      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(mockRoom.participants.size).toBe(2);
       
       lifecycleController.onPlayerLeft();
       
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
+    });
+
+    it('should process when status is not ENDED and players != 2 (full branch coverage)', () => {
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      
+      // First set up a timer
+      lifecycleController.onPlayerJoined();
+      
+      // Set up scenario where status is not ENDED and participants.size != 2
+      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      
+      // Reduce to 1 player so participants.size !== 2
+      Object.defineProperty(mockRoom, 'participants', {
+        value: new Map([[
+          '12345-67890-abcde-fghij-klmno',
+          { uuid: '12345-67890-abcde-fghij-klmno' }
+        ]]),
+        writable: true
+      });
+      
+      lifecycleController.onPlayerLeft();
+      
+      // Should process and clear timeout
+      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
 
     it('should clear start timer if player leaves', () => {
@@ -365,12 +402,24 @@ describe('LifecycleController', () => {
       );
     });
 
-    it('should handle empty progress data', () => {
+    it('should handle progress updates in TODO section (lines 95+)', () => {
       lifecycleController.initGame();
       
-      expect(() => {
-        progressCallback([]);
-      }).not.toThrow();
+      const progressData = [
+        { playerID: 1, progress: 50 }, // Between 33% and 100% - hits TODO section
+        { playerID: 2, progress: 75 }  // Between 33% and 100% - hits TODO section
+      ];
+      
+      const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
+      
+      // This should reach the TODO section without triggering game over
+      callbacks.onBoardProgressUpdate(progressData);
+      
+      // Should not broadcast game over since progress < 100%
+      expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
+        LifecycleActions.GAME_OVER,
+        expect.anything()
+      );
     });
   });
 

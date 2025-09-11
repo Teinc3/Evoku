@@ -1,10 +1,12 @@
 import { RouterOutlet } from '@angular/router';
 import { Component } from '@angular/core';
 
+import NetworkStatusComponent from './components/network-status.component';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NetworkStatusComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

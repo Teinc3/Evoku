@@ -23,6 +23,7 @@ export default class PacketIO {
     // }
     const packetBuffer = new PacketBuffer(buffer.byteLength);
     packetBuffer.write(buffer);
+    packetBuffer.index = 0; // Write bumps index, reset it for reading from start
 
     const action = (new ActionCodec).decode(packetBuffer);
     const Packet = packetRegistry.getPacket(action);
@@ -48,7 +49,7 @@ export default class PacketIO {
     const buffer = new Packet({
       action,
       ...dataContract
-    }).wrap().buffer;
+    }).wrap().nonResizeableBuffer;
     // if (this.security) {
     //   buffer = this.security.encrypt(buffer);
     // }

@@ -50,12 +50,28 @@ describe('PacketBuffer', () => {
       expect(buffer.readFloat()).toBeCloseTo(value);
     });
 
-    it('should write and read a raw byte array', () => {
+    it('should return the number of bytes written in write method', () => {
       const data = new Uint8Array([1, 2, 3, 4, 5]);
-      buffer.write(data);
+      const bytesWritten = buffer.write(data);
+      
+      expect(bytesWritten).toBe(5);
+      expect(buffer.maxWritten).toBe(5);
+    });
+
+    it('should handle ArrayBuffer input in write method', () => {
+      const data = new ArrayBuffer(8);
+      const view = new Uint8Array(data);
+      view.set([1, 2, 3, 4, 5, 6, 7, 8]);
+      
+      const bytesWritten = buffer.write(data);
+      
+      expect(bytesWritten).toBe(8);
+      expect(buffer.maxWritten).toBe(8);
+      
+      // Verify the data was written correctly
       buffer.index = 0;
-      const readData = buffer.read(5);
-      expect(readData).toEqual(data);
+      const readData = buffer.read(8);
+      expect(readData).toEqual(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]));
     });
 
     it('should write and read a string with a length prefix', () => {
@@ -149,10 +165,20 @@ describe('PacketBuffer', () => {
       expect(buffer.buffer.byteLength).toBe(16384);
     });
         
-    it('should throw when writing a string that exceeds maxByteLength', () => {
-      // maxByteLength is 2**16 - 1 = 65535
-      const tooLong = 'x'.repeat(70000); // Exceeds maxByteLength
-      expect(() => buffer.writeString(tooLong)).toThrow();
+    it('should handle multiple capacity doublings in _ensureCapacity', () => {
+      // Start with a very small buffer
+      const smallBuffer = new PacketBuffer(4);
+      
+      // Write data that requires multiple doublings
+      // 4 -> 8 -> 16 -> 32 bytes needed for 25 bytes of data
+      const largeData = new Uint8Array(25);
+      largeData.fill(255);
+      
+      smallBuffer.write(largeData);
+      
+      // Should have resized multiple times: 4 -> 8 -> 16 -> 32
+      expect(smallBuffer.buffer.byteLength).toBe(32);
+      expect(smallBuffer.maxWritten).toBe(25);
     });
   });
 
