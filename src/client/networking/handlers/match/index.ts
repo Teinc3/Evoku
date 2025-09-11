@@ -1,6 +1,4 @@
-import { 
-  isLifecycleActionsData, isPlayerActionsData, isProtocolActionsData
-} from "@shared/types/utils/typeguards/actions";
+import ActionGuard from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "../UnionHandler";
 import ProtocolHandler from "./ProtocolHandler";
 import PlayerHandler from "./player";
@@ -18,9 +16,9 @@ export default class MatchHandler extends UnionHandler<MatchActions> {
     const protocolHandler = new ProtocolHandler(networkService);
 
     super([
-      [isLifecycleActionsData, lifecycleHandler],
-      [isPlayerActionsData, playerHandler],
-      [isProtocolActionsData, protocolHandler]
+      [ActionGuard.isLifecycleActionsData, lifecycleHandler],
+      [ActionGuard.isPlayerActionsData, playerHandler],
+      [ActionGuard.isProtocolActionsData, protocolHandler]
     ] as SomeClientHandlerMapEntry<MatchActions>[]);
   }
 }

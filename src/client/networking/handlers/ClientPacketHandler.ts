@@ -1,6 +1,4 @@
-import { 
-  isSystemActionsData, isMatchActionsData
-} from "@shared/types/utils/typeguards/actions";
+import ActionGuard from "@shared/types/utils/typeguards/actions";
 import UnionHandler from "./UnionHandler";
 import SystemHandler from "./system";
 import MatchHandler from "./match";
@@ -20,8 +18,8 @@ export default class ClientPacketHandler extends UnionHandler<ActionEnum> {
     const matchHandler = new MatchHandler(networkService);
 
     super([
-      [isSystemActionsData, systemHandler],
-      [isMatchActionsData, matchHandler]
+      [ActionGuard.isSystemActionsData, systemHandler],
+      [ActionGuard.isMatchActionsData, matchHandler]
     ] as SomeClientHandlerMapEntry<ActionEnum>[]);
   }
 }

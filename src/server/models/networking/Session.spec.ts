@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 
+import SessionActions from '@shared/types/enums/actions/system/session';
 import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import SessionModel from './Session';
@@ -299,8 +300,8 @@ describe('SessionModel', () => {
         onDestroySpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>
       );
-      const action = 'GAME_INIT' as unknown as ActionEnum;
-      const data = { test: 'data' } as unknown as ActionMap[ActionEnum];
+      const action = SessionActions.HEARTBEAT;
+      const data = {};
 
       // Act
       sessionWithoutSocket.forward(action, data);
@@ -312,14 +313,14 @@ describe('SessionModel', () => {
     it('should handle different action types', () => {
       // Arrange
       const actions = [
-        'GAME_INIT' as unknown as ActionEnum,
-        'PLAYER_JOIN' as unknown as ActionEnum,
-        'GAME_OVER' as unknown as ActionEnum
+        MechanicsActions.SET_CELL,
+        LobbyActions.JOIN_QUEUE,
+        SessionActions.HEARTBEAT
       ];
 
       // Act & Assert
       actions.forEach(action => {
-        const data = { test: 'data' } as unknown as ActionMap[ActionEnum];
+        const data = {} as unknown as ActionMap[ActionEnum];
         session.forward(action, data);
         expect(mockSocket.send).toHaveBeenCalledWith(action, data);
       });
@@ -332,10 +333,13 @@ describe('SessionModel', () => {
       const originalTime = session.lastActiveTime;
       jest.advanceTimersByTime(1000); // Advance time by 1 second
 
-      const data = {
-        action: 'GAME_INIT' as unknown as ActionEnum,
-        data: { test: 'data' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
 
       // Mock successful handling
       mockRoom.roomDataHandler.handleData.mockReturnValue(true);
@@ -352,8 +356,8 @@ describe('SessionModel', () => {
     it('should disconnect when data handling fails', () => {
       // Arrange
       const data = {
-        action: 'INVALID_ACTION' as unknown as ActionEnum,
-        data: { test: 'data' }
+        action: 99999, // Invalid action number that doesn't match any enum
+        invalidField: 'test'
       } as unknown as AugmentAction<ActionEnum>;
 
       // Mock failed handling
@@ -370,10 +374,13 @@ describe('SessionModel', () => {
 
     it('should handle match actions when room exists', () => {
       // Arrange
-      const data = {
-        action: 'SET_CELL' as unknown as ActionEnum,
-        data: { x: 0, y: 0, element: 'fire' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
 
       // Act - Call the private method via type assertion
       (session as unknown as { 
@@ -386,10 +393,10 @@ describe('SessionModel', () => {
 
     it('should handle system actions', () => {
       // Arrange
-      const data = {
-        action: 'JOIN_QUEUE' as unknown as ActionEnum,
-        data: { difficulty: 'easy' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
+        action: LobbyActions.JOIN_QUEUE,
+        username: 'test-user'
+      };
 
       // Act - Call the private method via type assertion
       (session as unknown as { 
@@ -403,8 +410,8 @@ describe('SessionModel', () => {
     it('should handle unknown actions', () => {
       // Arrange
       const data = {
-        action: 'UNKNOWN_ACTION' as unknown as ActionEnum,
-        data: { test: 'data' }
+        action: 99999, // Invalid action number
+        unknownField: 'test'
       } as unknown as AugmentAction<ActionEnum>;
 
       // Act - Call the private method via type assertion
@@ -420,10 +427,13 @@ describe('SessionModel', () => {
   describe('handleData', () => {
     it('should route match actions to room handler when room exists', () => {
       // Arrange
-      const data = {
-        action: 'SET_CELL' as unknown as ActionEnum,
-        data: { x: 0, y: 0, element: 'fire' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
 
       // Act - Call the private method via type assertion
       const result = (session as unknown as { 
@@ -444,10 +454,13 @@ describe('SessionModel', () => {
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         null
       );
-      const data = {
-        action: 'SET_CELL' as unknown as ActionEnum,
-        data: { x: 0, y: 0, element: 'fire' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
 
       // Act - Call the private method via type assertion
       const result = (sessionWithoutRoom as unknown as { 
@@ -461,10 +474,10 @@ describe('SessionModel', () => {
 
     it('should route system actions to system handler', () => {
       // Arrange
-      const data = {
-        action: 'JOIN_QUEUE' as unknown as ActionEnum,
-        data: { difficulty: 'easy' }
-      } as unknown as AugmentAction<ActionEnum>;
+      const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
+        action: LobbyActions.JOIN_QUEUE,
+        username: 'test-user'
+      };
 
       // Act - Call the private method via type assertion
       const result = (session as unknown as { 
@@ -479,8 +492,8 @@ describe('SessionModel', () => {
     it('should return false for unknown action types', () => {
       // Arrange
       const data = {
-        action: 'UNKNOWN_ACTION' as unknown as ActionEnum,
-        data: { test: 'data' }
+        action: 99999, // Invalid action number
+        unknownField: 'test'
       } as unknown as AugmentAction<ActionEnum>;
 
       // Act - Call the private method via type assertion
