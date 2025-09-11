@@ -41,5 +41,5 @@ See the [Source Documentation](/docs/README.md) for more information.
 ### Main Developer
 - Teinc3 (@Teinc3)
 
-### Graphics Design
-- nakMedia (@slacknak)
+### Graphics Designer
+- Vacant
