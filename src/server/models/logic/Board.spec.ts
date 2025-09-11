@@ -145,6 +145,45 @@ describe('ServerBoardModel (server-specific tests)', () => {
     });
   });
 
+  describe('checkBoardObjectives', () => {
+    it('should return 0 for any cell index (TODO implementation)', () => {
+      // Test various cell indices
+      expect(board.checkBoardObjectives(0)).toBe(0);
+      expect(board.checkBoardObjectives(40)).toBe(0);
+      expect(board.checkBoardObjectives(80)).toBe(0);
+    });
+
+    it('should handle edge cases gracefully', () => {
+      // Test with invalid indices (should not crash)
+      expect(() => board.checkBoardObjectives(-1)).not.toThrow();
+      expect(() => board.checkBoardObjectives(81)).not.toThrow();
+    });
+
+    it('should be called when setCell succeeds', () => {
+      const checkBoardObjectivesSpy = jest.spyOn(board, 'checkBoardObjectives');
+      
+      // This should succeed and call checkBoardObjectives
+      const result = board.setCell(0, 5, baseTime);
+      
+      expect(result).toBe(true);
+      expect(checkBoardObjectivesSpy).toHaveBeenCalledWith(0);
+      
+      checkBoardObjectivesSpy.mockRestore();
+    });
+
+    it('should not be called when setCell fails validation', () => {
+      const checkBoardObjectivesSpy = jest.spyOn(board, 'checkBoardObjectives');
+      
+      // This should fail validation due to invalid cell index
+      const result = board.setCell(-1, 5, baseTime); // Invalid cell index
+      
+      expect(result).toBe(false);
+      expect(checkBoardObjectivesSpy).not.toHaveBeenCalled();
+      
+      checkBoardObjectivesSpy.mockRestore();
+    });
+  });
+
   // Note: Core functionality is tested in the base class' unit test
   // These tests focus only on server-specific extensions like global cooldown management
 });

@@ -23,6 +23,7 @@ import type RoomModel from "./Room";
  */
 export default class SessionModel {
   public readonly uuid: UUID;
+  private disconnected: boolean;
 
   constructor(
     public socketInstance: ServerSocket | null, // Require a Socket to be initialised
@@ -32,6 +33,7 @@ export default class SessionModel {
     public room: RoomModel | null = null,
     public lastActiveTime: number = (new Date).getTime()
   ) {
+    this.disconnected = false;
     this.uuid = randomUUID();
     this.room = room;
     this.onDisconnect = onDisconnect.bind(this);
@@ -53,7 +55,8 @@ export default class SessionModel {
       this.socketInstance = null;
     }
 
-    if (triggerEvent) {
+    if (triggerEvent && !this.disconnected) {
+      this.disconnected = true;
       this.onDisconnect(this);
     }
   }
