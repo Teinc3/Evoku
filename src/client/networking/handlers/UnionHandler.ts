@@ -1,13 +1,15 @@
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
-import type { IClientDataHandler, SomeClientHandlerMapEntry } from "../../types/networking";
+import type { 
+  default as IClientDataHandler, SomeClientHandlerMapEntry 
+} from "../../types/networking";
 
 
 /**
- * An abstract class for handlers that route data to specialized sub-handlers
+ * An abstract class for handlers that routes data to specialized sub-handlers
  * based on a type guard.
  */
-export default abstract class UnionHandler<GenericActionUnion extends ActionEnum> 
+export default abstract class ClientUnionHandler<GenericActionUnion extends ActionEnum> 
 implements IClientDataHandler<GenericActionUnion> {
 
   /**

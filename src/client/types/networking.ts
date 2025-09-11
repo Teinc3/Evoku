@@ -7,7 +7,7 @@ export type ActionHandler<GenericAction extends ActionEnum>
   = (data: ActionMap[GenericAction]) => void;
 
 
-export interface IClientDataHandler<GenericActionOrType extends ActionEnum> {
+export default interface IClientDataHandler<GenericActionOrType extends ActionEnum> {
   handleData: ClientHandleDataFn<GenericActionOrType>;
 }
 

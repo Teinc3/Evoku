@@ -1,14 +1,10 @@
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
-import type { IClientDataHandler, ClientHandlerMap } from "../../types/networking";
+import type { default as IClientDataHandler, ClientHandlerMap } from "../../types/networking";
 
 
-/**
- * An abstract class for handlers that route data to specialized sub-handlers
- * based on enum action types.
- */
-export default abstract class EnumHandler<GenericActionEnum extends ActionEnum> 
-implements IClientDataHandler<GenericActionEnum> {
+export default abstract class ClientEnumHandler<GenericEnum extends ActionEnum>
+implements IClientDataHandler<GenericEnum> {
 
   /**
    * A map of action handlers for the enum.
@@ -16,9 +12,9 @@ implements IClientDataHandler<GenericActionEnum> {
    * 
    * @abstract
    */
-  private handlerMap!: ClientHandlerMap<GenericActionEnum>;
+  private handlerMap!: ClientHandlerMap<GenericEnum>;
 
-  public setHandlerMap(handlerMap: ClientHandlerMap<GenericActionEnum>): void {
+  public setHandlerMap(handlerMap: ClientHandlerMap<GenericEnum>): void {
     this.handlerMap = handlerMap;
 
     // Bind "this" context to every handle function
@@ -30,7 +26,7 @@ implements IClientDataHandler<GenericActionEnum> {
     }
   }
 
-  public handleData(data: AugmentAction<GenericActionEnum>): void {
+  public handleData(data: AugmentAction<GenericEnum>): void {
     const handler = this.handlerMap[data.action];
 
     if (handler) {

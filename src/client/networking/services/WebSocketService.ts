@@ -10,13 +10,12 @@ import type ActionMap from '@shared/types/actionmap';
 
 /**
  * High-level network service that manages connection policy, action routing,
- * heartbeat/latency, offline send queue, and auto-reconnection.
+ * heartbeat/latency, and auto-reconnection.
  * Built on top of the transport-only ClientSocket.
  */
 export default class WebSocketService {
   private socket: ClientSocket;
   private packetHandler: ClientPacketHandler;
-  private queue: Array<[ActionEnum, ActionMap[ActionEnum]]>;
   private reconnectTimer: ReturnType<typeof setTimeout> | null;
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
@@ -27,7 +26,6 @@ export default class WebSocketService {
     this.socket = socket || new ClientSocket();
     this.packetHandler = packetHandler || new ClientPacketHandler(this);
 
-    this.queue = [];
     this.reconnectTimer = null;
     this.pingTimer = null;
     this.lastPingAt = null;
@@ -75,16 +73,13 @@ export default class WebSocketService {
     data: ActionMap[GenericAction]
   ): void {
     if (!this.ready) {
-      this.queue.push([action, data]);
-      return;
+      throw new Error('WebSocket is not connected');
     }
 
     try {
       this.socket.send(action, data);
       this.lastPacketSentAt = Date.now();
     } catch (error) {
-      // If send fails, add back to queue for retry
-      this.queue.push([action, data]);
       throw error;
     }
   }
@@ -94,7 +89,6 @@ export default class WebSocketService {
    */
   destroy(): void {
     this.clearTimers();
-    this.queue.length = 0;
     this.socket.close();
   }
 
