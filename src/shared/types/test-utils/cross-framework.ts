@@ -6,7 +6,7 @@
  * framework-specific APIs like jest.fn() vs jasmine.createSpy().
  */
 
-import type { SpyFunction, Constructor } from './types';
+import type { SpyFunction, Constructor, JestGlobal, JasmineGlobal } from './types';
 
 
 /**
@@ -15,7 +15,7 @@ import type { SpyFunction, Constructor } from './types';
 export function isJestEnvironment(): boolean {
   // Check multiple ways Jest might be available
   try {
-    return typeof (globalThis as { jest?: unknown }).jest !== 'undefined' ||
+    return typeof (globalThis as JestGlobal).jest !== 'undefined' ||
            (typeof window === 'undefined' && 
             typeof (globalThis as { 
               // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -30,7 +30,7 @@ export function isJestEnvironment(): boolean {
  * Check if we're running in Jasmine environment  
  */
 export function isJasmineEnvironment(): boolean {
-  return typeof (globalThis as { jasmine?: unknown }).jasmine !== 'undefined';
+  return typeof (globalThis as JasmineGlobal).jasmine !== 'undefined';
 }
 
 /**
@@ -40,19 +40,14 @@ export function createSpy<T extends (...args: unknown[]) => unknown>(
   name?: string
 ): SpyFunction<T> {
   if (isJestEnvironment()) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jestGlobal = (globalThis as any).jest || 
-                       eval('typeof jest !== "undefined" ? jest : undefined');
-    
-    if (jestGlobal && jestGlobal.fn) {
-      return jestGlobal.fn() as SpyFunction<T>;
+    const jestGlobal = globalThis as JestGlobal;
+    if (jestGlobal.jest?.fn) {
+      return jestGlobal.jest.fn() as SpyFunction<T>;
     }
-    
     throw new Error('Jest fn not available');
   } else if (isJasmineEnvironment()) {
-    return ((globalThis as { jasmine?: unknown }).jasmine as unknown as { 
-      createSpy: (name?: string) => SpyFunction<T> 
-    }).createSpy(name || 'spy');
+    const jasmineGlobal = globalThis as JasmineGlobal;
+    return jasmineGlobal.jasmine!.createSpy(name || 'spy') as SpyFunction<T>;
   }
   throw new Error('Unsupported test environment');
 }
@@ -60,31 +55,79 @@ export function createSpy<T extends (...args: unknown[]) => unknown>(
 /**
  * Create a spy on an object method that works in both Jest and Jasmine
  */
-/**
- * Create a spy on an object method that works in both Jest and Jasmine
- */
-export function spyOnMethod(
-  object: Record<string, unknown>,
-  method: string
+export function spyOnMethod<T extends Record<string, unknown>, K extends keyof T>(
+  object: T,
+  method: K
 ): SpyFunction {
   if (isJestEnvironment()) {
-    // In Jest, we need to access the global jest object
-    // Try different ways to access it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jestGlobal = (globalThis as any).jest || 
-                       eval('typeof jest !== "undefined" ? jest : undefined');
-    
-    if (jestGlobal && jestGlobal.spyOn) {
-      return jestGlobal.spyOn(object, method) as SpyFunction;
+    const jestGlobal = globalThis as JestGlobal;
+    if (jestGlobal.jest?.spyOn) {
+      return jestGlobal.jest.spyOn(object, method) as SpyFunction;
     }
-    
     throw new Error('Jest spyOn not available');
   } else if (isJasmineEnvironment()) {
-    return ((globalThis as { spyOn?: unknown }).spyOn as unknown as (
-      obj: Record<string, unknown>, method: string
-    ) => SpyFunction)(object, method);
+    const jasmineGlobal = globalThis as JasmineGlobal;
+    return jasmineGlobal.spyOn!(object, method) as SpyFunction;
   }
   throw new Error('Unsupported test environment');
+}
+
+/**
+ * Mock a module (Jest only - no-op in Jasmine)
+ */
+export function doMock(moduleName: string, factory: () => unknown, options?: { virtual?: boolean }): void {
+  if (isJestEnvironment()) {
+    const jestGlobal = globalThis as JestGlobal;
+    jestGlobal.jest?.doMock(moduleName, factory, options);
+  }
+  // Jasmine doesn't support dynamic module mocking - this is a no-op
+}
+
+/**
+ * Reset modules (Jest only - no-op in Jasmine)
+ */
+export function resetModules(): void {
+  if (isJestEnvironment()) {
+    const jestGlobal = globalThis as JestGlobal;
+    jestGlobal.jest?.resetModules();
+  }
+  // Jasmine doesn't support module resetting - this is a no-op
+}
+
+/**
+ * Require a module (Jest only - returns module or throws in Jasmine)
+ */
+export function requireModule(moduleName: string): unknown {
+  if (isJestEnvironment()) {
+    const jestGlobal = globalThis as JestGlobal;
+    if (jestGlobal.require) {
+      return jestGlobal.require(moduleName);
+    }
+  }
+  // In Jasmine, we can't dynamically require modules, throw error
+  throw new Error(`Cannot require module '${moduleName}' in Jasmine environment`);
+}
+
+/**
+ * Clear all mocks (Jest) or no-op (Jasmine)
+ */
+export function clearAllMocks(): void {
+  if (isJestEnvironment()) {
+    const jestGlobal = globalThis as JestGlobal;
+    jestGlobal.jest?.clearAllMocks();
+  }
+  // Jasmine doesn't have a global clear, individual spy clearing is needed
+}
+
+/**
+ * Restore all mocks/spies
+ */
+export function restoreAllMocks(): void {
+  if (isJestEnvironment()) {
+    const jestGlobal = globalThis as JestGlobal;
+    jestGlobal.jest?.restoreAllMocks();
+  }
+  // Jasmine handles restoration automatically after each test
 }
 
 /**
@@ -92,49 +135,153 @@ export function spyOnMethod(
  */
 export function anyOfType(type: Constructor): unknown {
   if (isJestEnvironment()) {
-    return ((globalThis as { expect?: unknown }).expect as unknown as { 
-      any: (constructor: unknown) => unknown 
-    }).any(type);
+    const expectGlobal = globalThis as { expect?: { any: (constructor: Constructor) => unknown } };
+    return expectGlobal.expect?.any(type);
   } else if (isJasmineEnvironment()) {
-    return ((globalThis as { jasmine?: unknown }).jasmine as unknown as { 
-      any: (constructor: unknown) => unknown 
-    }).any(type);
+    const jasmineGlobal = globalThis as JasmineGlobal;
+    return jasmineGlobal.jasmine?.any(type);
   }
   throw new Error('Unsupported test environment');
 }
 
 /**
- * Length assertion helper
+ * Cross-framework negation matcher - expect(actual).not.toEqual(expected)
  */
-export function expectToHaveLength(
-  actual: { length: number }, 
-  expectedLength: number
-): void {
-  expect(actual.length).toBe(expectedLength);
+export function expectNotToEqual(actual: unknown, expected: unknown): void {
+  expect(actual).not.toEqual(expected);
 }
 
 /**
- * Type assertion helper  
+ * Cross-framework negation matcher - expect(actual).not.toBe(expected)
  */
-export function expectToBeOfType(actual: unknown, type: Constructor): void {
+export function expectNotToBe(actual: unknown, expected: unknown): void {
+  expect(actual).not.toBe(expected);
+}
+
+/**
+ * Cross-framework deep object/array equality matcher
+ */
+export function expectToDeepEqual(actual: unknown, expected: unknown): void {
   if (isJestEnvironment()) {
-    expect(actual).toEqual(((globalThis as { expect?: unknown }).expect as unknown as { 
-      any: (constructor: unknown) => unknown 
-    }).any(type));
+    // Jest has toEqual for deep equality
+    expect(actual).toEqual(expected);
   } else if (isJasmineEnvironment()) {
-    expect(actual).toEqual(((globalThis as { jasmine?: unknown }).jasmine as unknown as { 
-      any: (constructor: unknown) => unknown 
-    }).any(type));
+    // Jasmine also has toEqual for deep equality
+    expect(actual).toEqual(expected);
+  } else {
+    // Fallback to JSON comparison
+    expect(JSON.stringify(actual)).toBe(JSON.stringify(expected));
+  }
+}
+
+/**
+ * Cross-framework deep object/array inequality matcher  
+ */
+export function expectNotToDeepEqual(actual: unknown, expected: unknown): void {
+  if (isJestEnvironment()) {
+    // Jest has toEqual for deep equality
+    expect(actual).not.toEqual(expected);
+  } else if (isJasmineEnvironment()) {
+    // Jasmine also has toEqual for deep equality
+    expect(actual).not.toEqual(expected);
+  } else {
+    // Fallback to JSON comparison
+    expect(JSON.stringify(actual)).not.toBe(JSON.stringify(expected));
+  }
+}
+
+/**
+ * Cross-framework array/object containing matcher
+ */
+export function expectToContain(actual: unknown[], expected: unknown): void {
+  expect(actual).toContain(expected);
+}
+
+/**
+ * Cross-framework array/object not containing matcher
+ */
+export function expectNotToContain(actual: unknown[], expected: unknown): void {
+  expect(actual).not.toContain(expected);
+}
+
+/**
+ * Cross-framework length assertion with negation option
+ */
+export function expectToHaveLength(
+  actual: { length: number }, 
+  expectedLength: number,
+  negate = false
+): void {
+  if (negate) {
+    expect(actual.length).not.toBe(expectedLength);
+  } else {
+    expect(actual.length).toBe(expectedLength);
+  }
+}
+
+/**
+ * Cross-framework property existence matcher
+ */
+export function expectToHaveProperty(
+  actual: Record<string, unknown>,
+  propertyName: string,
+  negate = false
+): void {
+  if (negate) {
+    expect(propertyName in actual).toBe(false);
+  } else {
+    expect(propertyName in actual).toBe(true);
+  }
+}
+
+/**
+ * Type assertion helper with negation option
+ */
+export function expectToBeOfType(
+  actual: unknown, 
+  type: Constructor,
+  negate = false
+): void {
+  if (isJestEnvironment()) {
+    const expectGlobal = globalThis as { expect?: { any: (constructor: Constructor) => unknown } };
+    if (negate) {
+      expect(actual).not.toEqual(expectGlobal.expect?.any(type));
+    } else {
+      expect(actual).toEqual(expectGlobal.expect?.any(type));
+    }
+  } else if (isJasmineEnvironment()) {
+    const jasmineGlobal = globalThis as JasmineGlobal;
+    if (negate) {
+      expect(actual).not.toEqual(jasmineGlobal.jasmine?.any(type));
+    } else {
+      expect(actual).toEqual(jasmineGlobal.jasmine?.any(type));
+    }
   } else {
     // Fallback to typeof check
     if (type === Number) {
-      expect(typeof actual).toBe('number');
+      if (negate) {
+        expect(typeof actual).not.toBe('number');
+      } else {
+        expect(typeof actual).toBe('number');
+      }
     } else if (type === String) {
-      expect(typeof actual).toBe('string');
+      if (negate) {
+        expect(typeof actual).not.toBe('string');
+      } else {
+        expect(typeof actual).toBe('string');
+      }
     } else if (type === Boolean) {
-      expect(typeof actual).toBe('boolean');
+      if (negate) {
+        expect(typeof actual).not.toBe('boolean');
+      } else {
+        expect(typeof actual).toBe('boolean');
+      }
     } else {
-      expect(actual).toBeInstanceOf(type);
+      if (negate) {
+        expect(actual).not.toBeInstanceOf(type);
+      } else {
+        expect(actual).toBeInstanceOf(type);
+      }
     }
   }
 }
