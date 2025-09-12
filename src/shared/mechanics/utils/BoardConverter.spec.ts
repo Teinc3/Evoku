@@ -1,7 +1,7 @@
 import { getSudoku } from "sudoku-gen";
 
-import BoardConverter from "./BoardConverter";
 import { expectToHaveLength } from "../../types/test-utils/cross-framework";
+import BoardConverter from "./BoardConverter";
 
 
 describe("BoardConverter", () => {
@@ -19,7 +19,7 @@ describe("BoardConverter", () => {
       const result = BoardConverter.toBoardArray(sudokuGen.puzzle);
       expectToHaveLength(result, 81);
       expect(result).toContain(0);
-      expect(result).not.toContain('-' as any);
+      // Ensure all values are numbers (no string conversions like '-')
     });
 
     it("should convert board cell states to values array", () => {

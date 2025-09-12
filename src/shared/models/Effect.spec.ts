@@ -1,5 +1,5 @@
-import { createMockEffect } from './utils/MockEffect';
 import { expectToBeOfType } from '../types/test-utils/cross-framework';
+import { createMockEffect } from './utils/MockEffect';
 
 import type BaseEffectModel from './Effect';
 

@@ -1,7 +1,8 @@
+import { expectToHaveLength, expectToBeOfType, spyOnMethod } from 
+  '../types/test-utils/cross-framework';
 import { createMockEffect } from './utils/MockEffect';
 import BaseCellModel from './Cell';
 import BaseBoardModel from './Board';
-import { expectToHaveLength, expectToBeOfType, spyOnMethod } from '../types/test-utils/cross-framework';
 
 
 // Concrete implementation for testing since BaseBoardModel is abstract
@@ -142,7 +143,7 @@ describe('BaseBoardModel', () => {
     });
 
     it('should call cell update method', () => {
-      const spy = spyOnMethod(board.board[0], 'update');
+      const spy = spyOnMethod(board.board[0] as unknown as Record<string, unknown>, 'update');
 
       board.update(0, 5, baseTime);
 
