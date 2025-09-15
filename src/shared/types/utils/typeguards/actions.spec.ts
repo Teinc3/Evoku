@@ -181,8 +181,6 @@ describe('Action Type Guards', () => {
       const duration = end - start;
 
       // This test documents that the optimization eliminates nested function calls
-      console.log(`Performance test: ${iterations} iterations took ${duration.toFixed(3)}ms`);
-      console.log(`Average per call: ${(duration / (iterations * 5)).toFixed(6)}ms`);
       
       // The optimization should complete in reasonable time (less than 100ms for this test)
       expect(duration).toBeLessThan(100);
