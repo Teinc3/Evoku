@@ -11,16 +11,22 @@ import { Injectable } from '@angular/core';
 export default class DynamicFaviconService {
   private static readonly FRAME_INTERVAL_MS = 400;
   private static readonly FRAMES = Array.from({ length: 8 }, (_, i) => `/animation/Evoku-${i}.png`);
-  private started = false;
-  private timer: number | null = null;
-  private frameIndex = 0;
+  private timer: number | null;
+  private frameIndex;
 
-  start(): void {
-    if (this.started) {
-      return;
+  constructor() {
+    this.timer = null;
+    this.frameIndex = 0;
+    this.start();
+  }
+
+  private onVisibilityChange = (): void => {
+    if (!document.hidden) {
+      this.setFavicon(DynamicFaviconService.FRAMES[this.frameIndex]);
     }
-    this.started = true;
+  }
 
+  public start(): void {
     if (this.isGifFriendly()) {
       this.injectGif();
       return;
@@ -38,18 +44,16 @@ export default class DynamicFaviconService {
       this.setFavicon(DynamicFaviconService.FRAMES[this.frameIndex]);
     }, DynamicFaviconService.FRAME_INTERVAL_MS);
 
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        this.setFavicon(DynamicFaviconService.FRAMES[this.frameIndex]);
-      }
-    });
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
-  stop(): void {
+  public stop(): void {
+    console.log('[ngOnDestroy] Stopping dynamic favicon service.');
     if (this.timer !== null) {
       clearInterval(this.timer);
       this.timer = null;
     }
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   private isGifFriendly(): boolean {
