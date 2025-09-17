@@ -18,6 +18,8 @@ describe('SessionHandler', () => {
 
   describe('handleData integration', () => {
     it('should handle HEARTBEAT action', () => {
+      // Mute warning for missing handler to avoid noisy test output
+      spyOn(console, 'warn').and.stub();
       const heartbeatData: AugmentAction<SessionActions.HEARTBEAT> = {
         action: SessionActions.HEARTBEAT
       };

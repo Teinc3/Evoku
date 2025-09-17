@@ -1,6 +1,10 @@
+// eslint-disable-next-line import/newline-after-import
 import { RouterOutlet } from '@angular/router';
+// eslint-disable-next-line import/newline-after-import
 import { Component } from '@angular/core';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import DynamicFaviconService from './services/dynamic-favicon.service';
 import NetworkStatusComponent from './components/network-status.component';
 
 
@@ -12,4 +16,8 @@ import NetworkStatusComponent from './components/network-status.component';
 })
 export default class App {
   protected title = 'Evoku';
+
+  constructor(
+    private readonly _faviconService: DynamicFaviconService
+  ) {}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 
 import WebSocketService from '../../networking/services/WebSocketService';
 
@@ -15,7 +15,8 @@ import type ActionMap from '@shared/types/actionmap';
 export default class NetworkService {
   private readonly wsService: WebSocketService;
 
-  constructor(wsService?: WebSocketService) {
+  constructor(@Optional() wsService?: WebSocketService) {
+    // If Angular did not provide an instance, fall back to a manual one.
     this.wsService = wsService ?? new WebSocketService();
   }
 
