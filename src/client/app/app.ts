@@ -5,12 +5,11 @@ import { Component } from '@angular/core';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import DynamicFaviconService from './services/dynamic-favicon.service';
-import NetworkStatusComponent from './components/network-status.component';
 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NetworkStatusComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
