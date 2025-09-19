@@ -32,11 +32,15 @@ export default class BoardModelComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.puzzle.length === 81) {
-      this.seed(this.puzzle);
+      this.initBoard(this.puzzle);
+    } else {
+      // Ensure the board is always initialized with 81 cells so child components have a model
+      this.initBoard([]);
     }
   }
 
-  private seed(values: ReadonlyArray<number>): void {
+  /** Initialize the board with a given set of values */
+  public initBoard(values: ReadonlyArray<number>): void {
     // Initialize board with provided puzzle, marking non-zero as fixed
     for (let i = 0; i < 81; i++) {
       const v = values[i] ?? 0;
@@ -44,29 +48,40 @@ export default class BoardModelComponent implements OnInit {
     }
   }
 
-  cell(i: number): ClientCellModel {
-    return this.model.board[i];
+  /** Provides access to the cell model for a given index */
+  public getCellModel(idx: number): ClientCellModel {
+    // Fallback: if board entry is missing, initialize to empty cell to keep template safe
+    if (!this.model.board[idx]) {
+      this.model.board[idx] = new this.model.CellModelClass(0, false);
+    }
+    return this.model.board[idx];
   }
 
-  onCellSelected(i: number): void {
+  /** Handler when cell is clicked */
+  public onCellSelected(i: number): void {
     this.selected.set(i);
     this.selectedIndexChange.emit(i);
     // Visually clear other selections
-    this.cellComps?.forEach((comp, idx) => {
-      if (idx !== i) {
+    this.cellComps?.forEach(comp => {
+      // Use the component's index rather than iteration index to ensure correctness
+      if (comp.index === i) {
+        comp.isSelected = true;
+      } else {
         comp.deselect();
       }
     });
   }
 
-  setPendingSelected(value: number, time?: number): boolean {
+  /** Sets a pending value for the currently selected cell */
+  public setPendingSelected(value: number, time?: number): boolean {
     const i = this.selected();
     if (i == null) {
       return false;
     }
     return this.model.setPendingCell(i, value, time);
   }
-  confirmSelected(time?: number): boolean {
+  /** Server confirmation for the currently selected cell */
+  public confirmSelected(time?: number): boolean {
     const i = this.selected();
     if (i == null) {
       return false;
@@ -77,7 +92,8 @@ export default class BoardModelComponent implements OnInit {
     }
     return this.model.confirmCellSet(i, pv, time);
   }
-  rejectSelected(): void {
+  /** Rejects the pending value for the currently selected cell */
+  public rejectSelected(): void {
     const i = this.selected();
     if (i == null) {
       return;

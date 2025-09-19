@@ -2,7 +2,7 @@
   <div class="board" role="grid" aria-rowcount="9" aria-colcount="9">
     @for (i of indices; track i) {
       <app-sudoku-cell
-        [model]="cell(i)"
+        [model]="getCellModel(i)"
         [index]="i"
         (selected)="onCellSelected($event)"
         [class.selected]="selected() === i"
