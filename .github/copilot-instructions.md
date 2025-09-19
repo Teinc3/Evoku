@@ -79,6 +79,7 @@ When the user suggests implementing Time Attack mode, ask them if they should up
   and familiarise yourself with the context, before making any changes
 
 ### Theoretical Concepts
+- No Repeated Logic, Code, HTML Templates, Constants and CSS Attribute Styles. **Strictly** Enforce DRY Principle.
 - Composition for unrelated functionalities - Inheritance for models with similar base logic
 - Prefer pure functions or static class methods - stateful class methods can be impure
 - Singleton objects must be instantiated and exported as default. Also export the singleton class
@@ -86,7 +87,22 @@ When the user suggests implementing Time Attack mode, ask them if they should up
 - Do not initialise class properties before constructor - do it in the constructor. Only type declarations allowed before.
 - For storing hashable objects, prefer `Map` or `Set` over arrays for runtime performance
 
+### Stylistic
+- No single line returns of conditionals and functions (if, switch etc). You must expand them with braces.
+  However, Anonymous functions can be single line (But if there any conditionals INSIDE, all must be expanded to multi line)
+
 ### Documentation Style
+
+#### Angular
+- Styles and html templates cannot be embedded within Typescript component files.
+  Store them in separate html and scss files instead in the same directory,
+  and reference them with `templateUrl` and `styleUrl`.
+- Use updated Angular directives over deprecated syntax if possible.
+
+#### CSS
+- No single line CSS rules within css files. Every style attribute must be in a different line.
+- Inline CSS is strongly discouraged, except for test or demo files that are meant to be temporary.
+- For inline CSS, single line styles are allowed if there are a relatively small number of short attributes.
 
 #### JSDoc
 - Use JSDoc comments for functions, classes, methods with complex logic.

@@ -247,5 +247,11 @@ export default defineConfig([
     plugins: { css },
     language: "css/css",
     extends: ["css/recommended"],
+    rules: {
+      // Use the 'widely' baseline preset which includes common properties like user-select
+      "css/use-baseline": ["error", {
+        "available": "widely"
+      }]
+    }
   }
 ]);

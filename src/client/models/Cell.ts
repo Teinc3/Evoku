@@ -15,6 +15,7 @@ export interface IPendingCellState {
  */
 export default class ClientCellModel extends BaseCellModel {
   public pendingCellState: Partial<IPendingCellState>;
+  public notes?: number[];
 
   constructor(
     value: number = 0,
@@ -23,6 +24,7 @@ export default class ClientCellModel extends BaseCellModel {
   ) {
     super(value, fixed, effects);
     this.pendingCellState = {}; // Initialise with no pending properties
+    this.notes = undefined;
   }
 
   /**

@@ -1,0 +1,76 @@
+:host {
+  display: contents;
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  /* Per-edge borders driven by CSS variables from the board; default to thin grey */
+  /* eslint-disable css/no-invalid-properties */
+  border-top: var(--b-top, 1px solid #9a9a9a);
+  border-right: var(--b-right, 1px solid #9a9a9a);
+  border-bottom: var(--b-bottom, 1px solid #9a9a9a);
+  border-left: var(--b-left, 1px solid #9a9a9a);
+  /* eslint-enable css/no-invalid-properties */
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Default cell value state */
+.v {
+  /* ~50% larger while staying responsive */
+  font-size: clamp(1.5rem, 3.3vh, 2.1rem);
+  /* baseline-friendly user-select with vendor prefixes */
+  /* eslint-disable css/use-baseline */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* eslint-enable css/use-baseline */
+  color: #1E88E5;
+  font-weight: 600;
+}
+
+/* Value coloring for fixed cells */
+.cell.fixed .v {
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Value coloring for pending cells */
+.cell.pending .v {
+  color: #808080;
+  font-weight: 600;
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  gap: 1px;
+  color: #b0b0b0;
+  font-size: clamp(0.9rem, 2vh, 1.4rem);
+}
+
+.note {
+  display: grid;
+  place-items: center;
+}
+
+/* Selection overlay (on host .selected) */
+:host(.selected) .cell::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 4px solid #1976d2;
+  pointer-events: none;
+  box-sizing: border-box;
+  z-index: 2;
+}

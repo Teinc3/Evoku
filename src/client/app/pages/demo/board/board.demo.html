@@ -1,0 +1,7 @@
+<main class="demo-page">
+  <h1>Sudoku Board Model Demo</h1>
+  <app-sudoku-board-model 
+    #board [puzzle]="puzzle" 
+    (selectedIndexChange)="selected = $event"
+  ></app-sudoku-board-model>
+</main>

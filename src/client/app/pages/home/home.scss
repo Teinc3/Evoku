@@ -1,0 +1,41 @@
+
+.home {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* align items from the top */
+  padding-top: 4vh; /* reduce top padding so content sits higher */
+  gap: 0.5rem; /* tighter gap between logo and actions */
+  text-align: center;
+}
+
+.logo {
+  max-height: 60vh;
+  object-fit: contain;
+  margin: 0 auto 0.125rem auto;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: -0.25rem; /* smaller pull to avoid overlap while keeping buttons close */
+}
+
+.btn {
+  display: inline-block;
+  padding: 1rem 1.4rem; /* larger tap target */
+  font-size: 1.05rem; /* slightly larger text */
+  border: 1px solid #333;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #222;
+  background: #fff;
+}
+
+.btn:hover {
+  border-color: #1976d2;
+  color: #1976d2;
+}

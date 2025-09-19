@@ -16,7 +16,6 @@ export default class NetworkService {
   private readonly wsService: WebSocketService;
 
   constructor(@Optional() wsService?: WebSocketService) {
-    // If Angular did not provide an instance, fall back to a manual one.
     this.wsService = wsService ?? new WebSocketService();
   }
 
