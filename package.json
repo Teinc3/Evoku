@@ -2,6 +2,7 @@
   "name": "evoku",
   "version": "0.0.0",
   "type": "module",
+  "license": "UNLICENSED",
   "scripts": {
     "build": "ng build",
     "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
