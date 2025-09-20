@@ -17,7 +17,7 @@ class MockCellModel {
     return !!this.pendingCellState;
   }
   getDisplayValue() {
-    return this.value;
+    return this.pendingCellState?.pendingValue ?? this.value;
   }
 }
 
@@ -84,7 +84,7 @@ describe('SudokuCellComponent', () => {
     expect(fixture.debugElement.query(By.css('.cell')).nativeElement.classList).toContain('fixed');
   });
 
-  it('emits selected and toggles selected class on click', () => {
+  it('emits selected on click', () => {
     const m = new MockCellModel();
     component.model = m as unknown as ClientCellModel;
     component.index = 42;
@@ -98,7 +98,5 @@ describe('SudokuCellComponent', () => {
     fixture.detectChanges();
 
     expect(spy).toHaveBeenCalledWith(42);
-    expect(component.isSelected).toBeTrue();
-    expect(fixture.debugElement.query(By.css(':host(.selected)'))).toBeNull();
   });
 });

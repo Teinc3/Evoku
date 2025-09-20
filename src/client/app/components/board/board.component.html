@@ -1,5 +1,5 @@
 <section class="board-wrap">
-  <div class="board" role="grid" aria-rowcount="9" aria-colcount="9">
+  <div class="board">
     @for (i of indices; track i) {
       <app-sudoku-cell
         [model]="getCellModel(i)"

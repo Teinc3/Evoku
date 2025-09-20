@@ -16,7 +16,7 @@ See also:
 
 - BoardModelComponent creates and owns a `ClientBoardModel` instance.
 - The template iterates a flat index list 0..80 and renders one `app-sudoku-cell` per index:
-  - Supplies a `ClientCellModel` from `model.board[i]` via the `cell(i)` accessor.
+  - Supplies a `ClientCellModel` from `model.board[i]` via the `getCellModel(i)` accessor.
   - Passes the numeric `index`.
   - Listens for the cell `(selected)` output and updates board selection.
 - The model exposes methods to set/confirm/reject pending cell values and computes board-wide progress/cooldowns via the shared base class.
@@ -32,14 +32,14 @@ See also:
 - Board tracks a `selected` signal (index | null).
 - When a child cell emits `(selected)` with its index:
   - Board updates `selected` and emits `selectedIndexChange`.
-  - Board iterates `@ViewChildren(SudokuCellComponent)` to mark only the selected child as `isSelected` and deselect the rest.
-- The selected cell gets a visual outline via a host-bound `.selected` class in the cell component.
+  - The template applies `[class.selected]="selected() === i"` on each `app-sudoku-cell` so selection is purely declarative (no direct access to child instances).
+- The selected cell gets a visual outline via the `.selected` class applied by the parent binding.
 
 ### Initialization & Seeding
 
-- On init, if `@Input() puzzle` has 81 entries, the board seeds with those values as fixed cells (non-zero become fixed).
-- If no puzzle is provided, the board seeds 81 empty (0, not fixed) cells so that every child always receives a defined model.
-- The `cell(i)` accessor is defensive and lazily creates a default empty cell if needed.
+- The `@Input() puzzle` uses a setter: when it receives 81 entries, the board seeds with those values as fixed cells (non-zero become fixed).
+- If no puzzle is provided, `ngOnInit` seeds 81 empty (0, not fixed) cells so that every child always receives a defined model.
+- The `getCellModel(i)` accessor is defensive and lazily creates a default empty cell if needed.
 
 ### Pending / Confirm / Reject
 

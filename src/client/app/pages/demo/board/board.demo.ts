@@ -14,19 +14,24 @@ import type { AfterViewInit } from '@angular/core';
 })
 export default class BoardDemoPageComponent implements AfterViewInit {
   @ViewChild('board', { static: true }) board!: BoardModelComponent;
-  selected: number | null = null;
+  selected: number | null;
   // Simple puzzle seed; non-zero are fixed
-  puzzle = [
-    5,3,0,0,7,0,0,0,0,
-    6,0,0,1,9,5,0,0,0,
-    0,9,8,0,0,0,0,6,0,
-    8,0,0,0,6,0,0,0,3,
-    4,0,0,8,0,3,0,0,1,
-    7,0,0,0,2,0,0,0,6,
-    0,6,0,0,0,0,2,8,0,
-    0,0,0,4,1,9,0,0,5,
-    0,0,0,0,8,0,0,7,9
-  ];
+  puzzle: number[];
+
+  constructor() {
+    this.selected = null;
+    this.puzzle = [
+      5,3,0,0,7,0,0,0,0,
+      6,0,0,1,9,5,0,0,0,
+      0,9,8,0,0,0,0,6,0,
+      8,0,0,0,6,0,0,0,3,
+      4,0,0,8,0,3,0,0,1,
+      7,0,0,0,2,0,0,0,6,
+      0,6,0,0,0,0,2,8,0,
+      0,0,0,4,1,9,0,0,5,
+      0,0,0,0,8,0,0,7,9
+    ];
+  }
 
   ngAfterViewInit(): void {
     // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
@@ -56,10 +61,8 @@ export default class BoardDemoPageComponent implements AfterViewInit {
     }
 
     // Place a visible cursor at row 4, col 6 (index 42)
-    try {
-      this.board.selected.set(42);
-      this.selected = 42;
-    } catch {}
+    this.board.selected.set(42);
+    this.selected = 42;
   }
 
   randPending(): void {
