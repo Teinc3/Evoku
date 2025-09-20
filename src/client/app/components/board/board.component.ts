@@ -1,9 +1,14 @@
-import { Component, EventEmitter, Input, Output, ViewChildren, signal } from '@angular/core';
+import { 
+  ChangeDetectionStrategy, Component, 
+  EventEmitter, Input, Output, signal 
+} from '@angular/core';
+
 
 import SudokuCellComponent from '../cell/cell.component';
 import ClientBoardModel from '../../../models/Board';
 
-import type { QueryList, OnInit } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
+import type { OnInit } from '@angular/core';
 import type ClientCellModel from '../../../models/Cell';
 
 
@@ -12,28 +17,41 @@ import type ClientCellModel from '../../../models/Cell';
   standalone: true,
   imports: [SudokuCellComponent],
   templateUrl: './board.component.html',
-  styleUrl: './board.component.scss'
+  styleUrl: './board.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export default class BoardModelComponent implements OnInit {
   // Public model instance, composed here. Parent can access it via template ref if needed.
-  public readonly model = new ClientBoardModel();
+  public readonly model: ClientBoardModel;
 
+  private _puzzle: ReadonlyArray<number>;
   @Input()
-  puzzle: ReadonlyArray<number> = [];
+  set puzzle(values: ReadonlyArray<number> | undefined) {
+    this._puzzle = Array.isArray(values) ? values : [];
+    if (this._puzzle.length === 81) {
+      this.initBoard(this._puzzle);
+    }
+  }
+  get puzzle(): ReadonlyArray<number> {
+    return this._puzzle;
+  }
   @Output()
   selectedIndexChange = new EventEmitter<number>();
 
-  @ViewChildren(SudokuCellComponent)
-  private cellComps!: QueryList<SudokuCellComponent>;
-
   // Flat indices 0..80 for a 9x9 board
-  readonly indices = Array.from({ length: 81 }, (_, i) => i);
-  readonly selected = signal<number | null>(null);
+  readonly indices: number[];
+  readonly selected: WritableSignal<number | null>;
+
+  constructor() {
+    this.model = new ClientBoardModel();
+    this._puzzle = [];
+    this.indices = Array.from({ length: 81 }, (_, i) => i);
+    this.selected = signal<number | null>(null);
+  }
 
   ngOnInit(): void {
-    if (this.puzzle.length === 81) {
-      this.initBoard(this.puzzle);
-    } else {
+    // If the puzzle setter already initialized the board, don't overwrite it.
+    if (!this.model.board[0]) {
       // Ensure the board is always initialized with 81 cells so child components have a model
       this.initBoard([]);
     }
@@ -61,15 +79,6 @@ export default class BoardModelComponent implements OnInit {
   public onCellSelected(i: number): void {
     this.selected.set(i);
     this.selectedIndexChange.emit(i);
-    // Visually clear other selections
-    this.cellComps?.forEach(comp => {
-      // Use the component's index rather than iteration index to ensure correctness
-      if (comp.index === i) {
-        comp.isSelected = true;
-      } else {
-        comp.deselect();
-      }
-    });
   }
 
   /** Sets a pending value for the currently selected cell */

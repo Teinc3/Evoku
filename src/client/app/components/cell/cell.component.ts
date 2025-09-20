@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 import type ClientCellModel from '../../../models/Cell';
 
@@ -7,7 +7,8 @@ import type ClientCellModel from '../../../models/Cell';
   selector: 'app-sudoku-cell',
   standalone: true,
   templateUrl: './cell.component.html',
-  styleUrl: './cell.component.scss'
+  styleUrl: './cell.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export default class SudokuCellComponent {
   @Input({ required: true }) 
@@ -16,17 +17,15 @@ export default class SudokuCellComponent {
   index!: number;
   @Output()
   selected = new EventEmitter<number>();
-  @HostBinding('class.selected') 
-  public isSelected = false;
+  
+  readonly noteGrid: number[];
 
-  readonly noteGrid = Array.from({ length: 9 }, (_, i) => i + 1);
+  constructor() {
+    this.noteGrid = Array.from({ length: 9 }, (_, i) => i + 1);
+  }
 
   onClick(): void {
-    this.isSelected = true;
     this.selected.emit(this.index);
-  }
-  deselect(): void {
-    this.isSelected = false;
   }
 
   get hasPending(): boolean {

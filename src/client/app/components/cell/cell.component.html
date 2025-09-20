@@ -5,10 +5,7 @@
         <span class="note">{{ noteDigit(n) }}</span>
       }
     </div>
-  } @else if (hasPending) {
-    <span class="v">{{ pendingValue }}</span>
   } @else {
     <span class="v">{{ value !== 0 ? value : '' }}</span>
   }
-  
 </button>

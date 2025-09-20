@@ -32,15 +32,14 @@ describe('BoardModelComponent', () => {
   it('emits selection and updates child selected state', () => {
     fixture.detectChanges();
     const cells = fixture.debugElement.queryAll(By.css('app-sudoku-cell'));
-    const first = cells[0].componentInstance;
     // simulate selecting the 0th cell via component API
     component.onCellSelected(0);
     fixture.detectChanges();
 
     // Check board selected signal is set
-    expect(component['selected']()).toBe(0);
-    // Child component instance should be selected
-    expect(first.isSelected).toBeTrue();
+    expect(component.selected()).toBe(0);
+    // The first child should have selected class via parent binding
+    expect(cells[0].nativeElement.classList.contains('selected')).toBeTrue();
   });
 
   it('supports seeding puzzle and marks fixed cells', () => {
@@ -48,6 +47,6 @@ describe('BoardModelComponent', () => {
     fixture.detectChanges();
 
     // After seed, model should have fixed cells for non-zero entries
-    expect(component['model'].board[0].fixed).toBeTrue();
+    expect(component.model.board[0].fixed).toBeTrue();
   });
 });
