@@ -9,7 +9,7 @@ This repository contains the source code, assets, tests and documentation for th
 
 > [!NOTE]
 > This repository is temporarily public for recruitment and technical evaluation purposes only.
-> - Review and run the code for hiring or assessment activities are allowed;
+> - Review and run the code for hiring or assessment activities are allowed.
 > - Redistribution, modification, commercial use, or sharing with third parties is not permitted.
 > 
 > See the [LICENSE](#license) section below for more information, including my contact details.
@@ -29,6 +29,10 @@ See the [Source Documentation](/docs/README.md) for more information.
 - MVP (Minimum Viable Product) - December 2025
 
 
+## Coverage Chart
+<img src="https://codecov.io/github/Teinc3/Evoku/graphs/icicle.svg?token=U83CE972IQ"></img>
+
+
 ## Development
 To install dependencies, run:
 ```bash
@@ -40,6 +44,21 @@ To launch both the game client and the game server concurrently, run:
 npm run dev
 ```
 
+The Typescript Compiler is set to noEmit, but you can still do a static type check by running:
+```bash
+npm run comp
+```
+
+The project adheres strictly to certain coding standards and linting rules. To check for errors, run:
+```bash
+npm run lint
+```
+
+To run tests for both the client and server, run:
+```bash
+npm run test
+```
+
 There are separate commands to launch the client and server individually:
 ```bash
 npm run dev:client
@@ -47,10 +66,6 @@ npm run dev:server
 ```
 
 Note that these separate commands also apply to other npm commands, such as start and test.
-
-
-## Coverage Chart
-<img src="https://codecov.io/github/Teinc3/Evoku/graphs/icicle.svg?token=U83CE972IQ"></img>
 
 
 ## License
