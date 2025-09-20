@@ -56,6 +56,24 @@ describe('SudokuCellComponent', () => {
       .toContain('pending');
   });
 
+  it('noteDigit returns empty string when digit not noted', () => {
+    const m = new MockCellModel();
+    m.notes = [2, 5];
+    component.model = m as unknown as ClientCellModel;
+    fixture.detectChanges();
+
+    expect(component.noteDigit(1)).toBe('');
+    expect(component.noteDigit(2)).toBe('2');
+  });
+
+  it('pendingValue getter exposes pendingCellState value', () => {
+    const m = new MockCellModel();
+    m.pendingCellState = { pendingValue: 3 };
+    component.model = m as unknown as ClientCellModel;
+    fixture.detectChanges();
+    expect(component.pendingValue).toBe(3);
+  });
+
   it('renders notes grid when no value and notes present', () => {
     const m = new MockCellModel();
     m.value = 0;
