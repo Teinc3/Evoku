@@ -1,7 +1,4 @@
-import { 
-  ChangeDetectionStrategy, Component, 
-  EventEmitter, Input, Output, signal 
-} from '@angular/core';
+import { Component, EventEmitter, Output, signal } from '@angular/core';
 
 
 import SudokuCellComponent from '../cell/cell.component';
@@ -18,23 +15,11 @@ import type ClientCellModel from '../../../models/Cell';
   imports: [SudokuCellComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export default class BoardModelComponent implements OnInit {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
-
-  private _puzzle: ReadonlyArray<number>;
-  @Input()
-  set puzzle(values: ReadonlyArray<number> | undefined) {
-    this._puzzle = Array.isArray(values) ? values : [];
-    if (this._puzzle.length === 81) {
-      this.initBoard(this._puzzle);
-    }
-  }
-  get puzzle(): ReadonlyArray<number> {
-    return this._puzzle;
-  }
+  
   @Output()
   selectedIndexChange = new EventEmitter<number>();
 
@@ -44,15 +29,13 @@ export default class BoardModelComponent implements OnInit {
 
   constructor() {
     this.model = new ClientBoardModel();
-    this._puzzle = [];
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
   }
 
   ngOnInit(): void {
-    // If the puzzle setter already initialized the board, don't overwrite it.
-    if (!this.model.board[0]) {
-      // Ensure the board is always initialized with 81 cells so child components have a model
+    // Initialize with 81 empty cells only if nothing has been loaded yet.
+    if (this.model.board.length === 0) {
       this.initBoard([]);
     }
   }
@@ -64,6 +47,14 @@ export default class BoardModelComponent implements OnInit {
       const v = values[i] ?? 0;
       this.model.board[i] = new this.model.CellModelClass(v, v !== 0);
     }
+  }
+
+  /** Load/overwrite a puzzle at any time (expected length: 81). */
+  public loadPuzzle(values: ReadonlyArray<number>): void {
+    if (!Array.isArray(values) || values.length !== 81) {
+      return;
+    }
+    this.initBoard(values);
   }
 
   /** Provides access to the cell model for a given index */

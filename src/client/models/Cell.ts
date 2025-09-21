@@ -1,18 +1,10 @@
 import BaseCellModel from "../../shared/models/Cell";
 
+import type { IPendingCellState } from "../types/gamestate";
 import type BaseEffectModel from "../../shared/models/Effect";
 
 
-export interface IPendingCellState {
-  pendingValue: number;
-  pendingCooldownEnd: number;
-  pendingEffects: BaseEffectModel[];
-};
-
-
-/**
- * Client-side implementation of CellModel with pending state for optimistic updates.
- */
+/** Client-side implementation of CellModel with pending state for optimistic updates. */
 export default class ClientCellModel extends BaseCellModel {
   public pendingCellState: Partial<IPendingCellState>;
   public notes?: number[];
@@ -23,6 +15,7 @@ export default class ClientCellModel extends BaseCellModel {
     effects: BaseEffectModel[] = []
   ) {
     super(value, fixed, effects);
+
     this.pendingCellState = {}; // Initialise with no pending properties
     this.notes = undefined;
   }
@@ -62,9 +55,7 @@ export default class ClientCellModel extends BaseCellModel {
     return true;
   }
 
-  /**
-   * Reject the pending value and restore the original state.
-   */
+  /** Reject the pending value and restore the original state. */
   public rejectPending(): void {
     // TODO: Here we might need to be more clear about which pending state we are rejecting
     // As it stands, it clears everything that is pending
@@ -72,23 +63,18 @@ export default class ClientCellModel extends BaseCellModel {
     this.clearPending();
   }
 
-  /**
-   * Clear all pending state.
-   */
+  /** Clear all pending state. */
   private clearPending(): void {
     this.pendingCellState = {};
   }
 
-  /**
-   * Get the current display value (pending if exists, otherwise actual).
-   */
+
+  /** Get the current display value (pending if exists, otherwise actual). */
   public getDisplayValue(): number {
     return this.pendingCellState.pendingValue ?? this.value;
   }
 
-  /**
-   * Check if this cell has any pending changes.
-   */
+  /** Check if this cell has any pending changes. */
   public hasPending(): boolean {
     return (
       this.pendingCellState.pendingValue !== undefined
@@ -96,4 +82,5 @@ export default class ClientCellModel extends BaseCellModel {
       || this.pendingCellState.pendingEffects !== undefined
     );
   }
+
 }

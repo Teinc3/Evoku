@@ -73,23 +73,17 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
     this.clearPendingGlobal();
   }
 
-  /**
-   * Clear pending global state.
-   */
+  /** Clear pending global state. */
   private clearPendingGlobal(): void {
     this.pendingGlobalCooldownEnd = undefined;
   }
 
-  /**
-   * Get the current display global cooldown end (pending if exists, otherwise actual).
-   */
+  /** Get the current display global cooldown end (pending if exists, otherwise actual). */
   public getDisplayGlobalCooldownEnd(): number {
     return this.pendingGlobalCooldownEnd ?? this.globalLastCooldownEnd;
   }
 
-  /**
-   * Check if the board has any pending changes.
-   */
+  /** Check if the board has any pending changes. */
   public hasPendingChanges(): boolean {
     return this.pendingGlobalCooldownEnd !== undefined;
   }

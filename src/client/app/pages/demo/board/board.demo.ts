@@ -34,6 +34,8 @@ export default class BoardDemoPageComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Load puzzle onto the pre-initialized empty board
+    this.board.loadPuzzle(this.puzzle);
     // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
     // Pick some indices that are empty in the seed puzzle
     const notesCells = [2, 16, 74];

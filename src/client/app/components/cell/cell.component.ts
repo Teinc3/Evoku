@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import type ClientCellModel from '../../../models/Cell';
 
@@ -8,7 +8,6 @@ import type ClientCellModel from '../../../models/Cell';
   standalone: true,
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export default class SudokuCellComponent {
   @Input({ required: true }) 

@@ -42,8 +42,8 @@ describe('BoardModelComponent', () => {
     expect(cells[0].nativeElement.classList.contains('selected')).toBeTrue();
   });
 
-  it('supports seeding puzzle and marks fixed cells', () => {
-    component.puzzle = puzzle;
+  it('supports loading puzzle and marks fixed cells', () => {
+    component.loadPuzzle(puzzle);
     fixture.detectChanges();
 
     // After seed, model should have fixed cells for non-zero entries
@@ -63,18 +63,6 @@ describe('BoardModelComponent', () => {
     expect(component.model.board[0].fixed).toBeFalse();
   });
 
-  it('puzzle setter after init re-seeds the board', () => {
-    fixture.detectChanges(); // triggers empty init
-    // Ensure an initially empty cell is not fixed
-    expect(component.model.board[0].fixed).toBeFalse();
-
-    // Now set the puzzle via the setter and verify seeding occurs
-    component.puzzle = puzzle;
-    fixture.detectChanges();
-    expect(component.model.board[0].fixed).toBeTrue();
-    // value should match provided puzzle
-    expect(component.model.board[0].value).toBe(1);
-  });
 
   it('getCellModel fallback creates a missing cell model defensively', () => {
     fixture.detectChanges();
