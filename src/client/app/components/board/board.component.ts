@@ -100,4 +100,22 @@ export default class BoardModelComponent implements OnInit {
     }
     this.model.rejectCellSet(i);
   }
+
+  /** Toggles a note for the currently selected cell */
+  public toggleNoteSelected(value: number): boolean {
+    const i = this.selected();
+    if (i == null) {
+      return false;
+    }
+    return this.model.toggleNote(i, value);
+  }
+
+  /** Clears the currently selected cell */
+  public clearSelected(): void {
+    const i = this.selected();
+    if (i == null) {
+      return;
+    }
+    this.model.clearCell(i);
+  }
 }

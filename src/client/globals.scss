@@ -1,8 +1,26 @@
 /* Global resets to ensure full-viewport layouts don't scroll due to default margins */
-html, body, app-root {
-	height: 100%;
+html,
+body,
+app-root {
+  height: 100%;
 }
 
 body {
 	margin: 0;
+}
+
+.demo-page {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  box-sizing: border-box;
+}
+
+.demo-page > h1 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  text-align: center;
 }

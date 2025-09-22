@@ -1,0 +1,15 @@
+<main class="demo-page">
+  <h1>Evoku Time Attack Model Demo</h1>
+  <div class="board-and-utilities">
+    <app-sudoku-board-model
+      #board
+      (selectedIndexChange)="selected = $event"
+    ></app-sudoku-board-model>
+    <app-utility-buttons-holder
+      (action)="onUtilityAction($event)"
+    ></app-utility-buttons-holder>
+  </div>
+  <app-numeric-buttons-holder
+    (numberClick)="onNumberClick($event)"
+  ></app-numeric-buttons-holder>
+</main>

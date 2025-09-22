@@ -78,6 +78,38 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
     this.pendingGlobalCooldownEnd = undefined;
   }
 
+  /** Toggles a note for a given cell. */
+  public toggleNote(cellIndex: number, value: number): boolean {
+    if (cellIndex < 0 || cellIndex >= this.board.length) {
+      return false;
+    }
+    const cell = this.board[cellIndex];
+    if (cell.fixed) {
+      return false;
+    }
+    const noteIndex = cell.notes.indexOf(value);
+    if (noteIndex > -1) {
+      cell.notes.splice(noteIndex, 1);
+    } else {
+      cell.notes.push(value);
+      cell.notes.sort((a, b) => a - b);
+    }
+    return true;
+  }
+
+  /** Clears a cell's value and notes. */
+  public clearCell(cellIndex: number): void {
+    if (cellIndex < 0 || cellIndex >= this.board.length) {
+      return;
+    }
+    const cell = this.board[cellIndex];
+    if (cell.fixed) {
+      return;
+    }
+    cell.update(0, undefined);
+    cell.notes = [];
+  }
+
   /** Get the current display global cooldown end (pending if exists, otherwise actual). */
   public getDisplayGlobalCooldownEnd(): number {
     return this.pendingGlobalCooldownEnd ?? this.globalLastCooldownEnd;
