@@ -2,6 +2,17 @@
   @switch (viewStateService.currentView()) {
     @case (AppView.MAIN_MENU) {
       <h1>Demo Catalogue</h1>
+
+      <section class="category">
+        <h3>Gameplay</h3>
+        <div class="items">
+          <button
+            class="btn"
+            (click)="viewStateService.navigateToView(AppView.TIMEATTACK_DEMO)"
+          >Time Attack</button>
+        </div>
+      </section>
+
       <div class="catalog">
         <section class="category">
           <h3>Components</h3>
@@ -25,6 +36,7 @@
       </div>
     }
 
+    @case (AppView.TIMEATTACK_DEMO) { <app-time-attack-demo-page></app-time-attack-demo-page> }
     @case (AppView.BOARD_DEMO) { <app-board-demo-page></app-board-demo-page> }
     @case (AppView.NETWORK_DEMO) { <app-network-demo-page></app-network-demo-page> }
   }

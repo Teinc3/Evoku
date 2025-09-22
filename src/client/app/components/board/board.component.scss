@@ -6,9 +6,7 @@
 }
 
 .board {
-  /* Make the board size driven by width so it stays visible even if parent height is 0.
-     Use viewport-relative limits so it fills available space without overflowing. */
-  width: min(100%, 90vmin);
+  height: 100%;
   aspect-ratio: 1;
   display: grid;
   grid-template-columns: repeat(9, 1fr);

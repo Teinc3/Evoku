@@ -5,7 +5,8 @@
 export enum AppView {
   MAIN_MENU,
   BOARD_DEMO,
-  NETWORK_DEMO
+  NETWORK_DEMO,
+  TIMEATTACK_DEMO
 }
 
 export default AppView;

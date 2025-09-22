@@ -1,0 +1,10 @@
+<div class="buttons-container">
+  @for (btn of buttons; track btn.action) {
+    <app-utility-button
+      [icon]="btn.icon"
+      [label]="btn.label"
+      [disabled]="btn.disabled"
+      (click)="onAction(btn.action)"
+    ></app-utility-button>
+  }
+</div>

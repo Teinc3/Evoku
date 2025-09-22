@@ -1,6 +1,8 @@
 /* Global resets to ensure full-viewport layouts don't scroll due to default margins */
-html, body, app-root {
-	height: 100%;
+html,
+body,
+app-root {
+  height: 100%;
 }
 
 body {

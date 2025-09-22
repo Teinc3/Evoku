@@ -3,15 +3,16 @@ import { Component } from '@angular/core';
 
 import AppView from '../../types/app-view';
 import ViewStateService from '../../services/view-state.service';
-import BoardDemoPageComponent from './board/board.demo';
+import TimeAttackDemoPageComponent from './time-attack/time-attack.demo';
 import NetworkDemoPageComponent from './network/network.demo';
+import BoardDemoPageComponent from './board/board.demo';
 /* eslint-enable */
 
 
 @Component({
   selector: 'app-demo-page',
   standalone: true,
-  imports: [BoardDemoPageComponent, NetworkDemoPageComponent],
+  imports: [BoardDemoPageComponent, NetworkDemoPageComponent, TimeAttackDemoPageComponent],
   templateUrl: './demo.html',
   styleUrl: './demo.scss'
 })

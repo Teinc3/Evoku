@@ -7,7 +7,7 @@ import type BaseEffectModel from "../../shared/models/Effect";
 /** Client-side implementation of CellModel with pending state for optimistic updates. */
 export default class ClientCellModel extends BaseCellModel {
   public pendingCellState: Partial<IPendingCellState>;
-  public notes?: number[];
+  public notes: number[];
 
   constructor(
     value: number = 0,
@@ -17,7 +17,7 @@ export default class ClientCellModel extends BaseCellModel {
     super(value, fixed, effects);
 
     this.pendingCellState = {}; // Initialise with no pending properties
-    this.notes = undefined;
+    this.notes = [];
   }
 
   /**

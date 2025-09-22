@@ -1,7 +1,3 @@
-:host {
-  display: contents;
-}
-
 .cell {
   position: relative;
   display: grid;
@@ -13,10 +9,6 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-}
-
-/* Grid lines: default thin grey to the right and bottom of each cell */
-:host .cell {
   border-right: 1px solid #9a9a9a;
   border-bottom: 1px solid #9a9a9a;
 }
@@ -51,7 +43,7 @@
 /* Default cell value state */
 .v {
   /* ~50% larger while staying responsive */
-  font-size: clamp(1.5rem, 3.3vh, 2.1rem);
+  font-size: 2rem;
   /* baseline-friendly user-select with vendor prefixes */
   /* eslint-disable css/use-baseline */
   -webkit-user-select: none;
@@ -85,12 +77,13 @@
   padding: 2px;
   gap: 1px;
   color: #b0b0b0;
-  font-size: clamp(0.9rem, 2vh, 1.4rem);
 }
 
 .note {
   display: grid;
   place-items: center;
+  line-height: 1;
+  align-content: center;
 }
 
 /* Selection uses a background fill instead of an outline */
