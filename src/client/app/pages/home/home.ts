@@ -1,12 +1,25 @@
-import { RouterLink } from '@angular/router';
 import { Component } from '@angular/core';
+
+import AppView from '../../types/app-view';
+
+import type ViewStateService from '../../services/view-state.service';
 
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export default class HomePageComponent {}
+export default class HomePageComponent {
+  constructor(private readonly viewStateService: ViewStateService) {}
+
+  navigateToBoardDemo(): void {
+    this.viewStateService.navigateToView(AppView.BOARD_DEMO);
+  }
+
+  navigateToNetworkDemo(): void {
+    this.viewStateService.navigateToView(AppView.NETWORK_DEMO);
+  }
+}
