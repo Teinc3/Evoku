@@ -1,7 +1,10 @@
 # Evoku
 
 [![Continuous Integration](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml)
+[![Continuous Deployment](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/github/Teinc3/Evoku/branch/master/graph/badge.svg?token=U83CE972IQ)](https://codecov.io/github/Teinc3/Evoku)
+
+🚀 **[Live Demo](https://teinc3.github.io/Evoku)** - Try the latest build deployed automatically from master!
 
 
 ## Introduction
