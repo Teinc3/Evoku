@@ -3,7 +3,7 @@
 [![Continuous Integration](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml)
 [![Continuous Deployment](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/github/Teinc3/Evoku/branch/master/graph/badge.svg?token=U83CE972IQ)](https://codecov.io/github/Teinc3/Evoku)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-teinc3.github.io%2FEvoku-blue?style=flat&logo=github&logoColor=white)](https://teinc3.github.io/Evoku)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-demo.evoku.io-blue?style=flat&logo=github&logoColor=white)](https://demo.evoku.io)
 
 
 ## Introduction
@@ -22,7 +22,7 @@ This repository contains the source code, assets, tests and documentation for th
 
 
 ## Live Demo
-Try the latest build deployed automatically from master at [https://teinc3.github.io/Evoku](https://teinc3.github.io/Evoku)!
+Try the latest build deployed automatically from master at [https://demo.evoku.io](https://demo.evoku.io)!
 
 
 ## Information and Documentation
@@ -76,6 +76,8 @@ Note that these separate commands also apply to other npm commands, such as star
 
 ## License
 All rights reserved © Teinc3 2024-2025.
-
 See [LICENSE](/LICENSE) for more information.
-For any inquiries, please contact me on Discord (@teinc3) or on Telegram: (@Teinc3).
+
+For any inquiries, please contact me through the following methods:
+- Email: help@evoku.io
+- Discord: <a href="https://discord.com/users/420725289908174859">@teinc3</a>
