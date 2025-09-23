@@ -1,7 +1,9 @@
 # Evoku
 
 [![Continuous Integration](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/ci.yml)
+[![Continuous Deployment](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/Teinc3/Evoku/actions/workflows/cd.yml)
 [![codecov](https://codecov.io/github/Teinc3/Evoku/branch/master/graph/badge.svg?token=U83CE972IQ)](https://codecov.io/github/Teinc3/Evoku)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-teinc3.github.io%2FEvoku-blue?style=flat&logo=github&logoColor=white)](https://teinc3.github.io/Evoku)
 
 
 ## Introduction
@@ -17,6 +19,10 @@ This repository contains the source code, assets, tests and documentation for th
 > - For Recruiters or potential employers: feel free to review and evaluate the code.
 > - For Designers/artists who want to contribute assets: please contact me and we will arrange privately.
 > - For license, permission requests or other inquiries, please contact me.
+
+
+## Live Demo
+Try the latest build deployed automatically from master at [https://teinc3.github.io/Evoku](https://teinc3.github.io/Evoku)!
 
 
 ## Information and Documentation
