@@ -76,7 +76,7 @@ Note that these separate commands also apply to other npm commands, such as star
 
 ## License
 All rights reserved © Teinc3 2024-2025.
-See <a>LICENSE</a> for more information.
+See [LICENSE](/LICENSE) for more information.
 
 For any inquiries, please contact me through the following methods:
 - Email: help@evoku.io
