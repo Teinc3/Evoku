@@ -22,7 +22,7 @@ This repository contains the source code, assets, tests and documentation for th
 
 
 ## Live Demo
-[Try the latest build deployed automatically from master!](https://teinc3.github.io/Evoku)
+Try the latest build deployed automatically from master at [https://teinc3.github.io/Evoku](https://teinc3.github.io/Evoku)!
 
 
 ## Information and Documentation
