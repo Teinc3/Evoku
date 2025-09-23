@@ -1,8 +1,9 @@
+/* eslint-disable */
 import { Component } from '@angular/core';
 
 import AppView from '../../types/app-view';
-
-import type ViewStateService from '../../services/view-state.service';
+import ViewStateService from '../../services/view-state.service';
+/* eslint-enable */
 
 
 @Component({

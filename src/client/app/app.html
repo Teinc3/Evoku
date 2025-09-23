@@ -1,5 +1,5 @@
-<div [ngSwitch]="viewStateService.currentView()">
-  <app-home-page *ngSwitchCase="AppView.MAIN_MENU"></app-home-page>
-  <app-board-demo-page *ngSwitchCase="AppView.BOARD_DEMO"></app-board-demo-page>
-  <app-network-demo-page *ngSwitchCase="AppView.NETWORK_DEMO"></app-network-demo-page>
+<div [@ngSwitch]="viewStateService.currentView()">
+  <app-home-page [@ngSwitchCase]="AppView.MAIN_MENU"></app-home-page>
+  <app-board-demo-page [@ngSwitchCase]="AppView.BOARD_DEMO"></app-board-demo-page>
+  <app-network-demo-page [@ngSwitchCase]="AppView.NETWORK_DEMO"></app-network-demo-page>
 </div>
