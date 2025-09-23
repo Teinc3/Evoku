@@ -68,6 +68,17 @@
   font-weight: 600;
 }
 
+.pending-clear {
+  color: #909090;
+  font-size: 2rem;
+  font-weight: 600;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* eslint-disable-next-line css/use-baseline */
+  user-select: none;
+}
+
 .notes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

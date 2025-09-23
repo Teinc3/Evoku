@@ -6,6 +6,14 @@
       }
     </div>
   } @else {
-    <span class="v">{{ value !== 0 ? value : '' }}</span>
+    @if (pendingValue !== undefined) {
+      @if (pendingValue === 0) {
+        <span class="pending-clear">✕</span>
+      } @else {
+        <span class="v">{{pendingValue}}</span>
+      }
+    } @else {
+      <span class="v">{{ value !== 0 ? value : '' }}</span>
+    }
   }
 </button>

@@ -83,4 +83,13 @@ export default class ClientCellModel extends BaseCellModel {
     );
   }
 
+  /** Override existing validate function for base model for client-side pending check */
+  public override validate(value: number, time?: number): boolean { 
+    // Check if pending value is same as current (dynamic value) or pending
+    if (this.pendingCellState?.pendingValue === value || this.value === value) {
+      return false;
+    }
+
+    return super.validate(value, time);
+  }
 }

@@ -32,9 +32,10 @@ export default class SudokuCellComponent {
   }
 
   get showNotes(): boolean {
-    // Show notes when empty value and notes present
+    // Show notes when empty value, no pending, and notes present
     const notes = this.model.notes;
-    return this.model.value === 0 && Array.isArray(notes) && notes.length > 0;
+    return this.model.value === 0 && !this.model.hasPending()
+      && Array.isArray(notes) && notes.length > 0;
   }
 
   get value(): number {
