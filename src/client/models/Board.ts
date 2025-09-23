@@ -20,6 +20,11 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
    * @returns Whether the pending value was set.
    */
   public setPendingCell(cellIndex: number, value: number, time?: number): boolean {
+    // Check global cooldown
+    // TODO: See if this check is redundant (is it already in validate?)
+    if (time !== undefined && time < this.getDisplayGlobalCooldownEnd()) {
+      return false;
+    }
     if (!this.validate(cellIndex, value, time)) {
       return false;
     }
@@ -30,6 +35,13 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
       if (time !== undefined) {
         this.pendingGlobalCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
       }
+      // Auto-confirm after 1 second for demo
+      setTimeout(() => {
+        // Only confirm if the pending value hasn't changed
+        if (cell.pendingCellState.pendingValue === value) {
+          this.confirmCellSet(cellIndex, value, performance.now());
+        }
+      }, 1000);
       return true;
     }
     return false;
@@ -84,7 +96,7 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
       return false;
     }
     const cell = this.board[cellIndex];
-    if (cell.fixed) {
+    if (cell.fixed || cell.value > 0 || cell.hasPending()) {
       return false;
     }
     const noteIndex = cell.notes.indexOf(value);

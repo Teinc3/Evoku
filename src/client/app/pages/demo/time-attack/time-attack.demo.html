@@ -3,7 +3,7 @@
   <div class="board-and-utilities">
     <app-sudoku-board-model
       #board
-      (selectedIndexChange)="selected = $event"
+      [isNoteMode]="isNoteMode"
     ></app-sudoku-board-model>
     <app-utility-buttons-holder
       (action)="onUtilityAction($event)"

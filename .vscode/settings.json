@@ -1,4 +1,5 @@
 {
   "editor.indentSize": 2,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "liveServer.settings.root": "dist/Evoku/browser"
 }

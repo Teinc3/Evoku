@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Output, signal, Input, HostListener } from '@angular/core';
 
 
 import SudokuCellComponent from '../cell/cell.component';
+import CursorDirectionEnum from '../../../types/cursor-direction.enum';
 import ClientBoardModel from '../../../models/Board';
 
 import type { WritableSignal } from '@angular/core';
@@ -19,6 +20,8 @@ import type ClientCellModel from '../../../models/Cell';
 export default class BoardModelComponent implements OnInit {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
+
+  @Input() isNoteMode = false;
   
   @Output()
   selectedIndexChange = new EventEmitter<number>();
@@ -31,6 +34,47 @@ export default class BoardModelComponent implements OnInit {
     this.model = new ClientBoardModel();
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    const key = event.key;
+
+    // Handle number inputs (1-9)
+    if (key >= '1' && key <= '9') {
+      const num = parseInt(key, 10);
+      if (this.isNoteMode) {
+        this.toggleNoteSelected(num);
+      } else {
+        this.setPendingSelected(num, performance.now());
+      }
+      return;
+    }
+
+    // Handle other actions
+    switch (key) {
+      case 'Backspace':
+      case '0':
+        this.clearSelected();
+        break;
+      // Movement keys
+      case 'w':
+      case 'ArrowUp':
+        this.moveSelection(CursorDirectionEnum.UP);
+        break;
+      case 's':
+      case 'ArrowDown':
+        this.moveSelection(CursorDirectionEnum.DOWN);
+        break;
+      case 'a':
+      case 'ArrowLeft':
+        this.moveSelection(CursorDirectionEnum.LEFT);
+        break;
+      case 'd':
+      case 'ArrowRight':
+        this.moveSelection(CursorDirectionEnum.RIGHT);
+        break;
+    }
   }
 
   ngOnInit(): void {
@@ -57,6 +101,53 @@ export default class BoardModelComponent implements OnInit {
     this.initBoard(values);
   }
 
+  /** Moves the selection on the board */
+  public moveSelection(direction: CursorDirectionEnum): void {
+    const currentSelection = this.selected();
+    if (currentSelection === null) {
+      // If nothing is selected, select the center cell
+      this.onCellSelected(40);
+      return;
+    }
+
+    let newIndex = currentSelection;
+    const currentRow = Math.floor(currentSelection / 9);
+    const currentCol = currentSelection % 9;
+
+    switch (direction) {
+      case CursorDirectionEnum.UP:
+        if (currentRow > 0) {
+          newIndex -= 9;
+        } else {
+          newIndex += 72; // Wrap to bottom row
+        }
+        break;
+      case CursorDirectionEnum.DOWN:
+        if (currentRow < 8) {
+          newIndex += 9;
+        } else {
+          newIndex -= 72; // Wrap to top row
+        }
+        break;
+      case CursorDirectionEnum.LEFT:
+        if (currentCol > 0) {
+          newIndex -= 1;
+        } else {
+          newIndex += 8; // Wrap to rightmost column
+        }
+        break;
+      case CursorDirectionEnum.RIGHT:
+        if (currentCol < 8) {
+          newIndex += 1;
+        } else {
+          newIndex -= 8; // Wrap to leftmost column
+        }
+        break;
+    }
+
+    this.onCellSelected(newIndex);
+  }
+
   /** Provides access to the cell model for a given index */
   public getCellModel(idx: number): ClientCellModel {
     // Fallback: if board entry is missing, initialize to empty cell to keep template safe
@@ -78,8 +169,15 @@ export default class BoardModelComponent implements OnInit {
     if (i == null) {
       return false;
     }
+    const cell = this.model.board[i];
+    // Don't set if it matches current pending or dynamic value
+    // I THINK THIS NEEDS TO BE MOVED TO THE MODEL FOR PROCESSING
+    if (cell.pendingCellState?.pendingValue === value || cell.value === value) {
+      return false;
+    }
     return this.model.setPendingCell(i, value, time);
   }
+
   /** Server confirmation for the currently selected cell */
   public confirmSelected(time?: number): boolean {
     const i = this.selected();
@@ -92,6 +190,7 @@ export default class BoardModelComponent implements OnInit {
     }
     return this.model.confirmCellSet(i, pv, time);
   }
+  
   /** Rejects the pending value for the currently selected cell */
   public rejectSelected(): void {
     const i = this.selected();
@@ -111,11 +210,51 @@ export default class BoardModelComponent implements OnInit {
   }
 
   /** Clears the currently selected cell */
-  public clearSelected(): void {
+  public clearSelected(time?: number): void {
     const i = this.selected();
     if (i == null) {
       return;
     }
-    this.model.clearCell(i);
+    if (this.isNoteMode) {
+      // In notes mode, clear notes
+      const cell = this.model.board[i];
+      cell.notes = [];
+    } else {
+      // In normal mode, set pending 0 (deletion)
+      this.setPendingSelected(0, time);
+    }
+  }
+
+  /** Sets up the board for the demo page */
+  public setupDemoBoard(): void {
+    // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
+    // Pick some indices that are empty in the seed puzzle
+    const notesCells = [2, 16, 74];
+    const pendingCells = [6, 28, 48];
+    const dynamicCells = [3, 24, 60];
+
+    // Notes: add candidate numbers
+    for (const i of notesCells) {
+      const cell = this.model.board[i];
+      cell.notes = Array.from({ length: 9 }, (_, n) => n + 1).filter(
+        () => Math.round(Math.random()) === 0
+      );
+    }
+
+    // Pending: set optimistic pending values
+    for (const i of pendingCells) {
+      const v = (i % 9) + 1;
+      this.model.setPendingCell(i, v, performance.now());
+    }
+
+    // Dynamic values (non-fixed): place values as if user set them
+    for (const i of dynamicCells) {
+      const v = (i % 9) + 1;
+      // Avoid violating validation (e.g., cooldown): use update directly for demo visuals
+      this.model.board[i].update(v, undefined);
+    }
+
+    // Place a visible cursor at row 4, col 6 (index 42)
+    this.selected.set(42);
   }
 }
