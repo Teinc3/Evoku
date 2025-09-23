@@ -80,4 +80,4 @@ See <a>LICENSE</a> for more information.
 
 For any inquiries, please contact me through the following methods:
 - Email: help@evoku.io
-- Discord: <a>https://discord.com/users/420725289908174859</a>
+- Discord: <a href="https://discord.com/users/420725289908174859">@teinc3</a>
