@@ -18,7 +18,9 @@
     "test:client-ci": "CI=true ng test --watch=false --code-coverage",
     "test:server-ci": "jest --config jest.config.cjs --coverage",
     "lint": "npx eslint .",
-    "comp": "npx tsc -b .",
+    "comp": "npm run comp:client && npm run comp:server",
+    "comp:client": "ngc -p tsconfig.app.json --noEmit",
+    "comp:server": "tsc -p tsconfig.server.json",
     "prepare": "husky"
   },
   "private": true,
