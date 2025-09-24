@@ -1,22 +1,19 @@
-// eslint-disable-next-line import/newline-after-import
-import { RouterOutlet } from '@angular/router';
-// eslint-disable-next-line import/newline-after-import
+/* eslint-disable */
 import { Component } from '@angular/core';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { RouterOutlet } from '@angular/router';
 import DynamicFaviconService from './services/dynamic-favicon.service';
+/* eslint-enable */
 
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
-  templateUrl: './app.html',
+  template: '<router-outlet></router-outlet>',
   styleUrl: './app.scss'
 })
 export default class App {
-  protected title = 'Evoku';
-
   constructor(
-    private readonly _faviconService: DynamicFaviconService
+    protected readonly faviconService: DynamicFaviconService
   ) {}
 }
