@@ -1,0 +1,19 @@
+<main class="home">
+  @switch (viewStateService.currentView()) {
+    @case (AppView.MAIN_MENU) {
+      <img src="/logo.png" alt="Evoku" class="logo">
+      <div class="actions">
+        <button
+          class="btn" 
+          (click)="this.viewStateService.navigateToView(AppView.BOARD_DEMO)"
+        >Board demo</button>
+        <button
+          class="btn"
+          (click)="this.viewStateService.navigateToView(AppView.NETWORK_DEMO)"
+        >Network demo</button>
+      </div>
+    }
+    @case (AppView.BOARD_DEMO) { <app-board-demo-page></app-board-demo-page> }
+    @case (AppView.NETWORK_DEMO) { <app-network-demo-page></app-network-demo-page> }
+}
+</main>

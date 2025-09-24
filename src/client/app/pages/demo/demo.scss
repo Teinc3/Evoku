@@ -1,4 +1,3 @@
-
 .home {
   min-height: 100dvh;
   display: flex;
@@ -37,4 +36,9 @@
 .btn:hover {
   border-color: #1976d2;
   color: #1976d2;
+}
+
+.hint {
+  color: #777;
+  font-size: 0.9rem;
 }
