@@ -14,13 +14,6 @@ import ViewStateService from '../../services/view-state.service';
   styleUrl: './home.scss'
 })
 export default class HomePageComponent {
-  constructor(private readonly viewStateService: ViewStateService) {}
-
-  navigateToBoardDemo(): void {
-    this.viewStateService.navigateToView(AppView.BOARD_DEMO);
-  }
-
-  navigateToNetworkDemo(): void {
-    this.viewStateService.navigateToView(AppView.NETWORK_DEMO);
-  }
+  protected readonly AppView = AppView;
+  constructor(protected readonly viewStateService: ViewStateService) {}
 }

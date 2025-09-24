@@ -1,7 +1,7 @@
 <main class="home">
   <img src="/logo.png" alt="Evoku" class="logo">
   <div class="actions">
-    <button class="btn" (click)="navigateToBoardDemo()">Board demo</button>
-    <button class="btn" (click)="navigateToNetworkDemo()">Network demo</button>
+    <button class="btn" (click)="this.viewStateService.navigateToView(AppView.BOARD_DEMO)">Board Demo</button>
+    <button class="btn" (click)="this.viewStateService.navigateToView(AppView.NETWORK_DEMO)">Network demo</button>
   </div>
 </main>
