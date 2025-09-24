@@ -7,6 +7,12 @@
   justify-content: flex-start; /* align items from the top */
   gap: 0.5rem; /* tighter gap between logo and actions */
   text-align: center;
+
+  /* Home landing background */
+  background-image: url('/landing.webp');
+  background-size: cover;
+  background-position: 50% 30%;
+  background-repeat: no-repeat;
 }
 
 .logo {
