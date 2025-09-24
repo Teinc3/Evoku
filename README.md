@@ -74,6 +74,11 @@ npm run dev:server
 Note that these separate commands also apply to other npm commands, such as start and test.
 
 
+## Discord
+
+<iframe src="https://discord.com/widget?id=1420393591578169367&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+
+
 ## License
 All rights reserved © Teinc3 2024-2025.
 See [LICENSE](/LICENSE) for more information.
