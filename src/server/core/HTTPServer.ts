@@ -37,23 +37,23 @@ export default class HTTPServer {
     const clientDist = path.join(process.cwd(), 'dist', 'Evoku', 'browser');
     const clientIndex = path.join(clientDist, 'index.html');
 
-    if (fs.existsSync(clientIndex)) {
-      // Serve static files from angular build
-      // The user can choose to access the built (static) client or the development client
-      // by navigating to the appropriate port (e.g., 6942 for dev server, 8745 for this server)
-      
-      console.log(`Serving client build from ${clientDist}`);
-      this.app.use(express.static(clientDist));
-
-    } else {
+    if (!fs.existsSync(clientIndex)) {
       console.warn(
         `Warning: Client build not found at ${clientIndex}. Server will not serve the application.`
       );
+      return
     }
 
-    // Final 404 handler: everything else returns 404
+    console.log(`Serving client build from ${clientDist}`);
+
+    // Serve static files from angular build
+    // The user can choose to access the built (static) client or the development client
+    // by navigating to the appropriate port (e.g., 6942 for dev server, 8745 for this server)
+    this.app.use(express.static(clientDist));
+
+    // Route everything back to index.html, client routing should fetch 404 if invalid
     this.app.use((_req, res) => {
-      res.sendStatus(404);
+      res.sendFile(clientIndex);
     });
   }
 
