@@ -5,9 +5,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "ng build",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "start:client": "npx serve -s dist/Evoku/browser -l 6942",
-    "start:server": "tsx src/server/index.ts",
+    "start": "npm run build && tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "ng serve",
     "dev:server": "tsx watch src/server/index.ts",
@@ -18,7 +16,9 @@
     "test:client-ci": "CI=true ng test --watch=false --code-coverage",
     "test:server-ci": "jest --config jest.config.cjs --coverage",
     "lint": "npx eslint .",
-    "comp": "npx tsc -b .",
+    "comp": "npm run comp:client && npm run comp:server",
+    "comp:client": "ngc -p tsconfig.app.json --noEmit",
+    "comp:server": "tsc -p tsconfig.server.json",
     "prepare": "husky"
   },
   "private": true,

@@ -1,3 +1,5 @@
+import path from 'node:path';
+import fs from 'node:fs';
 import { createServer } from 'http';
 import express from 'express';
 
@@ -22,9 +24,36 @@ export default class HTTPServer {
   }
 
   private configureRoutes(): void {
-    // Add a basic health check route for the HTTP server
-    this.app.get('/health', (req, res) => {
-      res.status(200).send('OK');
+
+    this.app.get('/health', (_req, res) => {
+      res.sendStatus(200);
+    });
+
+    this.app.get('/api', (_req, res) => {
+      res.sendStatus(501);
+    });
+
+    // Serve the built Angular client only if a build exists
+    const clientDist = path.join(process.cwd(), 'dist', 'Evoku', 'browser');
+    const clientIndex = path.join(clientDist, 'index.html');
+
+    if (!fs.existsSync(clientIndex)) {
+      console.warn(
+        `Warning: Client build not found at ${clientIndex}. Server will not serve the application.`
+      );
+      return
+    }
+
+    console.log(`Serving client build from ${clientDist}`);
+
+    // Serve static files from angular build
+    // The user can choose to access the built (static) client or the development client
+    // by navigating to the appropriate port (e.g., 6942 for dev server, 8745 for this server)
+    this.app.use(express.static(clientDist));
+
+    // Route everything back to index.html, client routing should fetch 404 if invalid
+    this.app.use((_req, res) => {
+      res.sendFile(clientIndex);
     });
   }
 
