@@ -5,6 +5,8 @@
 [![codecov](https://codecov.io/github/Teinc3/Evoku/branch/master/graph/badge.svg?token=U83CE972IQ)](https://codecov.io/github/Teinc3/Evoku)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-demo.evoku.io-blue?style=flat&logo=github&logoColor=white)](https://demo.evoku.io)
 
+[![Discord](https://img.shields.io/discord/1420393591578169367?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/Psfe9rzwu6)
+
 
 ## Introduction
 This repository contains the source code, assets, tests and documentation for the game Evoku.
