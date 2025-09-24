@@ -5,9 +5,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "ng build",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "start:client": "npx serve -s dist/Evoku/browser -l 6942",
-    "start:server": "tsx src/server/index.ts",
+    "start": "npm run build && tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "ng serve",
     "dev:server": "tsx watch src/server/index.ts",
