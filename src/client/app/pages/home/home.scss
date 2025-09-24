@@ -28,19 +28,3 @@
   align-items: center;
   margin-top: -0.25rem; /* smaller pull to avoid overlap while keeping buttons close */
 }
-
-.btn {
-  display: inline-block;
-  padding: 1rem 1.4rem; /* larger tap target */
-  font-size: 1.05rem; /* slightly larger text */
-  border: 1px solid #333;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #222;
-  background: #fff;
-}
-
-.btn:hover {
-  border-color: #1976d2;
-  color: #1976d2;
-}

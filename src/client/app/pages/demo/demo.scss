@@ -1,44 +1,34 @@
-.home {
+.demo-page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* align items from the top */
-  gap: 0.5rem; /* tighter gap between logo and actions */
-  text-align: center;
+  justify-content: flex-start;
+  padding: 1.25rem;
 }
 
-.logo {
-  max-height: 60vh;
-  object-fit: contain;
-  margin: 0 auto 0.125rem auto;
+.catalog {
+  width: min(100%, 960px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.actions {
+.category {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.category h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.items {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
-  margin-top: -0.25rem; /* smaller pull to avoid overlap while keeping buttons close */
-}
-
-.btn {
-  display: inline-block;
-  padding: 1rem 1.4rem; /* larger tap target */
-  font-size: 1.05rem; /* slightly larger text */
-  border: 1px solid #333;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #222;
-  background: #fff;
-}
-
-.btn:hover {
-  border-color: #1976d2;
-  color: #1976d2;
-}
-
-.hint {
-  color: #777;
-  font-size: 0.9rem;
 }
