@@ -7,7 +7,7 @@ import { promises as fs } from 'fs';
  * This copies the index.html file to 404.html to ensure that GitHub Pages serves 
  * the Angular application for any non-existent paths, allowing client-side routing to work.
  */
-async function createGitHubPagesFallback() {
+async function createGitHubPagesFallback(): Promise<void> {
   const buildDir = join(process.cwd(), 'dist', 'Evoku', 'browser');
   const indexPath = join(buildDir, 'index.html');
   const fallbackPath = join(buildDir, '404.html');
@@ -22,7 +22,7 @@ async function createGitHubPagesFallback() {
     
     console.log('✅ Created 404.html fallback for GitHub Pages routing');
   } catch (error) {
-    console.warn('⚠️  Could not create 404.html fallback:', error.message);
+    console.warn('⚠️  Could not create 404.html fallback:', (error as Error).message);
     console.warn('   This is expected if the client build does not exist.');
   }
 }
