@@ -14,6 +14,7 @@
   "include": [
     "src/server/**/*.ts",
     "src/shared/**/*.ts",
+    "scripts/**/*.ts",
     "config/server.json",
     "config/client.json"
   ],

@@ -4,7 +4,7 @@
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "ng build",
+    "build": "ng build && tsx scripts/post-build.ts",
     "start": "npm run build && tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "ng serve",
