@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { Router } from '@angular/router';
 import { Component, ViewChild } from '@angular/core';
 
 import UtilityButtonsHolderComponent 
@@ -29,7 +27,7 @@ export default class TimeAttackDemoPageComponent implements AfterViewInit {
   isNoteMode = false;
   puzzle: number[];
 
-  constructor(private readonly router: Router) {
+  constructor() {
     this.puzzle = [
       5, 3, 0, 0, 7, 0, 0, 0, 0, 6, 0, 0, 1, 9, 5, 0, 0, 0, 0, 9, 8, 0, 0, 0, 0,
       6, 0, 8, 0, 0, 0, 6, 0, 0, 0, 3, 4, 0, 0, 8, 0, 3, 0, 0, 1, 7, 0, 0, 0, 2,
@@ -68,9 +66,6 @@ export default class TimeAttackDemoPageComponent implements AfterViewInit {
         this.isNoteMode = !this.isNoteMode;
         this.board.isNoteMode = this.isNoteMode;
         // We can add some visual feedback for the note button here
-        break;
-      case UtilityAction.QUIT:
-        this.router.navigate(['/']);
         break;
     }
   }

@@ -1,8 +1,12 @@
+/* eslint-disable */
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import UtilityButtonComponent from '../utility-button/utility-button.component';
+import AppView from '../../../types/app-view';
 import UtilityAction from '../../../../types/utility';
+import ViewStateService from '../../../services/view-state.service';
+/* eslint-enable */
 
 
 @Component({
@@ -39,7 +43,17 @@ export default class UtilityButtonsHolderComponent {
     },
   ];
 
+  constructor(private readonly viewStateService: ViewStateService) {}
+
   onAction(action: UtilityAction) {
-    this.action.emit(action);
+    switch (action) {
+      case UtilityAction.QUIT:
+        // Handle quit action here - extracting injectable
+        this.viewStateService.navigateToView(AppView.MAIN_MENU)
+        break;
+      default:
+        // Something that requires binding component to access
+        this.action.emit(action);
+    }
   }
 }
