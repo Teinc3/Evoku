@@ -21,14 +21,16 @@
   padding: 1rem;
 }
 
-.category h3 {
+.category h2 {
   margin: 0 0 0.75rem 0;
   font-size: 1.1rem;
-  color: #333;
+  color: #000;
+  text-align: center;
 }
 
 .items {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: center;
 }
