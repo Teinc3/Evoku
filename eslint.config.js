@@ -241,9 +241,9 @@ export default defineConfig([
     }
   },
 
-  // CSS
+  // CSS (excluding SCSS files due to syntax differences)
   {
-    files: ["**/*.css", "**/*.scss"],
+    files: ["**/*.css"],
     plugins: { css },
     language: "css/css",
     extends: ["css/recommended"],
