@@ -5,7 +5,6 @@ import eslintPluginImport from "eslint-plugin-import";
 import { defineConfig } from "eslint/config";
 import stylistic from "@stylistic/eslint-plugin";
 import js from "@eslint/js";
-import css from "@eslint/css";
 import { includeIgnoreFile } from "@eslint/compat";
 import angularTemplateParser from "@angular-eslint/template-parser";
 import angularEslintTemplate from "@angular-eslint/eslint-plugin-template";
@@ -241,17 +240,5 @@ export default defineConfig([
     }
   },
 
-  // CSS (excluding SCSS files due to syntax differences)
-  {
-    files: ["**/*.css"],
-    plugins: { css },
-    language: "css/css",
-    extends: ["css/recommended"],
-    rules: {
-      // Use the 'widely' baseline preset which includes common properties like user-select
-      "css/use-baseline": ["error", {
-        "available": "widely"
-      }]
-    }
-  }
+  // CSS/SCSS linting is handled by Stylelint (see .stylelintrc.json)
 ]);
