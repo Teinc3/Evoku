@@ -9,6 +9,11 @@ body {
 	margin: 0;
 }
 
+h1 {
+  text-align: center;
+  flex-shrink: 0; /* Prevent h1 from shrinking */
+}
+
 /* Shared button styles */
 .btn {
 	display: inline-block;

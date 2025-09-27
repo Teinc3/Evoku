@@ -3,7 +3,7 @@
  * These correspond to the main screens in the application.
  */
 export enum AppView {
-  MAIN_MENU,
+  CATALOGUE,
   BOARD_DEMO,
   NETWORK_DEMO,
   TIMEATTACK_DEMO

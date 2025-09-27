@@ -4,7 +4,7 @@ import type ClientCellModel from '../../../models/Cell';
 
 
 @Component({
-  selector: 'app-sudoku-cell',
+  selector: 'app-cell-model',
   standalone: true,
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.scss',

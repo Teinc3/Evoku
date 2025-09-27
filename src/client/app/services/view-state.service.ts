@@ -12,7 +12,7 @@ import AppView from '../types/app-view';
 })
 export default class ViewStateService {
   /** Current application view state using Angular signal */
-  private readonly _currentView = signal<AppView>(AppView.MAIN_MENU);
+  private readonly _currentView = signal<AppView>(AppView.CATALOGUE);
 
   /** Public readonly accessor for the current view signal */
   public readonly currentView = this._currentView.asReadonly();

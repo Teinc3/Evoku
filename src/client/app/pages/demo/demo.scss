@@ -1,36 +1,16 @@
 .demo-page {
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 1.25rem;
-}
-
-.catalog {
-  width: min(100%, 960px);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.category {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #ddd;
-  border-radius: 10px;
+	height: 100%;
+	width: 100%;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
-.category h2 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.1rem;
-  color: #000;
-  text-align: center;
-}
-
-.items {
+.demo-page > * {
+  height: 100%;
+  width: 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  flex-direction: column;
 }

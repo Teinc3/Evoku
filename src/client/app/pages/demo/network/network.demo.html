@@ -1,4 +1,50 @@
-<main class="demo-page">
-  <h2>Network Demo</h2>
-  <app-network-status />
-</main>
+<h1>Networking Demo</h1>
+<div class="network-status">
+  <h2>Network Status</h2>
+  <div class="status-indicator">
+    <span
+      class="status-dot"
+      [class.connected]="isConnected"
+      [class.disconnected]="!isConnected"
+    ></span>
+    <span class="status-text">{{ isConnected ? 'Connected' : 'Disconnected' }}</span>
+  </div>
+
+  <div class="actions">
+    <button
+      class="btn btn-primary"
+      (click)="connect()"
+      [disabled]="isConnected"
+    >
+      Connect
+    </button>
+    <button
+      class="btn btn-secondary"
+      (click)="disconnect()"
+      [disabled]="!isConnected"
+    >
+      Disconnect
+    </button>
+    <button
+      class="btn btn-test"
+      (click)="sendTestPacket()"
+      [disabled]="!isConnected"
+    >
+      Send Test Packet
+    </button>
+  </div>
+
+  @if (logs.length > 0) {
+    <div class="logs">
+      <h3>Activity Log</h3>
+      <div class="log-entries">
+        @for (log of logs; track log) {
+          <div class="log-entry" [class]="log.type">
+            <span class="timestamp">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+            <span class="message">{{ log.message }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

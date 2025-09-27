@@ -1,12 +1,10 @@
-<section class="board-wrap">
-  <div class="board">
-    @for (i of indices; track i) {
-      <app-sudoku-cell
-        [model]="getCellModel(i)"
-        [index]="i"
-        (selected)="onCellSelected($event)"
-        [class.selected]="selected() === i"
-      ></app-sudoku-cell>
-    }
-  </div>
-</section>
+<div class="board">
+  @for (i of indices; track i) {
+    <app-cell-model
+      [model]="getCellModel(i)"
+      [index]="i"
+      (selected)="onCellSelected($event)"
+      [class.selected]="selected() === i"
+    ></app-cell-model>
+  }
+</div>

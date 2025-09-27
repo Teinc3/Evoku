@@ -49,7 +49,7 @@ export default class UtilityButtonsHolderComponent {
     switch (action) {
       case UtilityAction.QUIT:
         // Handle quit action here - extracting injectable
-        this.viewStateService.navigateToView(AppView.MAIN_MENU)
+        this.viewStateService.navigateToView(AppView.CATALOGUE)
         break;
       default:
         // Something that requires binding component to access

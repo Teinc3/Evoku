@@ -6,7 +6,7 @@ import type { AfterViewInit } from '@angular/core';
 
 
 @Component({
-  selector: 'app-board-demo-page',
+  selector: 'app-demo-board',
   standalone: true,
   imports: [BoardModelComponent],
   templateUrl: './board.demo.html',

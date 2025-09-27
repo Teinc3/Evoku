@@ -1,4 +1,10 @@
-<button type="button" class="cell" (click)="onClick()" [class.fixed]="model.fixed" [class.pending]="hasPending">
+<button 
+  type="button" 
+  class="cell" 
+  (click)="onClick()" 
+  [class.fixed]="model.fixed" 
+  [class.pending]="hasPending"
+>
   @if (showNotes) {
     <div class="notes" aria-hidden="true">
       @for (n of noteGrid; track n) {

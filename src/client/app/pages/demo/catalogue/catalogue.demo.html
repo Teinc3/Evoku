@@ -1,0 +1,30 @@
+<h1>Demo Catalogue</h1>
+<div class="catalog">
+  <section class="category">
+    <h2>Gameplay</h2>
+    <div class="items">
+      <button
+        class="btn"
+        (click)="viewStateService.navigateToView(AppView.TIMEATTACK_DEMO)"
+      >Time Attack Mode</button>
+    </div>
+  </section>
+  <section class="category">
+    <h2>Components</h2>
+    <div class="items">
+      <button
+        class="btn"
+        (click)="viewStateService.navigateToView(AppView.BOARD_DEMO)"
+      >Board Component</button>
+    </div>
+  </section>
+  <section class="category">
+    <h2>Miscellaneous</h2>
+    <div class="items">
+      <button
+        class="btn"
+        (click)="viewStateService.navigateToView(AppView.NETWORK_DEMO)"
+      >Networking Test</button>
+    </div>
+  </section>
+</div>

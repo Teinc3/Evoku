@@ -15,7 +15,7 @@ See also:
 ## Composition & Data Flow
 
 - BoardModelComponent creates and owns a `ClientBoardModel` instance.
-- The template iterates a flat index list 0..80 and renders one `app-sudoku-cell` per index:
+- The template iterates a flat index list 0..80 and renders one `app-cell-model` per index:
   - Supplies a `ClientCellModel` from `model.board[i]` via the `getCellModel(i)` accessor.
   - Passes the numeric `index`.
   - Listens for the cell `(selected)` output and updates board selection.
@@ -32,7 +32,7 @@ See also:
 - Board tracks a `selected` signal (index | null).
 - When a child cell emits `(selected)` with its index:
   - Board updates `selected` and emits `selectedIndexChange`.
-  - The template applies `[class.selected]="selected() === i"` on each `app-sudoku-cell` so selection is purely declarative (no direct access to child instances).
+  - The template applies `[class.selected]="selected() === i"` on each `app-cell-model` so selection is purely declarative (no direct access to child instances).
 - The selected cell gets a visual outline via the `.selected` class applied by the parent binding.
 
 ### Initialization & Seeding
@@ -64,7 +64,7 @@ These methods combine with server-side validation/confirmation in real gameplay 
 ## Minimal Usage
 
 ```html
-<app-sudoku-board-model [puzzle]="puzzle" (selectedIndexChange)="onSelect($event)"></app-sudoku-board-model>
+<app-board-model [puzzle]="puzzle" (selectedIndexChange)="onSelect($event)"></app-board-model>
 ```
 
 ```ts

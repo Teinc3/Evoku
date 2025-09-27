@@ -1,40 +1,9 @@
 <main class="demo-page">
   @switch (viewStateService.currentView()) {
-    @case (AppView.MAIN_MENU) {
-      <h1>Demo Catalogue</h1>
-      <div class="catalog">
-        <section class="category">
-          <h2>Gameplay</h2>
-          <div class="items">
-            <button
-              class="btn"
-              (click)="viewStateService.navigateToView(AppView.TIMEATTACK_DEMO)"
-            >Time Attack Mode</button>
-          </div>
-        </section>
-        <section class="category">
-          <h2>Components</h2>
-          <div class="items">
-            <button
-              class="btn"
-              (click)="viewStateService.navigateToView(AppView.BOARD_DEMO)"
-            >Board Component</button>
-          </div>
-        </section>
-        <section class="category">
-          <h2>Miscellaneous</h2>
-          <div class="items">
-            <button
-              class="btn"
-              (click)="viewStateService.navigateToView(AppView.NETWORK_DEMO)"
-            >Networking Test</button>
-          </div>
-        </section>
-      </div>
-    }
+    @case (AppView.CATALOGUE) { <app-demo-catalogue></app-demo-catalogue> }
 
-    @case (AppView.TIMEATTACK_DEMO) { <app-time-attack-demo-page></app-time-attack-demo-page> }
-    @case (AppView.BOARD_DEMO) { <app-board-demo-page></app-board-demo-page> }
-    @case (AppView.NETWORK_DEMO) { <app-network-demo-page></app-network-demo-page> }
+    @case (AppView.TIMEATTACK_DEMO) { <app-demo-time-attack></app-demo-time-attack> }
+    @case (AppView.BOARD_DEMO) { <app-demo-board></app-demo-board> }
+    @case (AppView.NETWORK_DEMO) { <app-demo-network></app-demo-network> }
   }
 </main>

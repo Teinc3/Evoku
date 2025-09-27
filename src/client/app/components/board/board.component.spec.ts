@@ -25,13 +25,13 @@ describe('BoardModelComponent', () => {
 
   it('renders 81 cells', () => {
     fixture.detectChanges();
-    const cells = fixture.debugElement.queryAll(By.css('app-sudoku-cell'));
+    const cells = fixture.debugElement.queryAll(By.css('app-cell-model'));
     expect(cells.length).toBe(81);
   });
 
   it('emits selection and updates child selected state', () => {
     fixture.detectChanges();
-    const cells = fixture.debugElement.queryAll(By.css('app-sudoku-cell'));
+    const cells = fixture.debugElement.queryAll(By.css('app-cell-model'));
     // simulate selecting the 0th cell via component API
     component.onCellSelected(0);
     fixture.detectChanges();

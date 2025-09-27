@@ -11,7 +11,7 @@ import type ClientCellModel from '../../../models/Cell';
 
 
 @Component({
-  selector: 'app-sudoku-board-model',
+  selector: 'app-board-model',
   standalone: true,
   imports: [SudokuCellComponent],
   templateUrl: './board.component.html',

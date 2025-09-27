@@ -11,7 +11,7 @@ import type { AfterViewInit } from '@angular/core';
 
 
 @Component({
-  selector: 'app-time-attack-demo-page',
+  selector: 'app-demo-time-attack',
   standalone: true,
   imports: [
     BoardModelComponent,
