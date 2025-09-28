@@ -1,12 +1,8 @@
-/* eslint-disable */
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import UtilityButtonComponent from '../utility-button/utility-button.component';
-import AppView from '../../../types/app-view';
 import UtilityAction from '../../../../types/utility';
-import ViewStateService from '../../../services/view-state.service';
-/* eslint-enable */
 
 
 @Component({
@@ -14,10 +10,13 @@ import ViewStateService from '../../../services/view-state.service';
   standalone: true,
   imports: [CommonModule, UtilityButtonComponent],
   templateUrl: './utility-buttons-holder.component.html',
-  styleUrls: ['./utility-buttons-holder.component.scss'],
+  styleUrl: './utility-buttons-holder.component.scss',
 })
 export default class UtilityButtonsHolderComponent {
-  @Output() action = new EventEmitter<UtilityAction>();
+  @Output()
+  protected utilityClick = new EventEmitter<UtilityAction>();
+  @Output()
+  protected quitClick = new EventEmitter<void>();
 
   protected readonly UtilityAction = UtilityAction;
   protected readonly buttons = [
@@ -43,17 +42,11 @@ export default class UtilityButtonsHolderComponent {
     },
   ];
 
-  constructor(private readonly viewStateService: ViewStateService) {}
-
-  onAction(action: UtilityAction) {
-    switch (action) {
-      case UtilityAction.QUIT:
-        // Handle quit action here - extracting injectable
-        this.viewStateService.navigateToView(AppView.CATALOGUE)
-        break;
-      default:
-        // Something that requires binding component to access
-        this.action.emit(action);
+  onUtilityAction(action: UtilityAction) {
+    if (action === UtilityAction.QUIT) {
+      this.quitClick.emit();      
+    } else {
+      this.utilityClick.emit(action);
     }
   }
 }

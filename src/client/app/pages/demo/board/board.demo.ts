@@ -66,18 +66,4 @@ export default class BoardDemoPageComponent implements AfterViewInit {
     this.board.selected.set(42);
     this.selected = 42;
   }
-
-  randPending(): void {
-    if (this.selected == null) {
-      return;
-    }
-    const v = (Math.random() * 9 | 0) + 1;
-    this.board.setPendingSelected(v, performance.now());
-  }
-  confirm(): void {
-    this.board.confirmSelected(performance.now());
-  }
-  reject(): void {
-    this.board.rejectSelected();
-  }
 }

@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Output, signal, Input, HostListener } from '@angular/core';
-
+import { Component, EventEmitter, Output, signal, HostListener } from '@angular/core';
 
 import SudokuCellComponent from '../cell/cell.component';
+import UtilityAction from '../../../types/utility';
 import CursorDirectionEnum from '../../../types/cursor-direction.enum';
 import ClientBoardModel from '../../../models/Board';
 
@@ -20,8 +20,7 @@ import type ClientCellModel from '../../../models/Cell';
 export default class BoardModelComponent implements OnInit {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
-
-  @Input() isNoteMode = false;
+  public isNoteMode = false;
   
   @Output()
   selectedIndexChange = new EventEmitter<number>();
@@ -43,11 +42,7 @@ export default class BoardModelComponent implements OnInit {
     // Handle number inputs (1-9)
     if (key >= '1' && key <= '9') {
       const num = parseInt(key, 10);
-      if (this.isNoteMode) {
-        this.toggleNoteSelected(num);
-      } else {
-        this.setPendingSelected(num, performance.now());
-      }
+      this.parseNumberKey(num);
       return;
     }
 
@@ -55,7 +50,7 @@ export default class BoardModelComponent implements OnInit {
     switch (key) {
       case 'Backspace':
       case '0':
-        this.clearSelected();
+        this.parseNumberKey(0);
         break;
       // Movement keys
       case 'w':
@@ -148,6 +143,26 @@ export default class BoardModelComponent implements OnInit {
     this.onCellSelected(newIndex);
   }
 
+  public parseNumberKey(num: number) {
+    if (this.isNoteMode) {
+      this.toggleNoteSelected(num);
+    } else {
+      this.setPendingSelected(num, performance.now());
+    }
+  }
+
+  public onUtilityAction(action: UtilityAction) {
+    switch (action) {
+      case UtilityAction.CLEAR:
+        this.parseNumberKey(0)
+        break;
+      case UtilityAction.NOTE:
+        this.isNoteMode = !this.isNoteMode;
+        // We can add some visual feedback for the note button here
+        break;
+    }
+  }
+
   /** Provides access to the cell model for a given index */
   public getCellModel(idx: number): ClientCellModel {
     // Fallback: if board entry is missing, initialize to empty cell to keep template safe
@@ -169,12 +184,6 @@ export default class BoardModelComponent implements OnInit {
     if (i == null) {
       return false;
     }
-    const cell = this.model.board[i];
-    // Don't set if it matches current pending or dynamic value
-    // I THINK THIS NEEDS TO BE MOVED TO THE MODEL FOR PROCESSING
-    if (cell.pendingCellState?.pendingValue === value || cell.value === value) {
-      return false;
-    }
     return this.model.setPendingCell(i, value, time);
   }
 
@@ -184,7 +193,7 @@ export default class BoardModelComponent implements OnInit {
     if (i == null) {
       return false;
     }
-    const pv = this.model.board[i].pendingCellState?.pendingValue;
+    const pv = this.getCellModel(i).pendingCellState?.pendingValue;
     if (pv === undefined) {
       return false;
     }
@@ -206,55 +215,12 @@ export default class BoardModelComponent implements OnInit {
     if (i == null) {
       return false;
     }
+
+    // Clear notes
+    if (value === 0) {
+      this.getCellModel(i).notes = [];
+      return true;
+    }
     return this.model.toggleNote(i, value);
-  }
-
-  /** Clears the currently selected cell */
-  public clearSelected(time?: number): void {
-    const i = this.selected();
-    if (i == null) {
-      return;
-    }
-    if (this.isNoteMode) {
-      // In notes mode, clear notes
-      const cell = this.model.board[i];
-      cell.notes = [];
-    } else {
-      // In normal mode, set pending 0 (deletion)
-      this.setPendingSelected(0, time);
-    }
-  }
-
-  /** Sets up the board for the demo page */
-  public setupDemoBoard(): void {
-    // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
-    // Pick some indices that are empty in the seed puzzle
-    const notesCells = [2, 16, 74];
-    const pendingCells = [6, 28, 48];
-    const dynamicCells = [3, 24, 60];
-
-    // Notes: add candidate numbers
-    for (const i of notesCells) {
-      const cell = this.model.board[i];
-      cell.notes = Array.from({ length: 9 }, (_, n) => n + 1).filter(
-        () => Math.round(Math.random()) === 0
-      );
-    }
-
-    // Pending: set optimistic pending values
-    for (const i of pendingCells) {
-      const v = (i % 9) + 1;
-      this.model.setPendingCell(i, v, performance.now());
-    }
-
-    // Dynamic values (non-fixed): place values as if user set them
-    for (const i of dynamicCells) {
-      const v = (i % 9) + 1;
-      // Avoid violating validation (e.g., cooldown): use update directly for demo visuals
-      this.model.board[i].update(v, undefined);
-    }
-
-    // Place a visible cursor at row 4, col 6 (index 42)
-    this.selected.set(42);
   }
 }

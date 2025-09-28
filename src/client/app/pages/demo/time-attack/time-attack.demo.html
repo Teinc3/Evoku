@@ -2,12 +2,12 @@
 <div class="board-and-utilities">
   <app-board-model
     #board
-    [isNoteMode]="isNoteMode"
   ></app-board-model>
   <app-utility-buttons-holder
-    (action)="onUtilityAction($event)"
+    (quitClick)="viewStateService.navigateToView(AppView.CATALOGUE)"
+    (utilityClick)="board.onUtilityAction($event)"
   ></app-utility-buttons-holder>
 </div>
 <app-numeric-buttons-holder
-  (numberClick)="onNumberClick($event)"
+  (numberClick)="board.parseNumberKey($event)"
 ></app-numeric-buttons-holder>

@@ -1,13 +1,11 @@
-/* eslint-disable */
 import { Component } from '@angular/core';
 
 import AppView from '../../types/app-view';
 import ViewStateService from '../../services/view-state.service';
 import TimeAttackDemoPageComponent from './time-attack/time-attack.demo';
 import NetworkDemoPageComponent from './network/network.demo';
-import BoardDemoPageComponent from './board/board.demo';
 import CatalogueDemoComponent from './catalogue/catalogue.demo';
-/* eslint-enable */
+import BoardDemoPageComponent from './board/board.demo';
 
 
 @Component({

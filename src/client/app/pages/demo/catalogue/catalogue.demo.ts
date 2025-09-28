@@ -1,9 +1,8 @@
-/* eslint-disable */
 import { Component } from '@angular/core';
 
 import AppView from '../../../types/app-view';
 import ViewStateService from '../../../services/view-state.service';
-/* eslint-enable */
+
 
 @Component({
   selector: 'app-demo-catalogue',

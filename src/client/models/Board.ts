@@ -10,6 +10,7 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
   get CellModelClass(): typeof ClientCellModel {
     return ClientCellModel;
   }
+  
   public pendingGlobalCooldownEnd?: number;
 
   /**
@@ -20,11 +21,6 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
    * @returns Whether the pending value was set.
    */
   public setPendingCell(cellIndex: number, value: number, time?: number): boolean {
-    // Check global cooldown
-    // TODO: See if this check is redundant (is it already in validate?)
-    if (time !== undefined && time < this.getDisplayGlobalCooldownEnd()) {
-      return false;
-    }
     if (!this.validate(cellIndex, value, time)) {
       return false;
     }
@@ -130,5 +126,13 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
   /** Check if the board has any pending changes. */
   public hasPendingChanges(): boolean {
     return this.pendingGlobalCooldownEnd !== undefined;
+  }
+
+  public override validate(cellIndex: number, value: number, time?: number): boolean {
+    // Check for global cooldown
+    if (time !== undefined && time < this.getDisplayGlobalCooldownEnd()) {
+      return false;
+    }
+    return super.validate(cellIndex, value, time);
   }
 }

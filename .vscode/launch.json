@@ -3,7 +3,20 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "npm run dev:server",
+      "name": "Debug Client",
+      "type": "firefox",
+      "request": "launch",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "pathMappings": [
+        {
+          "url": "webpack:///src/client",
+          "path": "${workspaceFolder}/src/client"
+        }
+      ]
+    },
+    {
+      "name": "Debug Server",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npx",
