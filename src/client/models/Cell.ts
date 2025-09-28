@@ -101,7 +101,7 @@ export default class ClientCellModel extends BaseCellModel {
   public wipeNotes(): boolean {
     if (this.notes.length > 0) {
       this.notes = [];
-      return true
+      return true;
     }
     return false;
   }
