@@ -42,12 +42,6 @@ describe('App', () => {
     expect(viewStateService.getCurrentView()).toBe(AppView.CATALOGUE);
   });
 
-  it('should render main menu by default', () => {
-    TestBed.createComponent(App);
-    // Don't call detectChanges() to avoid rendering child components
-    
-    expect(viewStateService.getCurrentView()).toBe(AppView.CATALOGUE);
-  });
 
   it('should render board demo when view state changes', () => {
     TestBed.createComponent(App);

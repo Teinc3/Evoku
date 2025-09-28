@@ -44,6 +44,8 @@ export default class TimeAttackDemoPageComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Enable demo auto-accept for optimistic pending visualization (time attack sandbox)
+    this.board.model.autoAcceptPending = true;
     // Load puzzle onto the pre-initialized empty board
     this.board.loadPuzzle(this.puzzle);
     this.setupDemoBoard();

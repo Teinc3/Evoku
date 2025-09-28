@@ -253,25 +253,7 @@ export default defineConfig([
     },
     plugins: { "@angular-eslint": angularEslintPlugin },
     rules: {
-      // To allow DI injections without enforcing "type" imports
-      "@typescript-eslint/consistent-type-imports": ["off"],
-    },
-  },
-
-  // Angular client TypeScript files
-  {
-    files: ["src/client/**/*.ts"],
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
-        sourceType: "module",
-      },
-    },
-    plugins: { "@angular-eslint": angularEslintPlugin },
-    rules: {
-      // To allow DI injections without enforcing "type" imports
+      // Allow DI without forcing type-only import style
       "@typescript-eslint/consistent-type-imports": ["off"],
     },
   },

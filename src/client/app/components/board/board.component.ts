@@ -1,4 +1,6 @@
-import { Component, EventEmitter, Output, signal, HostListener } from '@angular/core';
+import {
+  Component, EventEmitter, Output, signal, HostListener
+} from '@angular/core';
 
 import SudokuCellComponent from '../cell/cell.component';
 import UtilityAction from '../../../types/utility';
@@ -21,7 +23,7 @@ export default class BoardModelComponent implements OnInit {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
   public isNoteMode = false;
-  
+
   @Output()
   selectedIndexChange = new EventEmitter<number>();
 
@@ -145,7 +147,7 @@ export default class BoardModelComponent implements OnInit {
 
   public parseNumberKey(num: number) {
     const i = this.selected();
-    if (i == null) {
+    if (i === null) {
       return;
     }
 
@@ -165,7 +167,7 @@ export default class BoardModelComponent implements OnInit {
   public onUtilityAction(action: UtilityAction) {
     switch (action) {
       case UtilityAction.CLEAR:
-        this.parseNumberKey(0)
+        this.parseNumberKey(0);
         break;
       case UtilityAction.NOTE:
         this.isNoteMode = !this.isNoteMode;
@@ -192,7 +194,7 @@ export default class BoardModelComponent implements OnInit {
   /** Sets a pending value for the currently selected cell */
   public setPendingSelected(value: number, time?: number): boolean {
     const i = this.selected();
-    if (i == null) {
+    if (i === null) {
       return false;
     }
     return this.model.setPendingCell(i, value, time);
@@ -201,7 +203,7 @@ export default class BoardModelComponent implements OnInit {
   /** Server confirmation for the currently selected cell */
   public confirmSelected(time?: number): boolean {
     const i = this.selected();
-    if (i == null) {
+    if (i === null) {
       return false;
     }
     const pv = this.getCellModel(i).pendingCellState?.pendingValue;
@@ -214,7 +216,7 @@ export default class BoardModelComponent implements OnInit {
   /** Rejects the pending value for the currently selected cell */
   public rejectSelected(): void {
     const i = this.selected();
-    if (i == null) {
+    if (i === null) {
       return;
     }
     this.model.rejectCellSet(i);

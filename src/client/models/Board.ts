@@ -12,6 +12,13 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
   }
   
   public pendingGlobalCooldownEnd?: number;
+  /**
+   * Demo-only flag: when true, pending values auto-confirm after a short delay to simulate
+   * server round‑trip while no networking layer is wired for confirmation yet.
+   * Default false; can be toggled via component Input after construction.
+   */
+  public autoAcceptPending = false;
+
 
   /**
    * Set a pending cell value for optimistic updates while waiting for server confirmation.
@@ -31,13 +38,14 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
       if (time !== undefined) {
         this.pendingGlobalCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
       }
-      // Auto-confirm after 1 second for demo
-      setTimeout(() => {
-        // Only confirm if the pending value hasn't changed
-        if (cell.pendingCellState.pendingValue === value) {
-          this.confirmCellSet(cellIndex, value, performance.now());
-        }
-      }, 1000);
+      if (this.autoAcceptPending) {
+        // Auto-confirm after 1 second for demo only
+        setTimeout(() => {
+          if (cell.pendingCellState.pendingValue === value) {
+            this.confirmCellSet(cellIndex, value, performance.now());
+          }
+        }, 1000);
+      }
       return true;
     }
     return false;

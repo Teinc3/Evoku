@@ -17,9 +17,9 @@ export default class UtilityButtonsHolderComponent {
   @Input()
   noteModeActive = false;
   @Output()
-  protected utilityClick = new EventEmitter<UtilityAction>();
+  utilityClick = new EventEmitter<UtilityAction>();
   @Output()
-  protected quitClick = new EventEmitter<void>();
+  quitClick = new EventEmitter<void>();
 
   protected readonly UtilityAction = UtilityAction;
   protected readonly buttons = [
