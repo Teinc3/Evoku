@@ -104,6 +104,31 @@ describe('BoardModelComponent', () => {
     expect(component.selected()).toBe(9); // row1 col0
   });
 
+  it('initial ArrowDown selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('initial ArrowLeft selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('initial ArrowRight selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('setPendingSelected returns false when no cell selected', () => {
+    // Ensure nothing selected
+    expect(component.selected()).toBeNull();
+    const result = component.setPendingSelected(5, performance.now());
+    expect(result).toBeFalse();
+  });
+
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
     component.initBoard([]);
     component.onCellSelected(0);

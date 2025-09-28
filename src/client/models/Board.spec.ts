@@ -43,6 +43,30 @@ describe('ClientBoardModel', () => {
     expect(m.setPendingCell(1, 7, early)).toBeFalse();
   });
 
+  it('setPendingCell returns false for fixed cell and while global cooldown active', () => {
+    const m = createModel();
+    // Make cell fixed
+    m.board[2] = new m.CellModelClass(5, true);
+    const now = performance.now();
+    expect(m.setPendingCell(2, 7, now)).toBeFalse();
+    // Establish cooldown on another cell
+    expect(m.setPendingCell(0, 3, now)).toBeTrue();
+    const early = m.getDisplayGlobalCooldownEnd() - 5;
+    expect(m.setPendingCell(1, 9, early)).toBeFalse();
+  });
+
+  it('setPendingCell returns false when cell already has a confirmed value', () => {
+    const m = createModel();
+    const now = performance.now();
+    // confirm a value so cell.value > 0
+    expect(m.setPendingCell(0, 8, now)).toBeTrue();
+    expect(m.confirmCellSet(0, 8, now)).toBeTrue();
+    expect(m.board[0].value).toBe(8);
+    // Attempt to set another pending value should fail validation at super.validate
+    const later = m.getDisplayGlobalCooldownEnd() + 5;
+    expect(m.setPendingCell(0, 3, later)).toBeFalse();
+  });
+
   it('confirmCellSet applies cooldown and clears pending', () => {
     const m = createModel();
     const now = performance.now();
@@ -139,4 +163,5 @@ describe('ClientBoardModel', () => {
     expect(m.board[5].value).toBe(7);
     expect(m.board[5].notes).toEqual([1]);
   });
+
 });
