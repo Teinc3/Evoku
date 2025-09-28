@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import UtilityButtonComponent from '../utility-button/utility-button.component';
@@ -13,6 +13,9 @@ import UtilityAction from '../../../../types/utility';
   styleUrl: './utility-buttons-holder.component.scss',
 })
 export default class UtilityButtonsHolderComponent {
+  // Indicates if note mode currently active (to highlight Note button)
+  @Input()
+  noteModeActive = false;
   @Output()
   protected utilityClick = new EventEmitter<UtilityAction>();
   @Output()
@@ -20,7 +23,6 @@ export default class UtilityButtonsHolderComponent {
 
   protected readonly UtilityAction = UtilityAction;
   protected readonly buttons = [
-    { action: UtilityAction.UNDO, icon: 'undo', label: 'Undo', disabled: true },
     {
       action: UtilityAction.CLEAR,
       icon: 'clear',
@@ -28,12 +30,6 @@ export default class UtilityButtonsHolderComponent {
       disabled: false,
     },
     { action: UtilityAction.NOTE, icon: 'edit', label: 'Note', disabled: false },
-    {
-      action: UtilityAction.SETTINGS,
-      icon: 'settings',
-      label: 'Settings',
-      disabled: true,
-    },
     {
       action: UtilityAction.QUIT,
       icon: 'logout',

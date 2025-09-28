@@ -144,10 +144,21 @@ export default class BoardModelComponent implements OnInit {
   }
 
   public parseNumberKey(num: number) {
+    const i = this.selected();
+    if (i == null) {
+      return;
+    }
+
+    // See if we have notes to clear
+    if (num === 0 && this.getCellModel(i).wipeNotes()) {
+      return;      
+    }
+
+    // Otherwise, treat as normal
     if (this.isNoteMode) {
-      this.toggleNoteSelected(num);
+      this.model.toggleNote(i, num);
     } else {
-      this.setPendingSelected(num, performance.now());
+      this.model.setPendingCell(i, num, performance.now());
     }
   }
 
@@ -207,20 +218,5 @@ export default class BoardModelComponent implements OnInit {
       return;
     }
     this.model.rejectCellSet(i);
-  }
-
-  /** Toggles a note for the currently selected cell */
-  public toggleNoteSelected(value: number): boolean {
-    const i = this.selected();
-    if (i == null) {
-      return false;
-    }
-
-    // Clear notes
-    if (value === 0) {
-      this.getCellModel(i).notes = [];
-      return true;
-    }
-    return this.model.toggleNote(i, value);
   }
 }

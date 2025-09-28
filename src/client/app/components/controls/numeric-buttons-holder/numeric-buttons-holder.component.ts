@@ -12,7 +12,8 @@ import NumericButtonComponent from '../numeric-button/numeric-button.component';
   styleUrls: ['./numeric-buttons-holder.component.scss'],
 })
 export default class NumericButtonsHolderComponent {
-  @Output() numberClick = new EventEmitter<number>();
+  @Output()
+  numberClick = new EventEmitter<number>();
 
   protected readonly numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 

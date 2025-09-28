@@ -92,4 +92,17 @@ export default class ClientCellModel extends BaseCellModel {
 
     return super.validate(value, time);
   }
+
+  /** 
+   * Removes all notes
+   * 
+   * @returns {boolean} Whether any notes were wiped
+   */
+  public wipeNotes(): boolean {
+    if (this.notes.length > 0) {
+      this.notes = [];
+      return true
+    }
+    return false;
+  }
 }

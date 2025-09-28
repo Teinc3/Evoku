@@ -8,5 +8,6 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./numeric-button.component.scss'],
 })
 export default class NumericButtonComponent {
-  @Input() number = 0;
+  @Input()
+  number = 0;
 }

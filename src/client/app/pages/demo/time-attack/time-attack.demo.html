@@ -6,6 +6,7 @@
   <app-utility-buttons-holder
     (quitClick)="viewStateService.navigateToView(AppView.CATALOGUE)"
     (utilityClick)="board.onUtilityAction($event)"
+    [noteModeActive]="board.isNoteMode"
   ></app-utility-buttons-holder>
 </div>
 <app-numeric-buttons-holder

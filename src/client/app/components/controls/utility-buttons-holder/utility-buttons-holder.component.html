@@ -4,7 +4,10 @@
       [icon]="btn.icon"
       [label]="btn.label"
       [disabled]="btn.disabled"
+      [active]="btn.action === UtilityAction.NOTE && noteModeActive"
       (click)="onUtilityAction(btn.action)"
+      [class.note-active]="btn.action === UtilityAction.NOTE && noteModeActive"
+      [class.note-inactive]="btn.action === UtilityAction.NOTE && !noteModeActive"
     ></app-utility-button>
   }
 </div>

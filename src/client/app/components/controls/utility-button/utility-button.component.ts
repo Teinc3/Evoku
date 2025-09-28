@@ -10,7 +10,12 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./utility-button.component.scss'],
 })
 export default class UtilityButtonComponent {
-  @Input() icon: string | undefined;
-  @Input() label!: string;
-  @Input() disabled = false;
+  @Input() 
+  icon: string | undefined;
+  @Input() 
+  label!: string;
+  @Input() 
+  disabled = false;
+  @Input() 
+  active = false; // Allows special styling (e.g., Note mode toggled)
 }
