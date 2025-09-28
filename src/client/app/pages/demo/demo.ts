@@ -1,17 +1,22 @@
-/* eslint-disable */
 import { Component } from '@angular/core';
 
 import AppView from '../../types/app-view';
 import ViewStateService from '../../services/view-state.service';
-import BoardDemoPageComponent from './board/board.demo';
+import TimeAttackDemoPageComponent from './time-attack/time-attack.demo';
 import NetworkDemoPageComponent from './network/network.demo';
-/* eslint-enable */
+import CatalogueDemoComponent from './catalogue/catalogue.demo';
+import BoardDemoPageComponent from './board/board.demo';
 
 
 @Component({
   selector: 'app-demo-page',
   standalone: true,
-  imports: [BoardDemoPageComponent, NetworkDemoPageComponent],
+  imports: [
+    BoardDemoPageComponent, 
+    NetworkDemoPageComponent, 
+    TimeAttackDemoPageComponent, 
+    CatalogueDemoComponent
+  ],
   templateUrl: './demo.html',
   styleUrl: './demo.scss'
 })

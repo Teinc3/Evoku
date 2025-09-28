@@ -6,7 +6,7 @@ import type { AfterViewInit } from '@angular/core';
 
 
 @Component({
-  selector: 'app-board-demo-page',
+  selector: 'app-demo-board',
   standalone: true,
   imports: [BoardModelComponent],
   templateUrl: './board.demo.html',
@@ -14,12 +14,10 @@ import type { AfterViewInit } from '@angular/core';
 })
 export default class BoardDemoPageComponent implements AfterViewInit {
   @ViewChild('board', { static: true }) board!: BoardModelComponent;
-  selected: number | null;
   // Simple puzzle seed; non-zero are fixed
   puzzle: number[];
 
   constructor() {
-    this.selected = null;
     this.puzzle = [
       5,3,0,0,7,0,0,0,0,
       6,0,0,1,9,5,0,0,0,
@@ -34,6 +32,10 @@ export default class BoardDemoPageComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Enable demo auto-accept for optimistic pending visualization
+    this.board.model.autoAcceptPending = true;
+    // Load puzzle onto the pre-initialized empty board
+    this.board.loadPuzzle(this.puzzle);
     // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
     // Pick some indices that are empty in the seed puzzle
     const notesCells = [2, 16, 74];
@@ -59,23 +61,5 @@ export default class BoardDemoPageComponent implements AfterViewInit {
       // Avoid violating validation (e.g., cooldown): use update directly for demo visuals
       this.board.model.board[i].update(v, undefined);
     }
-
-    // Place a visible cursor at row 4, col 6 (index 42)
-    this.board.selected.set(42);
-    this.selected = 42;
-  }
-
-  randPending(): void {
-    if (this.selected == null) {
-      return;
-    }
-    const v = (Math.random() * 9 | 0) + 1;
-    this.board.setPendingSelected(v, performance.now());
-  }
-  confirm(): void {
-    this.board.confirmSelected(performance.now());
-  }
-  reject(): void {
-    this.board.rejectSelected();
   }
 }

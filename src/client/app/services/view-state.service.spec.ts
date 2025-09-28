@@ -16,9 +16,9 @@ describe('ViewStateService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should initialize with MAIN_MENU view', () => {
-    expect(service.getCurrentView()).toBe(AppView.MAIN_MENU);
-    expect(service.currentView()).toBe(AppView.MAIN_MENU);
+  it('should initialize with CATALOGUE view', () => {
+    expect(service.getCurrentView()).toBe(AppView.CATALOGUE);
+    expect(service.currentView()).toBe(AppView.CATALOGUE);
   });
 
   it('should navigate to different views', () => {
@@ -30,16 +30,16 @@ describe('ViewStateService', () => {
     expect(service.getCurrentView()).toBe(AppView.NETWORK_DEMO);
     expect(service.currentView()).toBe(AppView.NETWORK_DEMO);
 
-    service.navigateToView(AppView.MAIN_MENU);
-    expect(service.getCurrentView()).toBe(AppView.MAIN_MENU);
-    expect(service.currentView()).toBe(AppView.MAIN_MENU);
+    service.navigateToView(AppView.CATALOGUE);
+    expect(service.getCurrentView()).toBe(AppView.CATALOGUE);
+    expect(service.currentView()).toBe(AppView.CATALOGUE);
   });
 
   it('should provide a readonly signal', () => {
     const readonlySignal = service.currentView;
     
     // The readonly signal should reflect the current state
-    expect(readonlySignal()).toBe(AppView.MAIN_MENU);
+    expect(readonlySignal()).toBe(AppView.CATALOGUE);
     
     // After navigation, the readonly signal should update
     service.navigateToView(AppView.BOARD_DEMO);
@@ -49,7 +49,7 @@ describe('ViewStateService', () => {
   it('should handle multiple rapid navigation calls', () => {
     service.navigateToView(AppView.BOARD_DEMO);
     service.navigateToView(AppView.NETWORK_DEMO);
-    service.navigateToView(AppView.MAIN_MENU);
+    service.navigateToView(AppView.CATALOGUE);
     service.navigateToView(AppView.BOARD_DEMO);
 
     expect(service.getCurrentView()).toBe(AppView.BOARD_DEMO);

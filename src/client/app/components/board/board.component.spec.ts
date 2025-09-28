@@ -1,14 +1,12 @@
 import { By } from '@angular/platform-browser';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import SudokuCellComponent from '../cell/cell.component';
+import UtilityAction from '../../../types/utility';
 import BoardModelComponent from './board.component';
 
-import type { ComponentFixture } from '@angular/core/testing';
 
-
-// Minimal mock puzzle generator
-const puzzle = Array.from({ length: 81 }, (_, i) => (i % 9 === 0 ? (i / 9) + 1 : 0));
+// Simple static puzzle for seeding tests
+const puzzle: number[] = Array.from({ length: 81 }, (_, i) => (i % 9 === 0 ? (i / 9) + 1 : 0));
 
 describe('BoardModelComponent', () => {
   let fixture: ComponentFixture<BoardModelComponent>;
@@ -16,130 +14,191 @@ describe('BoardModelComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BoardModelComponent, SudokuCellComponent]
+      imports: [BoardModelComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BoardModelComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
   it('renders 81 cells', () => {
-    fixture.detectChanges();
-    const cells = fixture.debugElement.queryAll(By.css('app-sudoku-cell'));
+    const cells = fixture.debugElement.queryAll(By.css('app-cell-model'));
     expect(cells.length).toBe(81);
   });
 
-  it('emits selection and updates child selected state', () => {
-    fixture.detectChanges();
-    const cells = fixture.debugElement.queryAll(By.css('app-sudoku-cell'));
-    // simulate selecting the 0th cell via component API
+  it('emits selection and applies selected class', () => {
     component.onCellSelected(0);
     fixture.detectChanges();
-
-    // Check board selected signal is set
+    const first = fixture.debugElement.queryAll(By.css('app-cell-model'))[0].nativeElement;
     expect(component.selected()).toBe(0);
-    // The first child should have selected class via parent binding
-    expect(cells[0].nativeElement.classList.contains('selected')).toBeTrue();
+    expect(first.classList.contains('selected')).toBeTrue();
   });
 
-  it('supports seeding puzzle and marks fixed cells', () => {
-    component.puzzle = puzzle;
+  it('supports puzzle seeding via loadPuzzle()', () => {
+    component.loadPuzzle(puzzle);
     fixture.detectChanges();
-
-    // After seed, model should have fixed cells for non-zero entries
-    expect(component.model.board[0].fixed).toBeTrue();
+    expect(component.getCellModel(0).fixed).toBeTrue();
+    expect(component.getCellModel(0).value).toBe(1);
   });
 
-  it('seeds empty board on init when no puzzle provided', () => {
-    // fresh instance to avoid previous test side effects
-    fixture = TestBed.createComponent(BoardModelComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    // Board should be initialized with 81 empty non-fixed cells
+  it('initializes empty board when no puzzle provided', () => {
+    // Component already initialized in beforeEach
     expect(component.model.board.length).toBe(81);
-    expect(component.model.board[0]).toBeDefined();
-    expect(component.model.board[0].value).toBe(0);
-    expect(component.model.board[0].fixed).toBeFalse();
+    expect(component.getCellModel(0).value).toBe(0);
+    expect(component.getCellModel(0).fixed).toBeFalse();
   });
 
-  it('puzzle setter after init re-seeds the board', () => {
-    fixture.detectChanges(); // triggers empty init
-    // Ensure an initially empty cell is not fixed
-    expect(component.model.board[0].fixed).toBeFalse();
-
-    // Now set the puzzle via the setter and verify seeding occurs
-    component.puzzle = puzzle;
-    fixture.detectChanges();
-    expect(component.model.board[0].fixed).toBeTrue();
-    // value should match provided puzzle
-    expect(component.model.board[0].value).toBe(1);
-  });
-
-  it('getCellModel fallback creates a missing cell model defensively', () => {
-    fixture.detectChanges();
-    // Simulate an unexpected missing entry
-     
+  it('getCellModel defensively initializes missing entries', () => {
+    // Simulate missing entry
     delete component.model.board[10];
     const m = component.getCellModel(10);
     expect(m).toBeDefined();
     expect(m.value).toBe(0);
-    expect(m.fixed).toBeFalse();
   });
 
-  it('emits selectedIndexChange when a cell is selected', () => {
-    const spy = jasmine.createSpy('selectedIndexChange');
-    component.selectedIndexChange.subscribe(spy);
-    component.onCellSelected(7);
-    expect(spy).toHaveBeenCalledWith(7);
-    expect(component.selected()).toBe(7);
+  it('toggles note mode when NOTE action invoked', () => {
+    expect(component.isNoteMode).toBeFalse();
+    component.onUtilityAction(UtilityAction.NOTE);
+    expect(component.isNoteMode).toBeTrue();
+    component.onUtilityAction(UtilityAction.NOTE);
+    expect(component.isNoteMode).toBeFalse();
   });
 
-  it('setPendingSelected returns false when no selection', () => {
-    const ok = component.setPendingSelected(5, 123);
-    expect(ok).toBeFalse();
+  it('clears selected cell when CLEAR action invoked (pending value path)', () => {
+    component.initBoard([]);
+    component.onCellSelected(0);
+    const time = performance.now();
+    component.setPendingSelected(5, time);
+    // Simulate server confirming value so that CLEAR meaningfully changes it back to 0
+    component.model.confirmCellSet(0, 5, time);
+    expect(component.getCellModel(0).value).toBe(5);
+    const spy = spyOn(component.model, 'setPendingCell').and.callThrough();
+    component.onUtilityAction(UtilityAction.CLEAR); // parseNumberKey(0) -> setPendingSelected(0)
+    expect(spy).toHaveBeenCalledWith(0, 0, jasmine.any(Number));
   });
 
-  it('setPendingSelected delegates to model when selected', () => {
-    fixture.detectChanges();
-    component.onCellSelected(5);
-    const spy = spyOn(component.model, 'setPendingCell').and.returnValue(true);
+  it('moves selection with keyboard and wraps vertically and horizontally', () => {
+    // No selection initially -> pressing ArrowUp selects center (40)
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(component.selected()).toBe(40);
+
+    // Move up repeatedly to test wrap from top to bottom
+    for (let i = 0; i < 5; i++) {
+      component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    }
+    // We should now be some cells above; force to top row then wrap
+    // Jump directly to top-left (0) for deterministic wrap check
+    component.onCellSelected(0);
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(component.selected()).toBe(72); // Wrapped to bottom row same column
+
+    // Horizontal wrap: from col 0 pressing ArrowLeft wraps to col 8
+    component.onCellSelected(9); // Row 1, col 0
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(component.selected()).toBe(17); // 9 + 8
+
+    // From rightmost pressing ArrowRight wraps left
+    component.onCellSelected(17); // row1 col8
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(component.selected()).toBe(9); // row1 col0
+  });
+
+  it('initial ArrowDown selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('initial ArrowLeft selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('initial ArrowRight selects center cell when nothing selected', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(component.selected()).toBe(40);
+  });
+
+  it('setPendingSelected returns false when no cell selected', () => {
+    // Ensure nothing selected
+    expect(component.selected()).toBeNull();
+    const result = component.setPendingSelected(5, performance.now());
+    expect(result).toBeFalse();
+  });
+
+  it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
+    component.initBoard([]);
+    component.onCellSelected(0);
+    // Add notes mode then add a note
+    component.onUtilityAction(UtilityAction.NOTE);
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '5' }));
+    expect(component.getCellModel(0).notes).toContain(5);
+    // Exit note mode so that parseNumberKey(0) will try wipeNotes
+    component.onUtilityAction(UtilityAction.NOTE);
+    // Add another note (need note mode) then exit again
+    component.onUtilityAction(UtilityAction.NOTE);
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '3' }));
+    component.onUtilityAction(UtilityAction.NOTE);
+    expect(component.getCellModel(0).notes.length).toBeGreaterThan(0);
+    const wipeSpy = spyOn(component.getCellModel(0), 'wipeNotes').and.callThrough();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '0' }));
+    expect(wipeSpy).toHaveBeenCalled();
+    expect(component.getCellModel(0).notes.length).toBe(0);
+  });
+
+  it('confirmSelected and rejectSelected guard conditions', () => {
+    // No selection
+    expect(component.confirmSelected()).toBeFalse();
+    component.rejectSelected(); // should not throw
+
+    component.onCellSelected(0);
+    // No pending value -> confirmSelected returns false
+    expect(component.confirmSelected()).toBeFalse();
+
+    // Set pending then confirm
     const now = performance.now();
-    const ok = component.setPendingSelected(9, now);
-    expect(ok).toBeTrue();
-    expect(spy).toHaveBeenCalledWith(5, 9, now);
-  });
+    component.setPendingSelected(4, now);
+    expect(component.getCellModel(0).pendingCellState.pendingValue).toBe(4);
+    expect(component.confirmSelected(now)).toBeTrue();
+    // Pending cleared and value set
+    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
+    expect(component.getCellModel(0).value).toBe(4);
 
-  it('confirmSelected returns false when no selection or no pending', () => {
-    expect(component.confirmSelected(performance.now())).toBeFalse();
-    // With selection but no pending value
-    fixture.detectChanges(); // ensure ngOnInit seeds board before selecting
-    component.onCellSelected(3);
-    expect(component.confirmSelected(performance.now())).toBeFalse();
-  });
-
-  it('confirmSelected delegates when pending exists', () => {
-    fixture.detectChanges();
-    const idx = 2;
-    component.onCellSelected(idx);
-    // set minimal pending state
-    component.model.board[idx].pendingCellState = { pendingValue: 4 };
-    const spy = spyOn(component.model, 'confirmCellSet').and.returnValue(true);
-    const t = performance.now();
-    const ok = component.confirmSelected(t);
-    expect(ok).toBeTrue();
-    expect(spy).toHaveBeenCalledWith(idx, 4, t);
-  });
-
-  it('rejectSelected delegates when selected and is a no-op otherwise', () => {
-    // No selection → should not throw
+    // Reject with no pending (should be safe no-op)
     component.rejectSelected();
+    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
+    expect(component.getCellModel(0).value).toBe(4);
+  });
 
-    // With selection → delegates
-    fixture.detectChanges();
-    component.onCellSelected(8);
-    const spy = spyOn(component.model, 'rejectCellSet');
-    component.rejectSelected();
-    expect(spy).toHaveBeenCalledWith(8);
+  it('loadPuzzle early returns on invalid length', () => {
+    const initialFirst = component.getCellModel(0).value;
+    component.loadPuzzle([] as unknown as number[]); // invalid length 0
+    expect(component.getCellModel(0).value).toBe(initialFirst);
+  });
+
+  it('ignores number key when no selection', () => {
+    // Ensure nothing selected
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '1' }));
+    // Still null selection, so no pending set anywhere
+    const anyPending
+      = component.model.board.some(c => c?.pendingCellState?.pendingValue !== undefined);
+    expect(anyPending).toBeFalse();
+  });
+
+  it('wraps DOWN and RIGHT movement branches explicitly', () => {
+    // DOWN wrap: select bottom row then move DOWN
+    component.onCellSelected(72); // bottom-left
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBe(0);
+
+    // RIGHT wrap: select rightmost cell of a row then move RIGHT
+    component.onCellSelected(17); // row1 col8
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(component.selected()).toBe(9); // row1 col0
   });
 });
+

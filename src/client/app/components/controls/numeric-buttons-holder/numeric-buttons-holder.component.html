@@ -1,0 +1,8 @@
+<div class="buttons-grid">
+  @for (number of numbers; track number) {
+    <app-numeric-button
+      [number]="number"
+      (click)="onNumberClick(number)"
+    ></app-numeric-button>
+  }
+</div>

@@ -1,4 +1,10 @@
-<button type="button" class="cell" (click)="onClick()" [class.fixed]="model.fixed" [class.pending]="hasPending">
+<button 
+  type="button" 
+  class="cell" 
+  (click)="onClick()" 
+  [class.fixed]="model.fixed" 
+  [class.pending]="hasPending"
+>
   @if (showNotes) {
     <div class="notes" aria-hidden="true">
       @for (n of noteGrid; track n) {
@@ -6,6 +12,14 @@
       }
     </div>
   } @else {
-    <span class="v">{{ value !== 0 ? value : '' }}</span>
+    @if (pendingValue !== undefined) {
+      @if (pendingValue === 0) {
+        <span class="pending-clear">✕</span>
+      } @else {
+        <span class="v">{{pendingValue}}</span>
+      }
+    } @else {
+      <span class="v">{{ value !== 0 ? value : '' }}</span>
+    }
   }
 </button>

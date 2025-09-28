@@ -240,5 +240,23 @@ export default defineConfig([
     }
   },
 
+  // Angular client TypeScript files
+  {
+    files: ["src/client/**/*.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
+        sourceType: "module",
+      },
+    },
+    plugins: { "@angular-eslint": angularEslintPlugin },
+    rules: {
+      // Allow DI without forcing type-only import style
+      "@typescript-eslint/consistent-type-imports": ["off"],
+    },
+  },
+
   // CSS/SCSS linting is handled by Stylelint (see .stylelintrc.json)
 ]);

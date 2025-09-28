@@ -1,0 +1,12 @@
+<h1>Evoku Time Attack Gamemode Demo</h1>
+<div class="board-and-utilities">
+  <app-board-model #board></app-board-model>
+  <app-utility-buttons-holder
+    (quitClick)="viewStateService.navigateToView(AppView.CATALOGUE)"
+    (utilityClick)="board.onUtilityAction($event)"
+    [noteModeActive]="board.isNoteMode"
+  ></app-utility-buttons-holder>
+</div>
+<app-numeric-buttons-holder
+  (numberClick)="board.parseNumberKey($event)"
+></app-numeric-buttons-holder>

@@ -73,7 +73,7 @@ Template logic chooses one of three modes:
 ### Minimal Usage (inside a Board)
 
 ```html
-<app-sudoku-cell [model]="cell(i)" [index]="i" (selected)="onCellSelected($event)"></app-sudoku-cell>
+<app-cell-model [model]="cell(i)" [index]="i" (selected)="onCellSelected($event)"></app-cell-model>
 ```
 
 ### Internals & Links

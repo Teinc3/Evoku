@@ -1,0 +1,15 @@
+app-utility-button {
+  width: 100%;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 10%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}

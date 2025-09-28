@@ -1,47 +1,28 @@
-.board-wrap {
-  display: grid;
-  justify-items: center; /* center horizontally */
-  align-items: start; /* start at top, no vertical centering */
-  min-height: 0; /* allow children to shrink within grid container */
+:host {
+  width: 100%;
+  height: 100%;
 }
 
 .board {
-  /* Make the board size driven by width so it stays visible even if parent height is 0.
-     Use viewport-relative limits so it fills available space without overflowing. */
-  width: min(100%, 90vmin);
+  /* Parent now controls outer width; board enforces square shape */
   aspect-ratio: 1;
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
+  position: relative; /* for overlay lines */
   border: 6px solid #000;
   box-sizing: border-box;
 }
 
-/* Thick box borders */
-/* Thin default grid lines are in the cell component (via default variables).
-   Set thicker black borders on 3x3 sub-grid boundaries by assigning CSS variables
-   to the app-sudoku-cell host elements. This avoids over-specific selectors. */
-
-/* Columns 3,6: set thick right border */
-app-sudoku-cell:nth-child(9n + 3),
-app-sudoku-cell:nth-child(9n + 6) {
-  --b-right: 4px solid #000;
+/* Allow Board to take up full space by limiting dimension */
+@media (orientation: portrait) {
+  .board {
+    width: 100%;
+  }
 }
 
-/* Columns 4,7: remove left border to avoid double thickness at box edges */
-app-sudoku-cell:nth-child(9n + 4),
-app-sudoku-cell:nth-child(9n + 7) {
-  --b-left: 0;
-}
-
-/* Rows 3,6: set thick bottom border */
-app-sudoku-cell:nth-child(n + 19):nth-child(-n + 27),
-app-sudoku-cell:nth-child(n + 46):nth-child(-n + 54) {
-  --b-bottom: 4px solid #000;
-}
-
-/* Rows 4,7: remove top border to avoid double thickness at box edges */
-app-sudoku-cell:nth-child(n + 28):nth-child(-n + 36),
-app-sudoku-cell:nth-child(n + 55):nth-child(-n + 63) {
-  --b-top: 0;
+@media (orientation: landscape) {
+  .board {
+    height: 100%;
+  }
 }

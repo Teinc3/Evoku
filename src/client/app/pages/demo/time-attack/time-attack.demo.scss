@@ -1,0 +1,30 @@
+.board-and-utilities {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 80%;
+  gap: 4rem;
+}
+
+app-board-model {
+  flex: 0 0 0;
+  height: 100%;
+}
+
+app-utility-buttons-holder {
+  height: 100%;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+app-numeric-buttons-holder {
+  height: 20%;
+  width: min(60%, 650px);
+  margin: 0 auto; /* Center horizontally within the parent */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
