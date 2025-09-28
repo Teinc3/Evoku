@@ -117,4 +117,26 @@ describe('ClientBoardModel', () => {
     const after = m.getDisplayGlobalCooldownEnd() + 1;
     expect(m.validate(1, 3, after)).toBeTrue();
   });
+
+  it('confirmCellSet and rejectCellSet handle out-of-range indices', () => {
+    const m = createModel();
+    expect(m.confirmCellSet(-1, 5, performance.now())).toBeFalse();
+    expect(m.confirmCellSet(100, 5, performance.now())).toBeFalse();
+    // reject out-of-range should not throw
+    m.rejectCellSet(-1);
+    m.rejectCellSet(100);
+  });
+
+  it('clearCell out-of-range and fixed no-op paths', () => {
+    const m = createModel();
+    // Out-of-range no throw
+    m.clearCell(-1);
+    m.clearCell(100);
+    // Fixed cell not cleared
+    m.board[5] = new m.CellModelClass(7, true);
+    m.board[5].notes = [1];
+    m.clearCell(5);
+    expect(m.board[5].value).toBe(7);
+    expect(m.board[5].notes).toEqual([1]);
+  });
 });

@@ -147,5 +147,33 @@ describe('BoardModelComponent', () => {
     expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
     expect(component.getCellModel(0).value).toBe(4);
   });
+
+  it('loadPuzzle early returns on invalid length', () => {
+    const initialFirst = component.getCellModel(0).value;
+    component.loadPuzzle([] as unknown as number[]); // invalid length 0
+    expect(component.getCellModel(0).value).toBe(initialFirst);
+  });
+
+  it('ignores number key when no selection', () => {
+    // Ensure nothing selected
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '1' }));
+    // Still null selection, so no pending set anywhere
+    const anyPending
+      = component.model.board.some(c => c?.pendingCellState?.pendingValue !== undefined);
+    expect(anyPending).toBeFalse();
+  });
+
+  it('wraps DOWN and RIGHT movement branches explicitly', () => {
+    // DOWN wrap: select bottom row then move DOWN
+    component.onCellSelected(72); // bottom-left
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBe(0);
+
+    // RIGHT wrap: select rightmost cell of a row then move RIGHT
+    component.onCellSelected(17); // row1 col8
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(component.selected()).toBe(9); // row1 col0
+  });
 });
 
