@@ -6,51 +6,50 @@
   aspect-ratio: 1;
   /* Borders are controlled by parent board via nth-child selectors; default to none here */
   border: 0;
-  background: transparent;
+  background: #ffffff;
   padding: 0;
   cursor: pointer;
   border-right: 1px solid #9a9a9a;
   border-bottom: 1px solid #9a9a9a;
 }
 
-/* Do not render grey right border where a thick black vertical line appears (after col 3 and 6) or at board edge (col 9) */
+/* Ordering adjusted to satisfy no-descending-specificity */
+/* 1) Thick vertical separators */
+:host:nth-child(9n + 4) .cell,
+:host:nth-child(9n + 7) .cell {
+  border-left: 4px solid #000000;
+}
+
+/* 2) Right-border suppression (must precede horizontal thick lines per linter) */
 :host:nth-child(9n + 3) .cell,
 :host:nth-child(9n + 6) .cell,
 :host:nth-child(9n) .cell {
   border-right-color: transparent;
 }
 
-/* Do not render grey bottom border where a thick black horizontal line appears (after row 3 and 6) or at board edge (row 9) */
+/* 3) Selection state (before horizontal thick lines) */
+:host(.selected) .cell {
+  background: #85b3db;
+}
+
+/* 4) Thick horizontal separators */
+:host:nth-child(n + 28):nth-child(-n + 36) .cell,
+:host:nth-child(n + 55):nth-child(-n + 63) .cell {
+  border-top: 4px solid #000000;
+}
+
+/* 5) Bottom-border suppression */
 :host:nth-child(n + 19):nth-child(-n + 27) .cell,
 :host:nth-child(n + 46):nth-child(-n + 54) .cell,
 :host:nth-child(n + 73):nth-child(-n + 81) .cell {
   border-bottom-color: transparent;
 }
 
-/* Thick black separators at 3/6 boundaries by drawing the left/top border of the next column/row */
-/* Vertical thick lines between cols 3/4 and 6/7 */
-:host:nth-child(9n + 4) .cell,
-:host:nth-child(9n + 7) .cell {
-  border-left: 4px solid #000000;
-}
-
-/* Horizontal thick lines between rows 3/4 and 6/7 */
-:host:nth-child(n + 28):nth-child(-n + 36) .cell,
-:host:nth-child(n + 55):nth-child(-n + 63) .cell {
-  border-top: 4px solid #000000;
-}
-
 /* Default cell value state */
 .v {
   /* ~50% larger while staying responsive */
   font-size: 2rem;
-  /* baseline-friendly user-select with vendor prefixes */
-  /* eslint-disable css/use-baseline */
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
-  /* eslint-enable css/use-baseline */
   /* Swapped: dynamic value now uses the old selection color */
   color: #1976d2;
   font-weight: 600;
@@ -72,10 +71,6 @@
   color: #909090;
   font-size: 2rem;
   font-weight: 600;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  /* eslint-disable-next-line css/use-baseline */
   user-select: none;
 }
 
@@ -97,14 +92,13 @@
   align-content: center;
 }
 
-/* Selection uses a background fill instead of an outline */
-:host(.selected) .cell {
-  /* Swapped: selected background uses the old dynamic value color */
-  background: #85b3db;
-}
-
 /* Ensure content is readable on selected background */
 :host(.selected) .notes,
 :host(.selected) .note {
   color: #ffffff;
+}
+
+/* Simple hover feedback (only when not selected) */
+:host(:not(.selected)) .cell:hover {
+  background: rgba(0, 0, 0, 0.05);
 }

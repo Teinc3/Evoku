@@ -5,7 +5,6 @@ import eslintPluginImport from "eslint-plugin-import";
 import { defineConfig } from "eslint/config";
 import stylistic from "@stylistic/eslint-plugin";
 import js from "@eslint/js";
-import css from "@eslint/css";
 import { includeIgnoreFile } from "@eslint/compat";
 import angularTemplateParser from "@angular-eslint/template-parser";
 import angularEslintTemplate from "@angular-eslint/eslint-plugin-template";
@@ -259,17 +258,23 @@ export default defineConfig([
     },
   },
 
-  // CSS
+  // Angular client TypeScript files
   {
-    files: ["**/*.css", "**/*.scss"],
-    plugins: { css },
-    language: "css/css",
-    extends: ["css/recommended"],
+    files: ["src/client/**/*.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
+        sourceType: "module",
+      },
+    },
+    plugins: { "@angular-eslint": angularEslintPlugin },
     rules: {
-      // Use the 'widely' baseline preset which includes common properties like user-select
-      "css/use-baseline": ["error", {
-        "available": "widely"
-      }]
-    }
-  }
+      // To allow DI injections without enforcing "type" imports
+      "@typescript-eslint/consistent-type-imports": ["off"],
+    },
+  },
+
+  // CSS/SCSS linting is handled by Stylelint (see .stylelintrc.json)
 ]);
