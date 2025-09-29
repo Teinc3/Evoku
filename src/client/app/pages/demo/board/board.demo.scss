@@ -1,6 +1,12 @@
-app-board-model {
-  flex: 1; /* Take remaining space */
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically within its space */
+.resizable-container {
+  resize: both;
+  overflow: hidden;
+  border: 5px dashed #808080;
+  display: flex; /* Behave like an inline element but use flex for children */
+  justify-content: center;
+  align-items: center;
+  min-width: 200px;
+  min-height: 200px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
