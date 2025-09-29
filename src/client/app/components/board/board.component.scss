@@ -12,17 +12,6 @@
   position: relative; /* for overlay lines */
   border: 6px solid #000;
   box-sizing: border-box;
-}
-
-/* Allow Board to take up full space by limiting dimension */
-@media (orientation: portrait) {
-  .board {
-    width: 100%;
-  }
-}
-
-@media (orientation: landscape) {
-  .board {
-    height: 100%;
-  }
+  max-width: 100%;
+  max-height: 100%;
 }
