@@ -5,7 +5,7 @@
 
 .board {
   /* Parent now controls outer width; board enforces square shape */
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
