@@ -22,4 +22,7 @@
       <span class="v">{{ value !== 0 ? value : '' }}</span>
     }
   }
+  @if (cooldownPercentage() !== null) {
+    <div class="cooldown-overlay" [style.--angle]="(cooldownPercentage()! * 360) + 'deg'"></div>
+  }
 </button>

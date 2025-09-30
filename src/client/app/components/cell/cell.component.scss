@@ -6,7 +6,7 @@
   aspect-ratio: 1;
   /* Borders are controlled by parent board via nth-child selectors; default to none here */
   border: 0;
-  background: #ffffff;
+  background: transparent;
   padding: 0;
   cursor: pointer;
   border-right: 1px solid #9a9a9a;
@@ -106,4 +106,13 @@
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+.cooldown-overlay {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.3) 0deg var(--angle), transparent var(--angle) 360deg);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
 }
