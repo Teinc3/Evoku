@@ -1,5 +1,5 @@
 import { By } from '@angular/platform-browser';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import SudokuCellComponent from './cell.component';
 
@@ -119,34 +119,32 @@ describe('SudokuCellComponent', () => {
     expect(spy).toHaveBeenCalledWith(42);
   });
 
-  it('shows cooldown overlay when on cooldown', () => {
+  it('shows cooldown overlay when on cooldown', fakeAsync(() => {
     const m = new MockCellModel();
     m.lastCooldownEnd = performance.now() + 5000; // 5 seconds from now
     component.model = m as unknown as ClientCellModel;
     fixture.detectChanges();
 
     // Wait for interval to update
-    setTimeout(() => {
-      fixture.detectChanges();
-      const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
-      expect(overlay).toBeTruthy();
-      expect(component.cooldownPercentage()).toBeGreaterThan(0);
-    }, 1100);
-  });
+    tick(1100);
+    fixture.detectChanges();
+    const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
+    expect(overlay).toBeTruthy();
+    expect(component.cooldownPercentage()).toBeGreaterThan(0);
+  }));
 
-  it('hides cooldown overlay when not on cooldown', () => {
+  it('hides cooldown overlay when not on cooldown', fakeAsync(() => {
     const m = new MockCellModel();
     m.lastCooldownEnd = performance.now() - 1000; // Expired
     component.model = m as unknown as ClientCellModel;
     fixture.detectChanges();
 
-    setTimeout(() => {
-      fixture.detectChanges();
-      const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
-      expect(overlay).toBeFalsy();
-      expect(component.cooldownPercentage()).toBeNull();
-    }, 1100);
-  });
+    tick(1100);
+    fixture.detectChanges();
+    const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
+    expect(overlay).toBeFalsy();
+    expect(component.cooldownPercentage()).toBeNull();
+  }));
 
   it('calculates cooldown percentage correctly', () => {
     const m = new MockCellModel();

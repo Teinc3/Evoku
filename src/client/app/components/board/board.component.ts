@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Output, signal, HostListener
+  Component, EventEmitter, Output, signal, HostListener, type OnInit, type OnDestroy
 } from '@angular/core';
 
 import SudokuCellComponent from '../cell/cell.component';
@@ -8,7 +8,6 @@ import CursorDirectionEnum from '../../../types/cursor-direction.enum';
 import ClientBoardModel from '../../../models/Board';
 
 import type { WritableSignal } from '@angular/core';
-import type { OnInit } from '@angular/core';
 import type ClientCellModel from '../../../models/Cell';
 
 
@@ -19,7 +18,7 @@ import type ClientCellModel from '../../../models/Cell';
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
-export default class BoardModelComponent implements OnInit {
+export default class BoardModelComponent implements OnInit, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
   public isNoteMode = false;
@@ -30,6 +29,8 @@ export default class BoardModelComponent implements OnInit {
   // Flat indices 0..80 for a 9x9 board
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
+  readonly globalCooldownPercentage = signal<number | null>(null);
+  private updateInterval?: number;
 
   constructor() {
     this.model = new ClientBoardModel();
@@ -79,6 +80,29 @@ export default class BoardModelComponent implements OnInit {
     if (this.model.board.length === 0) {
       this.initBoard([]);
     }
+
+    // Update global cooldown percentage every 20ms for smoother animation
+    this.updateInterval = window.setInterval(() => {
+      this.globalCooldownPercentage.set(this.calculateGlobalCooldownPercentage());
+    }, 20);
+    // Initial update
+    this.globalCooldownPercentage.set(this.calculateGlobalCooldownPercentage());
+  }
+
+  ngOnDestroy(): void {
+    if (this.updateInterval !== undefined) {
+      clearInterval(this.updateInterval);
+    }
+  }
+
+  private calculateGlobalCooldownPercentage(): number | null {
+    const endTime = this.model.getDisplayGlobalCooldownEnd();
+    if (!endTime || endTime <= performance.now()) {
+      return null;
+    }
+    const remaining = endTime - performance.now();
+    const total = 5000; // BaseBoardModel.GLOBAL_COOLDOWN_DURATION
+    return Math.max(0, Math.min(1, remaining / total));
   }
 
   /** Initialize the board with a given set of values */

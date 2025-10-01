@@ -200,5 +200,36 @@ describe('BoardModelComponent', () => {
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(component.selected()).toBe(9); // row1 col0
   });
+
+  it('shows global cooldown overlay when on cooldown', () => {
+    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(performance.now() + 2500);
+    component.globalCooldownPercentage.set(component['calculateGlobalCooldownPercentage']());
+    fixture.detectChanges();
+    const overlay = fixture.debugElement.query(By.css('.global-cooldown-overlay'));
+    expect(overlay).toBeTruthy();
+    expect(component.globalCooldownPercentage()).toBeGreaterThan(0);
+  });
+
+  it('hides global cooldown overlay when not on cooldown', () => {
+    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(performance.now() - 1000);
+    component.globalCooldownPercentage.set(component['calculateGlobalCooldownPercentage']());
+    fixture.detectChanges();
+    const overlay = fixture.debugElement.query(By.css('.global-cooldown-overlay'));
+    expect(overlay).toBeFalsy();
+    expect(component.globalCooldownPercentage()).toBeNull();
+  });
+
+  it('calculates global cooldown percentage correctly', () => {
+    const now = 1000;
+    const spy = spyOn(performance, 'now').and.returnValue(now);
+    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(now + 5000);
+    expect(component['calculateGlobalCooldownPercentage']()).toBe(1);
+
+    spy.and.returnValue(now + 2500);
+    expect(component['calculateGlobalCooldownPercentage']()).toBe(0.5);
+
+    spy.and.returnValue(now + 6000);
+    expect(component['calculateGlobalCooldownPercentage']()).toBeNull();
+  });
 });
 

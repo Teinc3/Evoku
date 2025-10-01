@@ -1,3 +1,5 @@
+@use '../../../globals' as *;
+
 .cell {
   position: relative;
   display: grid;
@@ -109,10 +111,6 @@
 }
 
 .cooldown-overlay {
-  position: absolute;
-  inset: 0;
-  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.3) 0deg var(--angle), transparent var(--angle) 360deg);
-  pointer-events: none;
-  border-radius: inherit;
+  @extend %cooldown-overlay-base;
   z-index: 1;
 }

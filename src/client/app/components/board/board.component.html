@@ -7,4 +7,7 @@
       [class.selected]="selected() === i"
     ></app-cell-model>
   }
+  @if (globalCooldownPercentage() !== null) {
+    <div class="global-cooldown-overlay" [style.--angle]="(globalCooldownPercentage()! * 360) + 'deg'"></div>
+  }
 </div>
