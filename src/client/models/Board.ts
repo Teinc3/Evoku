@@ -42,7 +42,7 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
         // Auto-confirm after 1 second for demo only
         setTimeout(() => {
           if (cell.pendingCellState.pendingValue === value) {
-            this.confirmCellSet(cellIndex, value, performance.now());
+            this.confirmCellSet(cellIndex, value, performance.now() - 1000);
           }
         }, 1000);
       }
