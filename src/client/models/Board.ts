@@ -41,11 +41,10 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
       if (this.autoAcceptPending) {
         // Auto-confirm after 1 second
         // This branch is only for demo purposes, so we just use perf now and 1s delay
-        const now = performance.now();
-        const scheduledServerTime = now + 1000;
+        const newServerTime = performance.now();
         setTimeout(() => {
           if (cell.pendingCellState.pendingValue === value) {
-            this.confirmCellSet(cellIndex, value, scheduledServerTime);
+            this.confirmCellSet(cellIndex, value, newServerTime);
           }
         }, 1000);
       }
