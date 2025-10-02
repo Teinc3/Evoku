@@ -46,7 +46,7 @@ app-board-model {
 %cooldown-overlay-base {
   position: absolute;
   inset: 0;
-  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.3) 0deg var(--angle), transparent var(--angle) 360deg);
+  transition: --angle linear;
   pointer-events: none;
   border-radius: inherit;
 }

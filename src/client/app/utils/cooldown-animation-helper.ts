@@ -35,51 +35,40 @@ export default class CooldownAnimationHelper {
    */
   public checkCooldownChanges(
     pendingEnd: number | undefined,
-    normalEnd: number | undefined
+    normalEnd: number | undefined,
+    now: number = performance.now()
   ): void {
-    const now = performance.now();
+
     // Check if pendingEnd changed to a new value
     if (pendingEnd !== undefined && pendingEnd !== this.lastPendingCooldownEnd) {
-      // Fresh pending cooldown - reset to full angle
-      this.clearCleanupTimer();
-      const endTs = pendingEnd;
-      const remaining = Math.max(0, endTs - now);
-      this.transitionDuration.set('0s');
-      this.currentAngle.set(360);
-
-      requestAnimationFrame(() => {
-        this.transitionDuration.set(remaining / 1000 + 's');
-        requestAnimationFrame(() => {
-          this.currentAngle.set(0);
-        });
-      });
-
-      this.scheduleCleanupTimer(remaining);
+      this.setAnimation(pendingEnd, true, now);
     }
     // Check if pendingEnd cleared and normalEnd changed
     else if (
-      pendingEnd === undefined
-      && normalEnd !== this.lastCooldownEnd
-      && normalEnd !== undefined
-      && normalEnd > now
+      pendingEnd === undefined && normalEnd !== this.lastCooldownEnd
+      && normalEnd !== undefined && normalEnd > now
     ) {
-
-      this.clearCleanupTimer();
-      const endTs = normalEnd;
-      const remaining = Math.max(0, endTs - now);
-      this.transitionDuration.set(remaining / 1000 + 's');
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.currentAngle.set(0);
-        });
-      });
-      this.scheduleCleanupTimer(remaining);
-
+      this.setAnimation(normalEnd, false, now);
     }
 
     this.lastPendingCooldownEnd = pendingEnd;
     this.lastCooldownEnd = normalEnd;
+  }
+
+  private setAnimation(endTs: number, pending: boolean, now: number): void {
+    this.clearCleanupTimer();
+
+    const remaining = Math.max(0, endTs - now);
+    this.transitionDuration.set(remaining / 1000 + 's');
+    this.currentAngle.set(pending ? 360 : 0);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.currentAngle.set(0);
+      });
+    });
+
+    this.scheduleCleanupTimer(remaining);
   }
 
   private scheduleCleanupTimer(timeToFire: number): void {

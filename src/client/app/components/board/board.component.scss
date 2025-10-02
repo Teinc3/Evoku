@@ -20,7 +20,6 @@
 
 .global-cooldown-overlay {
   @extend %cooldown-overlay-base;
-  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.1) 0deg var(--angle), transparent var(--angle) 360deg);
+  background: conic-gradient(from 0deg, rgba(172, 172, 172, 0.2) 0deg var(--angle), transparent var(--angle) 360deg);
   z-index: 2; /* Above cells */
-  transition: --angle linear;
 }
