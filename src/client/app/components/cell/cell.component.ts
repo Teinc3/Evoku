@@ -1,4 +1,8 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, signal } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output, DoCheck, type OnDestroy,
+} from '@angular/core';
+
+import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 
 import type ClientCellModel from '../../../models/Cell';
 
@@ -9,7 +13,7 @@ import type ClientCellModel from '../../../models/Cell';
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.scss',
 })
-export default class SudokuCellComponent implements OnInit, OnDestroy {
+export default class SudokuCellComponent implements DoCheck, OnDestroy {
   @Input({ required: true }) 
   model!: ClientCellModel;
   @Input()
@@ -18,36 +22,22 @@ export default class SudokuCellComponent implements OnInit, OnDestroy {
   selected = new EventEmitter<number>();
   
   readonly noteGrid: number[];
-  readonly cooldownPercentage = signal<number | null>(null);
-  private updateInterval?: number;
+  public readonly cooldownHelper: CooldownAnimationHelper;
 
   constructor() {
     this.noteGrid = Array.from({ length: 9 }, (_, i) => i + 1);
+    this.cooldownHelper = new CooldownAnimationHelper();
   }
 
-  ngOnInit(): void {
-    // Update cooldown percentage every 200ms for smoother animation
-    this.updateInterval = window.setInterval(() => {
-      this.cooldownPercentage.set(this.calculateCooldownPercentage());
-    }, 20);
-    // Initial update
-    this.cooldownPercentage.set(this.calculateCooldownPercentage());
+  ngDoCheck(): void {
+    this.cooldownHelper.checkCooldownChanges(
+      this.model.pendingCellState?.pendingCooldownEnd,
+      this.model.lastCooldownEnd
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.updateInterval !== undefined) {
-      clearInterval(this.updateInterval);
-    }
-  }
-
-  private calculateCooldownPercentage(): number | null {
-    const endTime = this.model.pendingCellState?.pendingCooldownEnd ?? this.model.lastCooldownEnd;
-    if (!endTime || endTime <= performance.now()) {
-      return null;
-    }
-    const remaining = endTime - performance.now();
-    const total = 10000; // BaseCellModel.CELL_COOLDOWN_DURATION
-    return Math.max(0, Math.min(1, remaining / total));
+    this.cooldownHelper.destroy();
   }
 
   onClick(): void {

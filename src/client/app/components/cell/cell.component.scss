@@ -113,4 +113,5 @@
 .cooldown-overlay {
   @extend %cooldown-overlay-base;
   z-index: 1;
+  transition: --angle linear;
 }

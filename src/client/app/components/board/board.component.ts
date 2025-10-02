@@ -1,8 +1,16 @@
 import {
-  Component, EventEmitter, Output, signal, HostListener, type OnInit, type OnDestroy
+  Component,
+  EventEmitter,
+  Output,
+  signal,
+  HostListener,
+  type OnInit,
+  type DoCheck,
+  type OnDestroy,
 } from '@angular/core';
 
 import SudokuCellComponent from '../cell/cell.component';
+import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import CursorDirectionEnum from '../../../types/cursor-direction.enum';
 import ClientBoardModel from '../../../models/Board';
@@ -18,7 +26,7 @@ import type ClientCellModel from '../../../models/Cell';
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
-export default class BoardModelComponent implements OnInit, OnDestroy {
+export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
   public isNoteMode = false;
@@ -26,16 +34,33 @@ export default class BoardModelComponent implements OnInit, OnDestroy {
   @Output()
   selectedIndexChange = new EventEmitter<number>();
 
-  // Flat indices 0..80 for a 9x9 board
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
-  readonly globalCooldownPercentage = signal<number | null>(null);
-  private updateInterval?: number;
+  public readonly cooldownHelper: CooldownAnimationHelper;
 
   constructor() {
     this.model = new ClientBoardModel();
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
+    this.cooldownHelper = new CooldownAnimationHelper();
+  }
+
+  ngOnInit(): void {
+    // Initialize with 81 empty cells only if nothing has been loaded yet.
+    if (this.model.board.length === 0) {
+      this.initBoard([]);
+    }
+  }
+
+  ngDoCheck(): void {
+    this.cooldownHelper.checkCooldownChanges(
+      this.model.pendingGlobalCooldownEnd,
+      this.model.globalLastCooldownEnd
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.cooldownHelper.destroy();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -73,36 +98,6 @@ export default class BoardModelComponent implements OnInit, OnDestroy {
         this.moveSelection(CursorDirectionEnum.RIGHT);
         break;
     }
-  }
-
-  ngOnInit(): void {
-    // Initialize with 81 empty cells only if nothing has been loaded yet.
-    if (this.model.board.length === 0) {
-      this.initBoard([]);
-    }
-
-    // Update global cooldown percentage every 20ms for smoother animation
-    this.updateInterval = window.setInterval(() => {
-      this.globalCooldownPercentage.set(this.calculateGlobalCooldownPercentage());
-    }, 20);
-    // Initial update
-    this.globalCooldownPercentage.set(this.calculateGlobalCooldownPercentage());
-  }
-
-  ngOnDestroy(): void {
-    if (this.updateInterval !== undefined) {
-      clearInterval(this.updateInterval);
-    }
-  }
-
-  private calculateGlobalCooldownPercentage(): number | null {
-    const endTime = this.model.getDisplayGlobalCooldownEnd();
-    if (!endTime || endTime <= performance.now()) {
-      return null;
-    }
-    const remaining = endTime - performance.now();
-    const total = 5000; // BaseBoardModel.GLOBAL_COOLDOWN_DURATION
-    return Math.max(0, Math.min(1, remaining / total));
   }
 
   /** Initialize the board with a given set of values */
@@ -213,36 +208,5 @@ export default class BoardModelComponent implements OnInit, OnDestroy {
   public onCellSelected(i: number): void {
     this.selected.set(i);
     this.selectedIndexChange.emit(i);
-  }
-
-  /** Sets a pending value for the currently selected cell */
-  public setPendingSelected(value: number, time?: number): boolean {
-    const i = this.selected();
-    if (i === null) {
-      return false;
-    }
-    return this.model.setPendingCell(i, value, time);
-  }
-
-  /** Server confirmation for the currently selected cell */
-  public confirmSelected(time?: number): boolean {
-    const i = this.selected();
-    if (i === null) {
-      return false;
-    }
-    const pv = this.getCellModel(i).pendingCellState?.pendingValue;
-    if (pv === undefined) {
-      return false;
-    }
-    return this.model.confirmCellSet(i, pv, time);
-  }
-  
-  /** Rejects the pending value for the currently selected cell */
-  public rejectSelected(): void {
-    const i = this.selected();
-    if (i === null) {
-      return;
-    }
-    this.model.rejectCellSet(i);
   }
 }

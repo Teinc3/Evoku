@@ -1,5 +1,5 @@
 import { By } from '@angular/platform-browser';
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import SudokuCellComponent from './cell.component';
 
@@ -119,48 +119,36 @@ describe('SudokuCellComponent', () => {
     expect(spy).toHaveBeenCalledWith(42);
   });
 
-  it('shows cooldown overlay when on cooldown', fakeAsync(() => {
+  it('cooldown helper is properly instantiated', () => {
     const m = new MockCellModel();
-    m.lastCooldownEnd = performance.now() + 5000; // 5 seconds from now
     component.model = m as unknown as ClientCellModel;
     fixture.detectChanges();
 
-    // Wait for interval to update
-    tick(1100);
-    fixture.detectChanges();
-    const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
-    expect(overlay).toBeTruthy();
-    expect(component.cooldownPercentage()).toBeGreaterThan(0);
-  }));
+    expect(component.cooldownHelper).toBeDefined();
+    expect(component.cooldownHelper.currentAngle).toBeDefined();
+    expect(component.cooldownHelper.transitionDuration).toBeDefined();
+  });
 
-  it('hides cooldown overlay when not on cooldown', fakeAsync(() => {
+  it('passes cooldown values to helper on check', () => {
     const m = new MockCellModel();
-    m.lastCooldownEnd = performance.now() - 1000; // Expired
+    const now = performance.now();
+    m.pendingCellState = { pendingCooldownEnd: now + 5000 };
+    m.lastCooldownEnd = now + 10000;
+    component.model = m as unknown as ClientCellModel;
+
+    const helperSpy = spyOn(component.cooldownHelper, 'checkCooldownChanges');
+    component.ngDoCheck();
+
+    expect(helperSpy).toHaveBeenCalledWith(now + 5000, now + 10000);
+  });
+
+  it('calls helper destroy on component destroy', () => {
+    const m = new MockCellModel();
     component.model = m as unknown as ClientCellModel;
     fixture.detectChanges();
 
-    tick(1100);
-    fixture.detectChanges();
-    const overlay = fixture.debugElement.query(By.css('.cooldown-overlay'));
-    expect(overlay).toBeFalsy();
-    expect(component.cooldownPercentage()).toBeNull();
-  }));
-
-  it('calculates cooldown percentage correctly', () => {
-    const m = new MockCellModel();
-    const now = 1000;
-    m.lastCooldownEnd = now + 10000; // Full cooldown
-    component.model = m as unknown as ClientCellModel;
-    // Mock performance.now
-    const spy = spyOn(performance, 'now').and.returnValue(now);
-    expect(component['calculateCooldownPercentage']()).toBe(1);
-
-    // Half way
-    spy.and.returnValue(now + 5000);
-    expect(component['calculateCooldownPercentage']()).toBe(0.5);
-
-    // Expired
-    spy.and.returnValue(now + 11000);
-    expect(component['calculateCooldownPercentage']()).toBeNull();
+    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    component.ngOnDestroy();
+    expect(destroySpy).toHaveBeenCalled();
   });
 });

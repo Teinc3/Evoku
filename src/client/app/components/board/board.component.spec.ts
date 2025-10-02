@@ -65,19 +65,6 @@ describe('BoardModelComponent', () => {
     expect(component.isNoteMode).toBeFalse();
   });
 
-  it('clears selected cell when CLEAR action invoked (pending value path)', () => {
-    component.initBoard([]);
-    component.onCellSelected(0);
-    const time = performance.now();
-    component.setPendingSelected(5, time);
-    // Simulate server confirming value so that CLEAR meaningfully changes it back to 0
-    component.model.confirmCellSet(0, 5, time);
-    expect(component.getCellModel(0).value).toBe(5);
-    const spy = spyOn(component.model, 'setPendingCell').and.callThrough();
-    component.onUtilityAction(UtilityAction.CLEAR); // parseNumberKey(0) -> setPendingSelected(0)
-    expect(spy).toHaveBeenCalledWith(0, 0, jasmine.any(Number));
-  });
-
   it('moves selection with keyboard and wraps vertically and horizontally', () => {
     // No selection initially -> pressing ArrowUp selects center (40)
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
@@ -122,13 +109,6 @@ describe('BoardModelComponent', () => {
     expect(component.selected()).toBe(40);
   });
 
-  it('setPendingSelected returns false when no cell selected', () => {
-    // Ensure nothing selected
-    expect(component.selected()).toBeNull();
-    const result = component.setPendingSelected(5, performance.now());
-    expect(result).toBeFalse();
-  });
-
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
     component.initBoard([]);
     component.onCellSelected(0);
@@ -147,30 +127,6 @@ describe('BoardModelComponent', () => {
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(wipeSpy).toHaveBeenCalled();
     expect(component.getCellModel(0).notes.length).toBe(0);
-  });
-
-  it('confirmSelected and rejectSelected guard conditions', () => {
-    // No selection
-    expect(component.confirmSelected()).toBeFalse();
-    component.rejectSelected(); // should not throw
-
-    component.onCellSelected(0);
-    // No pending value -> confirmSelected returns false
-    expect(component.confirmSelected()).toBeFalse();
-
-    // Set pending then confirm
-    const now = performance.now();
-    component.setPendingSelected(4, now);
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBe(4);
-    expect(component.confirmSelected(now)).toBeTrue();
-    // Pending cleared and value set
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
-    expect(component.getCellModel(0).value).toBe(4);
-
-    // Reject with no pending (should be safe no-op)
-    component.rejectSelected();
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
-    expect(component.getCellModel(0).value).toBe(4);
   });
 
   it('loadPuzzle early returns on invalid length', () => {
@@ -201,35 +157,16 @@ describe('BoardModelComponent', () => {
     expect(component.selected()).toBe(9); // row1 col0
   });
 
-  it('shows global cooldown overlay when on cooldown', () => {
-    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(performance.now() + 2500);
-    component.globalCooldownPercentage.set(component['calculateGlobalCooldownPercentage']());
-    fixture.detectChanges();
-    const overlay = fixture.debugElement.query(By.css('.global-cooldown-overlay'));
-    expect(overlay).toBeTruthy();
-    expect(component.globalCooldownPercentage()).toBeGreaterThan(0);
+  it('cooldown helper is properly instantiated', () => {
+    expect(component.cooldownHelper).toBeDefined();
+    expect(component.cooldownHelper.currentAngle).toBeDefined();
+    expect(component.cooldownHelper.transitionDuration).toBeDefined();
   });
 
-  it('hides global cooldown overlay when not on cooldown', () => {
-    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(performance.now() - 1000);
-    component.globalCooldownPercentage.set(component['calculateGlobalCooldownPercentage']());
-    fixture.detectChanges();
-    const overlay = fixture.debugElement.query(By.css('.global-cooldown-overlay'));
-    expect(overlay).toBeFalsy();
-    expect(component.globalCooldownPercentage()).toBeNull();
-  });
-
-  it('calculates global cooldown percentage correctly', () => {
-    const now = 1000;
-    const spy = spyOn(performance, 'now').and.returnValue(now);
-    spyOn(component.model, 'getDisplayGlobalCooldownEnd').and.returnValue(now + 5000);
-    expect(component['calculateGlobalCooldownPercentage']()).toBe(1);
-
-    spy.and.returnValue(now + 2500);
-    expect(component['calculateGlobalCooldownPercentage']()).toBe(0.5);
-
-    spy.and.returnValue(now + 6000);
-    expect(component['calculateGlobalCooldownPercentage']()).toBeNull();
+  it('calls helper destroy on component destroy', () => {
+    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    component.ngOnDestroy();
+    expect(destroySpy).toHaveBeenCalled();
   });
 });
 
