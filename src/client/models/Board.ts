@@ -39,10 +39,12 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
         this.pendingGlobalCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
       }
       if (this.autoAcceptPending) {
-        // Auto-confirm after 1 second for demo only
+        // Auto-confirm after 1 second
+        // This branch is only for demo purposes, so we just use perf now and 1s delay
+        const newServerTime = performance.now();
         setTimeout(() => {
           if (cell.pendingCellState.pendingValue === value) {
-            this.confirmCellSet(cellIndex, value, performance.now());
+            this.confirmCellSet(cellIndex, value, newServerTime);
           }
         }, 1000);
       }

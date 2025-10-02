@@ -12,7 +12,8 @@ class MockCellModel {
   value = 0;
   fixed = false;
   notes: number[] = [];
-  pendingCellState?: { pendingValue: number };
+  pendingCellState?: { pendingValue?: number; pendingCooldownEnd?: number };
+  lastCooldownEnd = 0;
   hasPending() {
     return !!this.pendingCellState;
   }
@@ -116,5 +117,38 @@ describe('SudokuCellComponent', () => {
     fixture.detectChanges();
 
     expect(spy).toHaveBeenCalledWith(42);
+  });
+
+  it('cooldown helper is properly instantiated', () => {
+    const m = new MockCellModel();
+    component.model = m as unknown as ClientCellModel;
+    fixture.detectChanges();
+
+    expect(component.cooldownHelper).toBeDefined();
+    expect(component.cooldownHelper.currentAngle).toBeDefined();
+    expect(component.cooldownHelper.transitionDuration).toBeDefined();
+  });
+
+  it('passes cooldown values to helper on check', () => {
+    const m = new MockCellModel();
+    const now = performance.now();
+    m.pendingCellState = { pendingCooldownEnd: now + 5000 };
+    m.lastCooldownEnd = now + 10000;
+    component.model = m as unknown as ClientCellModel;
+
+    const helperSpy = spyOn(component.cooldownHelper, 'checkCooldownChanges');
+    component.ngDoCheck();
+
+    expect(helperSpy).toHaveBeenCalledWith(now + 5000, now + 10000);
+  });
+
+  it('calls helper destroy on component destroy', () => {
+    const m = new MockCellModel();
+    component.model = m as unknown as ClientCellModel;
+    fixture.detectChanges();
+
+    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    component.ngOnDestroy();
+    expect(destroySpy).toHaveBeenCalled();
   });
 });

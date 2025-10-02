@@ -1,4 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output, DoCheck, type OnDestroy,
+} from '@angular/core';
+
+import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 
 import type ClientCellModel from '../../../models/Cell';
 
@@ -9,7 +13,7 @@ import type ClientCellModel from '../../../models/Cell';
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.scss',
 })
-export default class SudokuCellComponent {
+export default class SudokuCellComponent implements DoCheck, OnDestroy {
   @Input({ required: true }) 
   model!: ClientCellModel;
   @Input()
@@ -18,9 +22,22 @@ export default class SudokuCellComponent {
   selected = new EventEmitter<number>();
   
   readonly noteGrid: number[];
+  public readonly cooldownHelper: CooldownAnimationHelper;
 
   constructor() {
     this.noteGrid = Array.from({ length: 9 }, (_, i) => i + 1);
+    this.cooldownHelper = new CooldownAnimationHelper();
+  }
+
+  ngDoCheck(): void {
+    this.cooldownHelper.checkCooldownChanges(
+      this.model.pendingCellState?.pendingCooldownEnd,
+      this.model.lastCooldownEnd
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.cooldownHelper.destroy();
   }
 
   onClick(): void {

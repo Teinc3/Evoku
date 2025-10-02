@@ -7,4 +7,11 @@
       [class.selected]="selected() === i"
     ></app-cell-model>
   }
+  @if (cooldownHelper.currentAngle() > 0 || cooldownHelper.transitionDuration() !== '0s') {
+    <div
+      class="global-cooldown-overlay"
+      [style.--angle]="cooldownHelper.currentAngle() + 'deg'"
+      [style.transition-duration]="cooldownHelper.transitionDuration()"
+    ></div>
+  }
 </div>

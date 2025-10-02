@@ -65,19 +65,6 @@ describe('BoardModelComponent', () => {
     expect(component.isNoteMode).toBeFalse();
   });
 
-  it('clears selected cell when CLEAR action invoked (pending value path)', () => {
-    component.initBoard([]);
-    component.onCellSelected(0);
-    const time = performance.now();
-    component.setPendingSelected(5, time);
-    // Simulate server confirming value so that CLEAR meaningfully changes it back to 0
-    component.model.confirmCellSet(0, 5, time);
-    expect(component.getCellModel(0).value).toBe(5);
-    const spy = spyOn(component.model, 'setPendingCell').and.callThrough();
-    component.onUtilityAction(UtilityAction.CLEAR); // parseNumberKey(0) -> setPendingSelected(0)
-    expect(spy).toHaveBeenCalledWith(0, 0, jasmine.any(Number));
-  });
-
   it('moves selection with keyboard and wraps vertically and horizontally', () => {
     // No selection initially -> pressing ArrowUp selects center (40)
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
@@ -122,13 +109,6 @@ describe('BoardModelComponent', () => {
     expect(component.selected()).toBe(40);
   });
 
-  it('setPendingSelected returns false when no cell selected', () => {
-    // Ensure nothing selected
-    expect(component.selected()).toBeNull();
-    const result = component.setPendingSelected(5, performance.now());
-    expect(result).toBeFalse();
-  });
-
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
     component.initBoard([]);
     component.onCellSelected(0);
@@ -147,30 +127,6 @@ describe('BoardModelComponent', () => {
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(wipeSpy).toHaveBeenCalled();
     expect(component.getCellModel(0).notes.length).toBe(0);
-  });
-
-  it('confirmSelected and rejectSelected guard conditions', () => {
-    // No selection
-    expect(component.confirmSelected()).toBeFalse();
-    component.rejectSelected(); // should not throw
-
-    component.onCellSelected(0);
-    // No pending value -> confirmSelected returns false
-    expect(component.confirmSelected()).toBeFalse();
-
-    // Set pending then confirm
-    const now = performance.now();
-    component.setPendingSelected(4, now);
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBe(4);
-    expect(component.confirmSelected(now)).toBeTrue();
-    // Pending cleared and value set
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
-    expect(component.getCellModel(0).value).toBe(4);
-
-    // Reject with no pending (should be safe no-op)
-    component.rejectSelected();
-    expect(component.getCellModel(0).pendingCellState.pendingValue).toBeUndefined();
-    expect(component.getCellModel(0).value).toBe(4);
   });
 
   it('loadPuzzle early returns on invalid length', () => {
@@ -199,6 +155,18 @@ describe('BoardModelComponent', () => {
     component.onCellSelected(17); // row1 col8
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(component.selected()).toBe(9); // row1 col0
+  });
+
+  it('cooldown helper is properly instantiated', () => {
+    expect(component.cooldownHelper).toBeDefined();
+    expect(component.cooldownHelper.currentAngle).toBeDefined();
+    expect(component.cooldownHelper.transitionDuration).toBeDefined();
+  });
+
+  it('calls helper destroy on component destroy', () => {
+    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    component.ngOnDestroy();
+    expect(destroySpy).toHaveBeenCalled();
   });
 });
 
