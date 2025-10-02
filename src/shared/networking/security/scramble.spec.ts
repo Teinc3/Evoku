@@ -285,15 +285,19 @@ describe('PacketScrambler', () => {
       const scrambler = createScrambler('consistency-seed');
       const testIDs = Array.from({ length: 100 }, (_, i) => i - 50) as ActionEnum[];
       
+      const start = performance.now();
+      
       testIDs.forEach(id => {
-        const start = performance.now();
         const scrambled = scrambler.scrambleID(id);
         const unscrambled = scrambler.unscrambleID(scrambled);
-        const end = performance.now();
-        
         expect(unscrambled).toBe(id);
-        expect(end - start).toBeLessThan(2); // Should be very fast
       });
+      
+      const end = performance.now();
+      const duration = end - start;
+      
+      // Should complete all operations quickly with O(1) map lookups
+      expect(duration).toBeLessThan(50); // Conservative threshold for 100 IDs
     });
   });
 });
