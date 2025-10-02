@@ -13,21 +13,17 @@ import BoardModelComponent from '../../../components/board/board.component';
 export default class BoardDemoPageComponent implements OnInit {
   @ViewChild('board', { static: true })
   board!: BoardModelComponent;
-  puzzle: number[];
-
-  constructor() {
-    this.puzzle = [
-      1, 0, 7, 0, 4, 9, 2, 0, 0,
-      0, 0, 4, 2, 5, 0, 7, 3, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 1,
-      0, 0, 6, 0, 3, 2, 5, 1, 0,
-      0, 0, 0, 0, 0, 0, 8, 9, 0, 
-      5, 1, 0, 0, 0, 6, 3, 4, 2, 
-      9, 0, 1, 0, 2, 4, 6, 0, 0, 
-      3, 0, 0, 0, 9, 7, 1, 0, 0,
-      4, 7, 2, 0, 0, 3, 9, 5, 0,
-    ];
-  }
+  private readonly puzzle = [
+    1, 0, 7, 0, 4, 9, 2, 0, 0,
+    0, 0, 4, 2, 5, 0, 7, 3, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 6, 0, 3, 2, 5, 1, 0,
+    0, 0, 0, 0, 0, 0, 8, 9, 0, 
+    5, 1, 0, 0, 0, 6, 3, 4, 2, 
+    9, 0, 1, 0, 2, 4, 6, 0, 0, 
+    3, 0, 0, 0, 9, 7, 1, 0, 0,
+    4, 7, 2, 0, 0, 3, 9, 5, 0,
+  ];
 
   ngOnInit(): void {
     // Enable demo auto-accept for optimistic pending visualization
@@ -47,7 +43,8 @@ export default class BoardDemoPageComponent implements OnInit {
 
     // Directly set value for dynamic placed cells so no cd effect overwrites
     dynamicCells.forEach(c => {
-      this.board.model.board[c.idx].value = c.value;
+      const cell = this.board.getCellModel(c.idx);
+      cell.update(c.value); // No time, no cd
     });
     // And notes
     notesCells.forEach(c => {

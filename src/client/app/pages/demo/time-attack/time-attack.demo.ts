@@ -25,19 +25,16 @@ import BoardModelComponent from '../../../components/board/board.component';
 export default class TimeAttackDemoPageComponent implements OnInit {
   @ViewChild('board', { static: true })
   board!: BoardModelComponent;
-  puzzle: number[];
-
+  private puzzle!: number[];
   protected AppView = AppView;
 
-  constructor(protected viewStateService: ViewStateService) {
-    // Let every puzzle be random for this one :D
-    this.puzzle = BoardConverter.toBoardArray(getSudoku('easy').puzzle);
-  }
+  constructor(protected viewStateService: ViewStateService) {}
 
   ngOnInit(): void {
+    // Generate a new easy puzzle on each load
+    this.puzzle = BoardConverter.toBoardArray(getSudoku('easy').puzzle);
     // Enable demo auto-accept for optimistic pending visualization (time attack sandbox)
     this.board.model.autoAcceptPending = true;
-    // Load puzzle onto the pre-initialized empty board
     this.board.loadPuzzle(this.puzzle);
   }
 }
