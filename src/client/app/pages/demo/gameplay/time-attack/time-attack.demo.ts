@@ -2,13 +2,13 @@ import { getSudoku } from 'sudoku-gen';
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardConverter from '@shared/mechanics/utils/BoardConverter';
-import AppView from '../../../types/app-view';
-import ViewStateService from '../../../services/view-state.service';
+import AppView from '../../../../types/app-view';
+import ViewStateService from '../../../../services/view-state.service';
 import UtilityButtonsHolderComponent 
-  from '../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
+  from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
 import NumericButtonsHolderComponent 
-  from '../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
-import BoardModelComponent from '../../../components/board/board.component';
+  from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
+import BoardModelComponent from '../../../../components/board/board.component';
 
 
 @Component({

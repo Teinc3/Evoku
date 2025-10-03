@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 
 import AppView from '../../types/app-view';
 import ViewStateService from '../../services/view-state.service';
-import TimeAttackDemoPageComponent from './time-attack/time-attack.demo';
-import NetworkDemoPageComponent from './network/network.demo';
-import DuelDemoPageComponent from './duel/duel.demo';
+import NetworkDemoPageComponent from './misc/network/network.demo';
+import TimeAttackDemoPageComponent from './gameplay/time-attack/time-attack.demo';
+import DuelDemoPageComponent from './gameplay/duel/duel.demo';
+import ProgressbarsDemoPageComponent from './components/progressbars/progressbars.demo';
+import BoardDemoPageComponent from './components/board/board.demo';
 import CatalogueDemoComponent from './catalogue/catalogue.demo';
-import BoardDemoPageComponent from './board/board.demo';
 
 
 @Component({
@@ -17,7 +18,8 @@ import BoardDemoPageComponent from './board/board.demo';
     NetworkDemoPageComponent, 
     TimeAttackDemoPageComponent, 
     CatalogueDemoComponent,
-    DuelDemoPageComponent
+    DuelDemoPageComponent,
+    ProgressbarsDemoPageComponent
   ],
   templateUrl: './demo.html',
   styleUrl: './demo.scss'

@@ -1,6 +1,6 @@
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
-import BoardModelComponent from '../../../components/board/board.component';
+import BoardModelComponent from '../../../../components/board/board.component';
 
 
 @Component({
