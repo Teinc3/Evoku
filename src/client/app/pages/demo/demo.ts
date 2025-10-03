@@ -4,6 +4,7 @@ import AppView from '../../types/app-view';
 import ViewStateService from '../../services/view-state.service';
 import TimeAttackDemoPageComponent from './time-attack/time-attack.demo';
 import NetworkDemoPageComponent from './network/network.demo';
+import DuelDemoPageComponent from './duel/duel.demo';
 import CatalogueDemoComponent from './catalogue/catalogue.demo';
 import BoardDemoPageComponent from './board/board.demo';
 
@@ -15,7 +16,8 @@ import BoardDemoPageComponent from './board/board.demo';
     BoardDemoPageComponent, 
     NetworkDemoPageComponent, 
     TimeAttackDemoPageComponent, 
-    CatalogueDemoComponent
+    CatalogueDemoComponent,
+    DuelDemoPageComponent
   ],
   templateUrl: './demo.html',
   styleUrl: './demo.scss'

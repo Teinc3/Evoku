@@ -6,7 +6,8 @@ export enum AppView {
   CATALOGUE,
   BOARD_DEMO,
   NETWORK_DEMO,
-  TIMEATTACK_DEMO
+  TIMEATTACK_DEMO,
+  DUEL_DEMO
 }
 
 export default AppView;
