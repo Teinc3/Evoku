@@ -5,7 +5,7 @@ import ViewStateService from '../../services/view-state.service';
 import NetworkDemoPageComponent from './misc/network/network.demo';
 import TimeAttackDemoPageComponent from './gameplay/time-attack/time-attack.demo';
 import DuelDemoPageComponent from './gameplay/duel/duel.demo';
-import ProgressbarsDemoPageComponent from './components/progressbars/progressbars.demo';
+import ProgressbarsDemoPageComponent from './components/progress-bars/progress-bars.demo';
 import BoardDemoPageComponent from './components/board/board.demo';
 import CatalogueDemoComponent from './catalogue/catalogue.demo';
 
