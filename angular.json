@@ -60,6 +60,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 3713
+          },
           "configurations": {
             "production": {
               "buildTarget": "Evoku:build:production"
