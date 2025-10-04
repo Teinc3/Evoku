@@ -48,7 +48,7 @@ export default class HTTPServer {
 
     // Serve static files from angular build
     // The user can choose to access the built (static) client or the development client
-    // by navigating to the appropriate port (e.g., 6942 for dev server, 8745 for this server)
+    // by navigating to the appropriate port (e.g., 3713 for dev server, 8745 for this server)
     this.app.use(express.static(clientDist));
 
     // Route everything back to index.html, client routing should fetch 404 if invalid

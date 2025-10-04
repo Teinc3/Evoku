@@ -6,7 +6,7 @@
       "name": "Debug Client",
       "type": "firefox",
       "request": "launch",
-      "url": "http://localhost:4200",
+      "url": "http://localhost:3713",
       "webRoot": "${workspaceFolder}",
       "pathMappings": [
         {
