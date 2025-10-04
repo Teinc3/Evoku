@@ -1,8 +1,8 @@
 enum CursorDirectionEnum {
-  UP = 'up',
-  DOWN = 'down',
-  LEFT = 'left',
-  RIGHT = 'right',
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT
 }
 
 export default CursorDirectionEnum;
