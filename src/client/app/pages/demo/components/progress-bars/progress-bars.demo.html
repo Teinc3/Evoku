@@ -1,1 +1,26 @@
-<h1>Progress Bars Demo</h1>
+<div class="horizontal-section">
+  <app-universal-progress-bar 
+    [colorGradient]="['#ff6b6b', '#4ecdc4']" 
+    [percentage]="75" 
+    [isVertical]="false"
+  >Player A [1239]</app-universal-progress-bar>
+  <app-universal-progress-bar
+    [colorGradient]="['#ff6b6b', '#4ecdc4']"
+    [percentage]="45"
+    [isVertical]="false"
+    [flipDirection]="true"
+  />
+</div>
+
+<div class="vertical-section">
+  <app-universal-progress-bar 
+    [colorGradient]="['#a8e6cf', '#ffd3a5']" 
+    [percentage]="70" 
+    [isVertical]="true"
+  />
+  <app-universal-progress-bar 
+    [colorGradient]="['#a8e6cf', '#ffd3a5']" 
+    [percentage]="30" 
+    [isVertical]="true"
+  />
+</div>

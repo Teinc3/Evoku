@@ -1,0 +1,40 @@
+/* Make the demo page component absolute positioned without flex properties */
+:host {
+	height: 100%;
+	width: 100%;
+  box-sizing: border-box;
+}
+
+.horizontal-section {
+  position: absolute;
+  top: 5%; // Percentage-based positioning relative to parent container
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5%;
+  height: 5%;
+
+  app-universal-progress-bar {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.vertical-section {
+  position: absolute;
+  bottom: 5%;
+  left: 3%;
+  right: 3%;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  height: 70%;
+
+  app-universal-progress-bar {
+    width: 4rem;
+    height: 100%;
+  }
+}

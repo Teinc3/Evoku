@@ -1,0 +1,149 @@
+.progress-container {
+  display: grid;
+  grid-template-areas: 'text' 'bar';
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  
+  .progress-bar {
+    box-sizing: border-box;
+  }
+
+  .text-content {
+    user-select: none;
+  }
+
+  &.vertical {
+    grid-template-areas: 'text' 'bar';
+    grid-template-rows: auto 1fr;
+
+    .text-content {
+      margin-bottom: 8px;
+      width: 100%;
+      color: #333;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .progress-bar {
+      grid-area: bar;
+      width: 100%;
+      /* Compute clamped percentage for clipping */
+      --pct-raw: calc(var(--pct, 0) * 1%);
+      --pct-clamped: clamp(0%, var(--pct-raw), 100%);
+      border: 2px solid black;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      background: transparent; /* keep unfilled area transparent */
+
+      /* Full-size gradient; reveal bottom portion via clip-path */
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, var(--gradient-start), var(--gradient-end));
+        clip-path: inset(calc(100% - var(--pct-clamped)) 0 0 0);
+        transition: clip-path 0.3s ease;
+        pointer-events: none;
+      }
+    }
+  }
+
+  &.horizontal {
+    /* Overlay text on top of the bar in one grid row */
+    grid-template-areas: 'bar';
+    grid-template-rows: 1fr;
+
+    .text-content {
+      grid-area: bar;
+      align-self: center;
+      justify-self: center;
+      color: black;
+      font-weight: bold;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .progress-bar {
+      grid-area: bar;
+      width: 100%;
+      height: 100%;
+      /* Compute clamped percentage for clipping */
+      --pct-raw: calc(var(--pct, 0) * 1%);
+      --pct-clamped: clamp(0%, var(--pct-raw), 100%);
+      border: 2px solid black;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      background: transparent; /* keep unfilled area transparent */
+
+      /* Full-size gradient; reveal left portion via clip-path */
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+        clip-path: inset(0 calc(100% - var(--pct-clamped)) 0 0);
+        transition: clip-path 0.3s ease;
+        pointer-events: none;
+      }
+    }
+
+    /* Horizontal host that contains projected label (optional) and percentage */
+    .bar-host {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+      pointer-events: none;
+      z-index: 3; /* above the gradient */
+    }
+
+    .bar-info {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding-left: 0.4rem;
+    }
+
+    .bar-percentage {
+      display: flex;
+      justify-content: center;
+    }
+
+    .bar-host > .projected-content {
+      align-self: center;
+      justify-self: start; /* align to left */
+      margin-left: 0.25rem;
+      z-index: 2; /* Above fill and border */
+      pointer-events: none; /* purely informational overlay */
+      padding: 0.06rem 0.25rem;
+      color: black;
+      font-weight: 600;
+      user-select: none;
+      width: auto;
+    }
+
+    .bar-host > .bar-percentage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* When there is no projected content, center the percentage fully */
+    .bar-host > .projected-content:empty + .bar-percentage {
+      margin-left: 0;
+    }
+
+    &.flipped {
+      .progress-bar::before {
+        background: linear-gradient(to left, var(--gradient-start), var(--gradient-end));
+        clip-path: inset(0 0 0 calc(100% - var(--pct-clamped)));
+      }
+    }
+  }
+}
