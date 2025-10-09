@@ -5,9 +5,26 @@
   width: 100%;
   height: 100%;
   position: relative;
-  
+
+  /* Shared bar visuals */
   .progress-bar {
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 3px solid black;
+
+    /* Compute clamped percentage for clipping (0-100%) */
+    --pct-raw: calc(var(--pct, 0) * 1%);
+    --pct-clamped: clamp(0%, var(--pct-raw), 100%);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transition: clip-path 0.3s ease;
+      pointer-events: none;
+    }
   }
 
   .text-content {
@@ -19,7 +36,7 @@
     grid-template-rows: auto 1fr;
 
     .text-content {
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
       width: 100%;
       color: #333;
       font-weight: bold;
@@ -29,24 +46,18 @@
     .progress-bar {
       grid-area: bar;
       width: 100%;
-      /* Compute clamped percentage for clipping */
-      --pct-raw: calc(var(--pct, 0) * 1%);
-      --pct-clamped: clamp(0%, var(--pct-raw), 100%);
-      border: 2px solid black;
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-      background: transparent; /* keep unfilled area transparent */
+      border-radius: 999px 999px 4px 4px; /* semicircle top */
 
-      /* Full-size gradient; reveal bottom portion via clip-path */
+      /* PUP Progress gradient (bottom -> top); reveal bottom portion */
       &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, var(--gradient-start), var(--gradient-end));
+        background: linear-gradient(
+          to top,
+          rgb(255, 0, 0) 0%,
+          rgb(255, 165, 0) 40%,
+          rgb(255, 165, 0) 60%,
+          rgb(255, 255, 0) 100%
+        );
         clip-path: inset(calc(100% - var(--pct-clamped)) 0 0 0);
-        transition: clip-path 0.3s ease;
-        pointer-events: none;
       }
     }
   }
@@ -70,24 +81,18 @@
       grid-area: bar;
       width: 100%;
       height: 100%;
-      /* Compute clamped percentage for clipping */
-      --pct-raw: calc(var(--pct, 0) * 1%);
-      --pct-clamped: clamp(0%, var(--pct-raw), 100%);
-      border: 2px solid black;
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-      background: transparent; /* keep unfilled area transparent */
+      border-radius: 10px 10px 10px 30px; /* stronger curve on bottom-right */
 
-      /* Full-size gradient; reveal left portion via clip-path */
+      /* Board Progress gradient (left -> right); reveal left portion */
       &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+        background: linear-gradient(
+          to right,
+          rgb(0, 155, 8) 0%,
+          rgb(38, 205, 0) 40%,
+          rgb(38, 205, 0) 60%,
+          rgb(77, 220, 48) 100%
+        );
         clip-path: inset(0 calc(100% - var(--pct-clamped)) 0 0);
-        transition: clip-path 0.3s ease;
-        pointer-events: none;
       }
     }
 
@@ -140,9 +145,19 @@
     }
 
     &.flipped {
-      .progress-bar::before {
-        background: linear-gradient(to left, var(--gradient-start), var(--gradient-end));
-        clip-path: inset(0 0 0 calc(100% - var(--pct-clamped)));
+      .progress-bar {
+        border-radius: 10px 10px 30px 10px;
+
+        &::before {
+          background: linear-gradient(
+            to left,
+            rgb(0, 155, 8) 0%,
+            rgb(38, 205, 0) 40%,
+            rgb(38, 205, 0) 60%,
+            rgb(77, 220, 48) 100%
+          );
+          clip-path: inset(0 0 0 calc(100% - var(--pct-clamped)));
+        }
       }
     }
   }

@@ -9,7 +9,6 @@ import { Component, Input } from '@angular/core';
   styleUrl: './universal-progress-bar.component.scss'
 })
 export default class UniversalProgressBarComponent {
-  @Input() colorGradient: [string, string] = ['#000', '#fff'];
   @Input() percentage: number = 0;
   @Input() isVertical: boolean = false;
   @Input() flipDirection: boolean = false;
