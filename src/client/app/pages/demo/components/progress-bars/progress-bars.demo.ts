@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import AppView from '../../../../types/app-view';
+import AppView from '../../../../types/app-view.enum';
 import ViewStateService from '../../../../services/view-state.service';
 import UniversalProgressBarComponent
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';

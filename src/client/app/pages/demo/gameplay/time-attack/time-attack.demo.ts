@@ -2,7 +2,7 @@ import { getSudoku } from 'sudoku-gen';
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardConverter from '@shared/mechanics/utils/BoardConverter';
-import AppView from '../../../../types/app-view';
+import AppView from '../../../../types/app-view.enum';
 import ViewStateService from '../../../../services/view-state.service';
 import UtilityButtonsHolderComponent 
   from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
