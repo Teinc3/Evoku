@@ -1,0 +1,16 @@
+<div class="horizontal-section">
+  <app-universal-progress-bar
+    [percentage]="boardProgress1"
+    [isVertical]="false"
+  >[NERD] Player 1 (1234)</app-universal-progress-bar>
+
+  <app-universal-progress-bar
+    [percentage]="boardProgress2"
+    [isVertical]="false"
+    [flipDirection]="true"
+  >[Goon] Player 2 (5678)</app-universal-progress-bar>
+</div>
+<app-phase-timer
+  [timeMs]="phaseTimeMs"
+  [percentage]="43"
+/>
