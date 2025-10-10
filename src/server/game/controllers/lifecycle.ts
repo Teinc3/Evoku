@@ -1,5 +1,6 @@
 import MatchStatus from "../../types/enums/matchstatus";
 import GameOverReason from "../../../shared/types/enums/GameOverReason";
+import ProtocolActions from "../../../shared/types/enums/actions/match/protocol";
 import LifecycleActions from "../../../shared/types/enums/actions/match/lifecycle";
 
 import type { GameLogicCallbacks } from "../../types/gamelogic";
@@ -103,6 +104,14 @@ export default class LifecycleController {
   private onBoardProgressUpdate(progressData: { playerID: number; progress: number }[]): void {
     if (this.status !== MatchStatus.ONGOING) {
       return;
+    }
+
+    // Broadcast board progress updates to all players
+    for (const { playerID, progress } of progressData) {
+      this.room.broadcast(ProtocolActions.BOARD_PROGRESS, {
+        playerID,
+        boardProgress: progress
+      });
     }
 
     // Check for game completion (100% progress)

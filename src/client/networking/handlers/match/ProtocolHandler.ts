@@ -12,6 +12,7 @@ export default class ProtocolHandler extends EnumHandler<ProtocolActions> {
     const handlerMap = {
       [ProtocolActions.PING]: this.handlePing,
       [ProtocolActions.REJECT_ACTION]: this.handleRejectAction,
+      [ProtocolActions.BOARD_PROGRESS]: this.handleBoardProgress,
     };
 
     this.setHandlerMap(handlerMap);
@@ -25,5 +26,10 @@ export default class ProtocolHandler extends EnumHandler<ProtocolActions> {
   private handleRejectAction(_data: AugmentAction<ProtocolActions.REJECT_ACTION>): void {
     // Handle action rejection from server
     console.debug('Server rejected an action');
+  }
+
+  private handleBoardProgress(_data: AugmentAction<ProtocolActions.BOARD_PROGRESS>): void {
+    // Handle board progress update from server
+    // TODO: Update game state with board progress information
   }
 }
