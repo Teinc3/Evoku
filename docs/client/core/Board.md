@@ -31,7 +31,7 @@ See also:
 
 - Board tracks a `selected` signal (index | null).
 - When a child cell emits `(selected)` with its index:
-  - Board updates `selected` and emits `selectedIndexChange`.
+  - Board updates `selected`.
   - The template applies `[class.selected]="selected() === i"` on each `app-cell-model` so selection is purely declarative (no direct access to child instances).
 - The selected cell gets a visual outline via the `.selected` class applied by the parent binding.
 
@@ -64,23 +64,19 @@ These methods combine with server-side validation/confirmation in real gameplay 
 ## Minimal Usage
 
 ```html
-<app-board-model [puzzle]="puzzle" (selectedIndexChange)="onSelect($event)"></app-board-model>
+<app-board-model></app-board-model>
 ```
 
 ```ts
-// Component TS
-puzzle: number[] = [... 81 entries ...];
-
-onSelect(i: number) {
-  // update UI, controls, etc.
-}
+// Component TS - Access board instance via template reference if needed:
+// <app-board-model #board></app-board-model>
+// Then use board.model, board.selected(), etc.
 ```
 
 ## Key APIs
 
 - BoardModelComponent
   - Inputs: `puzzle: ReadonlyArray<number>`
-  - Outputs: `selectedIndexChange: EventEmitter<number>`
   - Methods for gameplay wiring:
     - `setPendingSelected(value: number, time?: number): boolean`
     - `confirmSelected(time?: number): boolean`

@@ -1,7 +1,5 @@
 import {
   Component,
-  EventEmitter,
-  Output,
   signal,
   HostListener,
   type OnInit,
@@ -30,9 +28,6 @@ export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   public readonly model: ClientBoardModel;
   public isNoteMode = false;
-
-  @Output()
-  selectedIndexChange = new EventEmitter<number>();
 
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
@@ -207,6 +202,5 @@ export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
   /** Handler when cell is clicked */
   public onCellSelected(i: number): void {
     this.selected.set(i);
-    this.selectedIndexChange.emit(i);
   }
 }
