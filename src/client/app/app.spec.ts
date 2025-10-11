@@ -6,7 +6,6 @@ import AppView from './types/app-view.enum';
 import ViewStateService from './services/view-state.service';
 import NetworkService from './services/network.service';
 import DynamicFaviconService from './services/dynamic-favicon.service';
-import { APP_CONFIG, AppConfig } from './config';
 import App from './app';
 
 
@@ -17,7 +16,6 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        { provide: APP_CONFIG, useValue: AppConfig },
         { provide: WebSocketService, useFactory: () => new WebSocketService() },
         NetworkService,
         DynamicFaviconService,
