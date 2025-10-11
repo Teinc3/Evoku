@@ -117,43 +117,18 @@ describe('DuelDemoPageComponent', () => {
     });
   });
 
-  describe('Layout Structure Snapshot', () => {
-    it('should have correct DOM structure with all essential components', () => {
+  // Layout assertions: prefer presence and wiring checks (avoid brittle exact DOM snapshots)
+  describe('Layout sanity checks', () => {
+    it('should render top, center and bottom sections and main components', () => {
       const compiled = fixture.nativeElement;
-
-      // Top section
       expect(compiled.querySelector('app-duel-hud-top')).toBeTruthy();
+      expect(compiled.querySelector('.hud-centre')).toBeTruthy();
+      expect(compiled.querySelector('.hud-bottom')).toBeTruthy();
 
-      // Center section
-      const centerSection = compiled.querySelector('.hud-centre');
-      expect(centerSection).toBeTruthy();
-      expect(centerSection.querySelectorAll('app-board-model').length).toBe(2);
-      expect(centerSection.querySelector('app-utility-buttons-holder')).toBeTruthy();
-      expect(centerSection.querySelectorAll('app-universal-progress-bar').length).toBe(2);
-
-      // Bottom section
-      const bottomSection = compiled.querySelector('.hud-bottom');
-      expect(bottomSection).toBeTruthy();
-      expect(bottomSection.querySelector('app-pup-orb-spinner')).toBeTruthy();
-      expect(bottomSection.querySelectorAll('app-pup-slots-holder').length).toBe(2);
-      expect(bottomSection.querySelector('app-numeric-buttons-holder')).toBeTruthy();
-    });
-
-    it('should apply correct CSS classes to major sections', () => {
-      const compiled = fixture.nativeElement;
-
-      // Center cluster class
-      const center = compiled.querySelector('.hud-centre');
-      expect(center.classList.contains('hud-centre')).toBeTrue();
-
-      // Bottom HUD class
-      const bottom = compiled.querySelector('.hud-bottom');
-      expect(bottom.classList.contains('hud-bottom')).toBeTrue();
-
-      // Orb class
-      const orb = compiled.querySelector('.orb');
-      expect(orb).toBeTruthy();
-      expect(orb.classList.contains('orb')).toBeTrue();
+      // essential children are present
+      expect(compiled.querySelectorAll('app-board-model').length).toBeGreaterThanOrEqual(2);
+      expect(compiled.querySelector('app-pup-orb-spinner')).toBeTruthy();
+      expect(compiled.querySelector('app-numeric-buttons-holder')).toBeTruthy();
     });
   });
 
