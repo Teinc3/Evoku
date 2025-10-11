@@ -9,7 +9,7 @@ import NumericButtonComponent from '../numeric-button/numeric-button.component';
   standalone: true,
   imports: [CommonModule, NumericButtonComponent],
   templateUrl: './numeric-buttons-holder.component.html',
-  styleUrls: ['./numeric-buttons-holder.component.scss'],
+  styleUrl: './numeric-buttons-holder.component.scss',
 })
 export default class NumericButtonsHolderComponent {
   @Output()
