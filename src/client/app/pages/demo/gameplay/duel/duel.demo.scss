@@ -1,8 +1,73 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
 app-duel-hud-top {
-  position: absolute;
-  top: 0;
-  left: 55%;
-  transform: translateX(-55%);
-  width: 80%;
+  flex: 0 0 10%;
+  width: 90%;
   height: 10%;
+  margin-bottom: 5%;
+}
+
+.hud-centre {
+  flex: 1 1 auto;
+  /* Ratios used to derive widths from height (no deformation) */
+  --bar-r: 0.1;   /* bar width = --bar-r * height */
+  --util-r: 0.18; /* utility width = --util-r * height */
+  --gaps: 4;      /* number of gaps between 5 items */
+  --gap-x: 16px;  /* equal gap between items */
+  --width-factor: calc(2 + (2 * var(--bar-r)) + var(--util-r)); /* width/height ratio for cluster */
+
+  /* Let the cluster size itself from available width (so items shrink when width is tight).
+     width/height = --width-factor, therefore height = width / --width-factor. Cap height to 75%. */
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: var(--width-factor); /* enforces height derived from width */
+  max-height: 75%; /* cap so it never becomes taller than the surrounding area */
+  margin: 0 auto;
+
+  /* Grid: five columns sized by content, centered with fixed equal gaps */
+  display: grid;
+  grid-auto-flow: column;
+  /* Allow columns to shrink below their content's intrinsic size when necessary.
+    Using `auto` with `min-width: 0` on children permits the aspect-ratio-driven
+    layout to reduce sizes further instead of hitting a hard cutoff. */
+  grid-auto-columns: auto;
+  justify-content: center; /* center the whole cluster */
+  align-items: end;      /* align items to the bottom so boards/utilities sit on the same baseline as bars */
+  column-gap: var(--gap-x); /* equal spacing */
+  padding: 0 1%;
+
+  /* Vertical progress bars: derive width from height via aspect-ratio */
+  app-universal-progress-bar {
+    height: 100%;
+    aspect-ratio: var(--bar-r);
+    transform: translateY(-5%);
+  }
+
+  /* Boards: perfect squares, capped by container height */
+  app-board-model {
+    aspect-ratio: 1 / 1; /* square board */
+    align-self: end;
+  }
+
+  /* Utility cluster: width proportional to height, non-deforming */
+  app-utility-buttons-holder {
+    height: 100%;
+    aspect-ratio: var(--util-r);
+  }
+
+  /* Permit any direct child to shrink below its intrinsic content size when necessary.
+     This is important for grid/flex children to avoid an unshrinkable minimum width. */
+  * {
+    min-width: 0;
+  }
+}
+
+.hud-bottom {
+  flex: 0 0 15%;
+  height: 15%;
 }
