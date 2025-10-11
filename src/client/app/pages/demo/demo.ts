@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import AppView from '../../types/app-view.enum';
 import ViewStateService from '../../services/view-state.service';
+import AppView from '../../../types/enums/app-view.enum';
 import NetworkDemoPageComponent from './misc/network/network.demo';
 import TimeAttackDemoPageComponent from './gameplay/time-attack/time-attack.demo';
 import DuelDemoPageComponent from './gameplay/duel/duel.demo';
