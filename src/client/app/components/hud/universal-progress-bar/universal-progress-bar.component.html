@@ -1,0 +1,26 @@
+<div class="progress-container"
+  [class.vertical]="isVertical"
+  [class.horizontal]="!isVertical"
+  [class.flipped]="flipDirection && !isVertical"
+>
+  <!-- Percentage label for vertical mode only; position depends on mode -->
+  @if (isVertical) {
+    <div class="text-content">
+      {{ percentage }}%
+    </div>
+  }
+
+  <div class="progress-bar" [style.--pct]="percentage">
+    <!-- Horizontal-only host that stacks projected info and the percentage text -->
+    @if (!isVertical) {
+      <div class="bar-host">
+        <div class="projected-content">
+          <ng-content></ng-content>
+        </div>
+        <div class="bar-percentage">
+          <span class="text-content">{{ percentage }}%</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

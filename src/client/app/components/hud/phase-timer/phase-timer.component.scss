@@ -1,0 +1,47 @@
+.timer-svg {
+  position: relative;
+	z-index: 5; /* above bars */
+  max-height: 100%;
+  width: 100%;
+	pointer-events: none;
+
+	/* Base styling for the arc border */
+	.arc-border {
+		fill: none;
+		stroke: black;
+		stroke-width: 4;
+		stroke-linecap: round;
+	}
+
+	/* Background fill behind the arc (semicircle) */
+	.time-fill {
+		/* Ensure the fill is rendered beneath the border and progress stroke */
+		fill-opacity: 1;
+		stroke: none;
+		/* place early in DOM so it renders beneath; no pointer-events */
+		pointer-events: none;
+	}
+
+	/* Progress stroke around bottom arc */
+	.arc-progress {
+		fill: none;
+		stroke: url(#progressGrad);
+		stroke-width: 12; /* fixed width fill around the arc */
+		stroke-linecap: butt;
+	}
+
+	/* Markers at both ends of the arc */
+	.markers polygon {
+		fill: black;
+	}
+
+	/* Centered timer text */
+	.time {
+		font-weight: 600;
+		font-size: 1.25rem;
+		text-anchor: middle;
+		dominant-baseline: middle;
+		color: black;
+    user-select: none;
+	}
+}

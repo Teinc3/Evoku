@@ -7,11 +7,11 @@ import {
   type OnDestroy,
 } from '@angular/core';
 
-import SudokuCellComponent from '../cell/cell.component';
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import CursorDirectionEnum from '../../../types/cursor-direction.enum';
 import ClientBoardModel from '../../../models/Board';
+import SudokuCellComponent from './cell/cell.component';
 
 import type { WritableSignal } from '@angular/core';
 import type ClientCellModel from '../../../models/Cell';

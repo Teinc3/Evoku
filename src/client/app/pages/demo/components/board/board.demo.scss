@@ -1,0 +1,39 @@
+.resizable-container {
+  resize: both;
+  overflow: hidden;
+  border: 5px dashed #808080;
+  display: flex; /* Behave like an inline element but use flex for children */
+  justify-content: center;
+  align-items: center;
+  min-width: 200px;
+  min-height: 200px;
+  height: 100%;
+  max-width: 100%;
+  /* Allow container queries so we can compare width vs height */
+  container-type: size;
+  box-sizing: border-box;
+
+  app-board-model {
+    /* Neutral default: let the board size from its intrinsic layout but never exceed container */
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+/* If the container is wider than it is tall, make the board fill the container height */
+@container (min-aspect-ratio: 1 / 1) {
+  .resizable-container > app-board-model {
+    height: 100%;
+    width: auto;
+  }
+}
+
+/* If the container is taller than it is wide, make the board fill the container width */
+@container (max-aspect-ratio: 1 / 1) {
+  .resizable-container > app-board-model {
+    width: 100%;
+    height: auto;
+  }
+}

@@ -1,10 +1,9 @@
 import { By } from '@angular/platform-browser';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 
 import SudokuCellComponent from './cell.component';
 
-import type { ComponentFixture } from '@angular/core/testing';
-import type ClientCellModel from 'src/client/models/Cell';
+import type ClientCellModel from '../../../../models/Cell';
 
 
 // Minimal mock for the ClientCellModel interface used by the component

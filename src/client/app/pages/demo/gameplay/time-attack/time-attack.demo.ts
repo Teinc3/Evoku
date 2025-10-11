@@ -2,13 +2,18 @@ import { getSudoku } from 'sudoku-gen';
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardConverter from '@shared/mechanics/utils/BoardConverter';
-import AppView from '../../../types/app-view';
-import ViewStateService from '../../../services/view-state.service';
+import AppView from '../../../../types/app-view.enum';
+import ViewStateService from '../../../../services/view-state.service';
+import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
+import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
+import UniversalProgressBarComponent
+  from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
+import PhaseTimerComponent from '../../../../components/hud/phase-timer/phase-timer.component';
 import UtilityButtonsHolderComponent 
-  from '../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
+  from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
 import NumericButtonsHolderComponent 
-  from '../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
-import BoardModelComponent from '../../../components/board/board.component';
+  from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
+import BoardModelComponent from '../../../../components/board/board.component';
 
 
 @Component({
@@ -18,6 +23,10 @@ import BoardModelComponent from '../../../components/board/board.component';
     BoardModelComponent,
     NumericButtonsHolderComponent,
     UtilityButtonsHolderComponent,
+    PhaseTimerComponent,
+    UniversalProgressBarComponent,
+    PupOrbSpinnerComponent,
+    PupSlotsHolderComponent,
   ],
   templateUrl: './time-attack.demo.html',
   styleUrl: './time-attack.demo.scss',

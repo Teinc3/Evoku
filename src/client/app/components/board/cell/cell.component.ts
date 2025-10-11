@@ -2,9 +2,9 @@ import {
   Component, EventEmitter, Input, Output, DoCheck, type OnDestroy,
 } from '@angular/core';
 
-import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
+import CooldownAnimationHelper from '../../../utils/cooldown-animation-helper';
 
-import type ClientCellModel from '../../../models/Cell';
+import type ClientCellModel from '../../../../models/Cell';
 
 
 @Component({

@@ -1,0 +1,35 @@
+<!--Hud at the top-->
+<app-duel-hud-top
+	[boardProgress1]="60"
+	[boardProgress2]="45"
+	[phaseTimeMs]="97000"
+></app-duel-hud-top>
+
+<!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->
+<div class="hud-centre">
+  <app-universal-progress-bar
+    [percentage]="60"
+    [isVertical]="true"
+  />
+  <app-board-model
+    #board1
+  />
+  <app-utility-buttons-holder/>
+  <app-board-model
+    #board2
+  />
+  <app-universal-progress-bar
+    [percentage]="80"
+    [isVertical]="true"
+  />
+</div>
+
+<!-- Bottom HUD -->
+<div class="hud-bottom">
+  <div class="my-pup">
+    <app-pup-orb-spinner/>
+    <app-pup-slots-holder/>
+  </div>
+  <app-numeric-buttons-holder/>
+  <app-pup-slots-holder/>
+</div>

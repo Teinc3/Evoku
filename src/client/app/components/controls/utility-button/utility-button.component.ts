@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './utility-button.component.html',
-  styleUrls: ['./utility-button.component.scss'],
+  styleUrl: './utility-button.component.scss',
 })
 export default class UtilityButtonComponent {
   @Input() 

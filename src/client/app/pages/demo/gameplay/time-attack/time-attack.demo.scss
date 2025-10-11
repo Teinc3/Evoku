@@ -1,0 +1,81 @@
+/* Phase timer at top: 10vh height + 5vh bottom margin */
+app-phase-timer {
+  display: block;
+  height: 10vh;
+  margin-bottom: 5vh;
+  width: 100%;
+}
+
+/* Center section: PUP bar | board | utilities | board bar */
+.board-and-utilities {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: end;
+  height: 65vh;
+  gap: 2rem;
+
+  app-board-model {
+    flex: 0 1 0;
+    height: 100%;
+  }
+
+  app-utility-buttons-holder {
+    height: 100%;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* PUP progress bar on the left */
+  .pup-bar {
+    height: 105%;
+    width: auto;
+    aspect-ratio: 0.08;
+  }
+
+  /* Board progress bar on the right - add distance from utilities */
+  .board-bar {
+    height: 105%;
+    width: auto;
+    aspect-ratio: 0.08;
+    margin-right: 2rem;
+  }
+}
+
+/* Bottom HUD: orb | slots | numeric buttons (mostly centered but shifted right) */
+.bottom-hud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20vh;
+  gap: 1rem;
+  padding: 0 2rem;
+  box-sizing: border-box;
+
+  .orb {
+    height: 60%;
+    aspect-ratio: 1 / 1;
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  app-pup-slots-holder {
+    height: 100%;
+    flex: 0 0 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  app-numeric-buttons-holder {
+    /* Shift numeric buttons slightly to the right but keep mostly centered */
+    flex: 1 1 auto;
+    max-width: 650px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 1vw;
+  }
+}

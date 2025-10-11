@@ -1,0 +1,42 @@
+.slot {
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, rgb(245, 245, 245) 0%, rgb(150, 150, 150) 80%);
+  border: 3px solid #000;
+  overflow: visible;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  transform-origin: center;
+  cursor: pointer;
+}
+
+.slot.pending {
+  filter: brightness(50%);
+}
+
+.slot:hover,
+.slot:focus-visible {
+  transform: translateY(-3%) scale(1.05);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+  z-index: 5;
+}
+
+/* Locked styling can be added later when assets are available */
+
+.level {
+  position: absolute;
+  top: -20%;
+  right: -20%;
+  min-height: 50%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  background: rgb(240, 240, 240);
+  border: 3px solid #000;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 100%;
+  z-index: 2;
+}

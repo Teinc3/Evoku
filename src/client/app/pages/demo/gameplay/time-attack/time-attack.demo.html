@@ -1,0 +1,31 @@
+<!-- Phase timer at top (10vh height + 5vh margin-bottom) -->
+<app-phase-timer [timeMs]="120000" [percentage]="50" />
+
+<!-- Center section: PUP progress bar | board | utilities | board progress bar -->
+<div class="board-and-utilities">
+  <app-universal-progress-bar
+    [percentage]="60"
+    [isVertical]="true"
+    class="pup-bar"
+  />
+  <app-board-model #board></app-board-model>
+  <app-universal-progress-bar
+    [percentage]="45"
+    [isVertical]="true"
+    class="board-bar"
+  />
+  <app-utility-buttons-holder
+    (quitClick)="viewStateService.navigateToView(AppView.CATALOGUE)"
+    (utilityClick)="board.onUtilityAction($event)"
+    [noteModeActive]="board.isNoteMode"
+  ></app-utility-buttons-holder>
+</div>
+
+<!-- Bottom section: orb | slots | numeric buttons (centered but shifted right) -->
+<div class="bottom-hud">
+  <app-pup-orb-spinner class="orb" />
+  <app-pup-slots-holder />
+  <app-numeric-buttons-holder
+    (numberClick)="board.parseNumberKey($event)"
+  ></app-numeric-buttons-holder>
+</div>

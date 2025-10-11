@@ -1,0 +1,49 @@
+<svg class="timer-svg" viewBox="-55 0 110 55" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <!-- Progress arc gradient (green family like board progress) -->
+    <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgb(0, 155, 8)"/>
+      <stop offset="40%" stop-color="rgb(38, 205, 0)"/>
+      <stop offset="60%" stop-color="rgb(38, 205, 0)"/>
+      <stop offset="100%" stop-color="rgb(77, 220, 48)"/>
+    </linearGradient>
+
+    <!-- Time-display background gradient (single semicircle fill) -->
+    <linearGradient id="timeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgb(27, 109, 219)" />
+      <stop offset="40%" stop-color="rgb(47, 169, 249)" />
+      <stop offset="60%" stop-color="rgb(47, 169, 249)" />
+      <stop offset="100%" stop-color="rgb(112, 188, 255)" />
+    </linearGradient>
+
+      <!-- Bottom semicircle arcs; outer radius aligns with band outer edge -->
+      <!-- Outer edge (border) radius: 50 -->
+      <path id="bottomArcOuter" d="M -50 0 A 50 50 0 0 0 50 0" pathLength="100" />
+      <!-- Band centerline radius: 44 (bandWidth ~12 => outer edge ~50) -->
+      <path id="bottomArcBand" d="M -44 0 A 44 44 0 0 0 44 0" stroke-width="8" pathLength="100" />
+  </defs>
+
+  <!-- Single semicircle background behind the arc using one gradient -->
+  <use href="#bottomArcOuter" class="time-fill" fill="url(#timeGrad)" />
+
+  <!-- Outer border of the lower hemisphere -->
+    <use href="#bottomArcOuter" class="arc-border" />
+
+  <!-- Progress fill along the arc -->
+    <use href="#bottomArcBand" class="arc-progress"
+        [attr.stroke-dasharray]="100"
+        [attr.stroke-dashoffset]="dashOffset()" />
+
+  <!-- Phase start markers (triangles pointing outward), placed at ~60° and ~120° along the bottom arc -->
+  <g class="markers">
+    <g [attr.transform]="markerLeftTransform()">
+      <polygon points="0,0 -10,-2 -10,2" />
+    </g>
+    <g [attr.transform]="markerRightTransform()">
+      <polygon points="0,0 -10,-2 -10,2" />
+    </g>
+  </g>
+
+  <!-- Centered time text -->
+  <text class="time" x="0" y="19">{{ timeText() }}</text>
+</svg>

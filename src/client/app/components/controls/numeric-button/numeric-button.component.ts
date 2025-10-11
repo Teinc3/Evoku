@@ -5,7 +5,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-numeric-button',
   standalone: true,
   templateUrl: './numeric-button.component.html',
-  styleUrls: ['./numeric-button.component.scss'],
+  styleUrl: './numeric-button.component.scss',
 })
 export default class NumericButtonComponent {
   @Input()
