@@ -162,6 +162,11 @@ describe('DuelDemoPageComponent', () => {
         By.css('.hud-centre app-universal-progress-bar')
       );
       expect(centerBars.length).toBe(2);
+      
+      // Verify that center bars have isVertical = true
+      centerBars.forEach(bar => {
+        expect(bar.componentInstance.isVertical).toBe(true);
+      });
     });
   });
 });

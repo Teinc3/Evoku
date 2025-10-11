@@ -10,5 +10,5 @@ import PupSlotComponent from '../pup-slot/pup-slot.component';
   templateUrl: './pup-slots-holder.html',
   styleUrl: './pup-slots-holder.scss'
 })
-export default class PupSlotsHolder {
+export default class PupSlotsHolderComponent {
 }

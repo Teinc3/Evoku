@@ -10,7 +10,7 @@ import PUPOrbState from '../../../../types/pup-orb-state.enum';
   styleUrl: './pup-orb-spinner.scss'
 })
 export default class PupOrbSpinnerComponent {
-  @Input() 
+  // Change to input in the future when wiring everything up
   state: PUPOrbState = PUPOrbState.IDLE;
   @Input() 
   disabled = false;

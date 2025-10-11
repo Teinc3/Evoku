@@ -7,6 +7,7 @@ import PhaseTimerComponent from '../phase-timer/phase-timer.component';
 
 @Component({
   selector: 'app-duel-hud-top',
+  standalone: true,
   imports: [UniversalProgressBarComponent, PhaseTimerComponent],
   templateUrl: './duel-hud-top.html',
   styleUrl: './duel-hud-top.scss'

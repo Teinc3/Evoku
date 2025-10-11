@@ -60,7 +60,7 @@ app-duel-hud-top {
 
   /* Permit any direct child to shrink below its intrinsic content size when necessary.
      This is important for grid/flex children to avoid an unshrinkable minimum width. */
-  * {
+  > * {
     min-width: 0;
   }
 }

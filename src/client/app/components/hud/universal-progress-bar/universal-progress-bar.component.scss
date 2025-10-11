@@ -102,17 +102,11 @@
       inset: 0;
       display: flex;
       flex-direction: row;
-      justify-content: space-evenly;
+      justify-content: center;
       align-items: center;
+      gap: 15%;
       pointer-events: none;
       z-index: 3; /* above the gradient */
-    }
-
-    .bar-info {
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      padding-left: 0.4rem;
     }
 
     .bar-percentage {
@@ -122,13 +116,13 @@
 
     .bar-host > .projected-content {
       align-self: center;
-      justify-self: start; /* align to left */
       margin-left: 0.25rem;
       z-index: 2; /* Above fill and border */
       pointer-events: none; /* purely informational overlay */
       padding: 0.06rem 0.25rem;
       color: black;
       font-weight: 600;
+      font-size: 1.2rem;
       user-select: none;
       width: auto;
     }
@@ -137,6 +131,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      font-size: 1.2rem;
     }
 
     /* When there is no projected content, center the percentage fully */

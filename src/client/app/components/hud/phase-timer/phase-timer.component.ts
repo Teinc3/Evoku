@@ -11,6 +11,9 @@ import { Component, Input, computed, signal } from '@angular/core';
 export default class PhaseTimerComponent {
   // Geometry constants (SVG units, must match template)
   private static readonly OUTER_RADIUS = 50;
+  private static readonly MARKER_LEFT_ANGLE = 150;
+  private static readonly MARKER_RIGHT_ANGLE = 210;
+
   /** Time in milliseconds to display as mm:ss (floored). */
   @Input()
   set timeMs(value: number) {
@@ -43,13 +46,13 @@ export default class PhaseTimerComponent {
     return `${mmStr}:${ssStr}`;
   });
 
-  /** Marker helpers: place at 150° and 241° */
+  /** Marker helpers: place at 150° and 210° */
   protected markerLeftTransform(): string {
-    return this.markerTransformForClockAngle(150);
+    return this.markerTransformForClockAngle(PhaseTimerComponent.MARKER_LEFT_ANGLE);
   }
 
   protected markerRightTransform(): string {
-    return this.markerTransformForClockAngle(210);
+    return this.markerTransformForClockAngle(PhaseTimerComponent.MARKER_RIGHT_ANGLE);
   }
 
   private markerTransformForClockAngle(clockDeg: number): string {
@@ -59,8 +62,7 @@ export default class PhaseTimerComponent {
     const r = PhaseTimerComponent.OUTER_RADIUS;
     const x = r * Math.cos(rad);
     const y = r * Math.sin(rad);
-    // Apply translate first, then rotate about the marker origin (x,y)
-    // Rightmost operation runs first in SVG, so rotate(x,y) then translate(x,y)
-    return `rotate(${svgDeg} ${x} ${y}) translate(${x} ${y})`;
+    // Translate to the point on the circle, then rotate into position.
+    return `translate(${x} ${y}) rotate(${svgDeg})`;
   }
 }

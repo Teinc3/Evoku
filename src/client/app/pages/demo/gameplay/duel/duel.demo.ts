@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import PupSlotsHolder from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
+import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
@@ -21,12 +21,11 @@ import BoardModelComponent from '../../../../components/board/board.component';
     UniversalProgressBarComponent, 
     UtilityButtonsHolderComponent, 
     NumericButtonsHolderComponent,
-    PupSlotsHolder,
+    PupSlotsHolderComponent,
     PupOrbSpinnerComponent
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'
 })
 export default class DuelDemoPageComponent {
-  //@ViewChild()
 }
