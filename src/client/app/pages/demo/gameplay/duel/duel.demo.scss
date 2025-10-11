@@ -8,14 +8,13 @@
 app-duel-hud-top {
   flex: 0 0 10%;
   width: 90%;
-  height: 10%;
-  margin-bottom: 5%;
+  margin-bottom: 3%;
 }
 
 .hud-centre {
   flex: 1 1 auto;
   /* Ratios used to derive widths from height (no deformation) */
-  --bar-r: 0.1;   /* bar width = --bar-r * height */
+  --bar-r: 0.08;   /* bar width = --bar-r * height */
   --util-r: 0.18; /* utility width = --util-r * height */
   --gaps: 4;      /* number of gaps between 5 items */
   --gap-x: 16px;  /* equal gap between items */
@@ -26,8 +25,8 @@ app-duel-hud-top {
   box-sizing: border-box;
   width: 100%;
   aspect-ratio: var(--width-factor); /* enforces height derived from width */
+  min-height: 0%;
   max-height: 75%; /* cap so it never becomes taller than the surrounding area */
-  margin: 0 auto;
 
   /* Grid: five columns sized by content, centered with fixed equal gaps */
   display: grid;
@@ -39,13 +38,12 @@ app-duel-hud-top {
   justify-content: center; /* center the whole cluster */
   align-items: end;      /* align items to the bottom so boards/utilities sit on the same baseline as bars */
   column-gap: var(--gap-x); /* equal spacing */
-  padding: 0 1%;
+  padding: 0 1rem;
 
   /* Vertical progress bars: derive width from height via aspect-ratio */
   app-universal-progress-bar {
-    height: 100%;
+    height: 105%;
     aspect-ratio: var(--bar-r);
-    transform: translateY(-5%);
   }
 
   /* Boards: perfect squares, capped by container height */
@@ -69,5 +67,13 @@ app-duel-hud-top {
 
 .hud-bottom {
   flex: 0 0 15%;
-  height: 15%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+
+  app-numeric-buttons-holder {
+    display: block;
+    width: 50%;
+  }
 }
