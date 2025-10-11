@@ -2,7 +2,10 @@
   display: grid;
   place-items: center;
   width: 100%;
-  height: 8vh;
+  /* Let the host size itself but cap its height so it doesn't take the full HUD height */
+  height: auto;
+  max-height: 80%;
+  align-self: center;
 }
 
 .slots {
@@ -10,11 +13,18 @@
   justify-content: center;
   gap: 1rem;
   align-items: center;
-  height: 100%;
+  height: auto;
 }
 
 .slots > app-pup-slot {
-  height: 100%;
+  /* Responsive sizing: use vmin so slots shrink with the smaller viewport axis.
+     Allow some grow so slots can expand when HUD has space. Use a slightly larger
+     max to avoid being overly small on wide screens. */
+  width: clamp(16px, 6vmin, 64px);
   aspect-ratio: 1 / 1;
-  min-width: 48px;
+  min-width: 16px;
+  /* allow gentle growth but keep sizing mostly fixed-to-aspect */
+  flex: 0 1 auto;
+  /* Let the slot size come from its clamp and aspect-ratio (don't force full holder height) */
+  height: auto;
 }

@@ -72,32 +72,41 @@ app-duel-hud-top {
   justify-content: space-between;
   align-content: center;
   align-items: center;
-  gap: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   box-sizing: border-box;
 
-  .left-area {
-    width: 100%;
-    height: 100%;
+  .my-pup {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
-  .left-area .orb {
-    height: 80%;
+  app-pup-orb-spinner {
+    height: 10vh;
     aspect-ratio: 1 / 1;
   }
 
   app-numeric-buttons-holder {
     display: block;
-    flex: 5 0 50%;
+    /* Reduce basis so it doesn't dominate; prevent growing beyond its basis. */
+    flex: 0 1 45%;
+    min-width: 0;
   }
 
   app-pup-slots-holder {
-    flex: 2 0 20;
+    /* Derive size from HUD height so children can be sized correctly */
+    height: 100%;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+  /* Slightly smaller horizontal gaps so items fit better on narrow viewports */
+  gap: 0.75rem;
 }
