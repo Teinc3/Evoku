@@ -81,6 +81,34 @@ describe('ProtocolHandler', () => {
     });
   });
 
+  describe('handleBoardProgress', () => {
+    it('should handle BOARD_PROGRESS action', () => {
+      const boardProgressData: AugmentAction<ProtocolActions.BOARD_PROGRESS> = {
+        action: ProtocolActions.BOARD_PROGRESS,
+        playerID: 1,
+        boardProgress: 50
+      };
+
+      const privateHandler = handler['handleBoardProgress'].bind(handler);
+      privateHandler(boardProgressData);
+
+      expect(() => privateHandler(boardProgressData)).not.toThrow();
+    });
+
+    it('should handle BOARD_PROGRESS action with different data', () => {
+      const boardProgressData: AugmentAction<ProtocolActions.BOARD_PROGRESS> = {
+        action: ProtocolActions.BOARD_PROGRESS,
+        playerID: 2,
+        boardProgress: 75
+      };
+
+      const privateHandler = handler['handleBoardProgress'].bind(handler);
+      privateHandler(boardProgressData);
+
+      expect(() => privateHandler(boardProgressData)).not.toThrow();
+    });
+  });
+
   describe('handleData integration', () => {
     it('should route PING action to handlePing', () => {
       const pingData: AugmentAction<ProtocolActions.PING> = {
@@ -107,6 +135,18 @@ describe('ProtocolHandler', () => {
       handler.handleData(rejectData);
 
       expect(console.debug).toHaveBeenCalledWith('Server rejected an action');
+    });
+
+    it('should route BOARD_PROGRESS action to handleBoardProgress', () => {
+      const boardProgressData: AugmentAction<ProtocolActions.BOARD_PROGRESS> = {
+        action: ProtocolActions.BOARD_PROGRESS,
+        playerID: 1,
+        boardProgress: 50
+      };
+
+      handler.handleData(boardProgressData);
+
+      expect(() => handler.handleData(boardProgressData)).not.toThrow();
     });
 
     it('should handle errors in handler methods gracefully', () => {
