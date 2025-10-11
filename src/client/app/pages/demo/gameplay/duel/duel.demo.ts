@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import PupSlotsHolder from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import DuelHudTopComponent from '../../../../components/hud/duel-hud-top/duel-hud-top';
@@ -18,7 +19,8 @@ import BoardModelComponent from '../../../../components/board/board.component';
     BoardModelComponent, 
     UniversalProgressBarComponent, 
     UtilityButtonsHolderComponent, 
-    NumericButtonsHolderComponent
+    NumericButtonsHolderComponent,
+    PupSlotsHolder
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'

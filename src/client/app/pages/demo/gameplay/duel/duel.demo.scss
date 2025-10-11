@@ -69,11 +69,16 @@ app-duel-hud-top {
   flex: 0 0 15%;
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-content: center;
+  align-items: center;
 
   app-numeric-buttons-holder {
     display: block;
-    width: 50%;
+    flex: 5 0 50%;
+  }
+
+  app-pup-slots-holder {
+    flex: 2 0 20;
   }
 }
