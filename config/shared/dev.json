@@ -1,0 +1,10 @@
+{
+  "networking": {
+    "ws": {
+      "uri": "ws://localhost:8745"
+    }
+  },
+  "security": {
+    "packetScramblerSeed": "dev-scrambler-seed-123"
+  }
+}

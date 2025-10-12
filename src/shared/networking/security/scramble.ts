@@ -1,8 +1,8 @@
 import seedrandom from 'seedrandom';
 import BiMap from 'bidirectional-map';
 
-import clientConfig from '@config/client.json' with { type: 'json' };
 import ActionGuard from '../../types/utils/typeguards/actions';
+import clientConfig from '../../config';
 
 import type ActionEnum from '../../types/enums/actions';
 

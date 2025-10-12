@@ -1,7 +1,7 @@
 {
   "networking": {
     "ws": {
-      "uri": "ws://localhost:8745/ws",
+      "uri": "",
       "timeoutMs": 5000
     },
     "service": {
@@ -12,6 +12,6 @@
     }
   },
   "security": { 
-    "packetScramblerSeed": "dev-scrambler-seed-123" 
+    "packetScramblerSeed": "" 
   }
 }

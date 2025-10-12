@@ -1,7 +1,7 @@
 import SessionActions from '@shared/types/enums/actions/system/session';
-import clientConfig from '@config/client.json' with { type: 'json' };
 import ClientSocket from '../transport/ClientSocket';
 import ClientPacketHandler from '../handlers/ClientPacketHandler';
+import clientConfig from '../../../shared/config';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';

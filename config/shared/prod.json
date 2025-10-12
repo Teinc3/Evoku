@@ -1,0 +1,10 @@
+{
+  "networking": {
+    "ws": {
+      "uri": "wss://demo.evoku.io"
+    }
+  },
+  "security": {
+    "packetScramblerSeed": "54q3readsljhj"
+  }
+}
