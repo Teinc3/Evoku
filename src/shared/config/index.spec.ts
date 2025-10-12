@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readFileSync } from 'fs';
 
-import ClientConfigSchema from '../types/config/schema';
+import { SharedConfigSchema } from './schema';
 import { deepMerge, type JsonObject } from '.';
 
 
@@ -17,7 +17,7 @@ describe('config overrides validate against Zod schema', () => {
     const base = readJson(join(root, 'base.json'));
     const over = readJson(join(root, file));
     const merged = deepMerge(base, over);
-    expect(() => ClientConfigSchema.parse(merged)).not.toThrow();
+    expect(() => SharedConfigSchema.parse(merged)).not.toThrow();
   });
 
   test('sanity: broken override fails validation', () => {
@@ -36,7 +36,7 @@ describe('config overrides validate against Zod schema', () => {
       }
     };
     const merged = deepMerge(base, badOver);
-    expect(() => ClientConfigSchema.parse(merged)).toThrow();
+    expect(() => SharedConfigSchema.parse(merged)).toThrow();
   });
 
   test('sanity: extra fields in override fail validation', () => {
@@ -49,6 +49,6 @@ describe('config overrides validate against Zod schema', () => {
       }
     };
     const merged = deepMerge(base, badOver);
-    expect(() => ClientConfigSchema.parse(merged)).toThrow();
+    expect(() => SharedConfigSchema.parse(merged)).toThrow();
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 
-const ClientConfigSchema = z.object({
+export const SharedConfigSchema = z.object({
   networking: z.object({
     ws: z.object({
       uri: z.string().url().nonempty(),
@@ -19,4 +19,5 @@ const ClientConfigSchema = z.object({
   })
 }).strict();
 
-export default ClientConfigSchema;
+type SharedConfigType = z.infer<typeof SharedConfigSchema>;
+export default SharedConfigType;

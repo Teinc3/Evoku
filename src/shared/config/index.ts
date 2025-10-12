@@ -2,7 +2,7 @@ import override from '@config/shared/override.json' with { type: 'json' };
 import base from '@config/shared/base.json' with { type: 'json' };
 import deepFreeze from '../utils/deepFreeze';
 
-import type ClientConfigType from '../types/config/types';
+import type SharedConfigType from './schema';
 
 
 export type JsonObject = Record<string, unknown>;
@@ -29,7 +29,7 @@ export function deepMerge(a: JsonObject, b: JsonObject): JsonObject {
   return out;
 }
 
-const merged = deepMerge(base as JsonObject, override as JsonObject) as ClientConfigType;
+const merged = deepMerge(base as JsonObject, override as JsonObject) as SharedConfigType;
 const ClientConfig = deepFreeze(merged);
 
 export default ClientConfig;
