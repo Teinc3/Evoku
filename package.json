@@ -38,6 +38,7 @@
     "sudoku-gen": "github:dainisp/sudoku-gen#278b154406faa37879a957bf9a766bd7c4fee36b",
     "tslib": "^2.3.0",
     "ws": "^8.18.3",
+    "zod": "^3.25.76",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
