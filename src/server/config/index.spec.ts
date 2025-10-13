@@ -1,30 +1,8 @@
-import * as path from 'path';
-import * as fs from 'fs';
-
 import { deepMerge } from '@shared/utils/config';
 import prodConfig from '@config/server/prod.json';
 import devConfig from '@config/server/dev.json';
 import baseConfig from '@config/server/base.json';
 import { ServerConfigSchema } from './schema';
-
-
-jest.mock('./index', () => {
-  const env = process.env['NODE_ENV'] || 'development';
-  const overrideFileName = env.includes('prod') ? 'prod.json' : 'dev.json';
-  const baseConfigPath = path.resolve(__dirname, '../../../config/server/base.json');
-  const overrideConfigPath = path.resolve(__dirname, `../../../config/server/${overrideFileName}`);
-
-  const baseConfig = JSON.parse(fs.readFileSync(baseConfigPath, 'utf-8'));
-  const overrideConfig = JSON.parse(fs.readFileSync(overrideConfigPath, 'utf-8'));
-
-  const mergedConfig = deepMerge(baseConfig, overrideConfig);
-
-  return {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    __esModule: true,
-    default: mergedConfig,
-  } as unknown;
-});
 
 
 describe('Server Config', () => {

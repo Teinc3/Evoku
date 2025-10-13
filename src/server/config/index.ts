@@ -41,6 +41,8 @@ try {
     `There was an issue loading the config for the environment ${process.env['NODE_ENV']}:`,
     e
   );
+  // Fail fast to avoid running with a partial or missing config
+  process.exit(1);
 }
 
 const serverConfig = deepFreeze(deepMerge(

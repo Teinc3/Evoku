@@ -13,12 +13,11 @@ const mockPrng = jest.fn();
 
 /**
  * Helper to create a PacketScrambler instance with a provided seed *without*
- * relying on process.env. 
- * 
- * We mock the JSON config module that the implementation imports: '@shared/types/config'.
- * 
- * Each invocation resets modules so the fresh mock is picked up. 
- * resets modules so the fresh mock is picked up.
+ * relying on process.env.
+ *
+ * We mock the JSON config module that the implementation imports: '../../config'.
+ *
+ * Each invocation resets modules so the fresh mock is picked up.
  */
 function createScrambler(seed?: string) {
   jest.resetModules();
