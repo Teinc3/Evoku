@@ -17,7 +17,6 @@
     "paths": {
       "@shared/*": ["src/shared/*"],
       "@config/*": ["config/*"],
-      "@sharedconfig": ["config/shared/dev.json"],
     }
   },
   "angularCompilerOptions": {

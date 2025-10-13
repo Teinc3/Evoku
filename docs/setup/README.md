@@ -25,6 +25,8 @@ The repository now uses `config/shared/*` for client/shared values and `config/s
 1. Secrets go to `.env`. Do not commit secrets into JSON files.
 2. Keep `base.json` authoritative; per-env files should only list values that change.
 3. The server performs runtime validation (Zod) of merged configs and fails fast on invalid shapes.
-4. The client uses Angular `fileReplacements` to supply environment-specific overrides at build time; we avoid bundling Zod into the client.
+4. The client uses Angular `fileReplacements` to supply environment-specific overrides at build time; 
+Server uses environment variables to export override config at runtime.
+5. Zod is not bundled into the client - it is instead used to validate the config in CI.
 
 See [Config.md](Config.md) for detailed examples and the CI validation approach.

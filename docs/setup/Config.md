@@ -1,50 +1,55 @@
 # Configuration System
 
-Non-secret configuration lives in version-controlled JSON files; secrets must live only in `.env` (ignored). The repo now uses a small, explicit set of JSON files for configuration plus a shared Zod schema to validate merged results in CI.
+Non-secret configuration is stored in version-controlled JSON files; secrets must live only in `.env` (ignored).
+The repository now uses a base + minimal per-environment overrides pattern and a small runtime provider
+so shared code can access configuration consistently across client and server.
 
 ## Files and layout
 | File | Purpose |
 |------|---------|
-| `config/shared/base.json` | Canonical shared configuration (client + shared runtime defaults). Keep most non-secret shared values here.
-| `config/server/base.json` | Canonical server runtime defaults (non-secret).
-| `config/shared/*.json` | Small per-environment overrides for shared/client (e.g. `dev.json`, `prod.json`).
-| `config/server/*.json` | Small per-environment server overrides (e.g. `dev.json`, `prod.json`).
+| `config/shared/base.json` | Canonical shared defaults (used by client and shared runtime code). Keep most non-secret shared values here.
+| `config/shared/dev.json`, `config/shared/prod.json` | Per-environment shared overrides (minimal; only values that change per environment).
+| `config/server/base.json` | Canonical server defaults (non-secret runtime defaults).
+| `config/server/dev.json`, `config/server/prod.json` | Per-environment server overrides used at server startup.
 
 Notes:
-- Do not put secrets in the JSON files. Use `.env` for all secrets and read them at server bootstrap.
-- Keep per-environment override files minimal; prefer a single `base.json` and only list values that change per environment.
+- Do not put secrets in the JSON files, load them in `.env` files instead.
+- Keep per-environment files minimal; prefer a single `base.json` and list only values that differ per environment.
 
-## Client (build-time) behavior
-- The client bundle does not run Zod or runtime validation to keep bundles small.
-- During client builds we use Angular's `fileReplacements` to swap a small override file into the bundle (for example, `config/shared/override.json` replaced with `config/shared/dev.json` during a dev build). 
-This keeps the client build static and avoids shipping the entire validation library.
+## Client (build-time) behaviour
+- The client bundle is static. Angular's `fileReplacements` swap the shared override module/file at build time so the client receives the correct environment values without runtime branching.
+- We avoid shipping runtime validation (Zod) in the client bundle to keep it small; validation runs on the server and in CI.
 
-## Server (runtime) behavior
-- The server loader reads `config/server/base.json` synchronously at startup, then looks for a per-environment override file (selected via `NODE_ENV` or a dedicated `EVOKU_ENV`) under `config/server/{env}.json`. 
-If present, the loader deep-merges the override on top of `base.json` (override wins).
+## Server (runtime) behaviour
+- The server performs runtime merging and validation.
+At startup the server loader merges `config/server/base.json` with the environment override (`config/server/{dev|prod}.json`) and validates the merged result using the shared Zod schema.
+- Server code should import runtime config from `src/server/config` (the loader exports the validated, frozen object).
+
 
 ## Validation & CI
-- We validate merged configs (base + override + env overlays) in CI using a small Jest test that imports the shared Zod schema and parses each environment's merged result.
-If any environment's merged config fails the schema check, the CI job fails.
-- This gives us typed guarantees and prevents broken runtime configs from deploying.
+- CI validates merged configs (shared + server) by importing the shared Zod schema and parsing each environment's merged result.
+If parsing fails, CI fails the job.
 
 ## Usage examples
-Client import (build-time file replacement):
-
+Client (build-time via fileReplacement):
 ```ts
-import sharedConfig from '@shared/types/config';
-// This import receives the merged, frozen config at build-time via fileReplacement.
+import sharedConfig from '@shared/config';
+// The build-time replacement supplies the correct values in the bundle.
 ```
 
-Server loader (runtime):
-
+Server (runtime merge + validation):
 ```ts
-import ServerConfig from 'src/server/config';
-// ServerConfig is the typed, frozen object produced by merging base + override + envs and validated with Zod.
+import sharedConfig from '@shared/config';
+import serverConfig from 'REL_PATH_TO_SERVER_CONFIG_DIR';
 ```
 
-## Adding Values
-1. Secret? Add a placeholder to `.env.example` and read via `process.env` at server bootstrap.
-2. Shared non-secret? Add to `config/shared/base.json` and add per-env small overrides to `config/shared/{dev|prod}.json` if needed.
-3. Server-only non-secret? Add to `config/server/base.json` and to per-env overrides in `config/server/` as needed.
-4. For any breaking changes to the config shape, update the Zod schema under `src/shared/types/config/schema.ts` and update the CI validation tests.
+Shared library usage (runtime provider):
+```ts
+import sharedConfig from "REL_PATH_TO_SHARED_CONFIG_DIR"; // No @shared alias allowed within shared library.
+```
+
+## Adding values
+1. Secret? Add a placeholder to `.env.example` and read it from `process.env` at server bootstrap.
+2. Shared non-secret? Add to `config/shared/base.json` and add minimal per-env overrides under `config/shared/` if needed.
+3. Server-only non-secret? Add to `config/server/base.json` and per-env `config/server/{dev,prod}.json`.
+4. For breaking shape changes, update the Zod schema under `src/shared/types/config/schema.ts` and update CI tests.
