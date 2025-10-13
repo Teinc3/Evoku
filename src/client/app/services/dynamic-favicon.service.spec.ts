@@ -7,16 +7,18 @@ describe('DynamicFaviconService', () => {
   let service: DynamicFaviconService | null;
   let fetchSpy: jasmine.Spy;
 
-  const mockSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
-  <rect id="p0" x="0" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p1" x="8" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p2" x="16" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p3" x="24" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p4" x="0" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p5" x="8" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p6" x="16" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
-  <rect id="p7" x="24" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
-</svg>`;
+  const mockSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+      <rect id="p0" x="0" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p1" x="8" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p2" x="16" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p3" x="24" y="0" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p4" x="0" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p5" x="8" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p6" x="16" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
+      <rect id="p7" x="24" y="8" width="8" height="8" fill="#000" stroke="#fff"/>
+    </svg>
+  `;
 
   const getFaviconEl = (): HTMLLinkElement | null =>
     document.getElementById('dynamic-favicon') as HTMLLinkElement | null;
