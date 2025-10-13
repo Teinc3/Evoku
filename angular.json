@@ -39,19 +39,25 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "config/shared/dev.json",
+                  "with": "config/shared/prod.json"
+                }
+              ],
+              "outputHashing": "all",
               "budgets": [
                 {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
+                  "type":"initial", 
+                  "maximumWarning": "500kB", 
                   "maximumError": "1MB"
                 },
                 {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
+                  "type": "anyComponentStyle", 
+                  "maximumWarning": "4kB", 
                   "maximumError": "8kB"
                 }
-              ],
-              "outputHashing": "all"
+              ]
             },
             "development": {
               "optimization": false,
@@ -98,7 +104,11 @@
             "styles": [
               "src/client/globals.scss"
             ]
-          }
+          },
+          "configurations": {
+            "development": {}
+          },
+          "defaultConfiguration": "development"
         }
       }
     }

@@ -10,18 +10,14 @@ Single `.env` (ignored) for runtime secrets only; versioned JSON handles all non
 | `.env.example` | Secrets schema (no secrets) | ✅ Yes |
 
 ## Loading
-Server loads `.env` via `import 'dotenv/config'`. No cascading precedence.
+Server loads `.env` via `dotenv/config` preloaded using `NODE_OPTIONS='-r dotenv/config'` so environment variables are available before the server bootstrap and the tsconfig-paths loader runs.
+This ensures runtime selection and any loader logic can depend on `process.env` at startup.
+
+If your platform does not support `NODE_OPTIONS` in npm scripts (Windows shells), consider using the library `cross-env`.
 
 ## Variable Types
 Only secrets (tokens, credentials, secret DB URIs) go in `.env`.
 Everything else lives in JSON config and is typed.
 
 ## Setup
-1. Copy `.env.example` to `.env` if secrets are needed and fill them in.
-2. Adjust `config/server.json` / `config/client.json` for non-secret values.
-  For more details see [`docs/setup/Config.md`](Config.md).
-
-## Troubleshooting
-* Invalid JSON: fix and rebuild.
-* Changed `.env`: restart server.
-* Changed `client.json`: rebuild client bundle.
+Copy `.env.example` to `.env` if secrets are needed and fill them in.

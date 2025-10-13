@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import AppView from '../../../types/app-view.enum';
 import ViewStateService from '../../../services/view-state.service';
+import AppView from '../../../../types/enums/app-view.enum';
 
 
 @Component({

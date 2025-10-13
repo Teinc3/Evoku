@@ -1,5 +1,5 @@
 import PacketIO from '@shared/networking/utils/PacketIO';
-import clientConfig from "@config/client.json" with { type: "json" };
+import sharedConfig from "@shared/config";
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -18,7 +18,7 @@ export default class ClientSocket {
 
   constructor() {
     this.ws = null;
-    this.url = clientConfig.networking.ws.uri;
+    this.url = sharedConfig.networking.ws.uri;
     this.io = new PacketIO();
   }
 

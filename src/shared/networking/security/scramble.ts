@@ -1,8 +1,8 @@
 import seedrandom from 'seedrandom';
 import BiMap from 'bidirectional-map';
 
-import clientConfig from '@config/client.json' with { type: 'json' };
 import ActionGuard from '../../types/utils/typeguards/actions';
+import sharedConfig from '../../config';
 
 import type ActionEnum from '../../types/enums/actions';
 
@@ -11,7 +11,7 @@ class PacketScrambler {
   private map: BiMap<number> | undefined;
 
   constructor() {
-    const seed = clientConfig.security.packetScramblerSeed;
+    const seed = sharedConfig.security.packetScramblerSeed;
 
     // Only initialize the mapping if a seed is provided.
     // If no seed exists, the maps remain undefined, and IDs pass through unchanged.

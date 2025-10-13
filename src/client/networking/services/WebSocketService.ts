@@ -1,5 +1,5 @@
 import SessionActions from '@shared/types/enums/actions/system/session';
-import clientConfig from '@config/client.json' with { type: 'json' };
+import sharedConfig from '@shared/config';
 import ClientSocket from '../transport/ClientSocket';
 import ClientPacketHandler from '../handlers/ClientPacketHandler';
 
@@ -108,7 +108,7 @@ export default class WebSocketService {
   private handleClose = (): void => {
     this.clearTimers();
 
-    if (clientConfig.networking.service.autoReconnect) {
+    if (sharedConfig.networking.service.autoReconnect) {
       this.scheduleReconnect();
     }
 
@@ -152,7 +152,7 @@ export default class WebSocketService {
       return; // Already scheduled
     }
 
-    let delay = clientConfig.networking.service.backoffMs;
+    let delay = sharedConfig.networking.service.backoffMs;
 
     const attempt = async (): Promise<void> => {
       try {
@@ -160,7 +160,7 @@ export default class WebSocketService {
         console.log('Reconnected to server');
       } catch (error) {
         console.error('Reconnection failed:', error);
-        delay = Math.min(delay * 2, clientConfig.networking.service.backoffMaxMs);
+        delay = Math.min(delay * 2, sharedConfig.networking.service.backoffMaxMs);
         this.reconnectTimer = setTimeout(attempt, delay);
       }
     };

@@ -1,13 +1,11 @@
-import 'dotenv/config';
-
 import "@shared/networking/packets";
-import serverConfig from '../../config/server.json' with { type: 'json' };
 import WSServer from './core/WSServer';
 import HTTPServer from './core/HTTPServer';
+import serverConfig from './config';
 
 
 // Determine port preference: explicit env override OR config
-const port = serverConfig.port;
+const port = serverConfig.networking.port;
 if (port < 0 || port > 65535) {
   throw new Error(`Invalid port resolved: "${port}". Must be an integer between 0 and 65535.`);
 }

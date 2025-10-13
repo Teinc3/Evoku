@@ -417,6 +417,24 @@ describe('WebSocketService', () => {
       // Should be the same timer
       expect(firstTimer).toBe(secondTimer);
     });
+
+    it('should retry with backoff when reconnection fails', fakeAsync(() => {
+      // Make connect throw to simulate failure
+      const svc = service as unknown as { connect: () => Promise<void> };
+      spyOn(svc, 'connect').and.callFake(() => Promise.reject(new Error('Connect failed')));
+
+      // Start scheduler
+      service['scheduleReconnect']();
+
+      // Ensure a timer was scheduled
+      expect(service['reconnectTimer']).toBeTruthy();
+
+      // Fast-forward slightly to allow attempt to run and reschedule
+      jasmine.clock().tick(1);
+
+      // After failure, reconnectTimer should still be scheduled for next attempt
+      expect(service['reconnectTimer']).toBeTruthy();
+    }));
   });
 
   describe('Cleanup', () => {

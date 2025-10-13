@@ -1,32 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
-import NetworkService from './network.service';
-import { APP_CONFIG } from '../config';
 import WebSocketService from '../../networking/services/WebSocketService';
+import NetworkService from './network.service';
 
-
-// Removed separate type import; class imported above for DI
-
-
-// Mock configuration data
-const mockConfig = {
-  networking: {
-    ws: {
-      uri: 'ws://localhost:8745/ws',
-      timeoutMs: 5000
-    },
-    service: {
-      autoReconnect: true,
-      backoffMs: 500,
-      backoffMaxMs: 5000,
-      pingIntervalMs: 15000
-    }
-  },
-  security: {
-    packetScramblerSeed: 'dev-scrambler-seed-123'
-  }
-};
 
 // Mock WebSocketService
 class MockWebSocketService {
@@ -67,7 +44,6 @@ describe('NetworkService', () => {
     TestBed.configureTestingModule({
       providers: [
         NetworkService,
-        { provide: APP_CONFIG, useValue: mockConfig },
         { provide: WebSocketService, useFactory: () => mockWebSocketService }
       ]
     });
