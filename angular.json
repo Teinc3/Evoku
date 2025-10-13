@@ -41,7 +41,7 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "config/shared/override.json",
+                  "replace": "config/shared/dev.json",
                   "with": "config/shared/prod.json"
                 }
               ],
@@ -60,12 +60,6 @@
               ]
             },
             "development": {
-              "fileReplacements": [
-                {
-                  "replace": "config/shared/override.json",
-                  "with": "config/shared/dev.json"
-                }
-              ],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
@@ -112,22 +106,7 @@
             ]
           },
           "configurations": {
-            "production": {
-              "fileReplacements": [
-                {
-                  "replace": "config/shared/override.json",
-                  "with": "config/shared/prod.json"
-                }
-              ]
-            },
-            "development": {
-              "fileReplacements": [
-                {
-                  "replace": "config/shared/override.json",
-                  "with": "config/shared/dev.json"
-                }
-              ]
-            }
+            "development": {}
           },
           "defaultConfiguration": "development"
         }

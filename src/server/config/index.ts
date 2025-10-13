@@ -1,15 +1,15 @@
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
-import deepFreeze from '@shared/utils/deepFreeze';
-import { deepMerge } from '@shared/config';
-import base from '@config/server/base.json' with { type: 'json' };
+import { deepFreeze, deepMerge } from '@shared/utils/config';
+import baseServerConfig from '@config/server/base.json' with { type: 'json' };
 
-import type { JsonObject } from '@shared/config';
+import type { JsonObj as JsonObject } from '@shared/utils/config';
 import type ServerConfigType from './schema';
 
 
-const root = path.resolve(__dirname, '../../..');
+const root = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..', '..');
 
 function readJsonIfExists(p: string): JsonObject {
   if (!fs.existsSync(p)) {
@@ -22,25 +22,30 @@ function readJsonIfExists(p: string): JsonObject {
 let overrideConfig: JsonObject = {};
 
 try {
-  const serverConfigPath = path.join(root, 'config', 'server');
+  const configPath = path.join(root, 'config', 'server');
 
   switch (process.env['NODE_ENV']) {
     case 'production':
     case 'prod':
-      overrideConfig = readJsonIfExists(path.join(serverConfigPath, 'prod.json'));
+      overrideConfig = readJsonIfExists(path.join(configPath, 'prod.json'));
       break;
+    // Add staging in the future
     case 'dev':
     case 'development':
-      overrideConfig = readJsonIfExists(path.join(serverConfigPath, 'dev.json'));
-      break;
     default:
-      throw new Error(`Unrecognized NODE_ENV "${process.env['NODE_ENV']}"`);
+      overrideConfig = readJsonIfExists(path.join(configPath, 'dev.json'));
+      break;
   }
 } catch (e) {
-  console.error('There was an issue loading the override config for the current environment: ', e);
+  console.error(
+    `There was an issue loading the config for the environment ${process.env['NODE_ENV']}:`,
+    e
+  );
 }
 
-const merged = deepMerge(base as JsonObject, overrideConfig as JsonObject) as ServerConfigType;
-const ServerConfig = deepFreeze(merged);
+const serverConfig = deepFreeze(deepMerge(
+  baseServerConfig as JsonObject,
+  overrideConfig as JsonObject
+)) as ServerConfigType;
 
-export default ServerConfig;
+export default serverConfig;

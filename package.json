@@ -5,10 +5,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "ng build && tsx scripts/post-build.ts",
-    "start": "npm run build && tsx src/server/index.ts",
+    "start": "npm run build && NODE_OPTIONS='-r dotenv/config' tsx src/server/index.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "ng serve",
-    "dev:server": "tsx watch src/server/index.ts",
+    "dev:server": "NODE_OPTIONS='-r dotenv/config' NODE_ENV='development' tsx watch src/server/index.ts",
     "test": "concurrently \"npm run test:server\" \"npm run test:client\"",
     "test-ci": "npm run test:server-ci && npm run test:client-ci",
     "test:client": "ng test --watch=false",
@@ -38,7 +38,6 @@
     "sudoku-gen": "github:dainisp/sudoku-gen#278b154406faa37879a957bf9a766bd7c4fee36b",
     "tslib": "^2.3.0",
     "ws": "^8.18.3",
-    "zod": "^3.25.76",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -85,6 +84,7 @@
     "ts-jest": "^29.4.0",
     "tsx": "^4.20.3",
     "typescript": "~5.8.2",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "zod": "^3.25.76"
   }
 }
