@@ -1,0 +1,15 @@
+<svg width="467" height="467" viewBox="0 0 467 467" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(68.5,68.5) translate(165,165) rotate(45) translate(-165,-165)">
+    <!-- Row 1 -->
+    <rect id="p0" x="0" y="0" width="100" height="100" rx="5" fill="#fff" stroke="#000" stroke-width="1"/>
+    <rect id="p1" x="115" y="0" width="100" height="100" rx="5" fill="#fff" stroke="#000" stroke-width="1"/>
+    <rect id="p2" x="230" y="0" width="100" height="100" rx="5" fill="#fff" stroke="#000" stroke-width="1"/>
+    <!-- Row 2 -->
+    <rect id="p3" x="0" y="115" width="100" height="100" rx="5" fill="#000" stroke="#fff" stroke-width="1"/>
+    <rect id="p4" x="230" y="115" width="100" height="100" rx="5" fill="#fff" stroke="#000" stroke-width="1"/>
+    <!-- Row 3 -->
+    <rect id="p5" x="0" y="230" width="100" height="100" rx="5" fill="#000" stroke="#fff" stroke-width="1"/>
+    <rect id="p6" x="115" y="230" width="100" height="100" rx="5" fill="#000" stroke="#fff" stroke-width="1"/>
+    <rect id="p7" x="230" y="230" width="100" height="100" rx="5" fill="#000" stroke="#fff" stroke-width="1"/>
+  </g>
+</svg>
