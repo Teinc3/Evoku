@@ -11,6 +11,8 @@ import { Injectable } from '@angular/core';
 export default class DynamicFaviconService {
   private static readonly FRAME_INTERVAL_MS = 400;
   private static readonly SEQUENCE = [0, 1, 2, 4, 7, 6, 5, 3];
+  private static readonly OPPOSITE_MAX_INDEX = 7;
+  private static readonly IOS_VERSION_REGEX = /os\s+(\d+)[._](\d+)/;
   private initialSvg: string | null;
   private cachedSvg: string | null;
 
@@ -90,7 +92,7 @@ export default class DynamicFaviconService {
     // Get the ID of the element to flip for the current frame
     const elementToFlip = DynamicFaviconService.SEQUENCE[this.frameIndex];
 
-    [elementToFlip, 7 - elementToFlip].forEach(elementId => {
+    [elementToFlip, DynamicFaviconService.OPPOSITE_MAX_INDEX - elementToFlip].forEach(elementId => {
       const element = svgRoot.querySelector(`[id="p${elementId}"]`);
       if (element) {
         // Invert the fill and stroke colors
@@ -105,8 +107,14 @@ export default class DynamicFaviconService {
     const svgString = this.xmlSerializer.serializeToString(svgRoot);
 
     // Create a data URI and set it as the favicon
-    const dataUri = `data:image/svg+xml;base64,${btoa(svgString)}`;
-    this.setSVGIcon(dataUri);
+    try {
+      const dataUri = `data:image/svg+xml;base64,${btoa(svgString)}`;
+      this.setSVGIcon(dataUri);
+    } catch (err) {
+      console.warn('Failed to base64-encode SVG frame, stopping animation.', err);
+      this.stop();
+      return;
+    }
 
     // Persist the modified SVG so future frames build on the new state
     this.cachedSvg = svgString;
@@ -145,7 +153,7 @@ export default class DynamicFaviconService {
     }
 
     // Match iOS version like "OS 18_5" or "OS 18_6_1"
-    const match = ua.match(/os\s+(\d+)[._](\d+)/);
+    const match = ua.match(DynamicFaviconService.IOS_VERSION_REGEX);
     if (!match) {
       return false;
     }

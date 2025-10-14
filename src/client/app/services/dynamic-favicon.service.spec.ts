@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import DynamicFaviconService from './dynamic-favicon.service';
 
@@ -81,7 +81,7 @@ describe('DynamicFaviconService', () => {
   });
 
 
-  it('fetches and animates SVG on SVG-friendly browsers', done => {
+  it('fetches and animates SVG on SVG-friendly browsers', fakeAsync(() => {
     spyOnProperty(navigator, 'userAgent', 'get').and.returnValue(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 ' +
       '(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
@@ -90,102 +90,80 @@ describe('DynamicFaviconService', () => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(DynamicFaviconService);
 
-    // Wait for fetch promise to resolve
-    setTimeout(() => {
-      expect(fetchSpy).toHaveBeenCalledWith('/icon.svg');
+    // Resolve microtasks (fetch .then) and initial update
+    tick();
+    expect(fetchSpy).toHaveBeenCalledWith('/icon.svg');
 
-      const link = getFaviconEl();
-      expect(link).not.toBeNull();
-      expect(link!.type).toBe('image/svg+xml');
-      expect(link!.href).toContain('data:image/svg+xml;base64,');
+    const link = getFaviconEl();
+    expect(link).not.toBeNull();
+    expect(link!.type).toBe('image/svg+xml');
+    expect(link!.href).toContain('data:image/svg+xml;base64,');
 
-      const initialHref = link!.href;
+    const initialHref = link!.href;
 
-      // Wait for first interval tick (400ms)
-      setTimeout(() => {
-        const hrefAfterFrame = getFaviconEl()!.href;
-        expect(hrefAfterFrame).toContain('data:image/svg+xml;base64,');
-        // href should have changed (different frame mutation)
-        expect(hrefAfterFrame).not.toBe(initialHref);
-        done();
-      }, 500);
-    }, 100);
-  });
+    // Advance time for first interval
+    tick(400);
+    const hrefAfterFrame = getFaviconEl()!.href;
+    expect(hrefAfterFrame).toContain('data:image/svg+xml;base64,');
+    expect(hrefAfterFrame).not.toBe(initialHref);
+  }));
 
 
-  it('registers visibility listener and updates icon on visibilitychange', done => {
+  it('registers visibility listener and updates icon on visibilitychange', fakeAsync(() => {
     spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Chrome/128.0');
     const addListenerSpy = spyOn(document, 'addEventListener').and.callThrough();
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(DynamicFaviconService);
 
-    setTimeout(() => {
-      expect(addListenerSpy).toHaveBeenCalledWith('visibilitychange', jasmine.any(Function));
+    // Resolve microtasks (fetch .then) and initial update
+    tick();
+    expect(addListenerSpy).toHaveBeenCalledWith('visibilitychange', jasmine.any(Function));
 
-      const link = getFaviconEl();
-      expect(link).not.toBeNull();
+    const link = getFaviconEl();
+    expect(link).not.toBeNull();
 
-      // Visibility change handler should call updateIcon - we just verify it doesn't crash
-      spyOnProperty(document, 'hidden', 'get').and.returnValue(false);
-      document.dispatchEvent(new Event('visibilitychange'));
+    spyOnProperty(document, 'hidden', 'get').and.returnValue(false);
+    document.dispatchEvent(new Event('visibilitychange'));
+    expect(link).not.toBeNull();
+    expect(link!.href).toContain('data:image/svg+xml;base64,');
+  }));
 
-      // Service should still be running fine
-      expect(link).not.toBeNull();
-      expect(link!.href).toContain('data:image/svg+xml;base64,');
-      done();
-    }, 100);
-  });
-
-  it('stop() clears interval, removes listener, and resets to initial SVG', done => {
+  it('stop() clears interval, removes listener, and resets to initial SVG', fakeAsync(() => {
     spyOnProperty(navigator, 'userAgent', 'get').and.returnValue('Chrome/128.0');
     const removeListenerSpy = spyOn(document, 'removeEventListener').and.callThrough();
 
     TestBed.configureTestingModule({});
     service = TestBed.inject(DynamicFaviconService);
 
-    setTimeout(() => {
-      const link = getFaviconEl();
-      expect(link).not.toBeNull();
+    // Resolve microtasks (fetch .then) and initial update
+    tick();
+    const link = getFaviconEl();
+    expect(link).not.toBeNull();
 
-      // After start(), updateIcon() is called immediately (frame 0)
-      // So we need to capture the initial href after that first call
-      const hrefAfterStart = link!.href;
+    const hrefAfterStart = link!.href;
 
-      // Wait for a few frames to mutate the SVG further
-      setTimeout(() => {
-        const hrefAfterMutation = getFaviconEl()!.href;
-        // After multiple frames, href should have changed
-        expect(hrefAfterMutation).not.toBe(hrefAfterStart);
+    // Advance a few frames
+    tick(800);
+    const hrefAfterMutation = getFaviconEl()!.href;
+    expect(hrefAfterMutation).not.toBe(hrefAfterStart);
 
-        service!.stop();
+    service!.stop();
+    expect(removeListenerSpy).toHaveBeenCalledWith('visibilitychange', jasmine.any(Function));
 
-        expect(removeListenerSpy).toHaveBeenCalledWith('visibilitychange', jasmine.any(Function));
+    const hrefAfterStop = getFaviconEl()!.href;
+    expect(hrefAfterStop).toContain('data:image/svg+xml;base64,');
 
-        // After stop, the href should be reset to initial
-        // (original mock SVG with first frame applied)
-        const hrefAfterStop = getFaviconEl()!.href;
-        // Stop resets to initialSvg, which is the original unmutated SVG
-        // But after encoding, it should be the base64 of the original mock
-        expect(hrefAfterStop).toContain('data:image/svg+xml;base64,');
-
-        // Start again and verify it restarts from initial SVG (frame 0)
-        service!.start();
-        setTimeout(() => {
-          const linkAfterRestart = getFaviconEl();
-          expect(linkAfterRestart).not.toBeNull();
-          // Fetch should only have been called once (cached)
-          expect(fetchSpy).toHaveBeenCalledTimes(1);
-          // After restart, should be back at frame 0 (same as hrefAfterStart)
-          expect(linkAfterRestart!.href).toBe(hrefAfterStart);
-          done();
-        }, 100);
-      }, 1000);
-    }, 100);
-  });
+    service!.start();
+    tick();
+    const linkAfterRestart = getFaviconEl();
+    expect(linkAfterRestart).not.toBeNull();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(linkAfterRestart!.href).toBe(hrefAfterStart);
+  }));
 
 
-  it('falls back to static icon if fetch fails', done => {
+  it('falls back to static icon if fetch fails', fakeAsync(() => {
     fetchSpy.and.returnValue(
       Promise.resolve({
         ok: false,
@@ -197,18 +175,16 @@ describe('DynamicFaviconService', () => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(DynamicFaviconService);
 
-    setTimeout(() => {
-      expect(fetchSpy).toHaveBeenCalledWith('/icon.svg');
-      expect(console.warn).toHaveBeenCalledWith(
-        'Failed to fetch icon.svg, falling back to static icon.',
-        jasmine.any(Error)
-      );
+    tick();
+    expect(fetchSpy).toHaveBeenCalledWith('/icon.svg');
+    expect(console.warn).toHaveBeenCalledWith(
+      'Failed to fetch icon.svg, falling back to static icon.',
+      jasmine.any(Error)
+    );
 
-      const link = getFaviconEl();
-      expect(link).not.toBeNull();
-      expect(link!.type).toBe('image/png');
-      expect(link!.href).toContain('/favicon.ico');
-      done();
-    }, 100);
-  });
+    const link = getFaviconEl();
+    expect(link).not.toBeNull();
+    expect(link!.type).toBe('image/png');
+    expect(link!.href).toContain('/favicon.ico');
+  }));
 });

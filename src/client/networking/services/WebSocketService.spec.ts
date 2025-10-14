@@ -395,6 +395,8 @@ describe('WebSocketService', () => {
   describe('Reconnection functionality', () => {
     beforeEach(() => {
       jasmine.clock().install();
+      // Suppress expected error logs from failed reconnection attempts in tests
+      spyOn(console, 'error');
     });
 
     it('should schedule reconnection when autoReconnect is enabled', () => {
