@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 
@@ -8,8 +7,6 @@ import baseServerConfig from '@config/server/base.json' with { type: 'json' };
 import type { JsonObj as JsonObject } from '@shared/utils/config';
 import type ServerConfigType from './schema';
 
-
-const root = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..', '..');
 
 function readJsonIfExists(p: string): JsonObject {
   if (!fs.existsSync(p)) {
@@ -22,7 +19,7 @@ function readJsonIfExists(p: string): JsonObject {
 let overrideConfig: JsonObject = {};
 
 try {
-  const configPath = path.join(root, 'config', 'server');
+  const configPath = path.join(process.cwd(), 'config', 'server');
 
   switch (process.env['NODE_ENV']) {
     case 'production':
@@ -34,6 +31,7 @@ try {
     case 'development':
     default:
       overrideConfig = readJsonIfExists(path.join(configPath, 'dev.json'));
+      console.log('Using development configuration');
       break;
   }
 } catch (e) {

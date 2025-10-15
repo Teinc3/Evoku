@@ -182,7 +182,7 @@ You are encouraged to run these checks but **ONLY AFTER** you have finished the 
 as every time you run a check, the developer has to give you permission to run commands on their machine,
 which can be quite disruptive to their asynchronous workflow.
 
-#### Compilation
+#### Type Checking
 - Command: `npm run comp`
 
 This ensures type safety and catches all static analysis issues.
@@ -203,9 +203,9 @@ But most of the time you will have to fix them yourself.
 
 *Commands that allow custom flags*:
 - `npm run test:client` (Client tests)
-- `npm run test:client-ci` (Client tests with coverage)
+- `npm run test-ci:client` (Client tests with coverage)
 - `npm run test:server` (Server tests)
-- `npm run test:server-ci` (Server tests with coverage)
+- `npm run test-ci:server` (Server tests with coverage)
 
 If you try to run a test command that doesn't allow custom flags with custom flags,
 the desired effect of those flags will not be achieved.
@@ -254,8 +254,8 @@ Monorepo with 3 main components:
 #### Server
 - Express
 - Jest
-- Cache, Database: Not implemented yet (notify the developer if you recognise that they are implemented already)
-- Reverse Proxy: Nginx
+- Cache: Redis
+- Database: MySQL (both on MS Azure)
 
 #### Transport
 - REST API (using Express) for static information (e.g. leaderboards)
@@ -271,11 +271,13 @@ Monorepo with 3 main components:
 #### Tools
 - ESLint for linting
 - Husky for pre-commit hooks
+- esbuild for server bundling
+- Docker for server containerization
 
 #### Environments
 - Dev Environment: VSCode (MacOS v13)
 - CI/CD Runner: Github Actions, ubuntu-latest
-- Containerisation: Plan is to use Docker/Kubernetes (Not implemented yet)
+- Containerisation: Docker for server deployment
 - DigitalOcean for hosting
 
 #### Configuration

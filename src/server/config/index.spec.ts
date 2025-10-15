@@ -30,8 +30,13 @@ describe('Server Config', () => {
   describe('Loading Behavior', () => {
     const originalEnv = process.env['NODE_ENV'];
 
+    beforeEach(() => {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+    });
+
     afterEach(() => {
       process.env['NODE_ENV'] = originalEnv;
+      jest.restoreAllMocks();
     });
 
     it('should load development config by default', async () => {
