@@ -49,10 +49,9 @@ docs
 **/*.spec.ts
 jest.config.cjs
 karma.conf.cjs
-.eslint.config.js
-.style.intrc.json
+eslint.config.js
+.stylelintrc.json
 
 # Miscellaneous
 LICENSE
-docs
 README.md

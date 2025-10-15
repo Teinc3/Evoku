@@ -39,5 +39,8 @@ COPY --from=builder /app/config ./config
 # Expose the port (from server config)
 EXPOSE 8080
 
+# Use a non-root user for better security
+USER node
+
 # Start the server
 CMD ["npm", "start"]
