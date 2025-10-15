@@ -49,7 +49,10 @@ module.exports = function (config) {
     browsers: ['FirefoxHeadless'],
     // Timeout settings for better CI reliability
     browserNoActivityTimeout: isCI ? 60000 : 30000, // 60s in CI, 30s locally
+    browserDisconnectTimeout: isCI ? 10000 : 5000, // Reduce disconnect timeout
     captureTimeout: isCI ? 60000 : 30000,
+    // Exit immediately after tests complete in CI
+    singleRun: true,
     // Firefox-specific settings
     customLaunchers: {
       FirefoxHeadless: {

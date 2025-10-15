@@ -46,7 +46,8 @@ describe('DynamicFaviconService', () => {
       spyOn(console, 'log').and.stub();
     } catch {}
 
-    // Use real Response so we don't need to cast to any
+    // IMPORTANT: Set up fetch spy BEFORE injecting the service
+    // since the service constructor calls start() which triggers fetch
     const response = new Response(mockSvg, { status: 200, statusText: 'OK' });
     fetchSpy = spyOn(window, 'fetch').and.returnValue(Promise.resolve(response));
 
@@ -216,6 +217,9 @@ describe('DynamicFaviconService', () => {
   }));
 
   it('start calls setStaticIcon when SVG unfriendly', fakeAsync(() => {
+    // Stop the existing service that was started in beforeEach
+    service!.stop();
+    
     spyOnProperty(navigator, 'userAgent', 'get').and.returnValue(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 ' +
       '(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
@@ -227,6 +231,9 @@ describe('DynamicFaviconService', () => {
   }));
 
   it('start handles fetch error by calling setStaticIcon', fakeAsync(() => {
+    // Stop the existing service that was started in beforeEach
+    service!.stop();
+    
     fetchSpy.and.returnValue(Promise.reject(new Error('fetch fail')));
     // @ts-expect-error ts(2345)
     spyOn(service, 'setStaticIcon');

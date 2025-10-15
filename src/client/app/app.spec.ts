@@ -13,6 +13,11 @@ describe('App', () => {
   let viewStateService: ViewStateService;
 
   beforeEach(async () => {
+    // Mock fetch to prevent DynamicFaviconService from making real network requests
+    spyOn(window, 'fetch').and.returnValue(
+      Promise.resolve(new Response('<svg></svg>', { status: 200 }))
+    );
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
