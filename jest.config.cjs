@@ -16,11 +16,6 @@ module.exports = {
       {
         diagnostics: {
           ignoreCodes: [1343]
-        },
-        astTransformers: {
-          before: [
-            'ts-jest-mock-import-meta'
-          ]
         }
       }
     ]

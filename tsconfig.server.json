@@ -8,8 +8,7 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+    "noEmit": false,
   },
   "include": [
     "src/server/**/*.ts",
