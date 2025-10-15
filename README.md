@@ -52,7 +52,7 @@ To launch both the game client and the game server concurrently, run:
 npm run dev
 ```
 
-The Typescript Compiler is set to noEmit, but you can still do a static type check by running:
+To run a static typecheck, run:
 ```bash
 npm run comp
 ```
@@ -73,7 +73,7 @@ npm run dev:client
 npm run dev:server
 ```
 
-Note that these separate commands also apply to other npm commands, such as start and test.
+Note that these separate commands also apply to other npm commands, such as build, comp, test etc.
 
 
 ## License
