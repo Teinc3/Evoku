@@ -25,7 +25,6 @@ try {
     case 'production':
     case 'prod':
       overrideConfig = readJsonIfExists(path.join(configPath, 'prod.json'));
-      console.log('Using production configuration');
       break;
     // Add staging in the future
     case 'dev':

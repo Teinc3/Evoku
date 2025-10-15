@@ -3,7 +3,7 @@ import esbuild from 'esbuild';
 
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
-const externals = Object.keys(pkg.dependencies);
+const externals = Object.keys(pkg.dependencies) || [];
 
 esbuild.build({
   entryPoints: ['src/server/index.ts'],
@@ -13,4 +13,6 @@ esbuild.build({
   outfile: 'dist/server/index.js',
   external: externals,
   tsconfig: 'tsconfig.server.json',
+  minify: true,
+  sourcemap: true
 }).catch(() => process.exit(1));
