@@ -47,3 +47,18 @@ h1 {
   pointer-events: none;
   border-radius: inherit;
 }
+
+/* Shared landing page background styles */
+@mixin landing-page-background {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  /* Landing background */
+  background-image: url('/landing.webp');
+  background-size: cover;
+  background-position: 50% 30%;
+  background-repeat: no-repeat;
+}

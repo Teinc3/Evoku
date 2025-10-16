@@ -1,17 +1,9 @@
-.not-found {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 1rem;
+@use '../../../globals.scss' as *;
 
-  /* Use the same background as home page */
-  background-image: url('/landing.webp');
-  background-size: cover;
-  background-position: 50% 30%;
-  background-repeat: no-repeat;
+.not-found {
+  @include landing-page-background;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .content {
