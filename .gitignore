@@ -45,3 +45,6 @@ Thumbs.db
 .env
 # Keep example schema tracked
 !.env.example
+
+# Persistence Testing
+.local/

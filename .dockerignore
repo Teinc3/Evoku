@@ -42,6 +42,9 @@ Dockerfile*
 docker-compose*.yml
 .dockerignore
 
+# Persistence Testing
+.local/
+
 # Documentation (optional, but can be excluded if not needed in container)
 docs
 

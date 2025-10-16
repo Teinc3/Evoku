@@ -2,9 +2,26 @@ services:
   evoku-server:
     build: .
     ports:
-      - "6969:8080"
+      - "8745:8745"
     env_file:
       - .env
     environment:
-      - NODE_ENV=production
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+
+  redis:
+    image: redis:7.0-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ./.local/redis/data:/data
+      - ./.local/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "PING"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
