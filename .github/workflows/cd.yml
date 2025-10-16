@@ -43,4 +43,5 @@ jobs:
         run: |
           docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server:${{ github.sha }} .
           docker tag ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server:latest
-          docker push -a ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server:${{ github.sha }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/evoku-server:latest
