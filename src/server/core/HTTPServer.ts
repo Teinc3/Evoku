@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import { createServer } from 'http';
 import express from 'express';
 
+import redisService from '../services/RedisService';
+
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';
 
@@ -57,13 +59,15 @@ export default class HTTPServer {
     });
   }
 
-  public start(): void {
+  public async start() {
     this.server.listen(this.port, () => {
       console.log(`HTTP server is running on http://localhost:${this.port}`);
+      redisService.setStartupTime(); // Log startup time in Redis after initialization
+
     });
   }
 
-  public close(): void {
+  public async close() {
     this.server.close(() => {
       console.log('HTTP server closed');
     });
