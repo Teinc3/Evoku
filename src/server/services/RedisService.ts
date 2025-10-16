@@ -3,23 +3,29 @@ import { createClient, type RedisClientType } from 'redis';
 
 /** Service to manage Redis connections and operations for the server. */
 export class RedisService {
-  private client: RedisClientType | null = null;
+  private _client: RedisClientType | null = null;
+
+  get client(): RedisClientType {
+    if (!this._client) {
+      throw new Error('Redis client is not connected');
+    }
+    return this._client;
+  }
 
   /**
    * Connects to the Redis server using the provided URL.
    * If connection fails, an error is thrown.
    */
   async connect(redisURL?: string): Promise<void> {
-    if (this.client) {
+    if (this._client) {
       return;
     }
 
     if (!redisURL) {
-      console.error('Failed to connect to Redis: REDIS_URL is not defined.');
-      return;
+      throw new Error('Failed to connect to Redis: REDIS_URL is not defined.');
     }
 
-    this.client = createClient({ url: redisURL });
+    this._client = createClient({ url: redisURL });
 
     this.client.on('error', err => {
       console.error('Redis Client Error:', err);
@@ -33,30 +39,21 @@ export class RedisService {
   }
 
   async disconnect(): Promise<void> {
-    if (this.client) {
-      await this.client.quit();
-      this.client = null;
+    if (this._client) {
+      await this._client.quit();
+      this._client = null;
     }
   }
 
   async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
-    if (!this.client) {
-      throw new Error('Redis client is not connected');
-    }
     await this.client.set(key, value, options);
   }
 
   async get(key: string): Promise<string | null> {
-    if (!this.client) {
-      throw new Error('Redis client is not connected');
-    }
     return this.client.get(key);
   }
 
   async delete(key: string): Promise<number> {
-    if (!this.client) {
-      throw new Error('Redis client is not connected');
-    }
     return this.client.del(key);
   }
 

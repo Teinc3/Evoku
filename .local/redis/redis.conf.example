@@ -1,0 +1,5 @@
+bind 0.0.0.0
+protected-mode yes
+port 6379
+requirepass your_redis_password
+databases 4

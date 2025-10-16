@@ -17,7 +17,7 @@ async function bootstrap() {
   
   // Create and start the HTTP server
   const httpServer = new HTTPServer(port);
-  httpServer.start();
+  await httpServer.start();
 
   // Create the WebSocket server
   const wsServer = new WSServer(httpServer.server);

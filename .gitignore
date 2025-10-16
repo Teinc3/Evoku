@@ -43,8 +43,10 @@ Thumbs.db
 
 # Environment variables
 .env
-# Keep example schema tracked
-!.env.example
 
 # Persistence Testing
-.local/
+.local/redis/*
+
+# All Example files needs to be tracked
+!*.example
+!.local/redis/redis.conf.example

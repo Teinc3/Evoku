@@ -40,7 +40,7 @@ describe('RedisService', () => {
     });
 
     it('should not reconnect if already connected', async () => {
-      service['client'] = mockClient; // Simulate connected state
+      service['_client'] = mockClient; // Simulate connected state
 
       await service.connect('redis://localhost:6379');
 
@@ -48,15 +48,40 @@ describe('RedisService', () => {
       expect(mockClient.connect).not.toHaveBeenCalled();
     });
 
-    it('should log error and return if no URL provided', async () => {
+    it('should throw if no URL provided', async () => {
+      await expect(service.connect()).rejects
+        .toThrow('Failed to connect to Redis: REDIS_URL is not defined.');
+    });
+
+    it('should log on client connect event', async () => {
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+      await service.connect('redis://localhost:6379');
+
+      const connectCall = (mockClient.on as jest.Mock).mock.calls.find(
+        (call: [string, () => void]) => call[0] === 'connect'
+      );
+      const connectCallback = connectCall[1];
+      connectCallback();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Redis Client Connected');
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should log error on client error event', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      await service.connect();
+      await service.connect('redis://localhost:6379');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to connect to Redis: REDIS_URL is not defined.'
+      const errorCall = (mockClient.on as jest.Mock).mock.calls.find(
+        (call: [string, (error: Error) => void]) => call[0] === 'error'
       );
-      expect(createClient).not.toHaveBeenCalled();
+      const errorCallback = errorCall[1];
+      const testError = new Error('test error');
+      errorCallback(testError);
+
+      expect(consoleSpy).toHaveBeenCalledWith('Redis Client Error:', testError);
 
       consoleSpy.mockRestore();
     });
@@ -64,12 +89,12 @@ describe('RedisService', () => {
 
   describe('disconnect', () => {
     it('should quit client and set to null if connected', async () => {
-      service['client'] = mockClient;
+      service['_client'] = mockClient;
 
       await service.disconnect();
 
       expect(mockClient.quit).toHaveBeenCalled();
-      expect(service['client']).toBeNull();
+      expect(service['_client']).toBeNull();
     });
 
     it('should do nothing if not connected', async () => {
@@ -81,7 +106,7 @@ describe('RedisService', () => {
 
   describe('set', () => {
     it('should call client.set with key and value', async () => {
-      service['client'] = mockClient;
+      service['_client'] = mockClient;
 
       await service.set('testKey', 'testValue', { EX: 60 });
 
@@ -96,7 +121,7 @@ describe('RedisService', () => {
 
   describe('get', () => {
     it('should call client.get and return value', async () => {
-      service['client'] = mockClient;
+      service['_client'] = mockClient;
 
       const result = await service.get('testKey');
 
@@ -111,7 +136,7 @@ describe('RedisService', () => {
 
   describe('delete', () => {
     it('should call client.del and return count', async () => {
-      service['client'] = mockClient;
+      service['_client'] = mockClient;
 
       const result = await service.delete('testKey');
 
@@ -126,7 +151,7 @@ describe('RedisService', () => {
 
   describe('setStartupTime', () => {
     it('should set startup time and log', async () => {
-      service['client'] = mockClient;
+      service['_client'] = mockClient;
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       await service.setStartupTime();
