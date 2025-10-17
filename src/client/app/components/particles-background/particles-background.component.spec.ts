@@ -21,10 +21,6 @@ describe('ParticlesBackgroundComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have a unique id for particles', () => {
-    expect(component['id']).toBe('tsparticles');
-  });
-
   it('should have particles options configured', () => {
     expect(component['particlesOptions']).toBeDefined();
     expect(component['particlesOptions'].fpsLimit).toBe(60);
@@ -53,9 +49,5 @@ describe('ParticlesBackgroundComponent', () => {
 
   it('should have particlesInit method', () => {
     expect(typeof component['particlesInit']).toBe('function');
-  });
-
-  it('should have particlesLoaded method', () => {
-    expect(typeof component['particlesLoaded']).toBe('function');
   });
 });

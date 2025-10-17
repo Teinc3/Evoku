@@ -28,9 +28,6 @@
   },
   "private": true,
   "dependencies": {
-    "@tsparticles/angular": "^3.0.0",
-    "@tsparticles/engine": "^3.9.1",
-    "@tsparticles/slim": "^3.9.1",
     "bidirectional-map": "^1.1.1",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -40,6 +37,9 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@tsparticles/angular": "^3.0.0",
+    "@tsparticles/engine": "^3.9.1",
+    "@tsparticles/slim": "^3.9.1",
     "@angular-eslint/eslint-plugin": "^20.2.0",
     "@angular-eslint/eslint-plugin-template": "^20.2.0",
     "@angular-eslint/template-parser": "^20.2.0",

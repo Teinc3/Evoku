@@ -2,7 +2,7 @@ import { loadSlim } from '@tsparticles/slim';
 import { NgxParticlesModule } from '@tsparticles/angular';
 import { Component } from '@angular/core';
 
-import type { Container, Engine, ISourceOptions } from '@tsparticles/engine';
+import type { Engine, ISourceOptions } from '@tsparticles/engine';
 
 
 @Component({
@@ -13,8 +13,6 @@ import type { Container, Engine, ISourceOptions } from '@tsparticles/engine';
   styleUrl: './particles-background.component.scss'
 })
 export default class ParticlesBackgroundComponent {
-  protected id = 'tsparticles';
-
   protected particlesOptions: ISourceOptions = {
     background: {
       color: {
@@ -87,8 +85,5 @@ export default class ParticlesBackgroundComponent {
 
   protected async particlesInit(engine: Engine): Promise<void> {
     await loadSlim(engine);
-  }
-
-  protected particlesLoaded(_container: Container): void {
   }
 }
