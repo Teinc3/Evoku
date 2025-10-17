@@ -33,7 +33,10 @@ describe('RedisService', () => {
     it('should create and connect client with valid URL', async () => {
       await service.connect('redis://localhost:6379');
 
-      expect(createClient).toHaveBeenCalledWith({ url: 'redis://localhost:6379' });
+      expect(createClient).toHaveBeenCalledWith({ 
+        url: 'redis://localhost:6379',
+        pingInterval: expect.any(Number)
+      });
       expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
       expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
       expect(mockClient.connect).toHaveBeenCalled();
