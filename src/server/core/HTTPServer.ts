@@ -4,9 +4,11 @@ import { createServer } from 'http';
 import express from 'express';
 
 import redisService from '../services/RedisService';
+import guestAuthService from '../services/GuestAuthService';
 
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';
+import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 
 
 /**
@@ -26,6 +28,8 @@ export default class HTTPServer {
   }
 
   private configureRoutes(): void {
+    // Middleware to parse JSON bodies
+    this.app.use(express.json());
 
     this.app.get('/health', (_req, res) => {
       res.sendStatus(200);
@@ -33,6 +37,18 @@ export default class HTTPServer {
 
     this.app.get('/api', (_req, res) => {
       res.sendStatus(501);
+    });
+
+    // Guest authentication endpoint
+    this.app.post('/api/auth/guest', async (req, res) => {
+      try {
+        const token = req.body.token as string | undefined;
+        const result: IGuestAuthResponse = await guestAuthService.authenticate(token);
+        res.json(result);
+      } catch (error) {
+        console.error('Error in guest auth endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
     });
 
     // Serve the built Angular client only if a build exists

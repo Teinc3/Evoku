@@ -1,22 +1,35 @@
 import { Injectable, Optional } from '@angular/core';
 
 import WebSocketService from '../../networking/services/WebSocketService';
+import APIService from '../../networking/services/APIService';
+import CookieService from './cookie.service';
 
 import type ActionEnum from '@shared/types/enums/actions';
+import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 import type ActionMap from '@shared/types/actionmap';
 
 
 /**
  * Angular service wrapper for APIService and WebSocketService
- * Currently, only WebSocketService is implemented.
  * Provides global access to network functionality throughout the application
  */
 @Injectable({ providedIn: 'root' })
 export default class NetworkService {
-  private readonly wsService: WebSocketService;
+  private static readonly GUEST_TOKEN_COOKIE_NAME = 'evoku_guest_token';
+  private static readonly TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
-  constructor(@Optional() wsService?: WebSocketService) {
+  private readonly wsService: WebSocketService;
+  private readonly apiService: APIService;
+  private readonly cookieService: CookieService;
+
+  constructor(
+    @Optional() wsService?: WebSocketService,
+    @Optional() apiService?: APIService,
+    @Optional() cookieService?: CookieService
+  ) {
     this.wsService = wsService ?? new WebSocketService();
+    this.apiService = apiService ?? new APIService();
+    this.cookieService = cookieService ?? new CookieService();
   }
 
   getWSService(): WebSocketService { return this.wsService; }
@@ -42,5 +55,29 @@ export default class NetworkService {
   /** Get current connection status */
   get isConnected(): boolean {
     return this.wsService.ready;
+  }
+
+  /**
+   * Initialize guest authentication by fetching or creating a guest token
+   * Returns the guest authentication response with token and ELO
+   */
+  async initGuestAuth(): Promise<IGuestAuthResponse> {
+    const existingToken = this.cookieService.get(NetworkService.GUEST_TOKEN_COOKIE_NAME);
+
+    try {
+      const data = await this.apiService.authenticateGuest(existingToken ?? undefined);
+
+      // Save the new token to cookies
+      this.cookieService.set(
+        NetworkService.GUEST_TOKEN_COOKIE_NAME,
+        data.token,
+        NetworkService.TOKEN_MAX_AGE_SECONDS
+      );
+
+      return data;
+    } catch (error) {
+      console.error('Failed to initialize guest authentication:', error);
+      throw error;
+    }
   }
 }
