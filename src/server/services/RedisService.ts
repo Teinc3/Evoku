@@ -1,5 +1,7 @@
 import { createClient, type RedisClientType } from 'redis';
 
+import serverConfig from '../config';
+
 
 /** Service to manage Redis connections and operations for the server. */
 export class RedisService {
@@ -25,7 +27,10 @@ export class RedisService {
       throw new Error('Failed to connect to Redis: REDIS_URL is not defined.');
     }
 
-    this._client = createClient({ url: redisURL });
+    this._client = createClient({ 
+      url: redisURL,
+      pingInterval: serverConfig.redis.pingInterval
+    });
 
     this.client.on('error', err => {
       console.error('Redis Client Error:', err);

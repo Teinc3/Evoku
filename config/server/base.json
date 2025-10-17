@@ -1,5 +1,8 @@
 {
   "networking": {
     "port": 0
+  },
+  "redis": {
+    "pingInterval": 3E4
   }
 }
