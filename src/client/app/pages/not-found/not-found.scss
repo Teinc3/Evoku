@@ -4,6 +4,7 @@
   @include landing-page-background;
   justify-content: center;
   gap: 1rem;
+  position: relative;
 }
 
 .content {
@@ -12,6 +13,8 @@
   border-radius: 0.5rem;
   max-width: 500px;
   margin: 0 1rem;
+  position: relative;
+  z-index: 1;
 
   h1 {
     color: #fff;

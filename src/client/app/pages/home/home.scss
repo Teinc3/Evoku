@@ -4,12 +4,15 @@
   @include landing-page-background;
   justify-content: flex-start; /* align items from the top */
   gap: 0.5rem; /* tighter gap between logo and actions */
+  position: relative;
 }
 
 .logo {
   max-height: 60vh;
   object-fit: contain;
   margin: 0 auto 0.125rem auto;
+  position: relative;
+  z-index: 1;
 }
 
 .actions {
@@ -18,4 +21,6 @@
   justify-content: center;
   align-items: center;
   margin-top: -0.25rem; /* smaller pull to avoid overlap while keeping buttons close */
+  position: relative;
+  z-index: 1;
 }
