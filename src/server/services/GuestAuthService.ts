@@ -1,6 +1,8 @@
 import { generatePlayerId, signGuestToken, verifyGuestToken } from '../utils/jwt';
 import redisService from './RedisService';
 
+import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
+
 
 /**
  * Service to manage guest player authentication and data storage in Redis.
@@ -36,7 +38,7 @@ export class GuestAuthService {
    * If a token is provided and valid, returns existing player data.
    * Otherwise, creates a new guest player.
    */
-  async authenticate(token?: string): Promise<{ token: string; elo: number }> {
+  async authenticate(token?: string): Promise<IGuestAuthResponse> {
     // If token is provided, try to verify it
     if (token) {
       const playerId = verifyGuestToken(token);

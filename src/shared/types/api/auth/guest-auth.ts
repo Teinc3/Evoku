@@ -1,5 +1,7 @@
 /** Response interface for guest authentication endpoint */
-export interface IGuestAuthResponse {
+interface IGuestAuthResponse {
   token: string;
   elo: number;
 }
+
+export default IGuestAuthResponse;

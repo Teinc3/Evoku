@@ -7,9 +7,8 @@ import crypto from 'crypto';
  * Handles token signing and verification for guest users.
  */
 
-interface GuestTokenPayload {
+interface TokenPayload {
   playerId: string;
-  type: 'guest';
 }
 
 /**
@@ -28,9 +27,8 @@ export function signGuestToken(playerId: string): string {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  const payload: GuestTokenPayload = {
-    playerId,
-    type: 'guest'
+  const payload: TokenPayload = {
+    playerId
   };
 
   return jwt.sign(payload, secret, {
@@ -49,11 +47,8 @@ export function verifyGuestToken(token: string): string | null {
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as GuestTokenPayload;
-    if (decoded.type === 'guest') {
-      return decoded.playerId;
-    }
-    return null;
+    const decoded = jwt.verify(token, secret) as TokenPayload;
+    return decoded.playerId;
   } catch {
     return null;
   }

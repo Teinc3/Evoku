@@ -8,7 +8,7 @@ import guestAuthService from '../services/GuestAuthService';
 
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';
-import type { IGuestAuthResponse } from '@shared/types/api/auth/guest-auth';
+import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 
 
 /**

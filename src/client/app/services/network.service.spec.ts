@@ -2,7 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import WebSocketService from '../../networking/services/WebSocketService';
+import APIService from '../../networking/services/APIService';
 import NetworkService from './network.service';
+import CookieService from './cookie.service';
 
 
 // Mock WebSocketService
@@ -34,17 +36,35 @@ class MockWebSocketService {
   }
 }
 
+// Mock APIService
+class MockAPIService {
+  authenticateGuest = jasmine.createSpy('authenticateGuest');
+}
+
+// Mock CookieService
+class MockCookieService {
+  get = jasmine.createSpy('get');
+  set = jasmine.createSpy('set');
+  delete = jasmine.createSpy('delete');
+}
+
 describe('NetworkService', () => {
   let service: NetworkService;
   let mockWebSocketService: MockWebSocketService;
+  let mockAPIService: MockAPIService;
+  let mockCookieService: MockCookieService;
 
   beforeEach(() => {
     mockWebSocketService = new MockWebSocketService();
+    mockAPIService = new MockAPIService();
+    mockCookieService = new MockCookieService();
 
     TestBed.configureTestingModule({
       providers: [
         NetworkService,
-        { provide: WebSocketService, useFactory: () => mockWebSocketService }
+        { provide: WebSocketService, useFactory: () => mockWebSocketService },
+        { provide: APIService, useFactory: () => mockAPIService },
+        { provide: CookieService, useFactory: () => mockCookieService }
       ]
     });
 
@@ -105,75 +125,54 @@ describe('NetworkService', () => {
   });
 
   describe('Guest Authentication', () => {
-    const cookieName = 'evoku_guest_token';
-
-    beforeEach(() => {
-      // Clear cookies before each test
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-      jasmine.clock().install();
-    });
-
-    afterEach(() => {
-      jasmine.clock().uninstall();
-    });
-
     describe('initGuestAuth', () => {
-      it('should fetch and save token when no cookie exists', async () => {
+      it('should authenticate without existing token', async () => {
         const mockResponse = {
           token: 'new-test-token',
           elo: 0
         };
 
-        spyOn(window, 'fetch').and.returnValue(
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockResponse)
-          } as Response)
-        );
+        mockCookieService.get.and.returnValue(null);
+        mockAPIService.authenticateGuest.and.returnValue(Promise.resolve(mockResponse));
 
         const result = await service.initGuestAuth();
 
-        expect(window.fetch).toHaveBeenCalledWith('/api/auth/guest', jasmine.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({})
-        }));
-
+        expect(mockCookieService.get).toHaveBeenCalledWith('evoku_guest_token');
+        expect(mockAPIService.authenticateGuest).toHaveBeenCalledWith(undefined);
+        expect(mockCookieService.set).toHaveBeenCalledWith(
+          'evoku_guest_token',
+          'new-test-token',
+          604800
+        );
         expect(result).toEqual(mockResponse);
-        expect(document.cookie).toContain(cookieName);
       });
 
-      it('should send existing token if cookie exists', async () => {
+      it('should authenticate with existing token', async () => {
         const existingToken = 'existing-test-token';
-        document.cookie = `${cookieName}=${existingToken}; path=/`;
-
         const mockResponse = {
           token: 'new-test-token',
           elo: 1500
         };
 
-        spyOn(window, 'fetch').and.returnValue(
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockResponse)
-          } as Response)
-        );
+        mockCookieService.get.and.returnValue(existingToken);
+        mockAPIService.authenticateGuest.and.returnValue(Promise.resolve(mockResponse));
 
         const result = await service.initGuestAuth();
 
-        expect(window.fetch).toHaveBeenCalledWith('/api/auth/guest', jasmine.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ token: existingToken })
-        }));
-
+        expect(mockCookieService.get).toHaveBeenCalledWith('evoku_guest_token');
+        expect(mockAPIService.authenticateGuest).toHaveBeenCalledWith(existingToken);
+        expect(mockCookieService.set).toHaveBeenCalledWith(
+          'evoku_guest_token',
+          'new-test-token',
+          604800
+        );
         expect(result).toEqual(mockResponse);
       });
 
-      it('should throw error on failed fetch', async () => {
-        spyOn(window, 'fetch').and.returnValue(
-          Promise.resolve({
-            ok: false,
-            status: 500
-          } as Response)
+      it('should throw error on failed authentication', async () => {
+        mockCookieService.get.and.returnValue(null);
+        mockAPIService.authenticateGuest.and.returnValue(
+          Promise.reject(new Error('Auth failed'))
         );
 
         spyOn(console, 'error');
@@ -182,24 +181,7 @@ describe('NetworkService', () => {
           await service.initGuestAuth();
           fail('Expected initGuestAuth to throw an error');
         } catch (error) {
-          expect((error as Error).message).toContain('Guest auth failed with status 500');
-        }
-
-        expect(console.error).toHaveBeenCalled();
-      });
-
-      it('should handle network errors', async () => {
-        spyOn(window, 'fetch').and.returnValue(
-          Promise.reject(new Error('Network error'))
-        );
-
-        spyOn(console, 'error');
-
-        try {
-          await service.initGuestAuth();
-          fail('Expected initGuestAuth to throw an error');
-        } catch (error) {
-          expect((error as Error).message).toBe('Network error');
+          expect((error as Error).message).toBe('Auth failed');
         }
 
         expect(console.error).toHaveBeenCalled();
