@@ -103,4 +103,107 @@ describe('NetworkService', () => {
       }
     });
   });
+
+  describe('Guest Authentication', () => {
+    const cookieName = 'evoku_guest_token';
+
+    beforeEach(() => {
+      // Clear cookies before each test
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      jasmine.clock().install();
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    describe('initGuestAuth', () => {
+      it('should fetch and save token when no cookie exists', async () => {
+        const mockResponse = {
+          token: 'new-test-token',
+          elo: 0
+        };
+
+        spyOn(window, 'fetch').and.returnValue(
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockResponse)
+          } as Response)
+        );
+
+        const result = await service.initGuestAuth();
+
+        expect(window.fetch).toHaveBeenCalledWith('/api/auth/guest', jasmine.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({})
+        }));
+
+        expect(result).toEqual(mockResponse);
+        expect(document.cookie).toContain(cookieName);
+      });
+
+      it('should send existing token if cookie exists', async () => {
+        const existingToken = 'existing-test-token';
+        document.cookie = `${cookieName}=${existingToken}; path=/`;
+
+        const mockResponse = {
+          token: 'new-test-token',
+          elo: 1500
+        };
+
+        spyOn(window, 'fetch').and.returnValue(
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockResponse)
+          } as Response)
+        );
+
+        const result = await service.initGuestAuth();
+
+        expect(window.fetch).toHaveBeenCalledWith('/api/auth/guest', jasmine.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ token: existingToken })
+        }));
+
+        expect(result).toEqual(mockResponse);
+      });
+
+      it('should throw error on failed fetch', async () => {
+        spyOn(window, 'fetch').and.returnValue(
+          Promise.resolve({
+            ok: false,
+            status: 500
+          } as Response)
+        );
+
+        spyOn(console, 'error');
+
+        try {
+          await service.initGuestAuth();
+          fail('Expected initGuestAuth to throw an error');
+        } catch (error) {
+          expect((error as Error).message).toContain('Guest auth failed with status 500');
+        }
+
+        expect(console.error).toHaveBeenCalled();
+      });
+
+      it('should handle network errors', async () => {
+        spyOn(window, 'fetch').and.returnValue(
+          Promise.reject(new Error('Network error'))
+        );
+
+        spyOn(console, 'error');
+
+        try {
+          await service.initGuestAuth();
+          fail('Expected initGuestAuth to throw an error');
+        } catch (error) {
+          expect((error as Error).message).toBe('Network error');
+        }
+
+        expect(console.error).toHaveBeenCalled();
+      });
+    });
+  });
 });
