@@ -6,6 +6,8 @@ import serverConfig from '../config';
 /** Service to manage Redis connections and operations for the server. */
 export class RedisService {
   private _client: RedisClientType | null = null;
+  private _connectionErrorLogged = false;
+  private _isDevelopment = process.env['NODE_ENV'] === 'development';
 
   get client(): RedisClientType {
     if (!this._client) {
@@ -14,9 +16,14 @@ export class RedisService {
     return this._client;
   }
 
+  private get isConnected(): boolean {
+    return this._client !== null;
+  }
+
   /**
    * Connects to the Redis server using the provided URL.
-   * If connection fails, an error is thrown.
+   * In production, throws immediately on connection failure.
+   * In development, logs a single error and allows graceful degradation.
    */
   async connect(redisURL?: string): Promise<void> {
     if (this._client) {
@@ -24,7 +31,15 @@ export class RedisService {
     }
 
     if (!redisURL) {
-      throw new Error('Failed to connect to Redis: REDIS_URL is not defined.');
+      const error = 'Failed to connect to Redis: REDIS_URL is not defined.';
+      if (this._isDevelopment) {
+        if (!this._connectionErrorLogged) {
+          console.error(error);
+          this._connectionErrorLogged = true;
+        }
+        return;
+      }
+      throw new Error(error);
     }
 
     this._client = createClient({ 
@@ -32,15 +47,31 @@ export class RedisService {
       pingInterval: serverConfig.redis.pingInterval
     });
 
-    this.client.on('error', err => {
-      console.error('Redis Client Error:', err);
+    this._client.on('error', err => {
+      if (!this._connectionErrorLogged) {
+        console.error('Redis Client Error:', err);
+        this._connectionErrorLogged = true;
+      }
     });
 
-    this.client.on('connect', () => {
+    this._client.on('connect', () => {
       console.log('Redis Client Connected');
+      this._connectionErrorLogged = false;
     });
 
-    await this.client.connect();
+    try {
+      await this._client.connect();
+    } catch (err) {
+      if (this._isDevelopment) {
+        if (!this._connectionErrorLogged) {
+          console.error('Failed to connect to Redis:', err);
+          this._connectionErrorLogged = true;
+        }
+        this._client = null;
+      } else {
+        throw err;
+      }
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -51,18 +82,42 @@ export class RedisService {
   }
 
   async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
+    if (!this.isConnected) {
+      if (this._isDevelopment) {
+        return;
+      }
+      throw new Error('Redis client is not connected');
+    }
     await this.client.set(key, value, options);
   }
 
   async get(key: string): Promise<string | null> {
+    if (!this.isConnected) {
+      if (this._isDevelopment) {
+        return null;
+      }
+      throw new Error('Redis client is not connected');
+    }
     return this.client.get(key);
   }
 
   async delete(key: string): Promise<number> {
+    if (!this.isConnected) {
+      if (this._isDevelopment) {
+        return 0;
+      }
+      throw new Error('Redis client is not connected');
+    }
     return this.client.del(key);
   }
 
   async setStartupTime(): Promise<void> {
+    if (!this.isConnected) {
+      if (this._isDevelopment) {
+        return;
+      }
+      throw new Error('Redis client is not connected');
+    }
     const now = new Date().toISOString();
     await this.set('server:startup', now);
     console.log(`Server startup time logged: ${now}`);
