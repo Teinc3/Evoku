@@ -11,6 +11,7 @@ import App from './app';
 
 describe('App', () => {
   let viewStateService: ViewStateService;
+  let networkService: NetworkService;
 
   beforeEach(async () => {
     // Mock fetch to prevent DynamicFaviconService from making real network requests
@@ -30,12 +31,27 @@ describe('App', () => {
     }).compileComponents();
 
     viewStateService = TestBed.inject(ViewStateService);
+    networkService = TestBed.inject(NetworkService);
+    
+    // Mock initGuestAuth to prevent actual API calls during tests
+    spyOn(networkService, 'initGuestAuth').and.returnValue(
+      Promise.resolve({ token: 'test-token', elo: 0 })
+    );
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('should initialize guest authentication on init', async () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    
+    await app.ngOnInit();
+    
+    expect(networkService.initGuestAuth).toHaveBeenCalled();
   });
 
   it('should initialize with CATALOGUE view', () => {

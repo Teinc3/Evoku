@@ -29,27 +29,27 @@ describe('JWT Utilities', () => {
 
   describe('signGuestToken', () => {
     it('should generate a valid JWT token', () => {
-      const playerId = 'test-player-id';
-      const token = signGuestToken(playerId);
+      const playerID = 'test-player-id';
+      const token = signGuestToken(playerID);
       expect(token).toBeTruthy();
       expect(typeof token).toBe('string');
       expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
     });
 
     it('should throw error if JWT_SECRET is not defined', () => {
-      const playerId = 'test-player-id';
+      const playerID = 'test-player-id';
       delete process.env['JWT_SECRET'];
-      expect(() => signGuestToken(playerId)).toThrow('JWT_SECRET is not defined');
+      expect(() => signGuestToken(playerID)).toThrow('JWT_SECRET is not defined');
       process.env['JWT_SECRET'] = 'test-secret-key';
     });
   });
 
   describe('verifyGuestToken', () => {
     it('should verify and decode a valid token', () => {
-      const playerId = 'test-player-id';
-      const token = signGuestToken(playerId);
+      const playerID = 'test-player-id';
+      const token = signGuestToken(playerID);
       const decoded = verifyGuestToken(token);
-      expect(decoded).toBe(playerId);
+      expect(decoded).toBe(playerID);
     });
 
     it('should return null for invalid token', () => {
@@ -61,8 +61,8 @@ describe('JWT Utilities', () => {
     it('should return null for expired token', () => {
       // This test would require time manipulation or a token signed with a very short expiry
       // For now, we'll just test with an invalid signature
-      const playerId = 'test-player-id';
-      const token = signGuestToken(playerId);
+      const playerID = 'test-player-id';
+      const token = signGuestToken(playerID);
       const tamperedToken = token.slice(0, -1) + 'X'; // Tamper with signature
       const decoded = verifyGuestToken(tamperedToken);
       expect(decoded).toBeNull();
@@ -78,10 +78,10 @@ describe('JWT Utilities', () => {
 
   describe('Token round-trip', () => {
     it('should successfully sign and verify a token', () => {
-      const playerId = generatePlayerId();
-      const token = signGuestToken(playerId);
+      const playerID = generatePlayerId();
+      const token = signGuestToken(playerID);
       const verified = verifyGuestToken(token);
-      expect(verified).toBe(playerId);
+      expect(verified).toBe(playerID);
     });
   });
 });

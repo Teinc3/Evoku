@@ -7,10 +7,6 @@ import crypto from 'crypto';
  * Handles token signing and verification for guest users.
  */
 
-interface TokenPayload {
-  playerId: string;
-}
-
 /**
  * Generate a unique player ID for a guest user
  */
@@ -21,14 +17,14 @@ export function generatePlayerId(): string {
 /**
  * Sign a JWT token for a guest player
  */
-export function signGuestToken(playerId: string): string {
+export function signGuestToken(playerID: string): string {
   const secret = process.env['JWT_SECRET'];
   if (!secret) {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  const payload: TokenPayload = {
-    playerId
+  const payload = {
+    playerID
   };
 
   return jwt.sign(payload, secret, {
@@ -47,8 +43,8 @@ export function verifyGuestToken(token: string): string | null {
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as TokenPayload;
-    return decoded.playerId;
+    const decoded = jwt.verify(token, secret) as { playerID: string };
+    return decoded.playerID;
   } catch {
     return null;
   }
