@@ -45,7 +45,7 @@ describe('GuestAuthService', () => {
     });
 
     describe('with valid existing token', () => {
-      it('should return existing player data with new token', async () => {
+      it('should return existing player data with refreshed token', async () => {
         const existingPlayerId = 'existing-player-id';
         const oldToken = 'old-jwt-token';
         const newToken = 'new-jwt-token';
@@ -60,6 +60,11 @@ describe('GuestAuthService', () => {
         expect(mockVerifyGuestToken).toHaveBeenCalledWith(oldToken);
         expect(mockRedisGet).toHaveBeenCalledWith(`guest:player:${existingPlayerId}`);
         expect(mockSignGuestToken).toHaveBeenCalledWith(existingPlayerId);
+        expect(mockRedisSet).toHaveBeenCalledWith(
+          `guest:player:${existingPlayerId}`,
+          JSON.stringify({ elo: existingElo }),
+          { EX: 604800 }
+        );
         expect(result).toEqual({
           token: newToken,
           elo: existingElo

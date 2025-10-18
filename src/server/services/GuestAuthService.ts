@@ -26,16 +26,25 @@ export class GuestAuthService {
   /**
    * Store player data in Redis
    */
-  private async setPlayerData(playerId: string, elo: number): Promise<void> {
+  private async setPlayerData(
+    playerId: string, 
+    elo: number, 
+    extend: boolean = false
+  ): Promise<void> {
     const key = `${this.redisKeyPrefix}${playerId}`;
     const data = JSON.stringify({ elo });
-    // Set with 7 days expiration (7 * 24 * 60 * 60 = 604800 seconds)
-    await redisService.set(key, data, { EX: 604800 });
+    if (extend) {
+      // Set with 7 days expiration (7 * 24 * 60 * 60 = 604800 seconds)
+      await redisService.set(key, data, { EX: 604800 });
+    } else {
+      // Update without changing expiration
+      await redisService.set(key, data);
+    }
   }
 
   /**
    * Authenticate a guest user, either by creating a new guest or validating an existing token.
-   * If a token is provided and valid, returns existing player data.
+   * If a token is provided and valid, returns existing player data with a refreshed token.
    * Otherwise, creates a new guest player.
    */
   async authenticate(token?: string): Promise<IGuestAuthResponse> {
@@ -46,7 +55,8 @@ export class GuestAuthService {
         // Check if player exists in Redis
         const playerData = await this.getPlayerData(playerId);
         if (playerData) {
-          // Player exists, generate new token and return existing ELO
+          // Player exists, update data and extend expiration
+          await this.setPlayerData(playerId, playerData.elo, true);
           const newToken = signGuestToken(playerId);
           return {
             token: newToken,
@@ -59,7 +69,7 @@ export class GuestAuthService {
     // Create new guest player
     const playerId = generatePlayerId();
     const elo = this.defaultElo;
-    await this.setPlayerData(playerId, elo);
+    await this.setPlayerData(playerId, elo, true); // Set with expiration for new players
     const newToken = signGuestToken(playerId);
 
     return {
