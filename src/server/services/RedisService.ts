@@ -6,17 +6,20 @@ import serverConfig from '../config';
 /** Service to manage Redis connections and operations for the server. */
 export class RedisService {
   private _client: RedisClientType | null = null;
+  private isDevEnv = process.env['NODE_ENV'] === 'development';
 
-  get client(): RedisClientType {
-    if (!this._client) {
+  get client(): RedisClientType | undefined {
+    if (!this._client && !this.isDevEnv) {
       throw new Error('Redis client is not connected');
     }
-    return this._client;
+    return this._client ?? undefined;
   }
 
   /**
    * Connects to the Redis server using the provided URL.
-   * If connection fails, an error is thrown.
+   * In production, throws immediately on connection failure.
+   * In development, logs error once and allows graceful degradation.
+   * Should only be called once during application startup.
    */
   async connect(redisURL?: string): Promise<void> {
     if (this._client) {
@@ -24,7 +27,12 @@ export class RedisService {
     }
 
     if (!redisURL) {
-      throw new Error('Failed to connect to Redis: REDIS_URL is not defined.');
+      const error = 'Failed to connect to Redis: REDIS_URL is not defined.';
+      if (this.isDevEnv) {
+        console.error(error);
+        return;
+      }
+      throw new Error(error);
     }
 
     this._client = createClient({ 
@@ -32,40 +40,48 @@ export class RedisService {
       pingInterval: serverConfig.redis.pingInterval
     });
 
-    this.client.on('error', err => {
-      console.error('Redis Client Error:', err);
-    });
-
-    this.client.on('connect', () => {
+    this.client!.on('connect', () => {
       console.log('Redis Client Connected');
     });
 
-    await this.client.connect();
-  }
-
-  async disconnect(): Promise<void> {
-    if (this._client) {
-      await this._client.quit();
-      this._client = null;
+    try {
+      await this.client!.connect();
+      this.client!.on('error', err => {
+        console.error('Redis Client Error:', err);
+      });
+    } catch (err) {
+      if (this.isDevEnv) {
+        console.error('Failed to connect to Redis. Continuing in degraded mode.');
+        this._client = null;
+      } else {
+        throw err;
+      }
     }
   }
 
+  async disconnect(): Promise<void> {
+    await this.client?.quit();
+    this._client = null;
+  }
+
   async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
-    await this.client.set(key, value, options);
+    await this.client?.set(key, value, options);
   }
 
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    return await this.client?.get(key) ?? null;
   }
 
   async delete(key: string): Promise<number> {
-    return this.client.del(key);
+    return await this.client?.del(key) ?? 0;
   }
 
   async setStartupTime(): Promise<void> {
     const now = new Date().toISOString();
     await this.set('server:startup', now);
-    console.log(`Server startup time logged: ${now}`);
+    if (this.client) {
+      console.log(`Server startup time logged: ${now}`);
+    }
   }
 }
 
