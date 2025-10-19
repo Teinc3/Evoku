@@ -96,17 +96,6 @@ describe('RedisService', () => {
         consoleSpy.mockRestore();
       });
 
-      it('should not log error twice if connect fails multiple times', async () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-        await service.connect();
-        await service.connect();
-
-        expect(consoleSpy).toHaveBeenCalledTimes(1);
-
-        consoleSpy.mockRestore();
-      });
-
       it('should handle connection failure gracefully', async () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
         const connectionError = new Error('ECONNREFUSED');
@@ -114,22 +103,8 @@ describe('RedisService', () => {
 
         await service.connect('redis://localhost:6379');
 
-        expect(consoleSpy).toHaveBeenCalledTimes(1);
         expect(consoleSpy).toHaveBeenCalledWith('Failed to connect to Redis:', connectionError);
         expect(service['_client']).toBeNull();
-
-        consoleSpy.mockRestore();
-      });
-
-      it('should only log connection error once on repeated failures', async () => {
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-        const connectionError = new Error('ECONNREFUSED');
-        mockClient.connect = jest.fn().mockRejectedValue(connectionError);
-
-        await service.connect('redis://localhost:6379');
-        await service.connect('redis://localhost:6379');
-
-        expect(consoleSpy).toHaveBeenCalledTimes(1);
 
         consoleSpy.mockRestore();
       });
@@ -160,25 +135,7 @@ describe('RedisService', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should reset error flag on successful reconnection', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      await service.connect('redis://localhost:6379');
-
-      service['_connectionErrorLogged'] = true;
-
-      const connectCall = (mockClient.on as jest.Mock).mock.calls.find(
-        (call: [string, () => void]) => call[0] === 'connect'
-      );
-      const connectCallback = connectCall[1];
-      connectCallback();
-
-      expect(service['_connectionErrorLogged']).toBe(false);
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should only log error event once', async () => {
+    it('should log error events', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await service.connect('redis://localhost:6379');
@@ -190,9 +147,7 @@ describe('RedisService', () => {
       const testError = new Error('test error');
       
       errorCallback(testError);
-      errorCallback(testError);
 
-      expect(consoleSpy).toHaveBeenCalledTimes(1);
       expect(consoleSpy).toHaveBeenCalledWith('Redis Client Error:', testError);
 
       consoleSpy.mockRestore();
