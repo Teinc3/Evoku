@@ -77,7 +77,8 @@
               "buildTarget": "Evoku:build:production"
             },
             "development": {
-              "buildTarget": "Evoku:build:development"
+              "buildTarget": "Evoku:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

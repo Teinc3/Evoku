@@ -2,7 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import WebSocketService from '../../networking/services/WebSocketService';
+import APIService from '../../networking/services/APIService';
 import NetworkService from './network.service';
+import CookieService from './cookie.service';
 
 
 // Mock WebSocketService
@@ -34,17 +36,35 @@ class MockWebSocketService {
   }
 }
 
+// Mock APIService
+class MockAPIService {
+  authenticateGuest = jasmine.createSpy('authenticateGuest');
+}
+
+// Mock CookieService
+class MockCookieService {
+  get = jasmine.createSpy('get');
+  set = jasmine.createSpy('set');
+  delete = jasmine.createSpy('delete');
+}
+
 describe('NetworkService', () => {
   let service: NetworkService;
   let mockWebSocketService: MockWebSocketService;
+  let mockAPIService: MockAPIService;
+  let mockCookieService: MockCookieService;
 
   beforeEach(() => {
     mockWebSocketService = new MockWebSocketService();
+    mockAPIService = new MockAPIService();
+    mockCookieService = new MockCookieService();
 
     TestBed.configureTestingModule({
       providers: [
         NetworkService,
-        { provide: WebSocketService, useFactory: () => mockWebSocketService }
+        { provide: WebSocketService, useFactory: () => mockWebSocketService },
+        { provide: APIService, useFactory: () => mockAPIService },
+        { provide: CookieService, useFactory: () => mockCookieService }
       ]
     });
 
@@ -101,6 +121,71 @@ describe('NetworkService', () => {
       } catch (error) {
         expect((error as Error).message).toBe('Connection failed');
       }
+    });
+  });
+
+  describe('Guest Authentication', () => {
+    describe('initGuestAuth', () => {
+      it('should authenticate without existing token', async () => {
+        const mockResponse = {
+          token: 'new-test-token',
+          elo: 0
+        };
+
+        mockCookieService.get.and.returnValue(null);
+        mockAPIService.authenticateGuest.and.returnValue(Promise.resolve(mockResponse));
+
+        const result = await service.initGuestAuth();
+
+        expect(mockCookieService.get).toHaveBeenCalledWith('evoku_guest_token');
+        expect(mockAPIService.authenticateGuest).toHaveBeenCalledWith(undefined);
+        expect(mockCookieService.set).toHaveBeenCalledWith(
+          'evoku_guest_token',
+          'new-test-token',
+          604800
+        );
+        expect(result).toEqual(mockResponse);
+      });
+
+      it('should authenticate with existing token', async () => {
+        const existingToken = 'existing-test-token';
+        const mockResponse = {
+          token: 'new-test-token',
+          elo: 1500
+        };
+
+        mockCookieService.get.and.returnValue(existingToken);
+        mockAPIService.authenticateGuest.and.returnValue(Promise.resolve(mockResponse));
+
+        const result = await service.initGuestAuth();
+
+        expect(mockCookieService.get).toHaveBeenCalledWith('evoku_guest_token');
+        expect(mockAPIService.authenticateGuest).toHaveBeenCalledWith(existingToken);
+        expect(mockCookieService.set).toHaveBeenCalledWith(
+          'evoku_guest_token',
+          'new-test-token',
+          604800
+        );
+        expect(result).toEqual(mockResponse);
+      });
+
+      it('should throw error on failed authentication', async () => {
+        mockCookieService.get.and.returnValue(null);
+        mockAPIService.authenticateGuest.and.returnValue(
+          Promise.reject(new Error('Auth failed'))
+        );
+
+        spyOn(console, 'error');
+
+        try {
+          await service.initGuestAuth();
+          fail('Expected initGuestAuth to throw an error');
+        } catch (error) {
+          expect((error as Error).message).toBe('Auth failed');
+        }
+
+        expect(console.error).toHaveBeenCalled();
+      });
     });
   });
 });
