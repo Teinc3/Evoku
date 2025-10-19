@@ -80,10 +80,7 @@ export default class HTTPServer {
     });
 
     // Placeholder for other API routes
-    this.app.all('/api', (_req, res) => {
-      res.sendStatus(501);
-    });
-    this.app.all('/api*anyroute', (_req, res) => {
+    this.app.all(['/api', '/api/*route'], (_req, res) => {
       res.sendStatus(501);
     });
   }
@@ -93,7 +90,6 @@ export default class HTTPServer {
     this.server.listen(this.port, () => {
       console.log(`HTTP server is running on http://localhost:${this.port}`);
       redisService.setStartupTime(); // Log startup time in Redis after initialization
-
     });
   }
 
