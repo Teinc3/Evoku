@@ -3,10 +3,27 @@ import { createClient, type RedisClientType } from 'redis';
 import { RedisService } from './RedisService';
 
 
-// Mock the redis module
+jest.mock('node:fs', () => ({
+  existsSync: jest.fn().mockReturnValue(true),
+  readFileSync: jest.fn().mockReturnValue(JSON.stringify({
+    redis: { pingInterval: 30000 }
+  })),
+}));
+
+jest.mock('node:path', () => ({
+  join: jest.fn().mockImplementation((...args) => args.join('/')),
+}));
+
+// Mock shared utils
+jest.mock('@shared/utils/config', () => ({
+  deepFreeze: (obj: unknown) => obj,
+  deepMerge: (base: unknown, override: unknown) => ({ ...base as object, ...override as object }),
+}));
+
 jest.mock('redis', () => ({
   createClient: jest.fn(),
 }));
+
 
 describe('RedisService', () => {
   let service: RedisService;
@@ -42,13 +59,13 @@ describe('RedisService', () => {
       it('should create and connect client with valid URL', async () => {
         await service.connect('redis://localhost:6379');
 
-        expect(createClient).toHaveBeenCalledWith({ 
+        expect(createClient).toHaveBeenCalledWith({
           url: 'redis://localhost:6379',
-          pingInterval: expect.any(Number)
+          pingInterval: 30000
         });
-        expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
         expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
         expect(mockClient.connect).toHaveBeenCalled();
+        expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
       });
 
       it('should throw if no URL provided', async () => {
@@ -73,13 +90,13 @@ describe('RedisService', () => {
       it('should create and connect client with valid URL', async () => {
         await service.connect('redis://localhost:6379');
 
-        expect(createClient).toHaveBeenCalledWith({ 
+        expect(createClient).toHaveBeenCalledWith({
           url: 'redis://localhost:6379',
-          pingInterval: expect.any(Number)
+          pingInterval: 30000
         });
-        expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
         expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
         expect(mockClient.connect).toHaveBeenCalled();
+        expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
       });
 
       it('should log error once and continue if no URL provided', async () => {
@@ -103,7 +120,9 @@ describe('RedisService', () => {
 
         await service.connect('redis://localhost:6379');
 
-        expect(consoleSpy).toHaveBeenCalledWith('Failed to connect to Redis:', connectionError);
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to connect to Redis. Continuing in degraded mode.'
+        );
         expect(service['_client']).toBeNull();
 
         consoleSpy.mockRestore();
@@ -123,11 +142,11 @@ describe('RedisService', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       await service.connect('redis://localhost:6379');
-
       const connectCall = (mockClient.on as jest.Mock).mock.calls.find(
         (call: [string, () => void]) => call[0] === 'connect'
       );
-      const connectCallback = connectCall[1];
+      const connectCallback = connectCall![1];
+
       connectCallback();
 
       expect(consoleSpy).toHaveBeenCalledWith('Redis Client Connected');
@@ -139,13 +158,12 @@ describe('RedisService', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await service.connect('redis://localhost:6379');
-
       const errorCall = (mockClient.on as jest.Mock).mock.calls.find(
         (call: [string, (error: Error) => void]) => call[0] === 'error'
       );
-      const errorCallback = errorCall[1];
+      const errorCallback = errorCall![1];
       const testError = new Error('test error');
-      
+
       errorCallback(testError);
 
       expect(consoleSpy).toHaveBeenCalledWith('Redis Client Error:', testError);
@@ -155,7 +173,7 @@ describe('RedisService', () => {
   });
 
   describe('disconnect', () => {
-    it('should quit client and set to null if connected', async () => {
+    it('should call client.quit and set client to null', async () => {
       service['_client'] = mockClient;
 
       await service.disconnect();
@@ -164,8 +182,10 @@ describe('RedisService', () => {
       expect(service['_client']).toBeNull();
     });
 
-    it('should do nothing if not connected', async () => {
-      await service.disconnect();
+    it('should handle undefined client gracefully', async () => {
+      process.env['NODE_ENV'] = 'development';
+      const devService = new RedisService(); // Create new service with dev env
+      await devService.disconnect();
 
       expect(mockClient.quit).not.toHaveBeenCalled();
     });

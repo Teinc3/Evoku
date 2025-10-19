@@ -6,10 +6,10 @@ import serverConfig from '../config';
 /** Service to manage Redis connections and operations for the server. */
 export class RedisService {
   private _client: RedisClientType | null = null;
-  private _isDevelopment = process.env['NODE_ENV'] === 'development';
+  private isDevEnv = process.env['NODE_ENV'] === 'development';
 
   get client(): RedisClientType | undefined {
-    if (!this._client && !this._isDevelopment) {
+    if (!this._client && !this.isDevEnv) {
       throw new Error('Redis client is not connected');
     }
     return this._client ?? undefined;
@@ -28,7 +28,7 @@ export class RedisService {
 
     if (!redisURL) {
       const error = 'Failed to connect to Redis: REDIS_URL is not defined.';
-      if (this._isDevelopment) {
+      if (this.isDevEnv) {
         console.error(error);
         return;
       }
@@ -40,19 +40,18 @@ export class RedisService {
       pingInterval: serverConfig.redis.pingInterval
     });
 
-    this._client.on('error', err => {
-      console.error('Redis Client Error:', err);
-    });
-
-    this._client.on('connect', () => {
+    this.client!.on('connect', () => {
       console.log('Redis Client Connected');
     });
 
     try {
-      await this._client.connect();
+      await this.client!.connect();
+      this.client!.on('error', err => {
+        console.error('Redis Client Error:', err);
+      });
     } catch (err) {
-      if (this._isDevelopment) {
-        console.error('Failed to connect to Redis:', err);
+      if (this.isDevEnv) {
+        console.error('Failed to connect to Redis. Continuing in degraded mode.');
         this._client = null;
       } else {
         throw err;
@@ -61,10 +60,8 @@ export class RedisService {
   }
 
   async disconnect(): Promise<void> {
-    if (this._client) {
-      await this._client.quit();
-      this._client = null;
-    }
+    await this.client?.quit();
+    this._client = null;
   }
 
   async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
@@ -72,11 +69,11 @@ export class RedisService {
   }
 
   async get(key: string): Promise<string | null> {
-    return (await this.client?.get(key)) ?? null;
+    return await this.client?.get(key) ?? null;
   }
 
   async delete(key: string): Promise<number> {
-    return (await this.client?.del(key)) ?? 0;
+    return await this.client?.del(key) ?? 0;
   }
 
   async setStartupTime(): Promise<void> {

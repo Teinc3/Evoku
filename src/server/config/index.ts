@@ -25,13 +25,13 @@ try {
     case 'production':
     case 'prod':
       overrideConfig = readJsonIfExists(path.join(configPath, 'prod.json'));
+      console.log('Using production configuration');
       break;
     // Add staging in the future
     case 'dev':
     case 'development':
     default:
       overrideConfig = readJsonIfExists(path.join(configPath, 'dev.json'));
-      console.log('Using development configuration');
       break;
   }
 } catch (e) {
