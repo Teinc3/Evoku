@@ -31,11 +31,11 @@ export default class HTTPServer {
     // Middleware to parse JSON bodies
     this.app.use(express.json());
 
-    this.app.get('/health', (_req, res) => {
+    this.app.get('/api/health', (_req, res) => {
       res.sendStatus(200);
     });
 
-    this.app.get('/api', (_req, res) => {
+    this.app.get('/api*', (_req, res) => {
       res.sendStatus(501);
     });
 
