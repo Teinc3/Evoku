@@ -31,27 +31,12 @@ export default class HTTPServer {
     // Middleware to parse JSON bodies
     this.app.use(express.json());
 
-    this.app.get('/api/health', (_req, res) => {
-      res.sendStatus(200);
-    });
+    this.configureAPI();
+    this.serveClient();
+  }
 
-    this.app.get('/api*', (_req, res) => {
-      res.sendStatus(501);
-    });
-
-    // Guest authentication endpoint
-    this.app.post('/api/auth/guest', async (req, res) => {
-      try {
-        const token = req.body.token as string | undefined;
-        const result: IGuestAuthResponse = await guestAuthService.authenticate(token);
-        res.json(result);
-      } catch (error) {
-        console.error('Error in guest auth endpoint:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
-
-    // Serve the built Angular client only if a build exists
+  /** Serve the built Angular client if it exists */
+  private serveClient(): void {
     const clientDist = path.join(process.cwd(), 'dist', 'Evoku', 'browser');
     const clientIndex = path.join(clientDist, 'index.html');
 
@@ -75,6 +60,32 @@ export default class HTTPServer {
     });
   }
 
+  /** Configure API routes */
+  private configureAPI(): void {
+    // Health check endpoint
+    this.app.get('/api/health', (_req, res) => {
+      res.sendStatus(200);
+    });
+
+    // Guest authentication endpoint
+    this.app.post('/api/auth/guest', async (req, res) => {
+      try {
+        const token = req.body.token as string | undefined;
+        const result: IGuestAuthResponse = await guestAuthService.authenticate(token);
+        res.json(result);
+      } catch (error) {
+        console.error('Error in guest auth endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    // Placeholder for other API routes
+    this.app.all('/api*', (_req, res) => {
+      res.sendStatus(501);
+    });
+  }
+
+  /** Start the HTTP server */
   public async start() {
     this.server.listen(this.port, () => {
       console.log(`HTTP server is running on http://localhost:${this.port}`);
@@ -83,6 +94,7 @@ export default class HTTPServer {
     });
   }
 
+  /** Close the HTTP server */
   public async close() {
     this.server.close(() => {
       console.log('HTTP server closed');
