@@ -31,7 +31,7 @@ describe('Shared Config', () => {
   });
 
   describe('Version Consistency', () => {
-    it('should have the same version in base config and CLIENT_VERSION', () => {
+    it('should have the same version in base config and package.json', () => {
       expect(baseConfig.version).toBe(version);
     });
   });
