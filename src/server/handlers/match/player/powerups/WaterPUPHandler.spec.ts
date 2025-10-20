@@ -31,7 +31,7 @@ describe('WaterPUPHandler', () => {
   });
 
   describe('handleUseCryo', () => {
-    it('should handle USE_CRYO action and return true', () => {
+    it('should handle USE_CRYO action and return true', async () => {
       // Arrange
       const useCryoData = {
         action: WaterPUPActions.USE_CRYO,
@@ -43,7 +43,7 @@ describe('WaterPUPHandler', () => {
       };
 
       // Act
-      const result = waterPUPHandler.handleData(
+      const result = await waterPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useCryoData
       );
@@ -54,7 +54,7 @@ describe('WaterPUPHandler', () => {
   });
 
   describe('handleUseCascade', () => {
-    it('should handle USE_CASCADE action and return true', () => {
+    it('should handle USE_CASCADE action and return true', async () => {
       // Arrange
       const useCascadeData = {
         action: WaterPUPActions.USE_CASCADE,
@@ -64,7 +64,7 @@ describe('WaterPUPHandler', () => {
       };
 
       // Act
-      const result = waterPUPHandler.handleData(
+      const result = await waterPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useCascadeData
       );

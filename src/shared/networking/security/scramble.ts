@@ -3,14 +3,21 @@ import BiMap from 'bidirectional-map';
 
 import ActionGuard from '../../types/utils/typeguards/actions';
 import sharedConfig from '../../config';
+import SessionActions from '../../types/enums/actions/system/session';
 
 import type ActionEnum from '../../types/enums/actions';
 
 
 class PacketScrambler {
   private map: BiMap<number> | undefined;
+  private whitelist: Set<number>;
 
   constructor() {
+    // Initialize the whitelist with packet IDs that should not be scrambled
+    this.whitelist = new Set([
+      SessionActions.AUTH,
+    ]);
+
     const seed = sharedConfig.security.packetScramblerSeed;
 
     // Only initialize the mapping if a seed is provided.
@@ -50,6 +57,11 @@ class PacketScrambler {
      * @returns The scrambled packet ID.
      */
   public scrambleID(packetID: ActionEnum): number {
+    // Check if the packet ID is whitelisted
+    if (this.whitelist.has(packetID)) {
+      return packetID;
+    }
+
     // If the map doesn't exist, return the ID unchanged.
     if (!this.map) {
       return packetID;
@@ -71,6 +83,11 @@ class PacketScrambler {
      * @returns The original static packet ID.
      */
   public unscrambleID(scrambledID: number): ActionEnum {
+    // Check if the ID is whitelisted (not scrambled)
+    if (this.whitelist.has(scrambledID)) {
+      return scrambledID;
+    }
+
     // If the map doesn't exist, return the ID unchanged.
     if (!this.map) {
       return scrambledID;

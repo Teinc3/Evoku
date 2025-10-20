@@ -31,7 +31,7 @@ describe('EarthPUPHandler', () => {
   });
 
   describe('handleUseLandslide', () => {
-    it('should handle USE_LANDSLIDE action and return true', () => {
+    it('should handle USE_LANDSLIDE action and return true', async () => {
       // Arrange
       const useLandslideData = {
         action: EarthPUPActions.USE_LANDSLIDE,
@@ -43,7 +43,7 @@ describe('EarthPUPHandler', () => {
       };
 
       // Act
-      const result = earthPUPHandler.handleData(
+      const result = await earthPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useLandslideData
       );
@@ -54,7 +54,7 @@ describe('EarthPUPHandler', () => {
   });
 
   describe('handleUseExcavate', () => {
-    it('should handle USE_EXCAVATE action and return true', () => {
+    it('should handle USE_EXCAVATE action and return true', async () => {
       // Arrange
       const useExcavateData = {
         action: EarthPUPActions.USE_EXCAVATE,
@@ -65,7 +65,7 @@ describe('EarthPUPHandler', () => {
       };
 
       // Act
-      const result = earthPUPHandler.handleData(
+      const result = await earthPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useExcavateData
       );

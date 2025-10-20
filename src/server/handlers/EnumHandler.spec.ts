@@ -48,7 +48,7 @@ describe('EnumHandler', () => {
   });
 
   describe('handleData', () => {
-    it('should handle known actions successfully', () => {
+    it('should handle known actions successfully', async () => {
       // Arrange
       const action1Data = {
         action: 1,
@@ -61,17 +61,17 @@ describe('EnumHandler', () => {
       };
 
       // Act & Assert
-      expect(enumHandler.handleData(
+      expect(await enumHandler.handleData(
         mockSession as unknown as SessionModel, 
         action1Data as unknown as AugmentAction<number>
       )).toBe(true);
-      expect(enumHandler.handleData(
+      expect(await enumHandler.handleData(
         mockSession as unknown as SessionModel, 
         action2Data as unknown as AugmentAction<number>
       )).toBe(true);
     });
 
-    it('should return false for unknown actions', () => {
+    it('should return false for unknown actions', async () => {
       // Arrange
       const unknownActionData = {
         action: 999, // Action not in handlerMap
@@ -79,7 +79,7 @@ describe('EnumHandler', () => {
       };
 
       // Act
-      const result = enumHandler.handleData(
+      const result = await enumHandler.handleData(
         mockSession as unknown as SessionModel,
         unknownActionData as unknown as AugmentAction<number>
       );
@@ -90,7 +90,7 @@ describe('EnumHandler', () => {
   });
 
   describe('setHandlerMap', () => {
-    it('should bind handler functions to the correct context', () => {
+    it('should bind handler functions to the correct context', async () => {
       // Arrange
       const mockHandler = jest.fn<(
         session: SessionModel, 
@@ -115,7 +115,7 @@ describe('EnumHandler', () => {
       expect(mockHandler).toHaveBeenCalledTimes(1);
     });
 
-    it('should skip binding for falsy handlers', () => {
+    it('should skip binding for falsy handlers', async () => {
       // Arrange
       const mockHandler = jest.fn<(
         session: SessionModel,

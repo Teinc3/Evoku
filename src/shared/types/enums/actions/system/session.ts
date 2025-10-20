@@ -1,6 +1,6 @@
 enum SessionActions {
   HEARTBEAT = -20,
-  // Auth will be here later
+  AUTH = -21,
 }
 
 export default SessionActions

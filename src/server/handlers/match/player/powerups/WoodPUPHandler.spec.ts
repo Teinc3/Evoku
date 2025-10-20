@@ -32,7 +32,7 @@ describe('WoodPUPHandler', () => {
   });
 
   describe('handleUseEntangle', () => {
-    it('should handle USE_ENTANGLE action and return true', () => {
+    it('should handle USE_ENTANGLE action and return true', async () => {
       // Arrange
       const useEntangleData: AugmentAction<WoodPUPActions.USE_ENTANGLE> = {
         action: WoodPUPActions.USE_ENTANGLE,
@@ -43,7 +43,7 @@ describe('WoodPUPHandler', () => {
       };
 
       // Act
-      const result = woodPUPHandler.handleData(
+      const result = await woodPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useEntangleData
       );
@@ -54,7 +54,7 @@ describe('WoodPUPHandler', () => {
   });
 
   describe('handleUseWisdom', () => {
-    it('should handle USE_WISDOM action and return true', () => {
+    it('should handle USE_WISDOM action and return true', async () => {
       // Arrange
       const useWisdomData: AugmentAction<WoodPUPActions.USE_WISDOM> = {
         action: WoodPUPActions.USE_WISDOM,
@@ -64,7 +64,7 @@ describe('WoodPUPHandler', () => {
       };
 
       // Act
-      const result = woodPUPHandler.handleData(
+      const result = await woodPUPHandler.handleData(
         mockSession as unknown as SessionModel, 
         useWisdomData
       );

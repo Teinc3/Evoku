@@ -14,7 +14,7 @@ export interface IMatchEnumHandler<GenericAction extends ActionEnum>
 }
 
 export type HandleDataFn<GenericAction extends ActionEnum> 
-  = (session: SessionModel, data: AugmentAction<GenericAction>) => boolean;
+  = (session: SessionModel, data: AugmentAction<GenericAction>) => boolean | Promise<boolean>;
 
 export type HandlerMap<GenericAction extends ActionEnum> = {
   [ActionKey in GenericAction]?: HandleDataFn<ActionKey>;

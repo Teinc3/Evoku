@@ -41,7 +41,7 @@ describe('ProtocolHandler', () => {
   });
 
   describe('handlePong', () => {
-    it('should handle PONG action successfully when session is found in room', () => {
+    it('should handle PONG action successfully when session is found in room', async () => {
       // Arrange
       const playerID = 1;
       const clientTime = 1000;
@@ -55,7 +55,7 @@ describe('ProtocolHandler', () => {
       mockRoom.getPlayerID.mockReturnValue(playerID);
 
       // Act
-      const result = protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
+      const result = await protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
 
       // Assert
       expect(result).toBe(true);
@@ -63,7 +63,7 @@ describe('ProtocolHandler', () => {
       expect(mockTimeService.handlePong).toHaveBeenCalledWith(playerID, clientTime, serverTime);
     });
 
-    it('should return false when session is not found in room', () => {
+    it('should return false when session is not found in room', async () => {
       // Arrange
       const pongPacket: AugmentAction<ProtocolActions.PONG> = {
         action: ProtocolActions.PONG,
@@ -74,7 +74,7 @@ describe('ProtocolHandler', () => {
       mockRoom.getPlayerID.mockReturnValue(undefined);
 
       // Act
-      const result = protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
+      const result = await protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
 
       // Assert
       expect(result).toBe(false);

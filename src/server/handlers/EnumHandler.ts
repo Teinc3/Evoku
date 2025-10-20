@@ -27,12 +27,15 @@ implements IDataHandler<GenericEnum> {
     }
   }
 
-  public handleData(session: SessionModel, data: AugmentAction<GenericEnum>): boolean {
+  public async handleData(
+    session: SessionModel, 
+    data: AugmentAction<GenericEnum>
+  ): Promise<boolean> {
     const handler = this.handlerMap[data.action];
 
     if (handler) {
       // The data type is correctly inferred here because of how `action` and `handlerMap` are typed
-      return handler(session, data);
+      return await handler(session, data);
     } else {
       return false;
     }

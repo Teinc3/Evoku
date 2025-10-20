@@ -45,7 +45,7 @@ describe('System Handler Integration Test', () => {
     lobbyHandler = systemHandler.handlerMap[1][1];
   });
 
-  it('should correctly route a LobbyAction to the LobbyHandler', () => {
+  it('should correctly route a LobbyAction to the LobbyHandler', async () => {
     // A. Create a mock packet for a lobby action
     const joinQueuePacket = {
       action: LobbyActions.JOIN_QUEUE,
@@ -56,7 +56,7 @@ describe('System Handler Integration Test', () => {
     const lobbyHandlerSpy = jest.spyOn(lobbyHandler, 'handleData');
 
     // C. Pass the packet to the top-level SystemHandler
-    const result = systemHandler.handleData(mockSession, joinQueuePacket);
+    const result = await systemHandler.handleData(mockSession, joinQueuePacket);
 
     // D. Assertions
     expect(result).toBe(true);
@@ -65,7 +65,7 @@ describe('System Handler Integration Test', () => {
     expect(lobbyHandlerSpy).toHaveBeenCalledWith(mockSession, joinQueuePacket);
   });
 
-  it('should correctly route a SessionAction to the SessionHandler', () => {
+  it('should correctly route a SessionAction to the SessionHandler', async () => {
     // A. Create a mock packet for a session action
     const heartbeatPacket = {
       action: SessionActions.HEARTBEAT,
@@ -75,21 +75,21 @@ describe('System Handler Integration Test', () => {
     const sessionHandlerSpy = jest.spyOn(sessionHandler, 'handleData');
 
     // C. Pass the packet to the top-level SystemHandler
-    const result = systemHandler.handleData(mockSession, heartbeatPacket);
+    const result = await systemHandler.handleData(mockSession, heartbeatPacket);
 
     // D. Assertions
     expect(result).toBe(true);
     expect(sessionHandlerSpy).toHaveBeenCalledWith(mockSession, heartbeatPacket);
   });
 
-  it('should return false for an unhandled action', () => {
+  it('should return false for an unhandled action', async () => {
     // A. Create a packet with an action that SystemHandler does not handle
     const unhandledPacket = {
       action: 127, // Some action not in SystemActions
     };
 
     // B. Pass the packet to the handler
-    const result = systemHandler.handleData(mockSession, unhandledPacket);
+    const result = await systemHandler.handleData(mockSession, unhandledPacket);
 
     // C. Assertions
     expect(result).toBe(false);
@@ -109,7 +109,7 @@ describe('Match Handler Integration Test', () => {
     matchHandler = new MatchHandler(mockRoom);
   });
 
-  it('should route an action through multiple UnionHandlers properly', () => {
+  it('should route an action through multiple UnionHandlers properly', async () => {
     // We want to test the full chain: MatchHandler -> PlayerHandler -> PUPHandler -> FirePUPHandler
     // To do this, we spy on the final handler in the chain.
     // @ts-expect-error ts(2341)
@@ -133,7 +133,7 @@ describe('Match Handler Integration Test', () => {
     }
 
     // Pass the packet to the TOP-LEVEL MatchHandler
-    const result = matchHandler.handleData(mockSession, useInfernoPacket);
+    const result = await matchHandler.handleData(mockSession, useInfernoPacket);
 
     // Assertions
     expect(result).toBe(true);
@@ -142,7 +142,7 @@ describe('Match Handler Integration Test', () => {
     expect(firePUPHandlerSpy).toHaveBeenCalledWith(mockSession, useInfernoPacket);
   });
 
-  it('should return false for an unhandled action', () => {
+  it('should return false for an unhandled action', async () => {
     // Create a packet with an action that MatchHandler does not handle
     const unhandledPacket = {
       action: -128 // Some action not in MatchActions
@@ -150,7 +150,7 @@ describe('Match Handler Integration Test', () => {
 
     // Pass the packet to the handler
     // @ts-expect-error ts(2345)
-    const result = matchHandler.handleData(mockSession, unhandledPacket);
+    const result = await matchHandler.handleData(mockSession, unhandledPacket);
 
     // Assertions
     expect(result).toBe(false);

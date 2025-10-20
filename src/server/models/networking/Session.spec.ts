@@ -73,21 +73,21 @@ describe('SessionModel', () => {
   });
 
   describe('constructor', () => {
-    it('should generate a unique UUID', () => {
+    it('should generate a unique UUID', async () => {
       expect(session.uuid).toBeDefined();
       expect(typeof session.uuid).toBe('string');
       expect(session.uuid.length).toBeGreaterThan(0);
     });
 
-    it('should set socket instance', () => {
+    it('should set socket instance', async () => {
       expect(session.socketInstance).toBe(mockSocket);
     });
 
-    it('should set room reference', () => {
+    it('should set room reference', async () => {
       expect(session.room).toBe(mockRoom);
     });
 
-    it('should set last active time to current time', () => {
+    it('should set last active time to current time', async () => {
       const beforeTime = Date.now();
       const newSession = new SessionModel(
         mockSocket as unknown as ServerSocket,
@@ -101,24 +101,24 @@ describe('SessionModel', () => {
       expect(newSession.lastActiveTime).toBeLessThanOrEqual(afterTime);
     });
 
-    it('should set socket listener when socket is provided', () => {
+    it('should set socket listener when socket is provided', async () => {
       expect(mockSocket.setListener).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('should not set socket listener when socket is null', () => {
+    it('should not set socket listener when socket is null', async () => {
       const freshMockSocket = new MockServerSocket();
 
       expect(freshMockSocket.setListener).not.toHaveBeenCalled();
     });
 
-    it('should bind callback functions to session instance', () => {
+    it('should bind callback functions to session instance', async () => {
       expect(onDisconnectSpy).toHaveBeenCalledTimes(0); // Not called during construction
       expect(onDestroySpy).toHaveBeenCalledTimes(0); // Not called during construction
     });
   });
 
   describe('disconnect', () => {
-    it('should close socket when socket exists', () => {
+    it('should close socket when socket exists', async () => {
       // Act
       session.disconnect();
 
@@ -127,7 +127,7 @@ describe('SessionModel', () => {
       expect(session.socketInstance).toBeNull();
     });
 
-    it('should not close socket when socket is already null', () => {
+    it('should not close socket when socket is already null', async () => {
       // Arrange
       const sessionWithoutSocket = new SessionModel(
         null,
@@ -143,7 +143,7 @@ describe('SessionModel', () => {
       expect(mockSocket.close).not.toHaveBeenCalled();
     });
 
-    it('should trigger disconnect event by default', () => {
+    it('should trigger disconnect event by default', async () => {
       // Act
       session.disconnect();
 
@@ -151,7 +151,7 @@ describe('SessionModel', () => {
       expect(onDisconnectSpy).toHaveBeenCalledWith(session);
     });
 
-    it('should not trigger disconnect event when triggerEvent is false', () => {
+    it('should not trigger disconnect event when triggerEvent is false', async () => {
       // Act
       session.disconnect(false);
 
@@ -159,7 +159,7 @@ describe('SessionModel', () => {
       expect(onDisconnectSpy).not.toHaveBeenCalled();
     });
 
-    it('should handle multiple disconnect calls gracefully', () => {
+    it('should handle multiple disconnect calls gracefully', async () => {
       // Arrange
       const freshOnDisconnectSpy = jest.fn();
       const freshSession = new SessionModel(
@@ -181,7 +181,7 @@ describe('SessionModel', () => {
   });
 
   describe('destroy', () => {
-    it('should remove session from room when room exists', () => {
+    it('should remove session from room when room exists', async () => {
       // Act
       session.destroy();
 
@@ -190,7 +190,7 @@ describe('SessionModel', () => {
       expect(session.room).toBeNull();
     });
 
-    it('should not remove from room when room is null', () => {
+    it('should not remove from room when room is null', async () => {
       // Arrange
       const sessionWithoutRoom = new SessionModel(
         mockSocket as unknown as ServerSocket,
@@ -207,7 +207,7 @@ describe('SessionModel', () => {
       expect(mockRoom.removeSession).not.toHaveBeenCalled();
     });
 
-    it('should close socket when socket exists', () => {
+    it('should close socket when socket exists', async () => {
       // Act
       session.destroy();
 
@@ -216,7 +216,7 @@ describe('SessionModel', () => {
       expect(session.socketInstance).toBeNull();
     });
 
-    it('should trigger destroy event by default', () => {
+    it('should trigger destroy event by default', async () => {
       // Act
       session.destroy();
 
@@ -224,7 +224,7 @@ describe('SessionModel', () => {
       expect(onDestroySpy).toHaveBeenCalledWith(session);
     });
 
-    it('should not trigger destroy event when triggerEvent is false', () => {
+    it('should not trigger destroy event when triggerEvent is false', async () => {
       // Act
       session.destroy(false);
 
@@ -232,7 +232,7 @@ describe('SessionModel', () => {
       expect(onDestroySpy).not.toHaveBeenCalled();
     });
 
-    it('should clear all references', () => {
+    it('should clear all references', async () => {
       // Act
       session.destroy();
 
@@ -243,7 +243,7 @@ describe('SessionModel', () => {
   });
 
   describe('reconnect', () => {
-    it('should set new socket instance', () => {
+    it('should set new socket instance', async () => {
       // Arrange
       const newSocket = new MockServerSocket();
 
@@ -254,7 +254,7 @@ describe('SessionModel', () => {
       expect(session.socketInstance).toBe(newSocket);
     });
 
-    it('should set listener on new socket', () => {
+    it('should set listener on new socket', async () => {
       // Arrange
       const newSocket = new MockServerSocket();
 
@@ -265,7 +265,7 @@ describe('SessionModel', () => {
       expect(newSocket.setListener).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('should replace existing socket', () => {
+    it('should replace existing socket', async () => {
       // Arrange
       const newSocket = new MockServerSocket();
       const originalSocket = session.socketInstance;
@@ -280,7 +280,7 @@ describe('SessionModel', () => {
   });
 
   describe('forward', () => {
-    it('should send data through socket when socket exists', () => {
+    it('should send data through socket when socket exists', async () => {
       // Arrange
       const action = 'GAME_INIT' as unknown as ActionEnum;
       const data = { test: 'data' } as unknown as ActionMap[ActionEnum];
@@ -292,7 +292,7 @@ describe('SessionModel', () => {
       expect(mockSocket.send).toHaveBeenCalledWith(action, data);
     });
 
-    it('should not send data when socket is null', () => {
+    it('should not send data when socket is null', async () => {
       // Arrange
       const sessionWithoutSocket = new SessionModel(
         null,
@@ -310,7 +310,7 @@ describe('SessionModel', () => {
       expect(mockSocket.send).not.toHaveBeenCalled();
     });
 
-    it('should handle different action types', () => {
+    it('should handle different action types', async () => {
       // Arrange
       const actions = [
         MechanicsActions.SET_CELL,
@@ -328,8 +328,9 @@ describe('SessionModel', () => {
   });
 
   describe('dataListener', () => {
-    it('should update last active time when data is handled successfully', () => {
+    it('should update last active time when data is handled successfully', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first
       const originalTime = session.lastActiveTime;
       jest.advanceTimersByTime(1000); // Advance time by 1 second
 
@@ -345,15 +346,15 @@ describe('SessionModel', () => {
       mockRoom.roomDataHandler.handleData.mockReturnValue(true);
 
       // Act - Call the private method via type assertion
-      (session as unknown as { 
-        dataListener: (data: AugmentAction<ActionEnum>) => void 
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
       }).dataListener(data);
 
       // Assert
       expect(session.lastActiveTime).toBeGreaterThan(originalTime);
     });
 
-    it('should disconnect when data handling fails', () => {
+    it('should disconnect when data handling fails', async () => {
       // Arrange
       const data = {
         action: 99999, // Invalid action number that doesn't match any enum
@@ -364,16 +365,17 @@ describe('SessionModel', () => {
       mockRoom.roomDataHandler.handleData.mockReturnValue(false);
 
       // Act - Call the private method via type assertion
-      (session as unknown as { 
-        dataListener: (data: AugmentAction<ActionEnum>) => void 
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
       }).dataListener(data);
 
       // Assert
       expect(onDisconnectSpy).toHaveBeenCalledWith(session);
     });
 
-    it('should handle match actions when room exists', () => {
+    it('should handle match actions when room exists', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -383,15 +385,15 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      (session as unknown as { 
-        dataListener: (data: AugmentAction<ActionEnum>) => void
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void>
       }).dataListener(data);
 
       // Assert
       expect(mockRoom.roomDataHandler.handleData).toHaveBeenCalledWith(session, data);
     });
 
-    it('should handle system actions', () => {
+    it('should handle system actions', async () => {
       // Arrange
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
@@ -399,15 +401,15 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      (session as unknown as { 
-        dataListener: (data: AugmentAction<ActionEnum>) => void 
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
       }).dataListener(data);
 
       // Assert
       expect(mockSystemHandler.handleData).toHaveBeenCalledWith(session, data);
     });
 
-    it('should handle unknown actions', () => {
+    it('should handle unknown actions', async () => {
       // Arrange
       const data = {
         action: 99999, // Invalid action number
@@ -415,8 +417,8 @@ describe('SessionModel', () => {
       } as unknown as AugmentAction<ActionEnum>;
 
       // Act - Call the private method via type assertion
-      (session as unknown as { 
-        dataListener: (data: AugmentAction<ActionEnum>) => void 
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
       }).dataListener(data);
 
       // Assert
@@ -425,8 +427,9 @@ describe('SessionModel', () => {
   });
 
   describe('handleData', () => {
-    it('should route match actions to room handler when room exists', () => {
+    it('should route match actions to room handler when room exists and authenticated', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate the session first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -436,8 +439,8 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      const result = (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => boolean 
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
       }).handleData(data);
 
       // Assert
@@ -445,7 +448,27 @@ describe('SessionModel', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false for match actions when room is null', () => {
+    it('should return false for match actions when not authenticated', async () => {
+      // Arrange
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
+
+      // Act
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      }).handleData(data);
+
+      // Assert
+      expect(mockRoom.roomDataHandler.handleData).not.toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
+
+    it('should return false for match actions when room is null', async () => {
       // Arrange
       const sessionWithoutRoom = new SessionModel(
         mockSocket as unknown as ServerSocket,
@@ -454,6 +477,7 @@ describe('SessionModel', () => {
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         null
       );
+      sessionWithoutRoom.setAuthenticated(); // Authenticate so we can test room logic
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -463,8 +487,8 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      const result = (sessionWithoutRoom as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => boolean 
+      const result = await (sessionWithoutRoom as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
       }).handleData(data);
 
       // Assert
@@ -472,7 +496,7 @@ describe('SessionModel', () => {
       expect(result).toBe(false);
     });
 
-    it('should route system actions to system handler', () => {
+    it('should route system actions to system handler', async () => {
       // Arrange
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
@@ -480,8 +504,8 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      const result = (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => boolean 
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
       }).handleData(data);
 
       // Assert
@@ -489,7 +513,7 @@ describe('SessionModel', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false for unknown action types', () => {
+    it('should return false for unknown action types', async () => {
       // Arrange
       const data = {
         action: 99999, // Invalid action number
@@ -497,8 +521,8 @@ describe('SessionModel', () => {
       } as unknown as AugmentAction<ActionEnum>;
 
       // Act - Call the private method via type assertion
-      const result = (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => boolean 
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
       }).handleData(data);
 
       // Assert
@@ -507,8 +531,9 @@ describe('SessionModel', () => {
       expect(result).toBe(false);
     });
 
-    it('should propagate handler return values', () => {
+    it('should propagate handler return values', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         cellIndex: 0,
@@ -520,8 +545,8 @@ describe('SessionModel', () => {
       mockRoom.roomDataHandler.handleData.mockReturnValue(false);
 
       // Act - Call the private method via type assertion
-      const result = (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => boolean
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -530,7 +555,7 @@ describe('SessionModel', () => {
   });
 
   describe('integration scenarios', () => {
-    it('should handle complete session lifecycle', () => {
+    it('should handle complete session lifecycle', async () => {
       // Arrange
       const newSocket = new MockServerSocket();
 
@@ -554,8 +579,9 @@ describe('SessionModel', () => {
       expect(onDestroySpy).toHaveBeenCalledWith(session);
     });
 
-    it('should handle data flow correctly', () => {
+    it('should handle data flow correctly', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first to allow match actions
       const matchData: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         cellIndex: 5,
@@ -570,9 +596,9 @@ describe('SessionModel', () => {
       };
 
       // Act
-      (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => void })
+      await (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> })
         .dataListener(matchData);
-      (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => void })
+      await (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> })
         .dataListener(systemData);
 
       // Assert
