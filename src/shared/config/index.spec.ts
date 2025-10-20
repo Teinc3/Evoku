@@ -2,6 +2,7 @@ import prodConfig from '@config/shared/prod.json';
 import devConfig from '@config/shared/dev.json';
 import baseConfig from '@config/shared/base.json';
 import { deepMerge } from '../utils/config';
+import { version } from '../../../package.json';
 import { SharedConfigSchema } from './schema';
 
 
@@ -26,6 +27,12 @@ describe('Shared Config', () => {
         },
       };
       expect(() => SharedConfigSchema.parse(invalidConfig)).toThrow();
+    });
+  });
+
+  describe('Version Consistency', () => {
+    it('should have the same version in base config and CLIENT_VERSION', () => {
+      expect(baseConfig.version).toBe(version);
     });
   });
 

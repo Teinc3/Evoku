@@ -16,7 +16,8 @@ export const SharedConfigSchema = z.object({
   }),
   security: z.object({
     packetScramblerSeed: z.string().nonempty(),
-  })
+  }),
+  version: z.string().nonempty()
 }).strict();
 
 type SharedConfigType = z.infer<typeof SharedConfigSchema>;

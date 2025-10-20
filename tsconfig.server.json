@@ -16,7 +16,8 @@
     "scripts/**/*.ts",
     "config/**/*.json",
     "tsconfig.json", 
-    "src/server/tsconfig-paths.loader.cjs"  
+    "src/server/tsconfig-paths.loader.cjs",
+    "package.json"
   ],
   "exclude": [
     "src/client/**/*.ts"
