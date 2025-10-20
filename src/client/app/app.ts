@@ -19,7 +19,7 @@ import type { ISourceOptions } from '@tsparticles/engine';
 })
 export default class App implements OnInit {
   particlesOptions: ISourceOptions = {
-    fpsLimit: 60,
+    fpsLimit: 144,
     interactivity: {
       events: {
         resize: {
@@ -32,24 +32,28 @@ export default class App implements OnInit {
       move: {
         enable: true,
         direction: 'top',
-        random: true,
-        speed: 5,
+        speed: { min: 3, max: 10 },
         straight: false
       },
       number: {
-        value: 80
+        value: 75
       },
       opacity: {
         value: 0.8
       },
       shape: {
-        type: 'circle',
+        type: "image",
+        options: {
+          image: {
+            src: 'particle.png',
+          }
+        }
       },
       size: {
-        value: { min: 1, max: 4 }
+        value: { min: 1, max: 6 }
       }
     },
-    detectRetina: true
+    detectRetina: true,
   };
 
   constructor(
