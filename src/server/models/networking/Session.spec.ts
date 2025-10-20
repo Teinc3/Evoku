@@ -467,6 +467,26 @@ describe('SessionModel', () => {
       expect(result).toBe(false);
     });
 
+    it('should return false for match actions when not authenticated', async () => {
+      // Arrange - Use a match action to test authentication check
+      const data: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 42,
+        cellIndex: 5,
+        value: 2
+      };
+
+      // Act
+      const result = await (session as unknown as { 
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      }).handleData(data);
+
+      // Assert
+      expect(mockRoom.roomDataHandler.handleData).not.toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
+
     it('should return false for match actions when room is null', async () => {
       // Arrange
       const sessionWithoutRoom = new SessionModel(

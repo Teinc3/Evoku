@@ -175,6 +175,12 @@ describe('WebSocketService', () => {
     it('should have ready getter that returns false initially', () => {
       expect(service.ready).toBe(false);
     });
+
+    it('should set auth token', () => {
+      const testToken = 'test-auth-token';
+      service.setAuthToken(testToken);
+      expect(service['authToken']).toBe(testToken);
+    });
   });
 
   describe('Connection management', () => {
@@ -190,6 +196,35 @@ describe('WebSocketService', () => {
 
       await connectPromise;
       expect(service.ready).toBe(true);
+    }));
+
+    it('should send AUTH packet when connecting with auth token', fakeAsync(async () => {
+      const testToken = 'test-auth-token';
+      service.setAuthToken(testToken);
+      
+      spyOn(service, 'send');
+      
+      const connectPromise = service.connect();
+      mockClientSocket.connect();
+      await connectPromise;
+
+      expect(service.send).toHaveBeenCalledWith(
+        jasmine.any(Number), // SessionActions.AUTH
+        jasmine.objectContaining({
+          token: testToken,
+          version: jasmine.any(String)
+        })
+      );
+    }));
+
+    it('should not send AUTH packet when connecting without auth token', fakeAsync(async () => {
+      spyOn(service, 'send');
+      
+      const connectPromise = service.connect();
+      mockClientSocket.connect();
+      await connectPromise;
+
+      expect(service.send).not.toHaveBeenCalled();
     }));
 
     it('should handle disconnect', () => {
