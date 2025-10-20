@@ -427,7 +427,8 @@ describe('SessionModel', () => {
   });
 
   describe('handleData', () => {
-    it('should route match actions to room handler when room exists and authenticated', async () => {
+    it('should route match actions to room handler ' +
+      'when room exists and authenticated', async () => {
       // Arrange
       session.setAuthenticated(); // Authenticate the session first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
@@ -596,15 +597,131 @@ describe('SessionModel', () => {
       };
 
       // Act
-      await (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> })
-        .dataListener(matchData);
-      await (session as unknown as { dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> })
-        .dataListener(systemData);
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
+      }).dataListener(matchData);
+      await (session as unknown as { 
+        dataListener: (data: AugmentAction<ActionEnum>) => Promise<void> 
+      }).dataListener(systemData);
 
       // Assert
       expect(mockRoom.roomDataHandler.handleData).toHaveBeenCalledWith(session, matchData);
       expect(mockSystemHandler.handleData).toHaveBeenCalledWith(session, systemData);
       expect(session.lastActiveTime).toBeGreaterThan(0);
+    });
+  });
+
+  describe('authentication', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should start with authenticated as false', () => {
+      // Assert
+      expect(session.isAuthenticated()).toBe(false);
+    });
+
+    it('should set authenticated to true when setAuthenticated is called', () => {
+      // Act
+      session.setAuthenticated();
+
+      // Assert
+      expect(session.isAuthenticated()).toBe(true);
+    });
+
+    it('should disconnect session after auth timeout if not authenticated', () => {
+      // Arrange - Create a new session with a shorter timeout for testing
+      const sessionWithTimeout = new SessionModel(
+        mockSocket as unknown as ServerSocket,
+        onDisconnectSpy,
+        onDestroySpy,
+        mockSystemHandler as unknown as IDataHandler<SystemActions>,
+        mockRoom as unknown as RoomModel,
+        Date.now(),
+        5000 // 5 second timeout
+      );
+
+      // Act - Advance time past the auth timeout
+      jest.advanceTimersByTime(6000);
+
+      // Assert
+      expect(onDisconnectSpy).toHaveBeenCalledWith(sessionWithTimeout);
+    });
+
+    it('should not disconnect session after auth timeout if authenticated', () => {
+      // Arrange - Create a new session with a shorter timeout for testing
+      const sessionWithTimeout = new SessionModel(
+        mockSocket as unknown as ServerSocket,
+        onDisconnectSpy,
+        onDestroySpy,
+        mockSystemHandler as unknown as IDataHandler<SystemActions>,
+        mockRoom as unknown as RoomModel,
+        Date.now(),
+        5000 // 5 second timeout
+      );
+
+      // Authenticate the session
+      sessionWithTimeout.setAuthenticated();
+
+      // Act - Advance time past the auth timeout
+      jest.advanceTimersByTime(6000);
+
+      // Assert
+      expect(onDisconnectSpy).not.toHaveBeenCalled();
+    });
+
+    it('should clear auth timeout on disconnect', () => {
+      // Arrange
+      const sessionWithTimeout = new SessionModel(
+        mockSocket as unknown as ServerSocket,
+        onDisconnectSpy,
+        onDestroySpy,
+        mockSystemHandler as unknown as IDataHandler<SystemActions>,
+        mockRoom as unknown as RoomModel,
+        Date.now(),
+        5000
+      );
+
+      // Act
+      sessionWithTimeout.disconnect();
+
+      // Clear existing calls from disconnect
+      onDisconnectSpy.mockClear();
+
+      // Advance time past the original auth timeout
+      jest.advanceTimersByTime(6000);
+
+      // Assert - Should not disconnect again
+      expect(onDisconnectSpy).not.toHaveBeenCalled();
+    });
+
+    it('should start new auth timeout on reconnect', () => {
+      // Arrange - Create and disconnect a session
+      const sessionWithTimeout = new SessionModel(
+        mockSocket as unknown as ServerSocket,
+        onDisconnectSpy,
+        onDestroySpy,
+        mockSystemHandler as unknown as IDataHandler<SystemActions>,
+        mockRoom as unknown as RoomModel,
+        Date.now(),
+        5000
+      );
+      sessionWithTimeout.disconnect(false); // Disconnect without triggering event
+      onDisconnectSpy.mockClear();
+
+      // Act - Reconnect with a new socket
+      const newSocket = new MockServerSocket();
+      sessionWithTimeout.reconnect(newSocket as unknown as ServerSocket);
+
+      // Advance time past the auth timeout
+      jest.advanceTimersByTime(6000);
+
+      // Assert - Should disconnect due to new auth timeout
+      expect(onDisconnectSpy).toHaveBeenCalledWith(sessionWithTimeout);
     });
   });
 });

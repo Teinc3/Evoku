@@ -98,6 +98,7 @@ export default class SessionModel {
     // Plug in the new socket
     this.socketInstance = socket;
     this.socketInstance.setListener(this.dataListener.bind(this));
+    this.disconnected = false; // Reset disconnected flag
     this.startAuthTimeout();
   }
 

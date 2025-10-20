@@ -32,7 +32,10 @@ describe('LobbyHandler', () => {
       };
 
       // Act
-      const result = await lobbyHandler.handleData(mockSession as unknown as SessionModel, joinQueueData);
+      const result = await lobbyHandler.handleData(
+        mockSession as unknown as SessionModel, 
+        joinQueueData
+      );
 
       // Assert
       expect(result).toBe(true);

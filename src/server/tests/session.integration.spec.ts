@@ -106,7 +106,8 @@ describe('SessionManager and Session Integration Test', () => {
       jest.advanceTimersByTime(25000);
       
       // Simulate a packet arriving, which should reset the lastActiveTime
-      await dataListener({ action: SessionActions.HEARTBEAT }); // A system action to trigger the update
+      // A system action to trigger the update
+      await dataListener({ action: SessionActions.HEARTBEAT });
       
       // Advance time by another 10 seconds (total 35 seconds)
       jest.advanceTimersByTime(10000);

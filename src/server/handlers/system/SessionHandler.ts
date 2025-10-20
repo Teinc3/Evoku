@@ -1,8 +1,8 @@
 import SessionActions from "@shared/types/enums/actions/system/session";
+import sharedConfig from "@shared/config";
 import EnumHandler from "../EnumHandler";
 import { verifyGuestToken } from "../../utils/jwt";
 import redisService from "../../services/RedisService";
-import sharedConfig from "@shared/config";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SessionModel from "../../models/networking/Session";
@@ -52,7 +52,8 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
     // Validate client version
     if (version !== sharedConfig.version) {
       console.warn(
-        `Session ${session.uuid} version mismatch: client=${version}, server=${sharedConfig.version}`
+        `Session ${session.uuid} version mismatch: ` +
+        `client=${version}, server=${sharedConfig.version}`
       );
       return false;
     }

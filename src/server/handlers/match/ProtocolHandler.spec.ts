@@ -55,7 +55,10 @@ describe('ProtocolHandler', () => {
       mockRoom.getPlayerID.mockReturnValue(playerID);
 
       // Act
-      const result = await protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
+      const result = await protocolHandler.handleData(
+        mockSession as unknown as SessionModel, 
+        pongPacket
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -74,7 +77,10 @@ describe('ProtocolHandler', () => {
       mockRoom.getPlayerID.mockReturnValue(undefined);
 
       // Act
-      const result = await protocolHandler.handleData(mockSession as unknown as SessionModel, pongPacket);
+      const result = await protocolHandler.handleData(
+        mockSession as unknown as SessionModel, 
+        pongPacket
+      );
 
       // Assert
       expect(result).toBe(false);

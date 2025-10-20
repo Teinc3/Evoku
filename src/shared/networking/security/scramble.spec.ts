@@ -1,5 +1,5 @@
-import LifecycleActions from '../../types/enums/actions/match/lifecycle';
 import SessionActions from '../../types/enums/actions/system/session';
+import LifecycleActions from '../../types/enums/actions/match/lifecycle';
 
 
 // NOTE: We purposefully DO NOT import PacketScrambler at the top level.

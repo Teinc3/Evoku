@@ -2,8 +2,8 @@ import seedrandom from 'seedrandom';
 import BiMap from 'bidirectional-map';
 
 import ActionGuard from '../../types/utils/typeguards/actions';
-import sharedConfig from '../../config';
 import SessionActions from '../../types/enums/actions/system/session';
+import sharedConfig from '../../config';
 
 import type ActionEnum from '../../types/enums/actions';
 
