@@ -393,8 +393,9 @@ describe('SessionModel', () => {
       expect(mockRoom.roomDataHandler.handleData).toHaveBeenCalledWith(session, data);
     });
 
-    it('should handle system actions', async () => {
+    it('should handle system actions when authenticated', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
         username: 'test-user'
@@ -449,14 +450,11 @@ describe('SessionModel', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false for match actions when not authenticated', async () => {
-      // Arrange
-      const data: AugmentAction<MechanicsActions.SET_CELL> = {
-        action: MechanicsActions.SET_CELL,
-        clientTime: 1000,
-        actionID: 42,
-        cellIndex: 5,
-        value: 2
+    it('should return false for system actions when not authenticated', async () => {
+      // Arrange - Use a system action (JOIN_QUEUE) instead of match action
+      const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
+        action: LobbyActions.JOIN_QUEUE,
+        username: 'test-user',
       };
 
       // Act
@@ -465,7 +463,7 @@ describe('SessionModel', () => {
       }).handleData(data);
 
       // Assert
-      expect(mockRoom.roomDataHandler.handleData).not.toHaveBeenCalled();
+      expect(mockSystemHandler.handleData).not.toHaveBeenCalled();
       expect(result).toBe(false);
     });
 
@@ -497,8 +495,9 @@ describe('SessionModel', () => {
       expect(result).toBe(false);
     });
 
-    it('should route system actions to system handler', async () => {
+    it('should route system actions to system handler when authenticated', async () => {
       // Arrange
+      session.setAuthenticated(); // Authenticate first
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
         username: 'test-user'

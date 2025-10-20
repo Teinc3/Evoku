@@ -209,8 +209,7 @@ describe('PacketScrambler', () => {
         return values[callCount++ % values.length];
       });
       const scrambler = createScrambler('mapping-seed');
-      // Use a test range that doesn't include whitelisted packet IDs
-      // AUTH is -21, so avoid that range
+      // Test packet IDs, avoiding range where whitelisted IDs might appear as scrambled values
       const testRange = Array.from({ length: 20 }, (_, i) => i + 10) as ActionEnum[];
       const scrambledValues = new Set<number>();
       

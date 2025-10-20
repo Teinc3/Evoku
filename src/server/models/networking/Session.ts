@@ -1,7 +1,7 @@
 import { randomUUID, type UUID } from "crypto";
 
 import ActionGuard from "@shared/types/utils/typeguards/actions";
-
+import SessionActions from "@shared/types/enums/actions/system/session";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SystemActions from "@shared/types/enums/actions/system";
@@ -163,10 +163,21 @@ export default class SessionModel {
    * @param data The augmented action data.
    */
   private async handleData(data: AugmentAction<ActionEnum>): Promise<boolean> {
+    // First packet must be AUTH if not authenticated
+    if (!this.authenticated && !ActionGuard.isSystemActionsData(data)) {
+      return false;
+    }
+
+    // If it's a system action but not AUTH and we're not authenticated, reject
+    if (!this.authenticated && ActionGuard.isSystemActionsData(data)) {
+      if (data.action !== SessionActions.AUTH) {
+        return false;
+      }
+    }
+
     if (ActionGuard.isMatchActionsData(data)) {
       // Match actions require authentication
       if (!this.authenticated) {
-        console.error(`Unauthenticated session ${this.uuid} attempted match action`);
         return false;
       }
       

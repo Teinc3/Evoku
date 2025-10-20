@@ -118,13 +118,14 @@ describe('SessionManager and Session Integration Test', () => {
   });
 
   describe('Piping Data to Handlers', () => {
-    it('should forward data to the system handler', async () => {
+    it('should forward data to the system handler after authentication', async () => {
       const session = sessionManager.createSession(mockSocket);
+      session.setAuthenticated(); // Authenticate first
       const dataListener = (mockSocket as unknown as MockServerSocket)
         .setListener.mock.calls[0][0] as (data: IDataContract) => void;
 
       // Send a heartbeat action to the session
-      dataListener({ action: SessionActions.HEARTBEAT });
+      await dataListener({ action: SessionActions.HEARTBEAT });
 
       // The system handler should have received the data
       expect(mockHandler.handleData).toHaveBeenCalledWith(
@@ -151,9 +152,9 @@ describe('SessionManager and Session Integration Test', () => {
 
       // The system handler should not have been called
       expect(mockHandler.handleData).not.toHaveBeenCalled();
-      // Now the error is about authentication, not the action failing
+      // Now the error is just "Action failed" as the packet is rejected for not being AUTH
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Unauthenticated session')
+        expect.stringContaining('Action failed')
       );
       errorSpy.mockRestore();
     });

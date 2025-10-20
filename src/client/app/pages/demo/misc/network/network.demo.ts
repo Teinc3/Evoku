@@ -18,6 +18,7 @@ export default class NetworkDemoPageComponent implements OnInit {
   public networkService = inject(NetworkService);
 
   isConnected = false;
+  isConnecting = false;
   logs: Array<{ timestamp: Date; message: string; type: string }> = [];
 
   ngOnInit() {
@@ -31,11 +32,19 @@ export default class NetworkDemoPageComponent implements OnInit {
   }
 
   async connect() {
+    if (this.isConnecting || this.isConnected) {
+      this.addLog('Already connected or connecting', 'warning');
+      return;
+    }
+
+    this.isConnecting = true;
     this.addLog('Connection attempt initiated', 'info');
     try {
       await this.networkService.connect();
       this.updateConnectionStatus();
-      this.addLog('Successfully connected', 'success');
+      if (this.isConnected) {
+        this.addLog('Successfully connected', 'success');
+      }
     } catch (error) {
       this.updateConnectionStatus();
       let msg: string;
@@ -57,10 +66,17 @@ export default class NetworkDemoPageComponent implements OnInit {
         msg = String(error);
       }
       this.addLog(`Connection failed: ${msg}`, 'error');
+    } finally {
+      this.isConnecting = false;
     }
   }
 
   disconnect() {
+    if (!this.isConnected) {
+      this.addLog('Not connected', 'warning');
+      return;
+    }
+
     try {
       this.networkService.disconnect();
       this.addLog('Disconnected from server', 'warning');

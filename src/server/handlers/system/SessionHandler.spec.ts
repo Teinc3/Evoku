@@ -2,8 +2,7 @@ import { jest } from '@jest/globals';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
-import * as jwt from '../../utils/jwt';
-import redisService from '../../services/RedisService';
+import guestAuthService from '../../services/GuestAuthService';
 import SessionHandler from './SessionHandler';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -11,8 +10,7 @@ import type SessionModel from '../../models/networking/Session';
 
 
 // Mock dependencies
-jest.mock('../../utils/jwt');
-jest.mock('../../services/RedisService');
+jest.mock('../../services/GuestAuthService');
 
 describe('SessionHandler', () => {
   let sessionHandler: SessionHandler;
@@ -59,13 +57,8 @@ describe('SessionHandler', () => {
         version: sharedConfig.version,
       };
 
-      const playerId = 'player-123';
-      const playerData = JSON.stringify({ elo: 1000 });
-
-      (jwt.verifyGuestToken as jest.MockedFunction<typeof jwt.verifyGuestToken>)
-        .mockReturnValue(playerId);
-      (redisService.get as jest.MockedFunction<typeof redisService.get>)
-        .mockResolvedValue(playerData);
+      (guestAuthService.authenticate as jest.MockedFunction<typeof guestAuthService.authenticate>)
+        .mockResolvedValue({ token: 'new-token', elo: 1000 });
 
       // Act
       const result = await sessionHandler.handleData(
@@ -75,8 +68,7 @@ describe('SessionHandler', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(jwt.verifyGuestToken).toHaveBeenCalledWith('valid-token');
-      expect(redisService.get).toHaveBeenCalledWith(`guest:player:${playerId}`);
+      expect(guestAuthService.authenticate).toHaveBeenCalledWith('valid-token');
       expect(mockSession.setAuthenticated).toHaveBeenCalled();
     });
 
@@ -127,8 +119,8 @@ describe('SessionHandler', () => {
         version: sharedConfig.version,
       };
 
-      (jwt.verifyGuestToken as jest.MockedFunction<typeof jwt.verifyGuestToken>)
-        .mockReturnValue(null);
+      (guestAuthService.authenticate as jest.MockedFunction<typeof guestAuthService.authenticate>)
+        .mockRejectedValue(new Error('Invalid token'));
 
       // Act
       const result = await sessionHandler.handleData(
@@ -138,35 +130,7 @@ describe('SessionHandler', () => {
 
       // Assert
       expect(result).toBe(false);
-      expect(jwt.verifyGuestToken).toHaveBeenCalledWith('invalid-token');
-      expect(mockSession.setAuthenticated).not.toHaveBeenCalled();
-    });
-
-    it('should reject authentication if player not found in Redis', async () => {
-      // Arrange
-      const authData: AugmentAction<SessionActions.AUTH> = {
-        action: SessionActions.AUTH,
-        token: 'valid-token',
-        version: sharedConfig.version,
-      };
-
-      const playerId = 'player-123';
-
-      (jwt.verifyGuestToken as jest.MockedFunction<typeof jwt.verifyGuestToken>)
-        .mockReturnValue(playerId);
-      (redisService.get as jest.MockedFunction<typeof redisService.get>)
-        .mockResolvedValue(null);
-
-      // Act
-      const result = await sessionHandler.handleData(
-        mockSession as unknown as SessionModel,
-        authData
-      );
-
-      // Assert
-      expect(result).toBe(false);
-      expect(jwt.verifyGuestToken).toHaveBeenCalledWith('valid-token');
-      expect(redisService.get).toHaveBeenCalledWith(`guest:player:${playerId}`);
+      expect(guestAuthService.authenticate).toHaveBeenCalledWith('invalid-token');
       expect(mockSession.setAuthenticated).not.toHaveBeenCalled();
     });
   });

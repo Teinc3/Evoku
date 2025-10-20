@@ -21,6 +21,8 @@ export default class WebSocketService {
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
+  private authToken: string | null = null;
+  private shouldAutoReconnect: boolean = true;
 
   constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
     this.socket = socket || new ClientSocket();
@@ -30,6 +32,13 @@ export default class WebSocketService {
     this.pingTimer = null;
     this.lastPingAt = null;
     this.lastPacketSentAt = 0;
+  }
+
+  /**
+   * Set the authentication token to use for connecting
+   */
+  setAuthToken(token: string): void {
+    this.authToken = token;
   }
 
   /**
@@ -47,6 +56,15 @@ export default class WebSocketService {
     this.socket.setListener(this.handlePacket);
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
+    
+    // Send AUTH packet immediately after connection
+    if (this.authToken) {
+      this.send(SessionActions.AUTH, {
+        token: this.authToken,
+        version: sharedConfig.version,
+      });
+    }
+    
     this.startHeartbeat();
   }
 
@@ -54,6 +72,7 @@ export default class WebSocketService {
    * Disconnect from the WebSocket server
    */
   disconnect(code?: number, reason?: string): void {
+    this.shouldAutoReconnect = false; // Disable auto-reconnect on manual disconnect
     this.clearTimers();
     this.socket.close(code, reason);
   }
@@ -108,7 +127,8 @@ export default class WebSocketService {
   private handleClose = (): void => {
     this.clearTimers();
 
-    if (sharedConfig.networking.service.autoReconnect) {
+    // Only auto-reconnect if it wasn't a manual disconnect
+    if (sharedConfig.networking.service.autoReconnect && this.shouldAutoReconnect) {
       this.scheduleReconnect();
     }
 
@@ -156,6 +176,7 @@ export default class WebSocketService {
 
     const attempt = async (): Promise<void> => {
       try {
+        this.shouldAutoReconnect = true; // Re-enable auto-reconnect for the reconnection
         await this.connect();
         console.log('Reconnected to server');
       } catch (error) {
