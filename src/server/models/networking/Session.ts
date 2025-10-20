@@ -125,7 +125,6 @@ export default class SessionModel {
     this.clearAuthTimeout();
     this.authTimeout = setTimeout(() => {
       if (!this.authenticated) {
-        console.log(`Session ${this.uuid} authentication timeout`);
         this.disconnect(true);
       }
     }, this.authTimeoutMs);
