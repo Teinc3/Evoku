@@ -16,7 +16,11 @@ export const SharedConfigSchema = z.object({
   }),
   security: z.object({
     packetScramblerSeed: z.string().nonempty(),
-  })
+  }),
+  version: z.string().regex(
+    /^\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?$/,
+    'Must be a valid semantic version string'
+  )
 }).strict();
 
 type SharedConfigType = z.infer<typeof SharedConfigSchema>;
