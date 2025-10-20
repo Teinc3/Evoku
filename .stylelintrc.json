@@ -3,6 +3,9 @@
   "rules": {
     "scss/dollar-variable-pattern": "^[a-z][a-zA-Z0-9]*$",
     "scss/selector-no-redundant-nesting-selector": true,
-    "no-empty-source": null
+    "no-empty-source": null,
+    "selector-pseudo-element-no-unknown": [true, { 
+      "ignorePseudoElements": ["ng-deep"] 
+    }]
   }
 }

@@ -1,7 +1,4 @@
-@use '../../../globals.scss' as *;
-
 .home {
-  @include landing-page-background;
   justify-content: flex-start; /* align items from the top */
   gap: 0.5rem; /* tighter gap between logo and actions */
 }
