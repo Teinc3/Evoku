@@ -1,7 +1,7 @@
 import { loadSlim } from "@tsparticles/slim"
 import { NgParticlesService, NgxParticlesModule } from '@tsparticles/angular';
 import { RouterOutlet } from '@angular/router';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import NetworkService from './services/network.service';
 import DynamicFaviconService from './services/dynamic-favicon.service';
@@ -14,8 +14,7 @@ import type { ISourceOptions } from '@tsparticles/engine';
   standalone: true,
   imports: [RouterOutlet, NgxParticlesModule],
   templateUrl: './app.html',
-  styleUrl: './app.scss',
-  encapsulation: ViewEncapsulation.None
+  styleUrl: './app.scss'
 })
 export default class App implements OnInit {
   particlesOptions: ISourceOptions = {
@@ -65,7 +64,7 @@ export default class App implements OnInit {
   async ngOnInit(): Promise<void> {
     this.ngParticleService.init(async engine => {
       await loadSlim(engine);
-    })
+    });
     try {
       await this.networkService.initGuestAuth();
     } catch (error) {

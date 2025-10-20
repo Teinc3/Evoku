@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 
 import ViewStateService from '../../services/view-state.service';
 import AppView from '../../../types/enums/app-view.enum';
@@ -26,13 +26,16 @@ import CatalogueDemoComponent from './catalogue/catalogue.demo';
 })
 export default class DemoPageComponent implements OnInit, OnDestroy {
   protected readonly AppView = AppView;
-  constructor(protected readonly viewStateService: ViewStateService) {}
+  constructor(
+    protected readonly viewStateService: ViewStateService,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit(): void {
-    document.body.classList.add('no-bg');
+    this.renderer.addClass(document.body, 'no-bg');
   }
 
   ngOnDestroy(): void {
-    document.body.classList.remove('no-bg');
+    this.renderer.removeClass(document.body, 'no-bg');
   }
 }

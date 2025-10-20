@@ -2,6 +2,6 @@ router-outlet, ngx-particles {
   height: 0;
 }
 
-ngx-particles > .tsparticles > canvas {
+::ng-deep ngx-particles .tsparticles canvas {
   pointer-events: none;
 }
