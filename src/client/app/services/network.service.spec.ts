@@ -12,10 +12,10 @@ class MockWebSocketService {
   ready = false;
   lastPingAt: number | null = null;
   queue: Array<[SessionActions, Record<string, unknown>]> = [];
-  reconnectTimer: number | null = null;
   pingTimer: number | null = null;
   lastPacketSentAt = 0;
   disconnectCallback: (() => void) | null = null;
+  authToken: string | null = null;
 
   async connect(): Promise<void> {
     this.ready = true;
@@ -29,6 +29,10 @@ class MockWebSocketService {
 
   setDisconnectCallback(callback: () => void): void {
     this.disconnectCallback = callback;
+  }
+
+  setAuthToken(token: string): void {
+    this.authToken = token;
   }
 
   destroy(): void {
@@ -82,8 +86,41 @@ describe('NetworkService', () => {
   });
 
   describe('Connection management', () => {
-    it('should connect successfully', async () => {
+    it('should connect successfully with existing token', async () => {
+      // Setup mock to return a token so initGuestAuth isn't called
+      mockCookieService.get.and.returnValue('existing-token');
+      
       await service.connect();
+      expect(mockWebSocketService.ready).toBe(true);
+      expect(mockWebSocketService.authToken).toBe('existing-token');
+    });
+
+    it('should initialize guest auth when no token exists', async () => {
+      // Setup mock to return null initially, then the new token after auth
+      let callCount = 0;
+      mockCookieService.get.and.callFake((_name: string) => {
+        callCount++;
+        if (callCount <= 2) {
+          return null; // First two calls - no token exists yet
+        }
+        return 'new-token'; // Third call - get the token after initGuestAuth sets it
+      });
+      
+      const mockAuthResponse = {
+        token: 'new-token',
+        elo: 0
+      };
+      mockAPIService.authenticateGuest.and.returnValue(Promise.resolve(mockAuthResponse));
+
+      await service.connect();
+      
+      expect(mockAPIService.authenticateGuest).toHaveBeenCalledWith(undefined);
+      expect(mockCookieService.set).toHaveBeenCalledWith(
+        'evoku_guest_token',
+        'new-token',
+        604800
+      );
+      expect(mockWebSocketService.authToken).toBe('new-token');
       expect(mockWebSocketService.ready).toBe(true);
     });
 
@@ -112,6 +149,9 @@ describe('NetworkService', () => {
 
   describe('Error handling', () => {
     it('should handle connection errors gracefully', async () => {
+      // Setup mock to return a token so initGuestAuth isn't called
+      mockCookieService.get.and.returnValue('existing-token');
+      
       // Mock a connection failure
       spyOn(mockWebSocketService, 'connect').and.throwError('Connection failed');
 

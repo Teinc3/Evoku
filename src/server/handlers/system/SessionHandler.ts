@@ -1,5 +1,7 @@
 import SessionActions from "@shared/types/enums/actions/system/session";
+import sharedConfig from "@shared/config";
 import EnumHandler from "../EnumHandler";
+import guestAuthService from "../../services/GuestAuthService";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SessionModel from "../../models/networking/Session";
@@ -11,6 +13,7 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
 
     const handlerMap = {
       [SessionActions.HEARTBEAT]: this.handleHeartbeat,
+      [SessionActions.AUTH]: this.handleAuth,
     };
 
     this.setHandlerMap(handlerMap);
@@ -23,7 +26,42 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
    * The latter is already handled in general by the ServerSocket and Session's transport layer.
    * Therefore theres not really any action needed except to confirm that the action is valid.
    */
-  private handleHeartbeat(_session: SessionModel, _data: AugmentAction<SessionActions>): boolean {
+  private async handleHeartbeat(
+    _session: SessionModel, 
+    _data: AugmentAction<SessionActions>
+  ): Promise<boolean> {
     return true;
+  }
+
+  /**
+   * Handles authentication of a session.
+   * Validates the client version and authentication token using GuestAuthService.
+   * If successful, marks the session as authenticated.
+   * If validation fails, returns false which triggers disconnection.
+   */
+  private async handleAuth(
+    session: SessionModel, 
+    data: AugmentAction<SessionActions.AUTH>
+  ): Promise<boolean> {
+    // Check if already authenticated
+    if (session.isAuthenticated()) {
+      return false;
+    }
+
+    const { token, version } = data;
+
+    // Validate client version
+    if (version !== sharedConfig.version) {
+      return false;
+    }
+
+    // Validate token using GuestAuthService
+    try {
+      await guestAuthService.authenticate(token);
+      session.setAuthenticated();
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

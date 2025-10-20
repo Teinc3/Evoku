@@ -1,3 +1,4 @@
+import SessionActions from '../../types/enums/actions/system/session';
 import LifecycleActions from '../../types/enums/actions/match/lifecycle';
 
 
@@ -208,7 +209,8 @@ describe('PacketScrambler', () => {
         return values[callCount++ % values.length];
       });
       const scrambler = createScrambler('mapping-seed');
-      const testRange = Array.from({ length: 20 }, (_, i) => i - 10) as ActionEnum[];
+      // Test packet IDs, avoiding range where whitelisted IDs might appear as scrambled values
+      const testRange = Array.from({ length: 20 }, (_, i) => i + 10) as ActionEnum[];
       const scrambledValues = new Set<number>();
       
       testRange.forEach(id => {
@@ -256,6 +258,36 @@ describe('PacketScrambler', () => {
         expect(scrambled).toBeLessThanOrEqual(127);
         expect(unscrambled).toBe(id);
       });
+    });
+  });
+
+  describe('whitelist functionality', () => {
+    it('should not scramble whitelisted packet IDs', () => {
+      mockPrng.mockReturnValue(0.5);
+      const scrambler = createScrambler('whitelist-seed');
+      const authID = SessionActions.AUTH as ActionEnum;
+      
+      // AUTH packet should pass through unchanged
+      const scrambled = scrambler.scrambleID(authID);
+      expect(scrambled).toBe(authID);
+      
+      // Unscrambling should also work
+      const unscrambled = scrambler.unscrambleID(authID);
+      expect(unscrambled).toBe(authID);
+    });
+
+    it('should scramble non-whitelisted packet IDs', () => {
+      mockPrng.mockReturnValue(0.5);
+      const scrambler = createScrambler('whitelist-seed');
+      const heartbeatID = SessionActions.HEARTBEAT as ActionEnum;
+      
+      // HEARTBEAT is not whitelisted, should be scrambled
+      const scrambled = scrambler.scrambleID(heartbeatID);
+      expect(scrambled).not.toBe(heartbeatID);
+      
+      // Should unscramble back to original
+      const unscrambled = scrambler.unscrambleID(scrambled);
+      expect(unscrambled).toBe(heartbeatID);
     });
   });
 

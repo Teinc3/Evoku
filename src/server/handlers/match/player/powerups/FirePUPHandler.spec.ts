@@ -31,7 +31,7 @@ describe('FirePUPHandler', () => {
   });
 
   describe('handleUseInferno', () => {
-    it('should handle USE_INFERNO action and return true', () => {
+    it('should handle USE_INFERNO action and return true', async () => {
       // Arrange
       const useInfernoData = {
         action: FirePUPActions.USE_INFERNO,
@@ -43,7 +43,7 @@ describe('FirePUPHandler', () => {
       };
 
       // Act
-      const result = firePUPHandler.handleData(
+      const result = await firePUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useInfernoData
       );
@@ -54,7 +54,7 @@ describe('FirePUPHandler', () => {
   });
 
   describe('handleUseMetabolic', () => {
-    it('should handle USE_METABOLIC action and return true', () => {
+    it('should handle USE_METABOLIC action and return true', async () => {
       // Arrange
       const useMetabolicData = {
         action: FirePUPActions.USE_METABOLIC,
@@ -64,7 +64,7 @@ describe('FirePUPHandler', () => {
       };
 
       // Act
-      const result = firePUPHandler.handleData(
+      const result = await firePUPHandler.handleData(
         mockSession as unknown as SessionModel, 
         useMetabolicData
       );

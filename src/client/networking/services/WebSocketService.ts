@@ -10,26 +10,32 @@ import type ActionMap from '@shared/types/actionmap';
 
 /**
  * High-level network service that manages connection policy, action routing,
- * heartbeat/latency, and auto-reconnection.
+ * and heartbeat/latency.
  * Built on top of the transport-only ClientSocket.
  */
 export default class WebSocketService {
   private socket: ClientSocket;
   private packetHandler: ClientPacketHandler;
-  private reconnectTimer: ReturnType<typeof setTimeout> | null;
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
+  private authToken: string | null = null;
 
   constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
     this.socket = socket || new ClientSocket();
     this.packetHandler = packetHandler || new ClientPacketHandler(this);
 
-    this.reconnectTimer = null;
     this.pingTimer = null;
     this.lastPingAt = null;
     this.lastPacketSentAt = 0;
+  }
+
+  /**
+   * Set the authentication token to use for connecting
+   */
+  setAuthToken(token: string): void {
+    this.authToken = token;
   }
 
   /**
@@ -47,6 +53,15 @@ export default class WebSocketService {
     this.socket.setListener(this.handlePacket);
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
+    
+    // Send AUTH packet immediately after connection
+    if (this.authToken) {
+      this.send(SessionActions.AUTH, {
+        token: this.authToken,
+        version: sharedConfig.version,
+      });
+    }
+    
     this.startHeartbeat();
   }
 
@@ -108,10 +123,6 @@ export default class WebSocketService {
   private handleClose = (): void => {
     this.clearTimers();
 
-    if (sharedConfig.networking.service.autoReconnect) {
-      this.scheduleReconnect();
-    }
-
     // Notify any listeners about the disconnect
     if (this.disconnectCallback) {
       this.disconnectCallback();
@@ -147,36 +158,10 @@ export default class WebSocketService {
     }, 5000); // Check every 5 seconds
   }
 
-  private scheduleReconnect(): void {
-    if (this.reconnectTimer) {
-      return; // Already scheduled
-    }
-
-    let delay = sharedConfig.networking.service.backoffMs;
-
-    const attempt = async (): Promise<void> => {
-      try {
-        await this.connect();
-        console.log('Reconnected to server');
-      } catch (error) {
-        console.error('Reconnection failed:', error);
-        delay = Math.min(delay * 2, sharedConfig.networking.service.backoffMaxMs);
-        this.reconnectTimer = setTimeout(attempt, delay);
-      }
-    };
-
-    this.reconnectTimer = setTimeout(attempt, delay);
-  }
-
   private clearTimers(): void {
     if (this.pingTimer) {
       clearInterval(this.pingTimer);
       this.pingTimer = null;
-    }
-
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
     }
 
     this.lastPingAt = null;

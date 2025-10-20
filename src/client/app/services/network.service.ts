@@ -36,6 +36,16 @@ export default class NetworkService {
 
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {
+    // Ensure we have an auth token before connecting
+    if (!this.cookieService.get(NetworkService.GUEST_TOKEN_COOKIE_NAME)) {
+      await this.initGuestAuth();
+    }
+    
+    const token = this.cookieService.get(NetworkService.GUEST_TOKEN_COOKIE_NAME);
+    if (token) {
+      this.wsService.setAuthToken(token);
+    }
+    
     return this.wsService.connect();
   }
 

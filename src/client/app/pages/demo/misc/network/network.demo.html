@@ -5,16 +5,19 @@
     <span
       class="status-dot"
       [class.connected]="isConnected"
-      [class.disconnected]="!isConnected"
+      [class.connecting]="isConnecting"
+      [class.disconnected]="!isConnected && !isConnecting"
     ></span>
-    <span class="status-text">{{ isConnected ? 'Connected' : 'Disconnected' }}</span>
+    <span class="status-text">
+      {{ isConnecting ? 'Connecting...' : (isConnected ? 'Connected' : 'Disconnected') }}
+    </span>
   </div>
 
   <div class="actions">
     <button
       class="btn btn-primary"
       (click)="connect()"
-      [disabled]="isConnected"
+      [disabled]="isConnected || isConnecting"
     >
       Connect
     </button>

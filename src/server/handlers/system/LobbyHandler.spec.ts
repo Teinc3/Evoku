@@ -24,7 +24,7 @@ describe('LobbyHandler', () => {
   });
 
   describe('handleJoinQueue', () => {
-    it('should handle JOIN_QUEUE action and return true', () => {
+    it('should handle JOIN_QUEUE action and return true', async () => {
       // Arrange
       const joinQueueData = {
         action: LobbyActions.JOIN_QUEUE,
@@ -32,7 +32,10 @@ describe('LobbyHandler', () => {
       };
 
       // Act
-      const result = lobbyHandler.handleData(mockSession as unknown as SessionModel, joinQueueData);
+      const result = await lobbyHandler.handleData(
+        mockSession as unknown as SessionModel, 
+        joinQueueData
+      );
 
       // Assert
       expect(result).toBe(true);
@@ -40,7 +43,7 @@ describe('LobbyHandler', () => {
   });
 
   describe('handleLeaveQueue', () => {
-    it('should handle LEAVE_QUEUE action and return true', () => {
+    it('should handle LEAVE_QUEUE action and return true', async () => {
       // Arrange
       const leaveQueueData = {
         action: LobbyActions.LEAVE_QUEUE,
@@ -48,7 +51,7 @@ describe('LobbyHandler', () => {
       };
 
       // Act
-      const result = lobbyHandler.handleData(
+      const result = await lobbyHandler.handleData(
         mockSession as unknown as SessionModel,
         leaveQueueData
       );

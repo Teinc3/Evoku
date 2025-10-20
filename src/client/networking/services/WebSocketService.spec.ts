@@ -166,7 +166,6 @@ describe('WebSocketService', () => {
     });
 
     it('should initialize with correct default values', () => {
-      expect(service['reconnectTimer']).toBeNull();
       expect(service['pingTimer']).toBeNull();
       expect(service['lastPingAt']).toBeNull();
       expect(service['lastPacketSentAt']).toBe(0);
@@ -175,6 +174,12 @@ describe('WebSocketService', () => {
 
     it('should have ready getter that returns false initially', () => {
       expect(service.ready).toBe(false);
+    });
+
+    it('should set auth token', () => {
+      const testToken = 'test-auth-token';
+      service.setAuthToken(testToken);
+      expect(service['authToken']).toBe(testToken);
     });
   });
 
@@ -193,10 +198,38 @@ describe('WebSocketService', () => {
       expect(service.ready).toBe(true);
     }));
 
+    it('should send AUTH packet when connecting with auth token', fakeAsync(async () => {
+      const testToken = 'test-auth-token';
+      service.setAuthToken(testToken);
+      
+      spyOn(service, 'send');
+      
+      const connectPromise = service.connect();
+      mockClientSocket.connect();
+      await connectPromise;
+
+      expect(service.send).toHaveBeenCalledWith(
+        jasmine.any(Number), // SessionActions.AUTH
+        jasmine.objectContaining({
+          token: testToken,
+          version: jasmine.any(String)
+        })
+      );
+    }));
+
+    it('should not send AUTH packet when connecting without auth token', fakeAsync(async () => {
+      spyOn(service, 'send');
+      
+      const connectPromise = service.connect();
+      mockClientSocket.connect();
+      await connectPromise;
+
+      expect(service.send).not.toHaveBeenCalled();
+    }));
+
     it('should handle disconnect', () => {
       service.disconnect(1000, 'Test disconnect');
       expect(service['pingTimer']).toBeNull();
-      expect(service['reconnectTimer']).toBeNull();
     });
 
     it('should set disconnect callback', () => {
@@ -366,19 +399,14 @@ describe('WebSocketService', () => {
       expect(disconnectCallback).toHaveBeenCalled();
     });
 
-    it('should handle close events with auto-reconnect enabled', () => {
-      spyOn(console, 'log');
+    it('should handle close events', () => {
       const disconnectCallback = jasmine.createSpy('disconnectCallback');
       service.setDisconnectCallback(disconnectCallback);
 
-      // Since clientConfig is read-only, we'll test the default behavior
-      // which should have autoReconnect enabled by default
       const handleClose = service['handleClose'];
       handleClose();
 
       expect(disconnectCallback).toHaveBeenCalled();
-      // Should have scheduled reconnect (since autoReconnect is true by default)
-      expect(service['reconnectTimer']).toBeTruthy();
     });
 
     it('should handle error events', () => {
@@ -392,70 +420,21 @@ describe('WebSocketService', () => {
     });
   });
 
-  describe('Reconnection functionality', () => {
-    beforeEach(() => {
-      jasmine.clock().install();
-      // Suppress expected error logs from failed reconnection attempts in tests
-      spyOn(console, 'error');
-    });
-
-    it('should schedule reconnection when autoReconnect is enabled', () => {
-      spyOn(console, 'log');
-
-      service['scheduleReconnect']();
-
-      expect(service['reconnectTimer']).toBeTruthy();
-    });
-
-    it('should not schedule reconnection if already scheduled', () => {
-      // Schedule once
-      service['scheduleReconnect']();
-      const firstTimer = service['reconnectTimer'];
-
-      // Try to schedule again
-      service['scheduleReconnect']();
-      const secondTimer = service['reconnectTimer'];
-
-      // Should be the same timer
-      expect(firstTimer).toBe(secondTimer);
-    });
-
-    it('should retry with backoff when reconnection fails', fakeAsync(() => {
-      // Make connect throw to simulate failure
-      const svc = service as unknown as { connect: () => Promise<void> };
-      spyOn(svc, 'connect').and.callFake(() => Promise.reject(new Error('Connect failed')));
-
-      // Start scheduler
-      service['scheduleReconnect']();
-
-      // Ensure a timer was scheduled
-      expect(service['reconnectTimer']).toBeTruthy();
-
-      // Fast-forward slightly to allow attempt to run and reschedule
-      jasmine.clock().tick(1);
-
-      // After failure, reconnectTimer should still be scheduled for next attempt
-      expect(service['reconnectTimer']).toBeTruthy();
-    }));
-  });
-
   describe('Cleanup', () => {
     it('should clear timers on destroy', () => {
       service['pingTimer'] = setInterval(() => {}, 1000);
-      service['reconnectTimer'] = setTimeout(() => {}, 1000);
 
       service.destroy();
 
       expect(service['pingTimer']).toBeNull();
-      expect(service['reconnectTimer']).toBeNull();
     });
 
-    it('should clear reconnect timer when clearing timers', () => {
-      service['reconnectTimer'] = setTimeout(() => {}, 1000);
+    it('should clear ping timer when clearing timers', () => {
+      service['pingTimer'] = setInterval(() => {}, 1000);
 
       service['clearTimers']();
 
-      expect(service['reconnectTimer']).toBeNull();
+      expect(service['pingTimer']).toBeNull();
       expect(service['lastPingAt']).toBeNull();
     });
   });

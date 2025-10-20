@@ -28,11 +28,14 @@ implements IDataHandler<GenericActionUnion> {
    * @param session The session object of the player.
    * @param data The augmented data packet.
    */
-  public handleData(session: SessionModel, data: AugmentAction<GenericActionUnion>): boolean {
+  public async handleData(
+    session: SessionModel, 
+    data: AugmentAction<GenericActionUnion>
+  ): Promise<boolean> {
     for (const [typeGuard, handler] of this.handlerMap) {
       if (typeGuard(data)) {
         // The type guard has narrowed the type of 'data', so we can safely pass it.
-        return handler.handleData(session, data);
+        return await handler.handleData(session, data);
       }
     }
     return false;

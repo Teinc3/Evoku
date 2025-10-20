@@ -31,7 +31,7 @@ describe('MetalPUPHandler', () => {
   });
 
   describe('handleUseLock', () => {
-    it('should handle USE_LOCK action and return true', () => {
+    it('should handle USE_LOCK action and return true', async () => {
       // Arrange
       const useLockData = {
         action: MetalPUPActions.USE_LOCK,
@@ -43,7 +43,7 @@ describe('MetalPUPHandler', () => {
       };
 
       // Act
-      const result = metalPUPHandler.handleData(
+      const result = await metalPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useLockData
       );
@@ -54,7 +54,7 @@ describe('MetalPUPHandler', () => {
   });
 
   describe('handleUseForge', () => {
-    it('should handle USE_FORGE action and return true', () => {
+    it('should handle USE_FORGE action and return true', async () => {
       // Arrange
       const useForgeData = {
         action: MetalPUPActions.USE_FORGE,
@@ -64,7 +64,7 @@ describe('MetalPUPHandler', () => {
       };
 
       // Act
-      const result = metalPUPHandler.handleData(
+      const result = await metalPUPHandler.handleData(
         mockSession as unknown as SessionModel,
         useForgeData
       );

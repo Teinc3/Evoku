@@ -43,7 +43,7 @@ describe('MechanicsHandler', () => {
   });
 
   describe('handleSetCell', () => {
-    it('should handle SET_CELL action successfully and broadcast CELL_SET', () => {
+    it('should handle SET_CELL action successfully and broadcast CELL_SET', async () => {
       // Arrange
       const playerID = 1;
       const serverTime = 1005;
@@ -62,7 +62,7 @@ describe('MechanicsHandler', () => {
       });
 
       // Act
-      const result = mechanicsHandler.handleData(
+      const result = await mechanicsHandler.handleData(
         mockSession as unknown as SessionModel, 
         setCellData
       );
@@ -82,7 +82,7 @@ describe('MechanicsHandler', () => {
       expect(mockRoom.broadcast).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle SET_CELL action failure and broadcast REJECT_ACTION', () => {
+    it('should handle SET_CELL action failure and broadcast REJECT_ACTION', async () => {
       // Arrange
       const playerID = 1;
       const gameStateHash = 12345; // Using number instead of string 'hash123'
@@ -102,7 +102,7 @@ describe('MechanicsHandler', () => {
       mockStateController.computeHash.mockReturnValue(gameStateHash);
 
       // Act
-      const result = mechanicsHandler.handleData(
+      const result = await mechanicsHandler.handleData(
         mockSession as unknown as SessionModel, 
         setCellData
       );
@@ -123,7 +123,7 @@ describe('MechanicsHandler', () => {
       expect(mockRoom.broadcast).toHaveBeenCalledTimes(1);
     });
 
-    it('should return false when session is not found in room', () => {
+    it('should return false when session is not found in room', async () => {
       // Arrange
       const setCellData: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
@@ -136,7 +136,7 @@ describe('MechanicsHandler', () => {
       mockRoom.getPlayerID.mockReturnValue(undefined);
 
       // Act
-      const result = mechanicsHandler.handleData(
+      const result = await mechanicsHandler.handleData(
         mockSession as unknown as SessionModel, 
         setCellData
       );
@@ -150,7 +150,7 @@ describe('MechanicsHandler', () => {
   });
 
   describe('handleDrawPUP', () => {
-    it('should handle DRAW_PUP action and return true', () => {
+    it('should handle DRAW_PUP action and return true', async () => {
       // Arrange
       const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
         action: MechanicsActions.DRAW_PUP,
@@ -159,7 +159,7 @@ describe('MechanicsHandler', () => {
       };
 
       // Act
-      const result = mechanicsHandler.handleData(
+      const result = await mechanicsHandler.handleData(
         mockSession as unknown as SessionModel, 
         drawPUPData
       );

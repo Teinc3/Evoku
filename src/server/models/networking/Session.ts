@@ -1,7 +1,7 @@
 import { randomUUID, type UUID } from "crypto";
 
 import ActionGuard from "@shared/types/utils/typeguards/actions";
-
+import SessionActions from "@shared/types/enums/actions/system/session";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SystemActions from "@shared/types/enums/actions/system";
@@ -22,6 +22,8 @@ import type RoomModel from "./Room";
 export default class SessionModel {
   public readonly uuid: UUID;
   private disconnected: boolean;
+  private authenticated: boolean;
+  private authTimeout: NodeJS.Timeout | null;
 
   constructor(
     public socketInstance: ServerSocket | null, // Require a Socket to be initialised
@@ -29,9 +31,12 @@ export default class SessionModel {
     private readonly onDestroy: (session: SessionModel) => void,
     private readonly systemHandler: IDataHandler<SystemActions>,
     public room: RoomModel | null = null,
-    public lastActiveTime: number = (new Date).getTime()
+    public lastActiveTime: number = (new Date).getTime(),
+    private readonly authTimeoutMs: number = 10000 // 10 seconds by default
   ) {
     this.disconnected = false;
+    this.authenticated = false;
+    this.authTimeout = null;
     this.uuid = randomUUID();
     this.room = room;
     this.onDisconnect = onDisconnect.bind(this);
@@ -39,6 +44,7 @@ export default class SessionModel {
 
     if (this.socketInstance) {
       this.socketInstance.setListener(this.dataListener.bind(this));
+      this.startAuthTimeout();
     }
   }
 
@@ -47,6 +53,8 @@ export default class SessionModel {
    * @param triggerEvent If the disconnect event should be triggered.
    */
   public disconnect(triggerEvent: boolean = true): void {
+    this.clearAuthTimeout();
+    
     if (this.socketInstance) {
       // Removes socket references
       this.socketInstance.close();
@@ -64,6 +72,8 @@ export default class SessionModel {
    * @param triggerEvent If the destroy event should be triggered.
    */
   public destroy(triggerEvent: boolean = true): void {
+    this.clearAuthTimeout();
+    
     // Remove all references
     if (this.room) {
       this.room.removeSession(this);
@@ -88,15 +98,56 @@ export default class SessionModel {
     // Plug in the new socket
     this.socketInstance = socket;
     this.socketInstance.setListener(this.dataListener.bind(this));
+    this.disconnected = false; // Reset disconnected flag
+    this.startAuthTimeout();
+  }
+
+  /**
+   * Marks the session as authenticated, clearing the authentication timeout.
+   */
+  public setAuthenticated(): void {
+    this.authenticated = true;
+    this.clearAuthTimeout();
+  }
+
+  /**
+   * Checks if the session is authenticated.
+   */
+  public isAuthenticated(): boolean {
+    return this.authenticated;
+  }
+
+  /**
+   * Starts the authentication timeout. If authentication does not occur within the timeout period,
+   * the session will be disconnected.
+   */
+  private startAuthTimeout(): void {
+    this.clearAuthTimeout();
+    this.authTimeout = setTimeout(() => {
+      if (!this.authenticated) {
+        this.disconnect(true);
+      }
+    }, this.authTimeoutMs);
+  }
+
+  /**
+   * Clears the authentication timeout if it exists.
+   */
+  private clearAuthTimeout(): void {
+    if (this.authTimeout) {
+      clearTimeout(this.authTimeout);
+      this.authTimeout = null;
+    }
   }
 
   /**
    * Listener for incoming data that routes the packet to appropriate handlers.
    * @param data The decoded packet data.
    */
-  private dataListener(data: AugmentAction<ActionEnum>): void {    
+  private async dataListener(data: AugmentAction<ActionEnum>): Promise<void> {    
     // Try to route the packet
-    if (this.handleData(data)) {
+    const result = await this.handleData(data);
+    if (result) {
       // Update the last active time
       this.lastActiveTime = (new Date).getTime();
     } else {
@@ -110,15 +161,32 @@ export default class SessionModel {
    * Handles incoming data for the session.
    * @param data The augmented action data.
    */
-  private handleData(data: AugmentAction<ActionEnum>): boolean {
+  private async handleData(data: AugmentAction<ActionEnum>): Promise<boolean> {
+    // First packet must be AUTH if not authenticated
+    if (!this.authenticated && !ActionGuard.isSystemActionsData(data)) {
+      return false;
+    }
+
+    // If it's a system action but not AUTH and we're not authenticated, reject
+    if (!this.authenticated && ActionGuard.isSystemActionsData(data)) {
+      if (data.action !== SessionActions.AUTH) {
+        return false;
+      }
+    }
+
     if (ActionGuard.isMatchActionsData(data)) {
+      // Match actions require authentication
+      if (!this.authenticated) {
+        return false;
+      }
+      
       if (this.room) {
         return this.room.roomDataHandler.handleData(this, data);
       } else {
         return false;
       }
     } else if (ActionGuard.isSystemActionsData(data)) {
-      return this.systemHandler.handleData(this, data);
+      return await this.systemHandler.handleData(this, data);
     } else {
       return false;
     }

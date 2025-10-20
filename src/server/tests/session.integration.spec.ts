@@ -55,14 +55,14 @@ describe('SessionManager and Session Integration Test', () => {
     jest.clearAllMocks();
   });
 
-  it('should create a new session and store it', () => {
+  it('should create a new session and store it', async () => {
     const session = sessionManager.createSession(mockSocket);
     
     expect(session).toBeInstanceOf(SessionModel);
     expect(sessionManager.getSession(session.uuid)).toBe(session);
   });
 
-  it('should remove a session when it is destroyed', () => {
+  it('should remove a session when it is destroyed', async () => {
     const session = sessionManager.createSession(mockSocket);
     const sessionId = session.uuid;
     
@@ -73,7 +73,7 @@ describe('SessionManager and Session Integration Test', () => {
   });
 
   describe('Cleanup Logic', () => {
-    it('should disconnect an inactive socket after 30 seconds', () => {
+    it('should disconnect an inactive socket after 30 seconds', async () => {
       const session = sessionManager.createSession(mockSocket);
       
       // Advance time by 40 seconds (30 seconds + 10 seconds max buffer + 1ms trigger)
@@ -85,7 +85,7 @@ describe('SessionManager and Session Integration Test', () => {
       expect(sessionManager.getSession(session.uuid)).toBe(session);
     });
 
-    it('should destroy an inactive session after 2 minutes', () => {
+    it('should destroy an inactive session after 2 minutes', async () => {
       const session = sessionManager.createSession(mockSocket);
       const sessionId = session.uuid;
       
@@ -96,16 +96,18 @@ describe('SessionManager and Session Integration Test', () => {
       expect(sessionManager.getSession(sessionId)).toBeUndefined();
     });
 
-    it('should reset the inactivity timer when a packet is received', () => {
+    it('should reset the inactivity timer when a packet is received', async () => {
       const session = sessionManager.createSession(mockSocket);
+      session.setAuthenticated(); // Authenticate to prevent auth timeout
       const dataListener = (mockSocket as unknown as MockServerSocket)
-        .setListener.mock.calls[0][0] as (data: IDataContract) => void;
+        .setListener.mock.calls[0][0] as (data: IDataContract) => Promise<void>;
       
       // Advance time by 25 seconds
       jest.advanceTimersByTime(25000);
       
       // Simulate a packet arriving, which should reset the lastActiveTime
-      dataListener({ action: SessionActions.HEARTBEAT }); // A system action to trigger the update
+      // A system action to trigger the update
+      await dataListener({ action: SessionActions.HEARTBEAT });
       
       // Advance time by another 10 seconds (total 35 seconds)
       jest.advanceTimersByTime(10000);
@@ -116,13 +118,14 @@ describe('SessionManager and Session Integration Test', () => {
   });
 
   describe('Piping Data to Handlers', () => {
-    it('should forward data to the system handler', () => {
+    it('should forward data to the system handler after authentication', async () => {
       const session = sessionManager.createSession(mockSocket);
+      session.setAuthenticated(); // Authenticate first
       const dataListener = (mockSocket as unknown as MockServerSocket)
         .setListener.mock.calls[0][0] as (data: IDataContract) => void;
 
       // Send a heartbeat action to the session
-      dataListener({ action: SessionActions.HEARTBEAT });
+      await dataListener({ action: SessionActions.HEARTBEAT });
 
       // The system handler should have received the data
       expect(mockHandler.handleData).toHaveBeenCalledWith(
@@ -135,7 +138,7 @@ describe('SessionManager and Session Integration Test', () => {
       // Actually we can't looks too complicated fuck it
     });
 
-    it('should not have forwarded non-system data to the system handler', () => {
+    it('should not have forwarded non-system data to the system handler', async () => {
       sessionManager.createSession(mockSocket);
       const dataListener = (mockSocket as unknown as MockServerSocket)
         .setListener.mock.calls[0][0] as (data: IDataContract) => void;
@@ -143,15 +146,16 @@ describe('SessionManager and Session Integration Test', () => {
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       // Send a non-system action (e.g., MatchActions)
-      dataListener({ 
+      await dataListener({ 
         action: MechanicsActions.DRAW_PUP,
       } as AugmentAction<MechanicsActions>);
 
       // The system handler should not have been called
       expect(mockHandler.handleData).not.toHaveBeenCalled();
-      // As we are not in a room, the console should give an error
-      // -3 is the value for DRAW_PUP
-      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Action failed: -3'));
+      // Now the error is just "Action failed" as the packet is rejected for not being AUTH
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Action failed')
+      );
       errorSpy.mockRestore();
     });
   });
