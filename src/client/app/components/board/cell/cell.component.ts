@@ -77,7 +77,10 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
     if (this.selectedValue === 0) {
       return false;
     }
-    return noteDigit === this.selectedValue;
+    // Only highlight if the note actually exists in the cell
+    const notes = this.model.notes;
+    const hasNote = !!notes?.includes(noteDigit);
+    return hasNote && noteDigit === this.selectedValue;
   }
 
 }

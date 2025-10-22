@@ -154,16 +154,19 @@ describe('SudokuCellComponent', () => {
   describe('Note Highlighting', () => {
     it('identifies notes that should be highlighted when selectedValue matches', () => {
       const m = new MockCellModel();
+      m.notes = [5, 3]; // Add notes to the model
       component.model = m as unknown as ClientCellModel;
       component.selectedValue = 5;
       fixture.detectChanges();
 
       expect(component.shouldHighlightNote(5)).toBeTrue();
-      expect(component.shouldHighlightNote(3)).toBeFalse();
+      expect(component.shouldHighlightNote(3)).toBeFalse(); // Note exists but doesn't match
+      expect(component.shouldHighlightNote(7)).toBeFalse(); // Note doesn't exist
     });
 
     it('does not highlight notes when selectedValue is 0', () => {
       const m = new MockCellModel();
+      m.notes = [1, 2, 3];
       component.model = m as unknown as ClientCellModel;
       component.selectedValue = 0;
       fixture.detectChanges();
