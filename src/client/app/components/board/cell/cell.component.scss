@@ -37,6 +37,16 @@
   background: #9ed2ff;
 }
 
+/* 3.1) Highlight related cells (same row/column/grid) */
+:host(.highlight-related) .cell {
+  background: #c4e3ff;
+}
+
+/* 3.2) Highlight same number cells (takes precedence) */
+:host(.highlight-same-number) .cell {
+  background: #7db8e8;
+}
+
 /* 4) Thick horizontal separators */
 :host:nth-child(n + 28):nth-child(-n + 36) .cell,
 :host:nth-child(n + 55):nth-child(-n + 63) .cell {
@@ -100,6 +110,14 @@
   font-size: 20cqw;
 }
 
+/* Highlight individual notes matching selected value */
+.note.highlight-note {
+  background: #7db8e8;
+  border-radius: 2px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
 /* Ensure content is readable on selected background */
 :host(.selected) .notes,
 :host(.selected) .note {
@@ -108,7 +126,7 @@
 
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .cooldown-overlay {

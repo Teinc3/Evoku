@@ -150,4 +150,48 @@ describe('SudokuCellComponent', () => {
     component.ngOnDestroy();
     expect(destroySpy).toHaveBeenCalled();
   });
+
+  describe('Note Highlighting', () => {
+    it('identifies notes that should be highlighted when selectedValue matches', () => {
+      const m = new MockCellModel();
+      m.notes = [5, 3]; // Add notes to the model
+      component.model = m as unknown as ClientCellModel;
+      component.selectedValue = 5;
+      fixture.detectChanges();
+
+      expect(component.shouldHighlightNote(5)).toBeTrue();
+      expect(component.shouldHighlightNote(3)).toBeFalse(); // Note exists but doesn't match
+      expect(component.shouldHighlightNote(7)).toBeFalse(); // Note doesn't exist
+    });
+
+    it('does not highlight notes when selectedValue is 0', () => {
+      const m = new MockCellModel();
+      m.notes = [1, 2, 3];
+      component.model = m as unknown as ClientCellModel;
+      component.selectedValue = 0;
+      fixture.detectChanges();
+
+      for (let i = 1; i <= 9; i++) {
+        expect(component.shouldHighlightNote(i)).toBeFalse();
+      }
+    });
+
+    it('applies highlight-note class to matching notes in template', () => {
+      const m = new MockCellModel();
+      m.value = 0;
+      m.notes = [1, 5, 9];
+      component.model = m as unknown as ClientCellModel;
+      component.selectedValue = 5;
+      fixture.detectChanges();
+
+      const noteElements = fixture.debugElement.queryAll(By.css('.note'));
+      
+      // Note at index 4 (5th position, digit 5) should have highlight-note class
+      expect(noteElements[4].nativeElement.classList.contains('highlight-note')).toBeTrue();
+      
+      // Other notes should not have highlight-note class
+      expect(noteElements[0].nativeElement.classList.contains('highlight-note')).toBeFalse();
+      expect(noteElements[8].nativeElement.classList.contains('highlight-note')).toBeFalse();
+    });
+  });
 });

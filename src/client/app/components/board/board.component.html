@@ -5,6 +5,9 @@
       [index]="i"
       (selected)="onCellSelected($event)"
       [class.selected]="selected() === i"
+      [class.highlight-related]="isRelatedCell(i)"
+      [class.highlight-same-number]="isSameNumberCell(i)"
+      [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
     ></app-cell-model>
   }
   @if (cooldownHelper.currentAngle() > 0 || cooldownHelper.transitionDuration() !== '0s') {

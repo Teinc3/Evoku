@@ -18,6 +18,8 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
   model!: ClientCellModel;
   @Input()
   index!: number;
+  @Input()
+  selectedValue: number = 0;
   @Output()
   selected = new EventEmitter<number>();
   
@@ -67,6 +69,18 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
     const notes = this.model.notes;
     const has = !!notes?.includes(digit);
     return has ? String(digit) : '';
+  }
+
+  /** Checks if a note should be highlighted (matches selected value) */
+  shouldHighlightNote(noteDigit: number): boolean {
+    // Don't highlight notes for value 0
+    if (this.selectedValue === 0) {
+      return false;
+    }
+    // Only highlight if the note actually exists in the cell
+    const notes = this.model.notes;
+    const hasNote = !!notes?.includes(noteDigit);
+    return hasNote && noteDigit === this.selectedValue;
   }
 
 }
