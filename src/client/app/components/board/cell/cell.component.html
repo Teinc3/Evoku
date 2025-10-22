@@ -8,7 +8,7 @@
   @if (showNotes) {
     <div class="notes" aria-hidden="true">
       @for (n of noteGrid; track n) {
-        <span class="note">{{ noteDigit(n) }}</span>
+        <span class="note" [class.highlight-note]="shouldHighlightNote(n)">{{ noteDigit(n) }}</span>
       }
     </div>
   } @else {

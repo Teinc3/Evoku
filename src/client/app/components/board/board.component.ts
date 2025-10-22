@@ -203,4 +203,66 @@ export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
   public onCellSelected(i: number): void {
     this.selected.set(i);
   }
+
+  /** Checks if a cell is in the same row, column, or 3x3 grid as the selected cell */
+  public isRelatedCell(cellIndex: number): boolean {
+    const selectedIndex = this.selected();
+    if (selectedIndex === null || selectedIndex === cellIndex) {
+      return false;
+    }
+
+    const selectedRow = Math.floor(selectedIndex / 9);
+    const selectedCol = selectedIndex % 9;
+    const cellRow = Math.floor(cellIndex / 9);
+    const cellCol = cellIndex % 9;
+
+    // Same row or column
+    if (cellRow === selectedRow || cellCol === selectedCol) {
+      return true;
+    }
+
+    // Same 3x3 grid
+    const selectedBox = Math.floor(selectedRow / 3) * 3 + Math.floor(selectedCol / 3);
+    const cellBox = Math.floor(cellRow / 3) * 3 + Math.floor(cellCol / 3);
+    return selectedBox === cellBox;
+  }
+
+  /** Checks if a cell has the same number as the selected cell */
+  public isSameNumberCell(cellIndex: number): boolean {
+    const selectedIndex = this.selected();
+    if (selectedIndex === null || selectedIndex === cellIndex) {
+      return false;
+    }
+
+    const selectedCell = this.getCellModel(selectedIndex);
+    const selectedValue = selectedCell.getDisplayValue();
+    
+    // Don't highlight cells with value 0
+    if (selectedValue === 0) {
+      return false;
+    }
+
+    const cell = this.getCellModel(cellIndex);
+    const cellValue = cell.getDisplayValue();
+    
+    return cellValue === selectedValue;
+  }
+
+  /** Checks if a note should be highlighted (matches selected cell's value) */
+  public shouldHighlightNote(noteDigit: number): boolean {
+    const selectedIndex = this.selected();
+    if (selectedIndex === null) {
+      return false;
+    }
+
+    const selectedCell = this.getCellModel(selectedIndex);
+    const selectedValue = selectedCell.getDisplayValue();
+    
+    // Don't highlight notes for value 0
+    if (selectedValue === 0) {
+      return false;
+    }
+
+    return noteDigit === selectedValue;
+  }
 }
