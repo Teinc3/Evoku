@@ -15,11 +15,22 @@
         <div
           class="powerup-cell"
           [class.black]="cell.isBlack"
-          [class.white]="!cell.isBlack">
+          [class.white]="!cell.isBlack"
+          (click)="onCellClick($event, cell.id)">
         </div>
       }
     }
   </div>
 
-  <p class="loading-fact">Did you know: Beta Testers who tried Evoku at its MVP phase are more likely to be nerds!</p>
+  <p class="loading-fact">Did you know: Beta Testers who try Evoku during its MVP phase are more likely to be nerds!</p>
+
+  @if (tooltipVisible) {
+    <div
+      class="tooltip"
+      [style.left.px]="tooltipPosition.x"
+      [style.top.px]="tooltipPosition.y"
+      (click)="hideTooltip()">
+      {{ tooltipText }}
+    </div>
+  }
 </div>

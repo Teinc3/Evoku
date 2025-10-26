@@ -35,6 +35,9 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private timeoutId: number | null = null;
   private dotsTimer: number | null = null;
   private currentDotsIndex = -1;
+  protected tooltipVisible = false;
+  protected tooltipText = '';
+  protected tooltipPosition = { x: 0, y: 0 };
 
   constructor(public viewStateService: ViewStateService) {}
 
@@ -110,5 +113,43 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       clearTimeout(this.dotsTimer);
       this.dotsTimer = null;
     }
+  }
+
+  protected onCellClick(event: MouseEvent, cellId: number): void {
+    // Don't show tooltip for the cancel button (cell 4)
+    if (cellId === 4) {
+      return;
+    }
+
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    this.tooltipPosition = {
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10 // Position above the cell
+    };
+
+    // Generate lorem ipsum text
+    this.tooltipText = this.generateLoremIpsum();
+    this.tooltipVisible = true;
+  }
+
+  protected hideTooltip(): void {
+    this.tooltipVisible = false;
+  }
+
+  private generateLoremIpsum(): string {
+    const loremTexts = [
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.",
+      "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.",
+      "Deserunt mollit anim id est laborum et dolorum fuga.",
+      "Et harum quidem rerum facilis est et expedita distinctio.",
+      "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil.",
+      "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.",
+      "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis."
+    ];
+
+    return loremTexts[Math.floor(Math.random() * loremTexts.length)];
   }
 }

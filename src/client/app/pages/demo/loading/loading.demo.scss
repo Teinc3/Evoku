@@ -29,8 +29,13 @@
 .powerup-cell {
   border-radius: 8px;
   border: 2px solid #ffffff;
-  transition: background-color 1s ease, border-color 1s ease;
+  transition: background-color 1s ease, border-color 1s ease, transform 0.2s ease;
   aspect-ratio: 1;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .powerup-cell.black {
@@ -77,4 +82,26 @@
   line-height: 1.4;
   user-select: none;
   max-width: 80%;
+}
+
+.tooltip {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 2px solid #ffffff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  max-width: 250px;
+  text-align: center;
+  transform: translate(-50%, -100%);
+  z-index: 1000;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 80%;
+  }
 }
