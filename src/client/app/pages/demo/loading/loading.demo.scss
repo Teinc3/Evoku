@@ -20,8 +20,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  max-width: 300px;
-  width: 100%;
+  width: clamp(min(90%, 300px), 30vh, 50vh);
   aspect-ratio: 1;
   transform: translateY(-5rem) rotate(-45deg);
   
@@ -68,4 +67,14 @@
   .cancel-text {
     transform: rotate(45deg);
   }
+}
+
+.loading-fact {
+  font-size: 1rem;
+  color: #bbbbbb;
+  text-align: center;
+  margin-top: 3rem;
+  line-height: 1.4;
+  user-select: none;
+  max-width: 80%;
 }
