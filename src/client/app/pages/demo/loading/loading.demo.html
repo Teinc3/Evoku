@@ -1,0 +1,23 @@
+<div class="loading-demo">
+  <h1 class="loading-title">Searching for Opponent{{ dots }}</h1>
+
+  <div class="powerup-grid">
+    @for (cell of cells; track cell.id) {
+      @if (cell.id === 4) {
+        <button
+          class="cancel-button"
+          type="button"
+          (click)="viewStateService.navigateToView(AppView.CATALOGUE)"
+          [attr.aria-label]="'Cancel matchmaking'">
+          <span class="cancel-text">Cancel</span>
+        </button>
+      } @else {
+        <div
+          class="powerup-cell"
+          [class.black]="cell.isBlack"
+          [class.white]="!cell.isBlack">
+        </div>
+      }
+    }
+  </div>
+</div>
