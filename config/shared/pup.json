@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Cryo",
+    "theme": true,
+    "element": "water",
+    "asset": {
+      "icon": "/assets/pup/icons/cryo.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Cascade",
+    "theme": false,
+    "element": "water",
+    "asset": {
+      "icon": "/assets/pup/icons/cascade.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Inferno",
+    "theme": true,
+    "element": "fire",
+    "asset": {
+      "icon": "/assets/pup/icons/inferno.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Metabolic",
+    "theme": false,
+    "element": "fire",
+    "asset": {
+      "icon": "/assets/pup/icons/metabolic.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Entangle",
+    "theme": true,
+    "element": "wood",
+    "asset": {
+      "icon": "/assets/pup/icons/entangle.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Wisdom",
+    "theme": false,
+    "element": "wood",
+    "asset": {
+      "icon": "/assets/pup/icons/wisdom.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Landslide",
+    "theme": true,
+    "element": "earth",
+    "asset": {
+      "icon": "/assets/pup/icons/landslide.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Excavate",
+    "theme": false,
+    "element": "earth",
+    "asset": {
+      "icon": "/assets/pup/icons/excavate.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Lock",
+    "theme": true,
+    "element": "metal",
+    "asset": {
+      "icon": "/assets/pup/icons/lock.svg"
+    },
+    "mechanics": {}
+  },
+  {
+    "name": "Forge",
+    "theme": false,
+    "element": "metal",
+    "asset": {
+      "icon": "/assets/pup/icons/forge.svg"
+    },
+    "mechanics": {}
+  }
+]

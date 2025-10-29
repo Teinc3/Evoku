@@ -1,5 +1,9 @@
-<div class="slot" [class.locked]="locked" [class.pending]="pending">
-  <!-- Pup icon would go here when available -->
+<div class="slot-wrapper">
+  <div class="slot" [class.occupied]="!!pupIcon">
+  </div>
+  @if (pupIcon) {
+    <img [src]="pupIcon" alt="Pup" class="pup-icon">
+  }
   @if (level !== null) {
     <div class="level">{{ level }}</div>
   }
