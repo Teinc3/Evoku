@@ -13,9 +13,9 @@
   background: linear-gradient(135deg, rgb(245, 245, 245) 0%, rgb(150, 150, 150) 80%);
   border: 3px solid #000;
   overflow: visible;
+  transform: rotate(45deg);
   transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
   transform-origin: center;
-  transform: rotate(45deg);
   cursor: pointer;
 
   &.occupied {
@@ -29,7 +29,7 @@
 
 .slot:hover,
 .slot:focus-visible {
-  transform: translateY(-3%) scale(1.05) rotate(45deg);
+  transform: scale(1.05) rotate(45deg);
   box-shadow: 0 10px 24px rgba(0,0,0,0.35);
 }
 
