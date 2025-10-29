@@ -44,7 +44,7 @@ export default class App implements OnInit {
         type: "image",
         options: {
           image: {
-            src: 'particle.png',
+            src: '/assets/background/particle.png',
           }
         }
       },
