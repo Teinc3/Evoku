@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, type OnInit } from '@angular/core';
+
+import pupConfig from '@config/shared/pup.json';
 
 
 @Component({
@@ -7,8 +9,20 @@ import { Component, Input } from '@angular/core';
   templateUrl: './pup-slot.component.html',
   styleUrl: './pup-slot.component.scss'
 })
-export default class PupSlotComponent {
-  @Input() locked = false;
-  @Input() pending = false;
-  @Input() level: number | null = null;
+export default class PupSlotComponent implements OnInit {
+  // TODO: Accept a PUPClass input instead in the future
+
+  protected pupIcon: string | null = null;
+  protected level: number | null = null;
+
+  ngOnInit(): void {
+    // 70% chance to load a random pup
+    if (Math.random() < 0.7 && pupConfig.length > 0) {
+      const randomPup = pupConfig[Math.floor(Math.random() * pupConfig.length)];
+      this.pupIcon = randomPup.asset.icon;
+      
+      // Set random level between 1-5 if there's a pup
+      this.level = Math.floor(Math.random() * 5) + 1;
+    }
+  }
 }
