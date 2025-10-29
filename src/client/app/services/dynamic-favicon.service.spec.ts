@@ -80,7 +80,7 @@ describe('DynamicFaviconService', () => {
       }
     }
 
-    expect(fetchSpy).toHaveBeenCalledWith('/icon.svg');
+    expect(fetchSpy).toHaveBeenCalledWith('/assets/icons/icon.svg');
 
     // If the service didn't create the link within our wait window, force an update
     if (!link) {

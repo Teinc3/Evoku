@@ -124,9 +124,9 @@ export default class DynamicFaviconService {
     if (this.cachedSvg) {
       return;
     }
-    const res = await fetch('/icon.svg');
+    const res = await fetch('/assets/icons/icon.svg');
     if (!res.ok) {
-      throw new Error('Failed to fetch /icon.svg');
+      throw new Error('Failed to fetch /assets/icons/icon.svg');
     }
     this.cachedSvg = await res.text();
     // keep a copy of the original SVG so we can reset after stopping the animation
