@@ -19,7 +19,7 @@
             [style.opacity]="cell.opacity"
             (click)="onCellClick($event, cell.id)"
             tabindex="0"
-            [attr.aria-label]="'Powerup available'"
+            [attr.aria-label]="'Powerup: ' + cell.pupName"
             alt="Powerup icon">
         }
       }

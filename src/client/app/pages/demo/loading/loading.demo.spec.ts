@@ -1,5 +1,5 @@
 import { By } from '@angular/platform-browser';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
@@ -200,5 +200,165 @@ describe('LoadingDemoPageComponent', () => {
 
     // Restore original method
     component['getRandomAvailablePup'] = originalGetRandomAvailablePup;
+  });
+
+  it('should update cell colors and assign new pups', () => {
+    // Mock assignNewPupForCell
+    const originalAssignNewPupForCell = component['assignNewPupForCell'];
+    component['assignNewPupForCell'] = jasmine.createSpy('assignNewPupForCell');
+
+    // Set initial state
+    component['cells'][0].isBlack = true;
+    component['cells'][8].isBlack = false; // Opposite of 0 in 9-cell grid
+
+    component['frameIndex'] = 0; // This will flip cells 0 and 8
+    component['updateCellColors']();
+
+    // Colors should be flipped
+    expect(component['cells'][0].isBlack).toBe(false);
+    expect(component['cells'][8].isBlack).toBe(true);
+
+    // Should assign new pups for both cells
+    expect(component['assignNewPupForCell']).toHaveBeenCalledWith(0);
+    expect(component['assignNewPupForCell']).toHaveBeenCalledWith(8);
+
+    // Restore original method
+    component['assignNewPupForCell'] = originalAssignNewPupForCell;
+  });
+
+  it('should assign new pup for cell with fade transition', fakeAsync(() => {
+    // Mock getRandomAvailablePup
+    const originalGetRandomAvailablePup = component['getRandomAvailablePup'];
+    const mockPup = { name: 'New Pup', asset: { icon: '/new/icon.svg' } };
+    component['getRandomAvailablePup'] = jasmine.createSpy('getRandomAvailablePup')
+      .and.returnValue(mockPup);
+
+    // Set up cell with existing pup
+    component['cells'][0].pupIcon = '/old/icon.svg';
+    component['cells'][0].pupName = 'Old Pup';
+    component['cells'][0].opacity = 1;
+
+    component['assignNewPupForCell'](0);
+
+    // Should fade out first
+    expect(component['cells'][0].opacity).toBe(0);
+
+    // Fast-forward time by the fade transition duration (1.2 seconds)
+    tick(1200);
+
+    expect(component['cells'][0].pupIcon).toBe('/new/icon.svg');
+    expect(component['cells'][0].pupName).toBe('New Pup');
+    expect(component['cells'][0].opacity).toBe(1);
+
+    // Restore original method
+    component['getRandomAvailablePup'] = originalGetRandomAvailablePup;
+  }));
+
+  it('should assign new pup for cell without existing pup', () => {
+    // Mock getRandomAvailablePup
+    const originalGetRandomAvailablePup = component['getRandomAvailablePup'];
+    const mockPup = { name: 'New Pup', asset: { icon: '/new/icon.svg' } };
+    component['getRandomAvailablePup'] = jasmine.createSpy('getRandomAvailablePup')
+      .and.returnValue(mockPup);
+
+    // Cell starts with no pup
+    component['cells'][0].pupIcon = null;
+    component['cells'][0].pupName = null;
+
+    component['assignNewPupForCell'](0);
+
+    // Should set immediately without fade
+    const cell = component['cells'][0];
+    expect(cell.pupIcon).toBe('/new/icon.svg');
+    expect(cell.pupName).toBe('New Pup');
+    expect(cell.opacity).toBe(1);
+
+    // Restore original method
+    component['getRandomAvailablePup'] = originalGetRandomAvailablePup;
+  });
+
+  it('should trigger animation callback after interval', fakeAsync(() => {
+    // Spy on updateCellColors to verify it's called
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    spyOn(component as any, 'updateCellColors');
+
+    component['startAnimation']();
+
+    // Fast-forward time by the animation interval (2 seconds)
+    tick(2000);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((component as any).updateCellColors).toHaveBeenCalled();
+    component['stopAnimation']();
+  }));
+
+  it('should trigger timeout callback after delay', fakeAsync(() => {
+    component['startTimeout']();
+
+    // Fast-forward time by the timeout duration (30 seconds)
+    tick(30000);
+
+    expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.DUEL_DEMO);
+  }));
+
+  it('should handle cancel button click in onCellClick (no tooltip)', () => {
+    // Mock hideTooltip to verify it's not called
+    const originalHideTooltip = component['hideTooltip'];
+    component['hideTooltip'] = jasmine.createSpy('hideTooltip');
+
+    const mockEvent = { target: { getBoundingClientRect: () => ({}) } } as unknown as MouseEvent;
+    component['onCellClick'](mockEvent, 4);
+
+    // Should return early without showing tooltip
+    expect(component['tooltipVisible']).toBe(false);
+    expect(component['hideTooltip']).not.toHaveBeenCalled();
+
+    // Restore original method
+    component['hideTooltip'] = originalHideTooltip;
+  });
+
+  it('should show tooltip with "No powerup selected" when cell has no pup', () => {
+    // Create a fresh component instance to avoid initial pup assignment
+    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+
+    // Mock assignInitialPups to do nothing
+    const originalAssignInitialPups = freshComponent['assignInitialPups'];
+    const mockAssignInitialPups = jasmine.createSpy('assignInitialPups').and.callFake(() => {
+      // Do nothing - leave cells without pups
+    });
+    freshComponent['assignInitialPups'] = mockAssignInitialPups;
+
+    // Initialize component without pups
+    freshComponent.ngOnInit();
+
+    // Ensure cell has no pup and no tooltip is currently showing
+    freshComponent['cells'][0].pupName = null;
+    freshComponent['currentTooltipPupName'] = ''; // Set to empty string so null !== ''
+
+    const mockEvent = {
+      target: { getBoundingClientRect: () => ({ left: 100, width: 50, top: 200 }) }
+    } as unknown as MouseEvent;
+    freshComponent['onCellClick'](mockEvent, 0);
+
+    expect(freshComponent['tooltipText']).toBe('No powerup selected');
+    expect(freshComponent['tooltipVisible']).toBe(true);
+    expect(freshComponent['currentTooltipPupName']).toBeNull();
+
+    // Restore original method
+    freshComponent['assignInitialPups'] = originalAssignInitialPups;
+  });
+
+  it('should show tooltip with "No description available" when pup not found in map', () => {
+    // Set up cell with pup name that doesn't exist in map
+    component['cells'][0].pupName = 'NonExistentPup';
+
+    const mockEvent = {
+      target: { getBoundingClientRect: () => ({ left: 100, width: 50, top: 200 }) }
+    } as unknown as MouseEvent;
+    component['onCellClick'](mockEvent, 0);
+
+    expect(component['tooltipText']).toBe('No description available');
+    expect(component['tooltipVisible']).toBe(true);
+    expect(component['currentTooltipPupName']).toBe('NonExistentPup');
   });
 });
