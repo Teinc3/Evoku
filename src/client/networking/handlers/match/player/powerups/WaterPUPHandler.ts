@@ -10,7 +10,7 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions> {
 
     const handlerMap = {
       [WaterPUPActions.CRYO_USED]: this.handleCryoUsed,
-      [WaterPUPActions.CASCADE_USED]: this.handleCascadeUsed
+      [WaterPUPActions.PURITY_USED]: this.handlePurityUsed
     };
 
     this.setHandlerMap(handlerMap);
@@ -21,8 +21,8 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions> {
     // Handle client-side effects for water cryo powerup
   }
 
-  private handleCascadeUsed(_data: AugmentAction<WaterPUPActions>): void {
-    console.debug('Client received: Water Cascade powerup effect');
-    // Handle client-side effects for water cascade powerup
+  private handlePurityUsed(_data: AugmentAction<WaterPUPActions>): void {
+    console.debug('Client received: Water Purity powerup effect');
+    // Handle client-side effects for water purity powerup
   }
 }
