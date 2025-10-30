@@ -3,6 +3,7 @@
     "name": "Cryo",
     "theme": true,
     "element": "water",
+    "description": "Freezes an area of enemy cells for a short duration.",
     "asset": {
       "icon": "/assets/pup/icons/cryo.svg"
     },
@@ -12,6 +13,7 @@
     "name": "Purity",
     "theme": false,
     "element": "water",
+    "description": "Reduces all negative effects from your board.",
     "asset": {
       "icon": "/assets/pup/icons/purity.svg"
     },
@@ -21,6 +23,7 @@
     "name": "Inferno",
     "theme": true,
     "element": "fire",
+    "description": "Burns an area of filled enemy cells into empty ashes.",
     "asset": {
       "icon": "/assets/pup/icons/inferno.svg"
     },
@@ -30,6 +33,7 @@
     "name": "Metabolic",
     "theme": false,
     "element": "fire",
+    "description": "Speeds up board cooldown time for a short duration.",
     "asset": {
       "icon": "/assets/pup/icons/metabolic.svg"
     },
@@ -39,6 +43,7 @@
     "name": "Entangle",
     "theme": true,
     "element": "wood",
+    "description": "Leeches powerup progress from enemy players over time.",
     "asset": {
       "icon": "/assets/pup/icons/entangle.svg"
     },
@@ -48,6 +53,7 @@
     "name": "Wisdom",
     "theme": false,
     "element": "wood",
+    "description": "Fills in a random number of empty cells on your board.",
     "asset": {
       "icon": "/assets/pup/icons/wisdom.svg"
     },
@@ -57,6 +63,7 @@
     "name": "Landslide",
     "theme": true,
     "element": "earth",
+    "description": "Covers mud onto enemy cells, which must first be cleared.",
     "asset": {
       "icon": "/assets/pup/icons/landslide.svg"
     },
@@ -66,6 +73,7 @@
     "name": "Excavate",
     "theme": false,
     "element": "earth",
+    "description": "Reveals all possible number combinations for a selected area of cells.",
     "asset": {
       "icon": "/assets/pup/icons/excavate.svg"
     },
@@ -75,6 +83,7 @@
     "name": "Lock",
     "theme": true,
     "element": "metal",
+    "description": "Locks a selected number from being placed on enemy boards for a short duration.",
     "asset": {
       "icon": "/assets/pup/icons/lock.svg"
     },
@@ -84,6 +93,7 @@
     "name": "Forge",
     "theme": false,
     "element": "metal",
+    "description": "Increases powerup progress gain for a short duration.",
     "asset": {
       "icon": "/assets/pup/icons/forge.svg"
     },

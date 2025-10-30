@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import ViewStateService from '../../services/view-state.service';
 import AppView from '../../../types/enums/app-view.enum';
 import NetworkDemoPageComponent from './misc/network/network.demo';
+import LoadingDemoPageComponent from './loading/loading.demo';
 import TimeAttackDemoPageComponent from './gameplay/time-attack/time-attack.demo';
 import DuelDemoPageComponent from './gameplay/duel/duel.demo';
 import ProgressbarsDemoPageComponent from './components/progress-bars/progress-bars.demo';
@@ -19,7 +20,8 @@ import CatalogueDemoComponent from './catalogue/catalogue.demo';
     TimeAttackDemoPageComponent, 
     CatalogueDemoComponent,
     DuelDemoPageComponent,
-    ProgressbarsDemoPageComponent
+    ProgressbarsDemoPageComponent,
+    LoadingDemoPageComponent
   ],
   templateUrl: './demo.html',
   styleUrl: './demo.scss'

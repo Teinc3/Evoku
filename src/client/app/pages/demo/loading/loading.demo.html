@@ -1,0 +1,40 @@
+<div class="loading-demo">
+  <h2 class="loading-title">Searching for Opponent{{ dots }}</h2>
+
+  <div class="powerup-grid">
+    @for (cell of cells; track cell.id) {
+      @if (cell.id === 4) {
+        <button
+          class="cancel-button"
+          type="button"
+          (click)="viewStateService.navigateToView(AppView.CATALOGUE)"
+          [attr.aria-label]="'Cancel matchmaking'">
+          <span class="cancel-text">Cancel</span>
+        </button>
+      } @else {
+        @if (cell.pupIcon) {
+          <img
+            [src]="cell.pupIcon"
+            class="powerup-cell"
+            [style.opacity]="cell.opacity"
+            (click)="onCellClick($event, cell.id)"
+            tabindex="0"
+            [attr.aria-label]="'Powerup: ' + cell.pupName"
+            alt="Powerup icon">
+        }
+      }
+    }
+  </div>
+
+  <p class="loading-fact">Did you know: Beta Testers who try Evoku during its MVP phase are more likely to be nerds!</p>
+
+  @if (tooltipVisible) {
+    <div
+      class="tooltip"
+      [style.left.px]="tooltipPosition.x"
+      [style.top.px]="tooltipPosition.y"
+      (click)="hideTooltip()">
+      {{ tooltipText }}
+    </div>
+  }
+</div>

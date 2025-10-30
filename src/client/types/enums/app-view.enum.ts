@@ -8,7 +8,8 @@ export enum AppView {
   PROGRESSBARS_DEMO,
   NETWORK_DEMO,
   TIMEATTACK_DEMO,
-  DUEL_DEMO
+  DUEL_DEMO,
+  LOADING_DEMO
 }
 
 export default AppView;
