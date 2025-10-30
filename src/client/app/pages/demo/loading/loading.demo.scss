@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  background-color: #808080;
 }
 
 .loading-title {
@@ -23,28 +24,20 @@
   width: clamp(min(90%, 300px), 30vh, 50vh);
   aspect-ratio: 1;
   transform: translateY(-5rem) rotate(-45deg);
-  
 }
 
 .powerup-cell {
-  border-radius: 8px;
-  border: 2px solid #ffffff;
-  transition: background-color 1s ease, border-color 1s ease, transform 0.2s ease;
-  aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   cursor: pointer;
+  transform: rotate(45deg) scale(1.5);
+  transition: transform 0.2s ease, opacity 1s ease;
+  user-select: none;
 
   &:hover {
-    transform: scale(1.05);
+    transform: rotate(45deg) scale(1.55);
   }
-}
-
-.powerup-cell.black {
-  background-color: #000000;
-}
-
-.powerup-cell.white {
-  background-color: #ffffff;
-  border-color: #000000;
 }
 
 .cancel-button {

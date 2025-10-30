@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
+import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
 import AppView from '../../../../types/enums/app-view.enum';
 
@@ -16,7 +17,7 @@ import AppView from '../../../../types/enums/app-view.enum';
   styleUrl: './loading.demo.scss'
 })
 export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
-  private static readonly FRAME_INTERVAL_MS = 1500;
+  private static readonly FRAME_INTERVAL_MS = 2000;
   private static readonly SEQUENCE = [0, 1, 2, 5];
   private static readonly TOTAL_CELLS = 9;
 
@@ -26,7 +27,10 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     { length: LoadingDemoPageComponent.TOTAL_CELLS },
     (_, i) => ({
       id: i,
-      isBlack: [0, 1, 2, 5].includes(i) // Initial black cells
+      isBlack: [0, 1, 2, 5].includes(i), // Initial black cells (yin)
+      pupIcon: null as string | null,
+      pupName: null as string | null,
+      opacity: 1
     })
   );
 
@@ -35,6 +39,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private timeoutId: number | null = null;
   private dotsTimer: number | null = null;
   private currentDotsIndex = -1;
+  private currentTooltipPupName: string | null = null;
   protected tooltipVisible = false;
   protected tooltipText = '';
   protected tooltipPosition = { x: 0, y: 0 };
@@ -47,7 +52,41 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     return dots + spaces;
   }
 
+  private getAvailablePups(isYin: boolean): typeof pupConfig {
+    return pupConfig.filter(pup => pup.theme === !isYin); // theme: false = yin, theme: true = yang
+  }
+
+  private getRandomAvailablePup(isYin: boolean): typeof pupConfig[0] | null {
+    const availablePups = this.getAvailablePups(isYin);
+    const usedPupNames = new Set(
+      this.cells
+        .filter(cell => cell.pupName !== null)
+        .map(cell => cell.pupName!)
+    );
+
+    const unusedPups = availablePups.filter(pup => !usedPupNames.has(pup.name));
+
+    if (unusedPups.length === 0) {
+      return null; // No available pups
+    }
+
+    return unusedPups[Math.floor(Math.random() * unusedPups.length)];
+  }
+
+  private assignInitialPups(): void {
+    for (const cell of this.cells) {
+      if (cell.id !== 4) { // Skip cancel button
+        const pup = this.getRandomAvailablePup(cell.isBlack);
+        if (pup) {
+          cell.pupIcon = pup.asset.icon;
+          cell.pupName = pup.name;
+        }
+      }
+    }
+  }
+
   ngOnInit(): void {
+    this.assignInitialPups();
     this.startAnimation();
     this.startDotsAnimation();
     this.startTimeout();
@@ -80,6 +119,32 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     // Flip the colors of the current element and its opposite
     this.cells[elementToFlip].isBlack = !this.cells[elementToFlip].isBlack;
     this.cells[oppositeElement].isBlack = !this.cells[oppositeElement].isBlack;
+
+    // Assign new pups for the flipped cells
+    this.assignNewPupForCell(elementToFlip);
+    this.assignNewPupForCell(oppositeElement);
+  }
+
+  private assignNewPupForCell(cellId: number): void {
+    const cell = this.cells[cellId];
+    const pup = this.getRandomAvailablePup(cell.isBlack);
+    const newIcon = pup ? pup.asset.icon : null;
+    const newName = pup ? pup.name : null;
+
+    if (cell.pupIcon) {
+      // Fade out current pup
+      cell.opacity = 0;
+      setTimeout(() => {
+        cell.pupIcon = newIcon;
+        cell.pupName = newName;
+        cell.opacity = 1;
+      }, 1200); // Slightly longer than CSS transition duration to ensure fade out completes
+    } else {
+      // No current pup, just set new one
+      cell.pupIcon = newIcon;
+      cell.pupName = newName;
+      cell.opacity = 1;
+    }
   }
 
   private startTimeout(): void {
@@ -121,35 +186,34 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const cell = this.cells[cellId];
+    if (cell.pupName === this.currentTooltipPupName) {
+      // Clicking the same pup that's currently showing tooltip - close it
+      this.hideTooltip();
+      return;
+    }
+
+    // Different pup or no tooltip currently open
+    if (cell.pupName) {
+      const pup = pupConfig.find(p => p.name === cell.pupName);
+      this.tooltipText = pup ? `${pup.name}: ${pup.description}` : 'No description available';
+      this.currentTooltipPupName = cell.pupName;
+    } else {
+      this.tooltipText = 'No powerup selected';
+      this.currentTooltipPupName = null;
+    }
+
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     this.tooltipPosition = {
       x: rect.left + rect.width / 2,
       y: rect.top - 10 // Position above the cell
     };
 
-    // Generate lorem ipsum text
-    this.tooltipText = this.generateLoremIpsum();
     this.tooltipVisible = true;
   }
 
   protected hideTooltip(): void {
     this.tooltipVisible = false;
-  }
-
-  private generateLoremIpsum(): string {
-    const loremTexts = [
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.",
-      "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.",
-      "Deserunt mollit anim id est laborum et dolorum fuga.",
-      "Et harum quidem rerum facilis est et expedita distinctio.",
-      "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil.",
-      "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus.",
-      "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis."
-    ];
-
-    return loremTexts[Math.floor(Math.random() * loremTexts.length)];
+    this.currentTooltipPupName = null;
   }
 }

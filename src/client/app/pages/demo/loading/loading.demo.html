@@ -12,12 +12,16 @@
           <span class="cancel-text">Cancel</span>
         </button>
       } @else {
-        <div
-          class="powerup-cell"
-          [class.black]="cell.isBlack"
-          [class.white]="!cell.isBlack"
-          (click)="onCellClick($event, cell.id)">
-        </div>
+        @if (cell.pupIcon) {
+          <img
+            [src]="cell.pupIcon"
+            class="powerup-cell"
+            [style.opacity]="cell.opacity"
+            (click)="onCellClick($event, cell.id)"
+            tabindex="0"
+            [attr.aria-label]="'Powerup available'"
+            alt="Powerup icon">
+        }
       }
     }
   </div>
