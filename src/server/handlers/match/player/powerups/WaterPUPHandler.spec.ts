@@ -53,11 +53,11 @@ describe('WaterPUPHandler', () => {
     });
   });
 
-  describe('handleUseCascade', () => {
-    it('should handle USE_CASCADE action and return true', async () => {
+  describe('handleUsePurity', () => {
+    it('should handle USE_PURITY action and return true', async () => {
       // Arrange
-      const useCascadeData = {
-        action: WaterPUPActions.USE_CASCADE,
+      const usePurityData = {
+        action: WaterPUPActions.USE_PURITY,
         actionID: 43,
         pupID: 2,
         clientTime: 1000,
@@ -66,7 +66,7 @@ describe('WaterPUPHandler', () => {
       // Act
       const result = await waterPUPHandler.handleData(
         mockSession as unknown as SessionModel,
-        useCascadeData
+        usePurityData
       );
 
       // Assert

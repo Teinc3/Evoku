@@ -1,3 +1,3 @@
 // Export all water powerup packets
-export * from './Cascade';
+export * from './Purity';
 export * from './Cryo';

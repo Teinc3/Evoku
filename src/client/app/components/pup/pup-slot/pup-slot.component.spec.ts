@@ -179,7 +179,7 @@ describe('PupSlotComponent', () => {
       // Check that it's one of the expected icons from config
       const expectedIcons = [
         '/assets/pup/icons/cryo.svg',
-        '/assets/pup/icons/cascade.svg',
+        '/assets/pup/icons/purity.svg',
         '/assets/pup/icons/inferno.svg',
         '/assets/pup/icons/metabolic.svg',
         '/assets/pup/icons/entangle.svg',

@@ -9,11 +9,11 @@
     "mechanics": {}
   },
   {
-    "name": "Cascade",
+    "name": "Purity",
     "theme": false,
     "element": "water",
     "asset": {
-      "icon": "/assets/pup/icons/cascade.svg"
+      "icon": "/assets/pup/icons/purity.svg"
     },
     "mechanics": {}
   },

@@ -5,6 +5,6 @@ import type {
 import type IDataContract from "../../../../components/base/IDataContract";
 
 
-export default interface CascadeBaseContract extends PUPContract, IDataContract {}
-export interface CascadeContractC2S extends CascadeBaseContract, ActionContractC2S {}
-export interface CascadeContractS2C extends CascadeBaseContract, ActionContractS2C {}
+export default interface PurityBaseContract extends PUPContract, IDataContract {}
+export interface PurityContractC2S extends PurityBaseContract, ActionContractC2S {}
+export interface PurityContractS2C extends PurityBaseContract, ActionContractS2C {}
