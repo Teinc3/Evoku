@@ -15,7 +15,7 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions>
 
     const handlerMap = {
       [WaterPUPActions.USE_CRYO]: this.handleUseCryo,
-      [WaterPUPActions.USE_CASCADE]: this.handleUseCascade
+      [WaterPUPActions.USE_PURITY]: this.handleUsePurity
     };
 
     this.setHandlerMap(handlerMap);
@@ -25,7 +25,7 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions>
     return true;
   }
 
-  private handleUseCascade(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): boolean {
+  private handleUsePurity(_session: SessionModel, _data: AugmentAction<WaterPUPActions>): boolean {
     return true;
   }
   

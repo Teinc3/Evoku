@@ -73,11 +73,11 @@ describe('PUPHandler', () => {
       expect(console.debug).toHaveBeenCalledWith('Client received: Water Cryo powerup effect');
     });
 
-    it('should route Water CASCADE_USED action to WaterPUPHandler', () => {
+    it('should route Water PURITY_USED action to WaterPUPHandler', () => {
       spyOn(console, 'debug');
 
-      const waterData: AugmentAction<WaterPUPActions.CASCADE_USED> = {
-        action: WaterPUPActions.CASCADE_USED,
+      const waterData: AugmentAction<WaterPUPActions.PURITY_USED> = {
+        action: WaterPUPActions.PURITY_USED,
         pupID: 4,
         actionID: 250,
         serverTime: 12513,
@@ -86,7 +86,7 @@ describe('PUPHandler', () => {
 
       handler.handleData(waterData);
 
-      expect(console.debug).toHaveBeenCalledWith('Client received: Water Cascade powerup effect');
+      expect(console.debug).toHaveBeenCalledWith('Client received: Water Purity powerup effect');
     });
 
     it('should route Earth powerup actions to EarthPUPHandler', () => {

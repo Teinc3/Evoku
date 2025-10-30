@@ -70,11 +70,11 @@ describe('PlayerHandler', () => {
       expect(console.debug).toHaveBeenCalledWith('Client received: Fire Inferno powerup effect');
     });
 
-    it('should route Water CASCADE_USED action to PUPHandler', () => {
+    it('should route Water PURITY_USED action to PUPHandler', () => {
       spyOn(console, 'debug');
 
-      const waterData: AugmentAction<WaterPUPActions.CASCADE_USED> = {
-        action: WaterPUPActions.CASCADE_USED,
+      const waterData: AugmentAction<WaterPUPActions.PURITY_USED> = {
+        action: WaterPUPActions.PURITY_USED,
         pupID: 4,
         actionID: 250,
         serverTime: 1234567910,
@@ -83,7 +83,7 @@ describe('PlayerHandler', () => {
 
       handler.handleData(waterData);
 
-      expect(console.debug).toHaveBeenCalledWith('Client received: Water Cascade powerup effect');
+      expect(console.debug).toHaveBeenCalledWith('Client received: Water Purity powerup effect');
     });
 
     it('should handle errors in sub-handlers gracefully', () => {
