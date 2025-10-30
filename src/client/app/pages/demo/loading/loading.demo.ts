@@ -1,3 +1,4 @@
+import { interval, Subscription, timer } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
@@ -20,6 +21,11 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private static readonly FRAME_INTERVAL_MS = 2000;
   private static readonly SEQUENCE = [0, 1, 2, 5];
   private static readonly TOTAL_CELLS = 9;
+  private static readonly CANCEL_BUTTON_CELL_ID = 4;
+  private static readonly FADE_TRANSITION_MS = 1200;
+  private static readonly AUTO_TRANSITION_TIMEOUT_MS = 30000;
+  private static readonly DOTS_INTERVAL_MS = 1000;
+  private static readonly DOTS_PAUSE_MS = 3000;
 
   public AppView = AppView;
 
@@ -27,7 +33,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     { length: LoadingDemoPageComponent.TOTAL_CELLS },
     (_, i) => ({
       id: i,
-      isBlack: [0, 1, 2, 5].includes(i), // Initial black cells (yin)
+      isBlack: LoadingDemoPageComponent.SEQUENCE.includes(i), // Initial black cells (yin)
       pupIcon: null as string | null,
       pupName: null as string | null,
       opacity: 1
@@ -44,7 +50,17 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   protected tooltipText = '';
   protected tooltipPosition = { x: 0, y: 0 };
 
-  constructor(public viewStateService: ViewStateService) {}
+  private animationSubscription: Subscription | null = null;
+  private timeoutSubscription: Subscription | null = null;
+  private dotsSubscription: Subscription | null = null;
+  private pupConfigMap: Map<string, typeof pupConfig[0]> = new Map();
+
+  constructor(public viewStateService: ViewStateService) {
+    // Initialize pup config map for O(1) lookups
+    pupConfig.forEach(pup => {
+      this.pupConfigMap.set(pup.name, pup);
+    });
+  }
 
   get dots(): string {
     const dots = '.'.repeat(this.currentDotsIndex);
@@ -75,7 +91,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
 
   private assignInitialPups(): void {
     for (const cell of this.cells) {
-      if (cell.id !== 4) { // Skip cancel button
+      if (cell.id !== LoadingDemoPageComponent.CANCEL_BUTTON_CELL_ID) { // Skip cancel button
         const pup = this.getRandomAvailablePup(cell.isBlack);
         if (pup) {
           cell.pupIcon = pup.asset.icon;
@@ -99,16 +115,18 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   }
 
   private startAnimation(): void {
-    this.timer = window.setInterval(() => {
+    this.animationSubscription = interval(
+      LoadingDemoPageComponent.FRAME_INTERVAL_MS
+    ).subscribe(() => {
       this.frameIndex = (this.frameIndex + 1) % LoadingDemoPageComponent.SEQUENCE.length;
       this.updateCellColors();
-    }, LoadingDemoPageComponent.FRAME_INTERVAL_MS);
+    });
   }
 
   private stopAnimation(): void {
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-      this.timer = null;
+    if (this.animationSubscription) {
+      this.animationSubscription.unsubscribe();
+      this.animationSubscription = null;
     }
   }
 
@@ -138,7 +156,9 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
         cell.pupIcon = newIcon;
         cell.pupName = newName;
         cell.opacity = 1;
-      }, 1200); // Slightly longer than CSS transition duration to ensure fade out completes
+      },
+      LoadingDemoPageComponent.FADE_TRANSITION_MS
+      ); // Slightly longer than CSS transition duration to ensure fade out completes
     } else {
       // No current pup, just set new one
       cell.pupIcon = newIcon;
@@ -148,25 +168,29 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   }
 
   private startTimeout(): void {
-    this.timeoutId = window.setTimeout(() => {
+    this.timeoutSubscription = timer(
+      LoadingDemoPageComponent.AUTO_TRANSITION_TIMEOUT_MS
+    ).subscribe(() => {
       this.viewStateService.navigateToView(AppView.DUEL_DEMO);
-    }, 30000); // 30 seconds
+    });
   }
 
   private clearTimeout(): void {
-    if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
+    if (this.timeoutSubscription) {
+      this.timeoutSubscription.unsubscribe();
+      this.timeoutSubscription = null;
     }
   }
 
   private startDotsAnimation(): void {
     const animateDots = () => {
       this.currentDotsIndex = (this.currentDotsIndex + 1) % 4;
-      
+
       // Schedule next animation with appropriate delay
-      const delay = this.currentDotsIndex === 3 ? 3000 : 1000; // 3s for 3 dots, 1s for others
-      this.dotsTimer = window.setTimeout(animateDots, delay);
+      const delay = this.currentDotsIndex === 3
+        ? LoadingDemoPageComponent.DOTS_PAUSE_MS
+        : LoadingDemoPageComponent.DOTS_INTERVAL_MS;
+      this.dotsSubscription = timer(delay).subscribe(() => animateDots());
     };
 
     // Start the animation
@@ -174,15 +198,15 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   }
 
   private stopDotsAnimation(): void {
-    if (this.dotsTimer !== null) {
-      clearTimeout(this.dotsTimer);
-      this.dotsTimer = null;
+    if (this.dotsSubscription) {
+      this.dotsSubscription.unsubscribe();
+      this.dotsSubscription = null;
     }
   }
 
   protected onCellClick(event: MouseEvent, cellId: number): void {
     // Don't show tooltip for the cancel button (cell 4)
-    if (cellId === 4) {
+    if (cellId === LoadingDemoPageComponent.CANCEL_BUTTON_CELL_ID) {
       return;
     }
 
@@ -195,8 +219,10 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
 
     // Different pup or no tooltip currently open
     if (cell.pupName) {
-      const pup = pupConfig.find(p => p.name === cell.pupName);
-      this.tooltipText = pup ? `${pup.name}: ${pup.description}` : 'No description available';
+      const pup = this.pupConfigMap.get(cell.pupName);
+      this.tooltipText = pup
+        ? `${pup.name}: ${pup.description}`
+        : 'No description available';
       this.currentTooltipPupName = cell.pupName;
     } else {
       this.tooltipText = 'No powerup selected';

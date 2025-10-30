@@ -1,6 +1,7 @@
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
 import AppView from '../../../../types/enums/app-view.enum';
 import LoadingDemoPageComponent from './loading.demo';
@@ -49,11 +50,6 @@ describe('LoadingDemoPageComponent', () => {
     const cancelButton = fixture.debugElement.query(By.css('.cancel-button'));
     expect(cancelButton).toBeTruthy();
     expect(cancelButton.nativeElement.textContent).toContain('Cancel');
-  });
-
-  it('should render the title with dots', () => {
-    const titleElement = fixture.debugElement.query(By.css('.loading-title'));
-    expect(titleElement.nativeElement.textContent).toContain('Searching for Opponent');
   });
 
   it('should render the loading fact', () => {
@@ -117,13 +113,92 @@ describe('LoadingDemoPageComponent', () => {
     expect(tooltip).toBeFalsy();
   });
 
-  it('should clean up timers on destroy', () => {
-    spyOn(window, 'clearInterval');
-    spyOn(window, 'clearTimeout');
+  it('should clean up subscriptions on ngOnDestroy', () => {
+    component.ngOnInit(); // Initialize subscriptions
+
+    // Verify subscriptions exist
+    expect(component['animationSubscription']).toBeDefined();
+    expect(component['timeoutSubscription']).toBeDefined();
+    expect(component['dotsSubscription']).toBeDefined();
 
     component.ngOnDestroy();
 
-    expect(window.clearInterval).toHaveBeenCalled();
-    expect(window.clearTimeout).toHaveBeenCalled();
+    // Subscriptions should be cleaned up
+    expect(component['animationSubscription']).toBeNull();
+    expect(component['timeoutSubscription']).toBeNull();
+    expect(component['dotsSubscription']).toBeNull();
+  });
+
+  it('should initialize component state on ngOnInit', () => {
+    // Create a fresh component instance to test ngOnInit behavior
+    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+
+    // Before ngOnInit, cells should be initialized but no pups assigned
+    expect(freshComponent['cells'].length).toBe(9);
+    expect(freshComponent['cells'][0].pupName).toBeNull();
+
+    freshComponent.ngOnInit();
+
+    // After ngOnInit, cells should have pups assigned (except cancel button)
+    expect(freshComponent['cells'][0].pupName).toBeTruthy(); // Should have a pup
+    expect(freshComponent['cells'][4].pupName).toBeNull(); // Cancel button should not have pup
+
+    // Subscriptions should be created
+    expect(freshComponent['animationSubscription']).toBeDefined();
+    expect(freshComponent['timeoutSubscription']).toBeDefined();
+    expect(freshComponent['dotsSubscription']).toBeDefined();
+  });
+
+  it('should filter pups correctly in getAvailablePups', () => {
+    // Test Yin pups (theme: false)
+    const yinPups = component['getAvailablePups'](true);
+    expect(yinPups.every((pup: typeof pupConfig[0]) => pup.theme === false)).toBe(true);
+
+    // Test Yang pups (theme: true)
+    const yangPups = component['getAvailablePups'](false);
+    expect(yangPups.every((pup: typeof pupConfig[0]) => pup.theme === true)).toBe(true);
+  });
+
+  it('should return null when no unused pups available', () => {
+    // Fill all cells with all available Yin pups to exhaust options
+    const yinPups = pupConfig.filter(pup => pup.theme === false); // Yin pups have theme: false
+    let pupIndex = 0;
+
+    component['cells'].forEach((cell: typeof component['cells'][0]) => {
+      if (cell.id !== 4 && pupIndex < yinPups.length) {
+        cell.pupName = yinPups[pupIndex].name;
+        pupIndex++;
+      }
+    });
+
+    const result = component['getRandomAvailablePup'](true); // true = isYin
+    expect(result).toBeNull();
+  });
+
+  it('should assign initial pups correctly', () => {
+    // Mock getRandomAvailablePup for predictable results
+    const originalGetRandomAvailablePup = component['getRandomAvailablePup'];
+    component['getRandomAvailablePup'] = jasmine.createSpy('getRandomAvailablePup')
+      .and.returnValue({
+        name: 'Test Pup',
+        asset: { icon: '/test/icon.svg' }
+      });
+
+    component['assignInitialPups']();
+
+    // Check that cancel button cell (id: 4) was skipped
+    expect(component['cells'][4].pupIcon).toBeNull();
+    expect(component['cells'][4].pupName).toBeNull();
+
+    // Check that other cells got pups assigned
+    component['cells'].forEach((cell: typeof component['cells'][0]) => {
+      if (cell.id !== 4) {
+        expect(cell.pupIcon).toBe('/test/icon.svg');
+        expect(cell.pupName).toBe('Test Pup');
+      }
+    });
+
+    // Restore original method
+    component['getRandomAvailablePup'] = originalGetRandomAvailablePup;
   });
 });

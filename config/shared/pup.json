@@ -13,7 +13,7 @@
     "name": "Purity",
     "theme": false,
     "element": "water",
-    "description": "No Description.",
+    "description": "Reduces all negative effects from your board.",
     "asset": {
       "icon": "/assets/pup/icons/purity.svg"
     },
@@ -63,7 +63,7 @@
     "name": "Landslide",
     "theme": true,
     "element": "earth",
-    "description": "Covers mud onto enemy cells, which must be first be cleared.",
+    "description": "Covers mud onto enemy cells, which must first be cleared.",
     "asset": {
       "icon": "/assets/pup/icons/landslide.svg"
     },
