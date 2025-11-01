@@ -156,7 +156,7 @@ describe('HTTPServer - Stats API', () => {
         expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1h');
       });
 
-      it('should return historical data for 24h range', async () => {
+      it('should return historical data for 1d range', async () => {
         const mockData = [
           { activeSessions: 15, activeRooms: 3, uptime: 86400000, at: 1000000 },
         ];
@@ -165,23 +165,23 @@ describe('HTTPServer - Stats API', () => {
 
         const response = await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '24h' })
+          .query({ range: '1d' })
           .expect(200);
 
         expect(response.body).toEqual(mockData);
-        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('24h');
+        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1d');
       });
 
-      it('should return historical data for 7d range', async () => {
+      it('should return historical data for 1w range', async () => {
         (mockStatsService.getHistoricalStats as jest.Mock<() => Promise<unknown>>)
           .mockResolvedValue([]);
 
         await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '7d' })
+          .query({ range: '1w' })
           .expect(200);
 
-        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('7d');
+        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1w');
       });
     });
 

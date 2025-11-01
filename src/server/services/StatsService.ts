@@ -1,6 +1,7 @@
+import { StatsRange } from '../types/stats/online';
 import redisService from './RedisService';
 
-import type { IServerStats, StatsRange } from '../types/stats/online';
+import type { IServerStats } from '../types/stats/online';
 import type SessionManager from '../managers/SessionManager';
 import type RoomManager from '../managers/RoomManager';
 
@@ -55,20 +56,25 @@ export class StatsService {
   }
 
   /** Get historical stats for a given time range */
-  public async getHistoricalStats(range: StatsRange): Promise<IServerStats[]> {
+  public async getHistoricalStats(range: StatsRange | string): Promise<IServerStats[]> {
     const now = Date.now();
     let startTime: number;
 
     switch (range) {
+      case StatsRange.ONE_HOUR:
       case '1h':
         startTime = now - 60 * 60 * 1000;
         break;
-      case '24h':
+      case StatsRange.ONE_DAY:
+      case '1d':
         startTime = now - 24 * 60 * 60 * 1000;
         break;
-      case '7d':
+      case StatsRange.ONE_WEEK:
+      case '1w':
         startTime = now - 7 * 24 * 60 * 60 * 1000;
         break;
+      default:
+        throw new Error(`Invalid range: ${range}`);
     }
 
     // Get all keys matching the pattern and filter by timestamp

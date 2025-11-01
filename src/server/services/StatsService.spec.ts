@@ -145,7 +145,7 @@ describe('StatsService', () => {
       (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue([]);
 
       // Act
-      const result = await statsService.getHistoricalStats('24h');
+      const result = await statsService.getHistoricalStats('1d');
 
       // Assert
       expect(result).toEqual([]);
@@ -162,7 +162,7 @@ describe('StatsService', () => {
         .mockResolvedValue('invalid json');
 
       // Act
-      const result = await statsService.getHistoricalStats('7d');
+      const result = await statsService.getHistoricalStats('1w');
 
       // Assert
       expect(result).toEqual([]);
@@ -172,7 +172,7 @@ describe('StatsService', () => {
     });
 
     it('should sort stats by timestamp', async () => {
-      // Arrange - using 24h range to have more data points (24 hours = up to 24 samples)
+      // Arrange - using 1d range to have more data points (24 hours = up to 24 samples)
       const now = Date.now();
       const oneHourMs = 3600_000;
       
@@ -196,7 +196,7 @@ describe('StatsService', () => {
       });
 
       // Act
-      const result = await statsService.getHistoricalStats('24h');
+      const result = await statsService.getHistoricalStats('1d');
 
       // Assert
       expect(result.length).toBe(3);
@@ -253,9 +253,9 @@ describe('StatsService', () => {
       // Arrange
       const now = Date.now();
       const oneHourMs = 3600_000;
-      const sevenDaysMs = 7 * 24 * oneHourMs;
+      const oneWeekMs = 7 * 24 * oneHourMs;
       
-      // Generate 250 keys within the 7d range
+      // Generate 250 keys within the 1w range
       const keys = Array.from(
         { length: 250 }, 
         (_, i) => `stats:${now - (i * oneHourMs)}`
@@ -276,13 +276,13 @@ describe('StatsService', () => {
         });
 
       // Act
-      const result = await statsService.getHistoricalStats('7d');
+      const result = await statsService.getHistoricalStats('1w');
 
-      // Assert - should be limited to 200 (only keys within 7d range)
+      // Assert - should be limited to 200 (only keys within 1w range)
       expect(result.length).toBeLessThanOrEqual(200);
       
-      // Verify all results are within the 7d range
-      const startTime = now - sevenDaysMs;
+      // Verify all results are within the 1w range
+      const startTime = now - oneWeekMs;
       for (const stat of result) {
         expect(stat.at).toBeGreaterThanOrEqual(startTime);
         expect(stat.at).toBeLessThanOrEqual(now);

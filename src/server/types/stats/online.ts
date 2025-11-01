@@ -11,5 +11,12 @@ export interface IServerStats {
 }
 
 /** Valid time ranges for stats query */
-export type StatsRange = '1h' | '24h' | '7d';
+export enum StatsRange {
+  /** 1 hour */
+  ONE_HOUR = '1h',
+  /** 1 day */
+  ONE_DAY = '1d',
+  /** 1 week */
+  ONE_WEEK = '1w',
+}
 
