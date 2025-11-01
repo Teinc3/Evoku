@@ -65,13 +65,20 @@ describe('StatsSampler', () => {
 
     it('should not start if already running', () => {
       // Arrange
+      const mockDate = new Date('2024-01-01T12:34:00.000Z');
+      jest.setSystemTime(mockDate);
+      
       sampler.start();
+      // Advance time to ensure timer is set
+      jest.advanceTimersByTime(60_000);
+      
       const firstTimer = sampler['timer'];
+      expect(firstTimer).not.toBeNull();
 
-      // Act
+      // Act - try to start again while running
       sampler.start();
 
-      // Assert
+      // Assert - timer should be the same (not recreated)
       expect(sampler['timer']).toBe(firstTimer);
     });
   });

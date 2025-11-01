@@ -47,6 +47,8 @@ describe('StatsService', () => {
       // Assert
       expect(stats.activeSessions).toBe(42);
       expect(stats.activeRooms).toBe(7);
+      expect(stats.uptime).toBeGreaterThanOrEqual(0);
+      expect(typeof stats.uptime).toBe('number');
       expect(stats.at).toBeGreaterThan(0);
       expect(typeof stats.at).toBe('number');
     });
@@ -58,6 +60,7 @@ describe('StatsService', () => {
       // Assert
       expect(stats.activeSessions).toBe(0);
       expect(stats.activeRooms).toBe(0);
+      expect(stats.uptime).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -78,6 +81,7 @@ describe('StatsService', () => {
       const parsedData = JSON.parse(callArgs[1] as string);
       expect(parsedData.activeSessions).toBe(10);
       expect(parsedData.activeRooms).toBe(3);
+      expect(parsedData.uptime).toBeGreaterThanOrEqual(0);
       expect(parsedData.at).toBeGreaterThan(0);
     });
 

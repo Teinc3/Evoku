@@ -1,39 +1,32 @@
 import redisService from './RedisService';
 
+import type { IServerStats, StatsRange } from '../types/stats/online';
 import type SessionManager from '../managers/SessionManager';
 import type RoomManager from '../managers/RoomManager';
 
-
-/** Server statistics snapshot */
-export interface IServerStats {
-  /** Number of active sessions (online users) */
-  activeSessions: number;
-  /** Number of active rooms */
-  activeRooms: number;
-  /** Timestamp (epoch milliseconds) when stats were recorded */
-  at: number;
-}
-
-/** Valid time ranges for stats query */
-export type StatsRange = '1h' | '24h' | '7d';
 
 /**
  * Service for collecting and retrieving server statistics.
  */
 export class StatsService {
   private readonly redisKeyPrefix = 'stats:';
+  private readonly serverStartTime: number;
 
   constructor(
     private sessionManager: SessionManager,
     private roomManager: RoomManager
-  ) {}
+  ) {
+    this.serverStartTime = Date.now();
+  }
 
   /** Get current server statistics */
   public getCurrentStats(): IServerStats {
+    const now = Date.now();
     return {
       activeSessions: this.sessionManager.getOnlineCount(),
       activeRooms: this.roomManager.getActiveRoomsCount(),
-      at: Date.now(),
+      uptime: now - this.serverStartTime,
+      at: now,
     };
   }
 

@@ -77,6 +77,9 @@ describe('HTTPServer - Stats API', () => {
 
         expect(response.body).toHaveProperty('activeSessions', 42);
         expect(response.body).toHaveProperty('activeRooms', 7);
+        expect(response.body).toHaveProperty('uptime');
+        expect(typeof response.body.uptime).toBe('number');
+        expect(response.body.uptime).toBeGreaterThanOrEqual(0);
         expect(response.body).toHaveProperty('at');
         expect(typeof response.body.at).toBe('number');
         expect(response.body.at).toBeGreaterThan(0);
@@ -89,6 +92,7 @@ describe('HTTPServer - Stats API', () => {
 
         expect(response.body.activeSessions).toBe(0);
         expect(response.body.activeRooms).toBe(0);
+        expect(response.body.uptime).toBeGreaterThanOrEqual(0);
       });
 
       it('should return JSON format', async () => {
@@ -126,6 +130,7 @@ describe('HTTPServer - Stats API', () => {
           getCurrentStats: jest.fn().mockReturnValue({
             activeSessions: 10,
             activeRooms: 2,
+            uptime: 3600000,
             at: Date.now(),
           }),
           getHistoricalStats: jest.fn<() => Promise<unknown>>().mockResolvedValue([]),
@@ -136,8 +141,8 @@ describe('HTTPServer - Stats API', () => {
 
       it('should return historical data for 1h range', async () => {
         const mockData = [
-          { activeSessions: 10, activeRooms: 1, at: 1000000 },
-          { activeSessions: 20, activeRooms: 2, at: 2000000 },
+          { activeSessions: 10, activeRooms: 1, uptime: 3600000, at: 1000000 },
+          { activeSessions: 20, activeRooms: 2, uptime: 3660000, at: 2000000 },
         ];
         (mockStatsService.getHistoricalStats as jest.Mock<() => Promise<unknown>>)
           .mockResolvedValue(mockData);
@@ -153,7 +158,7 @@ describe('HTTPServer - Stats API', () => {
 
       it('should return historical data for 24h range', async () => {
         const mockData = [
-          { activeSessions: 15, activeRooms: 3, at: 1000000 },
+          { activeSessions: 15, activeRooms: 3, uptime: 86400000, at: 1000000 },
         ];
         (mockStatsService.getHistoricalStats as jest.Mock<() => Promise<unknown>>)
           .mockResolvedValue(mockData);
@@ -192,6 +197,60 @@ describe('HTTPServer - Stats API', () => {
         expect(response.status).toBe(500);
 
         await serverWithoutWs.close();
+      });
+
+      it('should handle errors when getCurrentStats throws', async () => {
+        const mockStatsServiceError = {
+          getCurrentStats: jest.fn().mockImplementation(() => {
+            throw new Error('Stats error');
+          }),
+          getHistoricalStats: jest.fn<() => Promise<unknown>>().mockResolvedValue([]),
+        } as unknown as StatsService;
+
+        httpServer['statsService'] = mockStatsServiceError;
+
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        await request(httpServer.app)
+          .get('/api/stats')
+          .expect(500);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error in stats endpoint:',
+          expect.any(Error)
+        );
+
+        consoleErrorSpy.mockRestore();
+      });
+
+      it('should handle errors when getHistoricalStats throws', async () => {
+        const mockStatsServiceError = {
+          getCurrentStats: jest.fn().mockReturnValue({
+            activeSessions: 10,
+            activeRooms: 2,
+            uptime: 3600000,
+            at: Date.now(),
+          }),
+          getHistoricalStats: jest.fn<() => Promise<unknown>>().mockRejectedValue(
+            new Error('Historical stats error')
+          ),
+        } as unknown as StatsService;
+
+        httpServer['statsService'] = mockStatsServiceError;
+
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        await request(httpServer.app)
+          .get('/api/stats')
+          .query({ range: '1h' })
+          .expect(500);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error in stats endpoint:',
+          expect.any(Error)
+        );
+
+        consoleErrorSpy.mockRestore();
       });
     });
   });

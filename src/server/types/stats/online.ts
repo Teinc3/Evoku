@@ -4,6 +4,8 @@ export interface IServerStats {
   activeSessions: number;
   /** Number of active rooms */
   activeRooms: number;
+  /** Server uptime in milliseconds */
+  uptime: number;
   /** Timestamp (epoch milliseconds) when stats were recorded */
   at: number;
 }
