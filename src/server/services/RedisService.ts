@@ -75,6 +75,10 @@ export class RedisService {
   async delete(key: string): Promise<number> {
     return await this.client?.del(key) ?? 0;
   }
+
+  async keys(pattern: string): Promise<string[]> {
+    return await this.client?.keys(pattern) ?? [];
+  }
 }
 
 const redisService = new RedisService();

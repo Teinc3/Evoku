@@ -13,6 +13,7 @@ jest.mock('./RedisService', () => ({
   default: {
     set: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     get: jest.fn<() => Promise<string | null>>().mockResolvedValue(null),
+    keys: jest.fn<() => Promise<string[]>>().mockResolvedValue([]),
   },
 }));
 
@@ -120,7 +121,12 @@ describe('StatsService', () => {
   describe('getHistoricalStats', () => {
     it('should retrieve and parse stats from Redis for 1h range', async () => {
       // Arrange
-      const mockStats = { activeSessions: 15, activeRooms: 2, at: Date.now() - 1800000 };
+      const now = Date.now();
+      const timestamp = now - 1800000;
+      const mockStats = { activeSessions: 15, activeRooms: 2, uptime: 1800000, at: timestamp };
+      
+      (redisService.keys as jest.Mock<() => Promise<string[]>>)
+        .mockResolvedValue([`stats:${timestamp}`]);
       (redisService.get as jest.Mock<() => Promise<string | null>>)
         .mockResolvedValue(JSON.stringify(mockStats));
 
@@ -128,13 +134,15 @@ describe('StatsService', () => {
       const result = await statsService.getHistoricalStats('1h');
 
       // Assert
+      expect(redisService.keys).toHaveBeenCalledWith('stats:*');
       expect(redisService.get).toHaveBeenCalled();
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.length).toBe(1);
+      expect(result[0]).toEqual(mockStats);
     });
 
     it('should return empty array when no data exists', async () => {
       // Arrange
-      (redisService.get as jest.Mock<() => Promise<string | null>>).mockResolvedValue(null);
+      (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue([]);
 
       // Act
       const result = await statsService.getHistoricalStats('24h');
@@ -146,6 +154,10 @@ describe('StatsService', () => {
     it('should handle invalid JSON gracefully', async () => {
       // Arrange
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const timestamp = Date.now() - 3600000;
+      
+      (redisService.keys as jest.Mock<() => Promise<string[]>>)
+        .mockResolvedValue([`stats:${timestamp}`]);
       (redisService.get as jest.Mock<() => Promise<string | null>>)
         .mockResolvedValue('invalid json');
 
@@ -168,6 +180,12 @@ describe('StatsService', () => {
       const stats2 = { activeSessions: 20, activeRooms: 2, uptime: 20000, at: now - oneHourMs * 1 };
       const stats3 = { activeSessions: 15, activeRooms: 3, uptime: 15000, at: now - oneHourMs * 2 };
 
+      (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue([
+        `stats:${stats1.at}`,
+        `stats:${stats3.at}`,
+        `stats:${stats2.at}`,
+      ]);
+
       let callCount = 0;
       (redisService.get as jest.Mock<() => Promise<string | null>>).mockImplementation(() => {
         callCount++;
@@ -181,12 +199,93 @@ describe('StatsService', () => {
       const result = await statsService.getHistoricalStats('24h');
 
       // Assert
-      const validStats = result.filter(s => s.at > 0);
-      expect(validStats.length).toBeGreaterThanOrEqual(3);
+      expect(result.length).toBe(3);
       
-      // Check that stats are sorted
-      for (let i = 1; i < validStats.length; i++) {
-        expect(validStats[i].at).toBeGreaterThanOrEqual(validStats[i - 1].at);
+      // Check that stats are sorted by timestamp
+      expect(result[0].at).toBe(stats1.at);
+      expect(result[1].at).toBe(stats3.at);
+      expect(result[2].at).toBe(stats2.at);
+    });
+
+    it('should filter stats by time range', async () => {
+      // Arrange
+      const now = Date.now();
+      const oneHourMs = 3600_000;
+      
+      const withinRange = { 
+        activeSessions: 10, 
+        activeRooms: 1, 
+        uptime: 10000, 
+        at: now - 30 * 60 * 1000 
+      };
+      const outsideRange = { 
+        activeSessions: 20, 
+        activeRooms: 2, 
+        uptime: 20000, 
+        at: now - 2 * oneHourMs 
+      };
+
+      (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue([
+        `stats:${withinRange.at}`,
+        `stats:${outsideRange.at}`,
+      ]);
+
+      (redisService.get as jest.Mock<(key: string) => Promise<string | null>>)
+        .mockImplementation((key: string) => {
+          if (key.includes(String(withinRange.at))) {
+            return Promise.resolve(JSON.stringify(withinRange));
+          }
+          if (key.includes(String(outsideRange.at))) {
+            return Promise.resolve(JSON.stringify(outsideRange));
+          }
+          return Promise.resolve(null);
+        });
+
+      // Act
+      const result = await statsService.getHistoricalStats('1h');
+
+      // Assert
+      expect(result.length).toBe(1);
+      expect(result[0].at).toBe(withinRange.at);
+    });
+
+    it('should limit results to 200 entries', async () => {
+      // Arrange
+      const now = Date.now();
+      const oneHourMs = 3600_000;
+      const sevenDaysMs = 7 * 24 * oneHourMs;
+      
+      // Generate 250 keys within the 7d range
+      const keys = Array.from(
+        { length: 250 }, 
+        (_, i) => `stats:${now - (i * oneHourMs)}`
+      );
+      
+      (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue(keys);
+      (redisService.get as jest.Mock<(key: string) => Promise<string | null>>)
+        .mockImplementation((key: string) => {
+          const timestamp = parseInt(key.replace('stats:', ''), 10);
+          return Promise.resolve(
+            JSON.stringify({ 
+              activeSessions: 1, 
+              activeRooms: 1, 
+              uptime: 1, 
+              at: timestamp 
+            })
+          );
+        });
+
+      // Act
+      const result = await statsService.getHistoricalStats('7d');
+
+      // Assert - should be limited to 200 (only keys within 7d range)
+      expect(result.length).toBeLessThanOrEqual(200);
+      
+      // Verify all results are within the 7d range
+      const startTime = now - sevenDaysMs;
+      for (const stat of result) {
+        expect(stat.at).toBeGreaterThanOrEqual(startTime);
+        expect(stat.at).toBeLessThanOrEqual(now);
       }
     });
   });

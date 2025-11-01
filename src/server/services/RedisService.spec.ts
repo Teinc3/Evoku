@@ -39,6 +39,7 @@ describe('RedisService', () => {
       set: jest.fn().mockResolvedValue(undefined),
       get: jest.fn().mockResolvedValue('value'),
       del: jest.fn().mockResolvedValue(1),
+      keys: jest.fn().mockResolvedValue([]),
       on: jest.fn(),
     } as unknown as RedisClientType;
     (createClient as jest.Mock).mockReturnValue(mockClient);
@@ -319,6 +320,52 @@ describe('RedisService', () => {
 
         expect(result).toBe(0);
         expect(mockClient.del).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('keys', () => {
+    describe('in production', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'production';
+        service = new RedisService();
+      });
+
+      it('should call client.keys and return keys when connected', async () => {
+        service['_client'] = mockClient;
+        (mockClient.keys as jest.Mock).mockResolvedValueOnce(['key1', 'key2', 'key3']);
+
+        const result = await service.keys('stats:*');
+
+        expect(mockClient.keys).toHaveBeenCalledWith('stats:*');
+        expect(result).toEqual(['key1', 'key2', 'key3']);
+      });
+
+      it('should throw if not connected', async () => {
+        await expect(service.keys('pattern')).rejects.toThrow('Redis client is not connected');
+      });
+    });
+
+    describe('in development', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'development';
+        service = new RedisService();
+      });
+
+      it('should call client.keys and return keys when connected', async () => {
+        service['_client'] = mockClient;
+        (mockClient.keys as jest.Mock).mockResolvedValueOnce(['key1', 'key2']);
+
+        const result = await service.keys('stats:*');
+
+        expect(mockClient.keys).toHaveBeenCalledWith('stats:*');
+        expect(result).toEqual(['key1', 'key2']);
+      });
+
+      it('should return empty array if not connected', async () => {
+        const result = await service.keys('pattern');
+
+        expect(result).toEqual([]);
       });
     });
   });

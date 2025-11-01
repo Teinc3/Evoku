@@ -91,19 +91,23 @@ export class StatsService {
 
   /** Get stats keys within a time range */
   private async getStatsKeys(startTime: number, endTime: number): Promise<string[]> {
-    // This is a simplified implementation
-    // In production, you might want to use Redis SCAN with pattern matching
-    // For now, we'll rely on the sampler creating keys at known intervals
-    const keys: string[] = [];
-    const intervalMs = 3600_000; // 1 hour
+    // Get all stats keys from Redis (max 200 for 7d worth of hourly data)
+    const allKeys = await redisService.keys(`${this.redisKeyPrefix}*`);
+    
+    // Filter keys by timestamp range and limit to 200 most recent
+    const filteredKeys = allKeys
+      .map(key => {
+        const timestamp = parseInt(key.replace(this.redisKeyPrefix, ''), 10);
+        return { key, timestamp };
+      })
+      .filter(({ timestamp }) => 
+        !isNaN(timestamp) && timestamp >= startTime && timestamp <= endTime
+      )
+      .sort((a, b) => b.timestamp - a.timestamp) // Sort descending
+      .slice(0, 200) // Limit to 200 entries max
+      .map(({ key }) => key);
 
-    for (let time = startTime; time <= endTime; time += intervalMs) {
-      // Round to nearest hour
-      const roundedTime = Math.floor(time / intervalMs) * intervalMs;
-      keys.push(`${this.redisKeyPrefix}${roundedTime}`);
-    }
-
-    return keys;
+    return filteredKeys;
   }
 }
 
