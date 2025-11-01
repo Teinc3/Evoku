@@ -14,6 +14,8 @@ import AppView from '../../../../types/enums/app-view.enum';
   styleUrl: './catalogue.demo.scss'
 })
 export default class CatalogueDemoComponent {
+  private static readonly DEFAULT_DEMO_USERNAME = 'DemoPlayer';
+
   protected readonly AppView = AppView;
 
   constructor(
@@ -35,10 +37,9 @@ export default class CatalogueDemoComponent {
       this.viewStateService.navigateToView(AppView.LOADING_DEMO);
 
       // Send JOIN_QUEUE packet with username
-      // For demo purposes, we'll use a default username
-      // In production, this would come from the user's profile
+      // TODO: Replace with actual user profile username when authentication is implemented
       this.networkService.send(LobbyActions.JOIN_QUEUE, {
-        username: 'DemoPlayer'
+        username: CatalogueDemoComponent.DEFAULT_DEMO_USERNAME
       });
     } catch (error) {
       console.error('Failed to start matchmaking:', error);

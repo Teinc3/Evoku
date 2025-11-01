@@ -50,7 +50,7 @@ describe('CatalogueDemoComponent', () => {
     // Should send JOIN_QUEUE packet
     expect(networkServiceSpy.send).toHaveBeenCalledWith(
       LobbyActions.JOIN_QUEUE,
-      { username: 'DemoPlayer' }
+      { username: 'DemoPlayer' } // Using the DEFAULT_DEMO_USERNAME constant
     );
   }));
 

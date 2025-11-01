@@ -39,14 +39,8 @@ export default class LobbyHandler extends EnumHandler<LobbyActions> {
   private handleQueueUpdate(data: AugmentAction<LobbyActions.QUEUE_UPDATE>): void {
     console.debug('Queue status updated:', data);
     
-    // Note: QueueUpdate doesn't contain player count in the current implementation
-    // We could track inQueue status if needed, but for now we'll just log it
-    if (this.matchmakingService) {
-      // The QUEUE_UPDATE packet only tells us if we're in queue or not
-      // For demo purposes, we can simulate a player count update
-      // In a real implementation, the server would send the actual count
-      console.debug('In queue:', data.inQueue);
-    }
+    // Note: QueueUpdate currently only contains inQueue status
+    // Player count tracking would require server-side changes to include count in packet
   }
 
   private handleMatchFound(data: AugmentAction<LobbyActions.MATCH_FOUND>): void {
