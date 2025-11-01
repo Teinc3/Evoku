@@ -4,14 +4,13 @@ import { createServer } from 'http';
 import { rateLimit } from 'express-rate-limit';
 import express from 'express';
 
-import redisService from '../services/RedisService';
+import StatsService from '../services/StatsService';
 import guestAuthService from '../services/GuestAuthService';
 
 import type { Server as HttpServer } from 'http';
-import type { Application, Request, Response, NextFunction } from 'express';
+import type { Application } from 'express';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
-import type { IOnlineStats, IOnlineDataPoint, OnlineStatsRange, OnlineStatsFormat, IServerStats } 
-  from '../types/stats/online';
+import type { StatsRange } from '../types/stats/online';
 import type WSServer from './WSServer';
 
 
@@ -22,20 +21,18 @@ export default class HTTPServer {
   public readonly app: Application;
   public readonly server: HttpServer;
   private readonly port: number;
-  private wsServer: WSServer | null = null;
-  private serverStartTime: number;
+  private statsService: StatsService | null = null;
 
   constructor(port: number) {
     this.port = port;
     this.app = express();
     this.server = createServer(this.app);
-    this.serverStartTime = Date.now();
 
     this.configureRoutes();
   }
 
   public setWsServer(wsServer: WSServer): void {
-    this.wsServer = wsServer;
+    this.statsService = new StatsService(wsServer.sessionManager, wsServer.roomManager);
   }
 
   private configureRoutes(): void {
@@ -73,26 +70,6 @@ export default class HTTPServer {
 
   /** Configure API routes */
   private configureAPI(): void {
-    // Middleware for API key authentication
-    const apiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
-      const apiKey = req.headers['x-api-key'];
-      const expectedKey = process.env['API_KEY'];
-
-      if (!expectedKey) {
-        // In dev mode, allow if no API key is set
-        if (process.env['NODE_ENV'] === 'development') {
-          return next();
-        }
-        return res.status(500).json({ error: 'API key not configured' });
-      }
-
-      if (apiKey !== expectedKey) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-
-      next();
-    };
-
     // Rate limiter for stats endpoints
     const statsLimiter = rateLimit({
       windowMs: 60 * 1000, // 1 minute
@@ -115,48 +92,32 @@ export default class HTTPServer {
         res.json(result);
       } catch (error) {
         console.error('Error in guest auth endpoint:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.sendStatus(500);
       }
     });
 
-    // General server stats endpoint
-    this.app.get('/api/stats', apiKeyAuth, statsLimiter, async (_req, res) => {
+    // Server stats endpoint
+    this.app.get('/api/stats', statsLimiter, async (req, res) => {
       try {
-        const stats = await this.getServerStats();
-        res.json(stats);
-      } catch (error) {
-        console.error('Error in server stats endpoint:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    });
+        if (!this.statsService) {
+          res.sendStatus(500);
+          return;
+        }
 
-    // Current online count endpoint
-    this.app.get('/api/stats/online', apiKeyAuth, statsLimiter, async (req, res) => {
-      try {
-        const range = req.query['range'] as OnlineStatsRange | undefined;
-        const format = (req.query['format'] as OnlineStatsFormat) || 'text';
+        const range = req.query['range'] as StatsRange | undefined;
 
-        // If range is provided, return historical data
         if (range) {
-          const data = await this.getHistoricalOnlineStats(range);
-
-          if (format === 'json') {
-            res.json(data);
-          } else {
-            // Return as text (CSV format)
-            const csv = data
-              .map(point => `${new Date(point.at).toISOString()},${point.online}`)
-              .join('\n');
-            res.type('text/plain').send(csv);
-          }
+          // Return historical data
+          const data = await this.statsService.getHistoricalStats(range);
+          res.json(data);
         } else {
-          // Return current count
-          const currentData = await this.getCurrentOnlineStats();
-          res.json(currentData);
+          // Return current stats
+          const stats = this.statsService.getCurrentStats();
+          res.json(stats);
         }
       } catch (error) {
-        console.error('Error in online stats endpoint:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error in stats endpoint:', error);
+        res.sendStatus(500);
       }
     });
 
@@ -166,82 +127,10 @@ export default class HTTPServer {
     });
   }
 
-  /** Get current online count from Redis */
-  private async getCurrentOnlineStats(): Promise<IOnlineStats> {
-    const now = Date.now();
-    // Get the most recent entry from the sorted set
-    const results = await redisService.zRangeByScoreWithScores(
-      'stats:online',
-      now - 60_000, // Last minute
-      now
-    );
-
-    if (results.length === 0) {
-      return { online: 0, at: now };
-    }
-
-    // Get the most recent entry
-    const latest = results[results.length - 1];
-    return {
-      online: parseInt(latest.value, 10),
-      at: latest.score,
-    };
-  }
-
-  /** Get general server statistics */
-  private async getServerStats(): Promise<IServerStats> {
-    if (!this.wsServer) {
-      throw new Error('WS server not initialized');
-    }
-
-    const sessionManager = this.wsServer.getSessionManager();
-    const roomManager = this.wsServer.getRoomManager();
-    const now = Date.now();
-
-    return {
-      activeSessions: sessionManager.getOnlineCount(),
-      activeRooms: roomManager.getActiveRoomsCount(),
-      serverUptime: now - this.serverStartTime,
-      at: now,
-    };
-  }
-
-  /** Get historical online stats from Redis */
-  private async getHistoricalOnlineStats(range: OnlineStatsRange): Promise<IOnlineDataPoint[]> {
-    const now = Date.now();
-    let startTime: number;
-
-    switch (range) {
-      case '1h':
-        startTime = now - 60 * 60 * 1000;
-        break;
-      case '24h':
-        startTime = now - 24 * 60 * 60 * 1000;
-        break;
-      case '7d':
-        startTime = now - 7 * 24 * 60 * 60 * 1000;
-        break;
-      default:
-        startTime = now - 60 * 60 * 1000;
-    }
-
-    const results = await redisService.zRangeByScoreWithScores(
-      'stats:online',
-      startTime,
-      now
-    );
-
-    return results.map(result => ({
-      at: result.score,
-      online: parseInt(result.value, 10),
-    }));
-  }
-
   /** Start the HTTP server */
   public async start() {
     this.server.listen(this.port, () => {
       console.log(`HTTP server is running on http://localhost:${this.port}`);
-      redisService.setStartupTime(); // Log startup time in Redis after initialization
     });
   }
 

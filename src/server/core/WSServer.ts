@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 
+import StatsService from '../services/StatsService';
 import OnlineSampler from '../services/online.sampler';
 import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
@@ -14,10 +15,11 @@ import type { Server as HttpServer } from 'http';
  */
 export default class WSServer {
   private wss: WebSocketServer;
-  private sessionManager: SessionManager;
+  public readonly sessionManager: SessionManager;
+  public readonly roomManager: RoomManager;
   private systemHandler: SystemHandler;
-  private roomManager: RoomManager;
-  private onlineSampler: OnlineSampler;
+  private statsService: StatsService;
+  private statsSampler: OnlineSampler;
 
   constructor(
     httpServer: HttpServer,
@@ -31,8 +33,9 @@ export default class WSServer {
     this.systemHandler = new SystemHandler();
     this.sessionManager = new SessionManager(this.systemHandler);
     this.roomManager = new RoomManager();
-    this.onlineSampler = new OnlineSampler(this.sessionManager);
-    this.onlineSampler.start();
+    this.statsService = new StatsService(this.sessionManager, this.roomManager);
+    this.statsSampler = new OnlineSampler(this.statsService);
+    this.statsSampler.start();
   }
 
   private configureWebSockets(): void {
@@ -44,20 +47,12 @@ export default class WSServer {
     });
   }
 
-  public getSessionManager(): SessionManager {
-    return this.sessionManager;
-  }
-
-  public getRoomManager(): RoomManager {
-    return this.roomManager;
-  }
-
   public close(): void {
     this.wss.close(() => {
       console.log('WebSocket server closed');
     });
 
-    this.onlineSampler.stop();
+    this.statsSampler.stop();
     this.roomManager.close();
     this.sessionManager.close();
   }

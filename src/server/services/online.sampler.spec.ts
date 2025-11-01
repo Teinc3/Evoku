@@ -1,32 +1,23 @@
 import { jest } from '@jest/globals';
 
-import redisService from './RedisService';
-import OnlineSampler from './online.sampler';
+import { StatsSampler } from './online.sampler';
 
-import type SessionManager from '../managers/SessionManager';
+import type { StatsService } from './StatsService';
 
 
-jest.mock('./RedisService', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  __esModule: true,
-  default: {
-    zAdd: jest.fn<() => Promise<number>>().mockResolvedValue(1),
-  },
-}));
-
-describe('OnlineSampler', () => {
-  let sampler: OnlineSampler;
-  let mockSessionManager: SessionManager;
+describe('StatsSampler', () => {
+  let sampler: StatsSampler;
+  let mockStatsService: StatsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
 
-    mockSessionManager = {
-      getOnlineCount: jest.fn<() => number>().mockReturnValue(0),
-    } as unknown as SessionManager;
+    mockStatsService = {
+      sampleStats: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    } as unknown as StatsService;
 
-    sampler = new OnlineSampler(mockSessionManager);
+    sampler = new StatsSampler(mockStatsService);
   });
 
   afterEach(() => {
@@ -45,10 +36,10 @@ describe('OnlineSampler', () => {
 
       // Expected delay: (60 - 45) * 1000 - 500 = 14,500ms
       jest.advanceTimersByTime(14_499);
-      expect(mockSessionManager.getOnlineCount).not.toHaveBeenCalled();
+      expect(mockStatsService.sampleStats).not.toHaveBeenCalled();
 
       jest.advanceTimersByTime(1);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(1);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
     });
 
     it('should sample every 60 seconds after alignment', () => {
@@ -61,36 +52,15 @@ describe('OnlineSampler', () => {
 
       // Advance to first sample (at :00)
       jest.advanceTimersByTime(60_000);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(1);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
 
       // Advance 60 more seconds
       jest.advanceTimersByTime(60_000);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(2);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(2);
 
       // Advance another 60 seconds
       jest.advanceTimersByTime(60_000);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(3);
-    });
-
-    it('should persist count to Redis with correct key and timestamp', async () => {
-      // Arrange
-      const mockDate = new Date('2024-01-01T12:34:00.000Z');
-      jest.setSystemTime(mockDate);
-      (mockSessionManager.getOnlineCount as jest.Mock<() => number>).mockReturnValue(42);
-
-      // Act
-      sampler.start();
-      jest.advanceTimersByTime(60_000);
-
-      // Wait for promises
-      await Promise.resolve();
-
-      // Assert
-      expect(redisService.zAdd).toHaveBeenCalledWith(
-        'stats:online',
-        expect.any(Number),
-        '42'
-      );
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(3);
     });
 
     it('should not start if already running', () => {
@@ -103,30 +73,6 @@ describe('OnlineSampler', () => {
 
       // Assert
       expect(sampler['timer']).toBe(firstTimer);
-    });
-
-    it('should handle Redis errors gracefully', async () => {
-      // Arrange
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      const redisError = new Error('Redis connection failed');
-      (redisService.zAdd as jest.Mock<() => Promise<number>>)
-        .mockRejectedValueOnce(redisError);
-
-      const mockDate = new Date('2024-01-01T12:34:00.000Z');
-      jest.setSystemTime(mockDate);
-
-      // Act
-      sampler.start();
-      jest.advanceTimersByTime(60_000);
-      await Promise.resolve();
-
-      // Assert
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to persist online count to Redis:',
-        redisError
-      );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -156,56 +102,18 @@ describe('OnlineSampler', () => {
 
       // Act - Advance to first sample
       jest.advanceTimersByTime(60_000);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(1);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
 
       sampler.stop();
 
       // Advance more time - should not sample anymore
       jest.advanceTimersByTime(60_000);
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalledTimes(1);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
     });
 
     it('should handle being called when not running', () => {
       // Act & Assert - Should not throw
       expect(() => sampler.stop()).not.toThrow();
-    });
-  });
-
-  describe('sample', () => {
-    it('should read count from SessionManager', async () => {
-      // Arrange
-      (mockSessionManager.getOnlineCount as jest.Mock<() => number>).mockReturnValue(15);
-      const sampleMethod = sampler['sample'].bind(sampler);
-
-      // Act
-      await sampleMethod();
-
-      // Assert
-      expect(mockSessionManager.getOnlineCount).toHaveBeenCalled();
-      expect(redisService.zAdd).toHaveBeenCalledWith(
-        'stats:online',
-        expect.any(Number),
-        '15'
-      );
-    });
-
-    it('should use current timestamp for score', async () => {
-      // Arrange
-      const mockDate = new Date('2024-01-01T12:00:00.000Z');
-      jest.setSystemTime(mockDate);
-      const expectedTimestamp = mockDate.getTime();
-
-      const sampleMethod = sampler['sample'].bind(sampler);
-
-      // Act
-      await sampleMethod();
-
-      // Assert
-      expect(redisService.zAdd).toHaveBeenCalledWith(
-        'stats:online',
-        expectedTimestamp,
-        expect.any(String)
-      );
     });
   });
 });

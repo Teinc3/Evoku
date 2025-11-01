@@ -1,17 +1,14 @@
-import redisService from './RedisService';
-
-import type SessionManager from '../managers/SessionManager';
+import type StatsService from './StatsService';
 
 
 /**
- * Sampler service that periodically records online session counts to Redis.
- * Samples every minute at :00 seconds and stores data in a sorted set.
+ * Sampler service that periodically records server statistics to Redis.
+ * Samples every minute at :00 seconds.
  */
-export class OnlineSampler {
+export class StatsSampler {
   private timer: NodeJS.Timeout | null = null;
-  private readonly redisKey = 'stats:online';
 
-  constructor(private sessionManager: SessionManager) {}
+  constructor(private statsService: StatsService) {}
 
   /**
    * Start the sampler. It will align to the next minute boundary (:00 seconds)
@@ -43,15 +40,8 @@ export class OnlineSampler {
 
   /** Take a sample and persist to Redis */
   private async sample(): Promise<void> {
-    const count = this.sessionManager.getOnlineCount();
-    const timestamp = Date.now();
-
-    try {
-      await redisService.zAdd(this.redisKey, timestamp, count.toString());
-    } catch (error) {
-      console.error('Failed to persist online count to Redis:', error);
-    }
+    await this.statsService.sampleStats();
   }
 }
 
-export default OnlineSampler;
+export default StatsSampler;
