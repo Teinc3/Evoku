@@ -17,6 +17,18 @@ export class StatsService {
     private roomManager: RoomManager
   ) {
     this.serverStartTime = Date.now();
+    this.logStartupTime();
+  }
+
+  /** Log server startup time to Redis */
+  private async logStartupTime(): Promise<void> {
+    try {
+      const isoTime = new Date(this.serverStartTime).toISOString();
+      await redisService.set('server:startup', isoTime);
+      console.log(`Server startup time logged: ${isoTime}`);
+    } catch (error) {
+      console.error('Failed to log startup time to Redis:', error);
+    }
   }
 
   /** Get current server statistics */
@@ -83,10 +95,10 @@ export class StatsService {
     // In production, you might want to use Redis SCAN with pattern matching
     // For now, we'll rely on the sampler creating keys at known intervals
     const keys: string[] = [];
-    const intervalMs = 60_000; // 1 minute
+    const intervalMs = 3600_000; // 1 hour
 
     for (let time = startTime; time <= endTime; time += intervalMs) {
-      // Round to nearest minute
+      // Round to nearest hour
       const roundedTime = Math.floor(time / intervalMs) * intervalMs;
       keys.push(`${this.redisKeyPrefix}${roundedTime}`);
     }

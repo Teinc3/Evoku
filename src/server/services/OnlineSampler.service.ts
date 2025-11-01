@@ -3,7 +3,7 @@ import type StatsService from './StatsService';
 
 /**
  * Sampler service that periodically records server statistics to Redis.
- * Samples every minute at :00 seconds.
+ * Samples every hour at xx:00:00.
  */
 export class StatsSampler {
   private timer: NodeJS.Timeout | null = null;
@@ -11,23 +11,24 @@ export class StatsSampler {
   constructor(private statsService: StatsService) {}
 
   /**
-   * Start the sampler. It will align to the next minute boundary (:00 seconds)
-   * and then sample every 60 seconds.
+   * Start the sampler. It will align to the next hour boundary (:00:00)
+   * and then sample every 60 minutes.
    */
   public start(): void {
     if (this.timer) {
       return; // Already running
     }
 
-    // Calculate milliseconds until next :00 second
+    // Calculate milliseconds until next hour
     const now = new Date();
-    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+    const msUntilNextHour = 
+      (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
 
-    // Wait until next :00, then start the interval
+    // Wait until next :00:00, then start the interval
     setTimeout(() => {
       this.sample(); // Take first sample
-      this.timer = setInterval(() => this.sample(), 60_000); // Then every 60s
-    }, msUntilNextMinute);
+      this.timer = setInterval(() => this.sample(), 3600_000); // Then every 60 minutes
+    }, msUntilNextHour);
   }
 
   /** Stop the sampler */

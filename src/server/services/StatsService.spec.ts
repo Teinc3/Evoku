@@ -35,6 +35,19 @@ describe('StatsService', () => {
     statsService = new StatsService(mockSessionManager, mockRoomManager);
   });
 
+  describe('constructor', () => {
+    it('should log startup time to Redis', async () => {
+      // Wait for async constructor logic
+      await new Promise(resolve => setImmediate(resolve));
+
+      // Assert
+      expect(redisService.set).toHaveBeenCalledWith(
+        'server:startup',
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+      );
+    });
+  });
+
   describe('getCurrentStats', () => {
     it('should return current stats with session and room counts', () => {
       // Arrange
@@ -67,6 +80,7 @@ describe('StatsService', () => {
   describe('sampleStats', () => {
     it('should persist stats to Redis with correct key format', async () => {
       // Arrange
+      jest.clearAllMocks(); // Clear startup call
       (mockSessionManager.getOnlineCount as jest.Mock<() => number>).mockReturnValue(10);
       (mockRoomManager.getActiveRoomsCount as jest.Mock<() => number>).mockReturnValue(3);
 
@@ -146,10 +160,13 @@ describe('StatsService', () => {
     });
 
     it('should sort stats by timestamp', async () => {
-      // Arrange
-      const stats1 = { activeSessions: 10, activeRooms: 1, at: 1000 };
-      const stats2 = { activeSessions: 20, activeRooms: 2, at: 2000 };
-      const stats3 = { activeSessions: 15, activeRooms: 3, at: 1500 };
+      // Arrange - using 24h range to have more data points (24 hours = up to 24 samples)
+      const now = Date.now();
+      const oneHourMs = 3600_000;
+      
+      const stats1 = { activeSessions: 10, activeRooms: 1, uptime: 10000, at: now - oneHourMs * 3 };
+      const stats2 = { activeSessions: 20, activeRooms: 2, uptime: 20000, at: now - oneHourMs * 1 };
+      const stats3 = { activeSessions: 15, activeRooms: 3, uptime: 15000, at: now - oneHourMs * 2 };
 
       let callCount = 0;
       (redisService.get as jest.Mock<() => Promise<string | null>>).mockImplementation(() => {
@@ -161,7 +178,7 @@ describe('StatsService', () => {
       });
 
       // Act
-      const result = await statsService.getHistoricalStats('1h');
+      const result = await statsService.getHistoricalStats('24h');
 
       // Assert
       const validStats = result.filter(s => s.at > 0);

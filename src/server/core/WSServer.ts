@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 
 import StatsService from '../services/StatsService';
-import OnlineSampler from '../services/online.sampler';
+import OnlineSampler from '../services/OnlineSampler.service';
 import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
