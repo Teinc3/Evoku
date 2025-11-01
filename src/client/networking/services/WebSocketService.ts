@@ -1,4 +1,4 @@
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
@@ -16,10 +16,7 @@ import type ActionMap from '@shared/types/actionmap';
  */
 export default class WebSocketService {
   private socket: ClientSocket;
-  private readonly packetSubject = new Subject<{
-    action: ActionEnum;
-    data: ActionMap[ActionEnum];
-  }>();
+  readonly packetSubject = new Subject<AugmentAction<ActionEnum>>();
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
@@ -32,32 +29,6 @@ export default class WebSocketService {
     this.pingTimer = null;
     this.lastPingAt = null;
     this.lastPacketSentAt = 0;
-  }
-
-  /**
-   * Get the packet stream for subscribing to all packet events.
-   */
-  getPacketStream(): Observable<{ action: ActionEnum; data: ActionMap[ActionEnum] }> {
-    return this.packetSubject.asObservable();
-  }
-
-  /**
-   * Subscribe to packets of a specific action type using RxJS operators.
-   * @param action The action to filter by
-   * @returns Observable that emits only packets matching the action
-   */
-  onPacket<GenericAction extends ActionEnum>(
-    action: GenericAction
-  ): Observable<ActionMap[GenericAction]> {
-    return new Observable(observer => {
-      const subscription = this.packetSubject.subscribe(packet => {
-        if (packet.action === action) {
-          observer.next(packet.data as ActionMap[GenericAction]);
-        }
-      });
-
-      return () => subscription.unsubscribe();
-    });
   }
 
   /**
@@ -79,7 +50,7 @@ export default class WebSocketService {
    */
   async connect(): Promise<void> {
     await this.socket.connect();
-    this.socket.setListener(this.handlePacket);
+    this.socket.setListener(data => this.packetSubject.next(data));
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
     
@@ -138,17 +109,6 @@ export default class WebSocketService {
   }
 
   // Private methods
-
-  private handlePacket = (augmentedAction: AugmentAction<ActionEnum>): void => {
-    const { action, ...data } = augmentedAction;
-
-    // Broadcast the decoded packet to all subscribers
-    try {
-      this.packetSubject.next({ action, data });
-    } catch (error) {
-      console.error(`Error broadcasting packet for action ${String(action)}:`, error);
-    }
-  };
 
   private handleClose = (): void => {
     this.clearTimers();

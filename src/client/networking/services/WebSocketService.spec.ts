@@ -348,54 +348,21 @@ describe('WebSocketService', () => {
 
     it('should broadcast incoming packets via Subject', done => {
       const mockPacket = {
-        action: SessionActions.HEARTBEAT,
-        timestamp: Date.now()
+        action: SessionActions.HEARTBEAT
       };
 
-      // Subscribe to packet stream
-      service.getPacketStream().subscribe(packet => {
+      // Subscribe to packet subject
+      service.packetSubject.subscribe(packet => {
         expect(packet.action).toBe(SessionActions.HEARTBEAT);
-        expect(packet.data).toEqual({ timestamp: jasmine.any(Number) });
         done();
       });
 
-      // Access private method and trigger packet
-      const handlePacket = service['handlePacket'];
-      handlePacket(mockPacket);
-    });
-
-    it('should handle broadcast errors gracefully', () => {
-      spyOn(console, 'error');
-
-      const mockPacket = {
-        action: SessionActions.HEARTBEAT,
-        timestamp: Date.now()
-      };
-
-      // Spy on the subject's next method to throw an error
-      spyOn(service['packetSubject'], 'next').and.throwError('Broadcast error');
-
-      const handlePacket = service['handlePacket'];
-      handlePacket(mockPacket);
-
-      expect(console.error).toHaveBeenCalledWith(
-        `Error broadcasting packet for action ${SessionActions.HEARTBEAT}:`,
-        jasmine.any(Error)
-      );
+      // Trigger packet directly via subject
+      service.packetSubject.next(mockPacket);
     });
 
     it('should handle close events', () => {
       spyOn(console, 'log');
-      const disconnectCallback = jasmine.createSpy('disconnectCallback');
-      service.setDisconnectCallback(disconnectCallback);
-
-      const handleClose = service['handleClose'];
-      handleClose();
-
-      expect(disconnectCallback).toHaveBeenCalled();
-    });
-
-    it('should handle close events', () => {
       const disconnectCallback = jasmine.createSpy('disconnectCallback');
       service.setDisconnectCallback(disconnectCallback);
 
@@ -419,7 +386,7 @@ describe('WebSocketService', () => {
   describe('Cleanup', () => {
     it('should clear timers and complete subject on destroy', () => {
       service['pingTimer'] = setInterval(() => {}, 1000);
-      const completeSpy = spyOn(service['packetSubject'], 'complete');
+      const completeSpy = spyOn(service.packetSubject, 'complete');
 
       service.destroy();
 
@@ -434,44 +401,6 @@ describe('WebSocketService', () => {
 
       expect(service['pingTimer']).toBeNull();
       expect(service['lastPingAt']).toBeNull();
-    });
-  });
-
-  describe('Packet subscription', () => {
-    it('should provide packet stream', done => {
-      const stream = service.getPacketStream();
-      expect(stream).toBeDefined();
-
-      stream.subscribe(packet => {
-        expect(packet.action).toBe(SessionActions.HEARTBEAT);
-        done();
-      });
-
-      // Trigger a packet
-      service['packetSubject'].next({
-        action: SessionActions.HEARTBEAT,
-        data: {}
-      });
-    });
-
-    it('should filter packets by action type', done => {
-      const heartbeatStream = service.onPacket(SessionActions.HEARTBEAT);
-
-      heartbeatStream.subscribe(data => {
-        expect(data).toEqual({ timestamp: 123 });
-        done();
-      });
-
-      // Send different action types
-      service['packetSubject'].next({
-        action: SessionActions.AUTH,
-        data: { token: 'test', version: '1.0.0' }
-      });
-
-      service['packetSubject'].next({
-        action: SessionActions.HEARTBEAT,
-        data: { timestamp: 123 }
-      });
     });
   });
 });
