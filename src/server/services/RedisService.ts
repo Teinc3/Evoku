@@ -83,6 +83,32 @@ export class RedisService {
       console.log(`Server startup time logged: ${now}`);
     }
   }
+
+  /**
+   * Add a member with a score to a sorted set.
+   * @param key Redis key for the sorted set
+   * @param score Numeric score for the member
+   * @param member Member value to add
+   * @returns Number of elements added (0 if member already existed with same score)
+   */
+  async zAdd(key: string, score: number, member: string): Promise<number> {
+    return await this.client?.zAdd(key, { score, value: member }) ?? 0;
+  }
+
+  /**
+   * Get members from a sorted set within a score range.
+   * @param key Redis key for the sorted set
+   * @param min Minimum score (inclusive)
+   * @param max Maximum score (inclusive)
+   * @returns Array of members with their scores
+   */
+  async zRangeByScoreWithScores(
+    key: string,
+    min: number,
+    max: number
+  ): Promise<Array<{ value: string; score: number }>> {
+    return await this.client?.zRangeByScoreWithScores(key, min, max) ?? [];
+  }
 }
 
 const redisService = new RedisService();

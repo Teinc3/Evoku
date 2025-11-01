@@ -40,6 +40,8 @@ describe('RedisService', () => {
       get: jest.fn().mockResolvedValue('value'),
       del: jest.fn().mockResolvedValue(1),
       on: jest.fn(),
+      zAdd: jest.fn().mockResolvedValue(1),
+      zRangeByScoreWithScores: jest.fn().mockResolvedValue([]),
     } as unknown as RedisClientType;
     (createClient as jest.Mock).mockReturnValue(mockClient);
   });
@@ -319,6 +321,119 @@ describe('RedisService', () => {
 
         expect(result).toBe(0);
         expect(mockClient.del).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('zAdd', () => {
+    describe('in production', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'production';
+        service = new RedisService();
+      });
+
+      it('should call client.zAdd with correct parameters when connected', async () => {
+        service['_client'] = mockClient;
+
+        const result = await service.zAdd('stats:online', 1234567890, '42');
+
+        expect(mockClient.zAdd).toHaveBeenCalledWith(
+          'stats:online',
+          { score: 1234567890, value: '42' }
+        );
+        expect(result).toBe(1);
+      });
+
+      it('should throw if not connected', async () => {
+        await expect(service.zAdd('key', 1, 'value')).rejects
+          .toThrow('Redis client is not connected');
+      });
+    });
+
+    describe('in development', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'development';
+        service = new RedisService();
+      });
+
+      it('should call client.zAdd when connected', async () => {
+        service['_client'] = mockClient;
+
+        const result = await service.zAdd('stats:online', 1234567890, '42');
+
+        expect(mockClient.zAdd).toHaveBeenCalledWith(
+          'stats:online',
+          { score: 1234567890, value: '42' }
+        );
+        expect(result).toBe(1);
+      });
+
+      it('should return 0 if not connected', async () => {
+        const result = await service.zAdd('key', 1, 'value');
+
+        expect(result).toBe(0);
+        expect(mockClient.zAdd).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('zRangeByScoreWithScores', () => {
+    describe('in production', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'production';
+        service = new RedisService();
+      });
+
+      it('should call client.zRangeByScoreWithScores with correct parameters', async () => {
+        service['_client'] = mockClient;
+        const mockData = [
+          { value: '10', score: 1000 },
+          { value: '20', score: 2000 }
+        ];
+        (mockClient.zRangeByScoreWithScores as jest.Mock).mockResolvedValue(mockData);
+
+        const result = await service.zRangeByScoreWithScores('stats:online', 1000, 3000);
+
+        expect(mockClient.zRangeByScoreWithScores).toHaveBeenCalledWith(
+          'stats:online',
+          1000,
+          3000
+        );
+        expect(result).toEqual(mockData);
+      });
+
+      it('should throw if not connected', async () => {
+        await expect(service.zRangeByScoreWithScores('key', 0, 100)).rejects
+          .toThrow('Redis client is not connected');
+      });
+    });
+
+    describe('in development', () => {
+      beforeEach(() => {
+        process.env['NODE_ENV'] = 'development';
+        service = new RedisService();
+      });
+
+      it('should call client.zRangeByScoreWithScores when connected', async () => {
+        service['_client'] = mockClient;
+        const mockData = [{ value: '10', score: 1000 }];
+        (mockClient.zRangeByScoreWithScores as jest.Mock).mockResolvedValue(mockData);
+
+        const result = await service.zRangeByScoreWithScores('stats:online', 1000, 3000);
+
+        expect(mockClient.zRangeByScoreWithScores).toHaveBeenCalledWith(
+          'stats:online',
+          1000,
+          3000
+        );
+        expect(result).toEqual(mockData);
+      });
+
+      it('should return empty array if not connected', async () => {
+        const result = await service.zRangeByScoreWithScores('key', 0, 100);
+
+        expect(result).toEqual([]);
+        expect(mockClient.zRangeByScoreWithScores).not.toHaveBeenCalled();
       });
     });
   });

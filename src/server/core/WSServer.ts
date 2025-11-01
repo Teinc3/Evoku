@@ -4,6 +4,7 @@ import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import SystemHandler from '../handlers/system';
+import OnlineSampler from '../services/online.sampler';
 
 import type { Server as HttpServer } from 'http';
 
@@ -16,6 +17,7 @@ export default class WSServer {
   private sessionManager: SessionManager;
   private systemHandler: SystemHandler;
   private roomManager: RoomManager;
+  private onlineSampler: OnlineSampler;
 
   constructor(
     httpServer: HttpServer,
@@ -29,6 +31,8 @@ export default class WSServer {
     this.systemHandler = new SystemHandler();
     this.sessionManager = new SessionManager(this.systemHandler);
     this.roomManager = new RoomManager();
+    this.onlineSampler = new OnlineSampler(this.sessionManager);
+    this.onlineSampler.start();
   }
 
   private configureWebSockets(): void {
@@ -45,6 +49,7 @@ export default class WSServer {
       console.log('WebSocket server closed');
     });
 
+    this.onlineSampler.stop();
     this.roomManager.close();
     this.sessionManager.close();
   }

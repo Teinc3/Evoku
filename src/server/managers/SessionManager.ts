@@ -38,6 +38,11 @@ export default class SessionManager {
     return this.sessions.get(uuid);
   }
 
+  /** Returns the current number of online sessions. */
+  public getOnlineCount(): number {
+    return this.sessions.size;
+  }
+
   /**
    * Event handler when the socket of a session disconnects.
    * @param session The session which socket disconnected.
