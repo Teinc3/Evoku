@@ -39,6 +39,7 @@ describe('RedisService', () => {
       set: jest.fn().mockResolvedValue(undefined),
       get: jest.fn().mockResolvedValue('value'),
       del: jest.fn().mockResolvedValue(1),
+      keys: jest.fn().mockResolvedValue([]),
       on: jest.fn(),
     } as unknown as RedisClientType;
     (createClient as jest.Mock).mockReturnValue(mockClient);
@@ -323,30 +324,25 @@ describe('RedisService', () => {
     });
   });
 
-  describe('setStartupTime', () => {
+  describe('keys', () => {
     describe('in production', () => {
       beforeEach(() => {
         process.env['NODE_ENV'] = 'production';
         service = new RedisService();
       });
 
-      it('should set startup time and log when connected', async () => {
+      it('should call client.keys and return keys when connected', async () => {
         service['_client'] = mockClient;
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+        (mockClient.keys as jest.Mock).mockResolvedValueOnce(['key1', 'key2', 'key3']);
 
-        await service.setStartupTime();
+        const result = await service.keys('stats:*');
 
-        expect(mockClient.set)
-          .toHaveBeenCalledWith('server:startup', expect.any(String), undefined);
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Server startup time logged:')
-        );
-
-        consoleSpy.mockRestore();
+        expect(mockClient.keys).toHaveBeenCalledWith('stats:*');
+        expect(result).toEqual(['key1', 'key2', 'key3']);
       });
 
       it('should throw if not connected', async () => {
-        await expect(service.setStartupTime()).rejects.toThrow('Redis client is not connected');
+        await expect(service.keys('pattern')).rejects.toThrow('Redis client is not connected');
       });
     });
 
@@ -356,31 +352,22 @@ describe('RedisService', () => {
         service = new RedisService();
       });
 
-      it('should set startup time and log when connected', async () => {
+      it('should call client.keys and return keys when connected', async () => {
         service['_client'] = mockClient;
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+        (mockClient.keys as jest.Mock).mockResolvedValueOnce(['key1', 'key2']);
 
-        await service.setStartupTime();
+        const result = await service.keys('stats:*');
 
-        expect(mockClient.set)
-          .toHaveBeenCalledWith('server:startup', expect.any(String), undefined);
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Server startup time logged:')
-        );
-
-        consoleSpy.mockRestore();
+        expect(mockClient.keys).toHaveBeenCalledWith('stats:*');
+        expect(result).toEqual(['key1', 'key2']);
       });
 
-      it('should silently fail if not connected', async () => {
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      it('should return empty array if not connected', async () => {
+        const result = await service.keys('pattern');
 
-        await expect(service.setStartupTime()).resolves.toBeUndefined();
-
-        expect(mockClient.set).not.toHaveBeenCalled();
-        expect(consoleSpy).not.toHaveBeenCalled();
-
-        consoleSpy.mockRestore();
+        expect(result).toEqual([]);
       });
     });
   });
 });
+

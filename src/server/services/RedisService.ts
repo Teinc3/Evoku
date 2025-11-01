@@ -76,12 +76,8 @@ export class RedisService {
     return await this.client?.del(key) ?? 0;
   }
 
-  async setStartupTime(): Promise<void> {
-    const now = new Date().toISOString();
-    await this.set('server:startup', now);
-    if (this.client) {
-      console.log(`Server startup time logged: ${now}`);
-    }
+  async keys(pattern: string): Promise<string[]> {
+    return await this.client?.keys(pattern) ?? [];
   }
 }
 

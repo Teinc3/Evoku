@@ -22,6 +22,9 @@ async function bootstrap() {
   // Create the WebSocket server
   const wsServer = new WSServer(httpServer.server);
 
+  // Connect HTTP server to WS server managers for stats
+  httpServer.setWsServer(wsServer);
+
   // Set up listeners for graceful shutdown for both servers
   const signals = ['SIGINT', 'SIGTERM'];
   signals.forEach(signal => {

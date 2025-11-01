@@ -44,6 +44,11 @@ export default class RoomManager {
     }
   }
 
+  /** Returns the current number of active rooms. */
+  public getActiveRoomsCount(): number {
+    return this.rooms.size;
+  }
+
   public close(): void {
     if (this.roomCleanupTimer) {
       clearInterval(this.roomCleanupTimer);

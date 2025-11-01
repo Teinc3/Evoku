@@ -1,14 +1,17 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { createServer } from 'http';
+import { rateLimit } from 'express-rate-limit';
 import express from 'express';
 
-import redisService from '../services/RedisService';
+import StatsService from '../services/StatsService';
 import guestAuthService from '../services/GuestAuthService';
 
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
+import type { StatsRange } from '../types/stats/online';
+import type WSServer from './WSServer';
 
 
 /**
@@ -18,6 +21,7 @@ export default class HTTPServer {
   public readonly app: Application;
   public readonly server: HttpServer;
   private readonly port: number;
+  private statsService: StatsService | null = null;
 
   constructor(port: number) {
     this.port = port;
@@ -25,6 +29,10 @@ export default class HTTPServer {
     this.server = createServer(this.app);
 
     this.configureRoutes();
+  }
+
+  public setWsServer(wsServer: WSServer): void {
+    this.statsService = new StatsService(wsServer.sessionManager, wsServer.roomManager);
   }
 
   private configureRoutes(): void {
@@ -62,6 +70,15 @@ export default class HTTPServer {
 
   /** Configure API routes */
   private configureAPI(): void {
+    // Rate limiter for stats endpoints
+    const statsLimiter = rateLimit({
+      windowMs: 60 * 1000, // 1 minute
+      max: 60, // Limit each IP to 60 requests per minute
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Too many requests, please try again later' },
+    });
+
     // Health check endpoint
     this.app.get('/api/health', (_req, res) => {
       res.sendStatus(200);
@@ -75,7 +92,32 @@ export default class HTTPServer {
         res.json(result);
       } catch (error) {
         console.error('Error in guest auth endpoint:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.sendStatus(500);
+      }
+    });
+
+    // Server stats endpoint
+    this.app.get('/api/stats', statsLimiter, async (req, res) => {
+      try {
+        if (!this.statsService) {
+          res.sendStatus(500);
+          return;
+        }
+
+        const range = req.query['range'] as StatsRange | undefined;
+
+        if (range) {
+          // Return historical data
+          const data = await this.statsService.getHistoricalStats(range);
+          res.json(data);
+        } else {
+          // Return current stats
+          const stats = this.statsService.getCurrentStats();
+          res.json(stats);
+        }
+      } catch (error) {
+        console.error('Error in stats endpoint:', error);
+        res.sendStatus(500);
       }
     });
 
@@ -89,14 +131,16 @@ export default class HTTPServer {
   public async start() {
     this.server.listen(this.port, () => {
       console.log(`HTTP server is running on http://localhost:${this.port}`);
-      redisService.setStartupTime(); // Log startup time in Redis after initialization
     });
   }
 
   /** Close the HTTP server */
   public async close() {
-    this.server.close(() => {
-      console.log('HTTP server closed');
+    return new Promise<void>(resolve => {
+      this.server.close(() => {
+        console.log('HTTP server closed');
+        resolve();
+      });
     });
   }
 }

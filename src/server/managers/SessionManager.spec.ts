@@ -108,6 +108,57 @@ describe('SessionManager', () => {
     });
   });
 
+  describe('getOnlineCount', () => {
+    it('should return 0 when no sessions exist', () => {
+      // Act
+      const count = sessionManager.getOnlineCount();
+
+      // Assert
+      expect(count).toBe(0);
+    });
+
+    it('should return correct count with one session', () => {
+      // Arrange
+      const socket = new MockServerSocket();
+      sessionManager.createSession(socket as unknown as ServerSocket);
+
+      // Act
+      const count = sessionManager.getOnlineCount();
+
+      // Assert
+      expect(count).toBe(1);
+    });
+
+    it('should return correct count with multiple sessions', () => {
+      // Arrange
+      const socket1 = new MockServerSocket();
+      const socket2 = new MockServerSocket();
+      const socket3 = new MockServerSocket();
+      sessionManager.createSession(socket1 as unknown as ServerSocket);
+      sessionManager.createSession(socket2 as unknown as ServerSocket);
+      sessionManager.createSession(socket3 as unknown as ServerSocket);
+
+      // Act
+      const count = sessionManager.getOnlineCount();
+
+      // Assert
+      expect(count).toBe(3);
+    });
+
+    it('should decrease count when session is destroyed', () => {
+      // Arrange
+      const socket = new MockServerSocket();
+      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      expect(sessionManager.getOnlineCount()).toBe(1);
+
+      // Act
+      sessionManager.onDestroy(session);
+
+      // Assert
+      expect(sessionManager.getOnlineCount()).toBe(0);
+    });
+  });
+
   describe('onDisconnect', () => {
     it('should handle disconnection event', () => {
       // Arrange - Create a session using the manager so it's properly stored

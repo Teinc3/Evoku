@@ -25,6 +25,15 @@ jest.mock('ws', () => ({
 jest.mock('../managers/SessionManager');
 jest.mock('../managers/RoomManager');
 jest.mock('../models/networking/ServerSocket');
+jest.mock('../services/RedisService', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: {
+    set: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    get: jest.fn<() => Promise<string | null>>().mockResolvedValue(null),
+    keys: jest.fn<() => Promise<string[]>>().mockResolvedValue([]),
+  },
+}));
 
 describe('WSServer Integration Test', () => {
   let httpServer: HttpServer;

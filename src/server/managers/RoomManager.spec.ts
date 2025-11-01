@@ -128,6 +128,57 @@ describe('RoomManager', () => {
     });
   });
 
+  describe('getActiveRoomsCount', () => {
+    it('should return 0 when no rooms exist', () => {
+      // Act
+      const count = roomManager.getActiveRoomsCount();
+
+      // Assert
+      expect(count).toBe(0);
+    });
+
+    it('should return correct count with one room', () => {
+      // Arrange
+      roomManager.createRoom();
+
+      // Act
+      const count = roomManager.getActiveRoomsCount();
+
+      // Assert
+      expect(count).toBe(1);
+    });
+
+    it('should return correct count with multiple rooms', () => {
+      // Arrange
+      roomManager.createRoom();
+      roomManager.createRoom();
+      roomManager.createRoom();
+
+      // Act
+      const count = roomManager.getActiveRoomsCount();
+
+      // Assert
+      expect(count).toBe(3);
+    });
+
+    it('should decrease count when rooms are cleaned up', () => {
+      // Arrange
+      const room = roomManager.createRoom();
+      expect(roomManager.getActiveRoomsCount()).toBe(1);
+
+      // Simulate room with no participants
+      (room as unknown as { participants: Map<unknown, unknown> }).participants.clear();
+
+      // Act
+      const cleanupMethod = (roomManager as unknown as RoomManagerPrivate)
+        .cleanupRooms.bind(roomManager);
+      cleanupMethod();
+
+      // Assert
+      expect(roomManager.getActiveRoomsCount()).toBe(0);
+    });
+  });
+
   describe('close', () => {
     it('should clear the cleanup timer and rooms', () => {
       // Arrange
