@@ -4,11 +4,10 @@ import WebSocketService from '../../networking/services/WebSocketService';
 import APIService from '../../networking/services/APIService';
 import CookieService from './cookie.service';
 
+import type { Observable } from 'rxjs';
 import type ActionEnum from '@shared/types/enums/actions';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 import type ActionMap from '@shared/types/actionmap';
-import type { Observable } from 'rxjs';
-import type PacketBroadcaster from '../../networking/services/PacketBroadcaster';
 
 
 /**
@@ -41,7 +40,7 @@ export default class NetworkService {
    * @returns Observable that emits packet events
    */
   getPacketStream(): Observable<{ action: ActionEnum; data: ActionMap[ActionEnum] }> {
-    return this.wsService.getBroadcaster().getPacketStream();
+    return this.wsService.getPacketStream();
   }
 
   /**
@@ -52,7 +51,7 @@ export default class NetworkService {
   onPacket<GenericAction extends ActionEnum>(
     action: GenericAction
   ): Observable<ActionMap[GenericAction]> {
-    return this.wsService.getBroadcaster().onPacket(action);
+    return this.wsService.onPacket(action);
   }
 
   /** Connect to the WebSocket server */

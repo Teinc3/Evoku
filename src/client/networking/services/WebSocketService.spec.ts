@@ -105,24 +105,14 @@ class MockClientSocket {
   }
 }
 
-// Mock PacketBroadcaster
-class MockPacketBroadcaster {
-  broadcast = jasmine.createSpy('broadcast');
-  getPacketStream = jasmine.createSpy('getPacketStream');
-  onPacket = jasmine.createSpy('onPacket');
-  destroy = jasmine.createSpy('destroy');
-}
-
 // Mock the dependencies
 let mockClientSocket: MockClientSocket;
-let mockPacketBroadcaster: MockPacketBroadcaster;
 let originalWebSocket: typeof WebSocket;
 
 // Import the actual classes to mock them
 import WebSocketService from './WebSocketService';
 
 import type ClientSocket from '../transport/ClientSocket';
-import type PacketBroadcaster from './PacketBroadcaster';
 
 
 describe('WebSocketService', () => {
@@ -145,15 +135,13 @@ describe('WebSocketService', () => {
   beforeEach(() => {
     // Create fresh mocks for each test
     mockClientSocket = new MockClientSocket();
-    mockPacketBroadcaster = new MockPacketBroadcaster();
 
     (window as Window & { WebSocket: typeof WebSocket }).WebSocket =
       MockWebSocket as unknown as typeof WebSocket;
 
     // Create service instance with mocked dependencies
     service = new WebSocketService(
-      mockClientSocket as unknown as ClientSocket,
-      mockPacketBroadcaster as unknown as PacketBroadcaster
+      mockClientSocket as unknown as ClientSocket
     );
   });
 
@@ -358,20 +346,22 @@ describe('WebSocketService', () => {
       await connectPromise;
     });
 
-    it('should broadcast incoming packets', () => {
+    it('should broadcast incoming packets via Subject', done => {
       const mockPacket = {
         action: SessionActions.HEARTBEAT,
         timestamp: Date.now()
       };
 
-      // Access private method
+      // Subscribe to packet stream
+      service.getPacketStream().subscribe(packet => {
+        expect(packet.action).toBe(SessionActions.HEARTBEAT);
+        expect(packet.data).toEqual({ timestamp: jasmine.any(Number) });
+        done();
+      });
+
+      // Access private method and trigger packet
       const handlePacket = service['handlePacket'];
       handlePacket(mockPacket);
-
-      expect(mockPacketBroadcaster.broadcast).toHaveBeenCalledWith(
-        SessionActions.HEARTBEAT,
-        { timestamp: jasmine.any(Number) }
-      );
     });
 
     it('should handle broadcast errors gracefully', () => {
@@ -382,8 +372,8 @@ describe('WebSocketService', () => {
         timestamp: Date.now()
       };
 
-      // Make broadcaster throw an error
-      mockPacketBroadcaster.broadcast.and.throwError('Broadcast error');
+      // Spy on the subject's next method to throw an error
+      spyOn(service['packetSubject'], 'next').and.throwError('Broadcast error');
 
       const handlePacket = service['handlePacket'];
       handlePacket(mockPacket);
@@ -427,13 +417,14 @@ describe('WebSocketService', () => {
   });
 
   describe('Cleanup', () => {
-    it('should clear timers on destroy', () => {
+    it('should clear timers and complete subject on destroy', () => {
       service['pingTimer'] = setInterval(() => {}, 1000);
+      const completeSpy = spyOn(service['packetSubject'], 'complete');
 
       service.destroy();
 
       expect(service['pingTimer']).toBeNull();
-      expect(mockPacketBroadcaster.destroy).toHaveBeenCalled();
+      expect(completeSpy).toHaveBeenCalled();
     });
 
     it('should clear ping timer when clearing timers', () => {
@@ -446,10 +437,41 @@ describe('WebSocketService', () => {
     });
   });
 
-  describe('getBroadcaster', () => {
-    it('should return the packet broadcaster', () => {
-      const broadcaster = service.getBroadcaster();
-      expect(broadcaster).toBe(mockPacketBroadcaster as unknown as PacketBroadcaster);
+  describe('Packet subscription', () => {
+    it('should provide packet stream', done => {
+      const stream = service.getPacketStream();
+      expect(stream).toBeDefined();
+
+      stream.subscribe(packet => {
+        expect(packet.action).toBe(SessionActions.HEARTBEAT);
+        done();
+      });
+
+      // Trigger a packet
+      service['packetSubject'].next({
+        action: SessionActions.HEARTBEAT,
+        data: {}
+      });
+    });
+
+    it('should filter packets by action type', done => {
+      const heartbeatStream = service.onPacket(SessionActions.HEARTBEAT);
+
+      heartbeatStream.subscribe(data => {
+        expect(data).toEqual({ timestamp: 123 });
+        done();
+      });
+
+      // Send different action types
+      service['packetSubject'].next({
+        action: SessionActions.AUTH,
+        data: { token: 'test', version: '1.0.0' }
+      });
+
+      service['packetSubject'].next({
+        action: SessionActions.HEARTBEAT,
+        data: { timestamp: 123 }
+      });
     });
   });
 });

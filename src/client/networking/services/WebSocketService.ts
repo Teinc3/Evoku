@@ -1,7 +1,8 @@
+import { Subject, Observable } from 'rxjs';
+
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
 import ClientSocket from '../transport/ClientSocket';
-import PacketBroadcaster from './PacketBroadcaster';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -15,16 +16,18 @@ import type ActionMap from '@shared/types/actionmap';
  */
 export default class WebSocketService {
   private socket: ClientSocket;
-  private broadcaster: PacketBroadcaster;
+  private readonly packetSubject = new Subject<{
+    action: ActionEnum;
+    data: ActionMap[ActionEnum];
+  }>();
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
   private authToken: string | null = null;
 
-  constructor(socket?: ClientSocket, broadcaster?: PacketBroadcaster) {
+  constructor(socket?: ClientSocket) {
     this.socket = socket || new ClientSocket();
-    this.broadcaster = broadcaster || new PacketBroadcaster();
 
     this.pingTimer = null;
     this.lastPingAt = null;
@@ -32,10 +35,29 @@ export default class WebSocketService {
   }
 
   /**
-   * Get the packet broadcaster for subscribing to packet events.
+   * Get the packet stream for subscribing to all packet events.
    */
-  getBroadcaster(): PacketBroadcaster {
-    return this.broadcaster;
+  getPacketStream(): Observable<{ action: ActionEnum; data: ActionMap[ActionEnum] }> {
+    return this.packetSubject.asObservable();
+  }
+
+  /**
+   * Subscribe to packets of a specific action type using RxJS operators.
+   * @param action The action to filter by
+   * @returns Observable that emits only packets matching the action
+   */
+  onPacket<GenericAction extends ActionEnum>(
+    action: GenericAction
+  ): Observable<ActionMap[GenericAction]> {
+    return new Observable(observer => {
+      const subscription = this.packetSubject.subscribe(packet => {
+        if (packet.action === action) {
+          observer.next(packet.data as ActionMap[GenericAction]);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    });
   }
 
   /**
@@ -111,7 +133,7 @@ export default class WebSocketService {
    */
   destroy(): void {
     this.clearTimers();
-    this.broadcaster.destroy();
+    this.packetSubject.complete();
     this.socket.close();
   }
 
@@ -122,7 +144,7 @@ export default class WebSocketService {
 
     // Broadcast the decoded packet to all subscribers
     try {
-      this.broadcaster.broadcast(action, data);
+      this.packetSubject.next({ action, data });
     } catch (error) {
       console.error(`Error broadcasting packet for action ${String(action)}:`, error);
     }
