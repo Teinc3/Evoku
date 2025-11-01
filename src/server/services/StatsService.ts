@@ -56,21 +56,18 @@ export class StatsService {
   }
 
   /** Get historical stats for a given time range */
-  public async getHistoricalStats(range: StatsRange | string): Promise<IServerStats[]> {
+  public async getHistoricalStats(range: StatsRange): Promise<IServerStats[]> {
     const now = Date.now();
     let startTime: number;
 
     switch (range) {
       case StatsRange.ONE_HOUR:
-      case '1h':
         startTime = now - 60 * 60 * 1000;
         break;
       case StatsRange.ONE_DAY:
-      case '1d':
         startTime = now - 24 * 60 * 60 * 1000;
         break;
       case StatsRange.ONE_WEEK:
-      case '1w':
         startTime = now - 7 * 24 * 60 * 60 * 1000;
         break;
       default:
@@ -92,7 +89,7 @@ export class StatsService {
       }
     }
 
-    return stats.sort((a, b) => a.at - b.at);
+    return stats.sort((a, b) => b.at - a.at);
   }
 
   /** Get stats keys within a time range */

@@ -7,6 +7,7 @@ import type StatsService from './StatsService';
  */
 export class StatsSampler {
   private timer: NodeJS.Timeout | null = null;
+  private initialTimeout: NodeJS.Timeout | null = null;
 
   constructor(private statsService: StatsService) {}
 
@@ -15,7 +16,7 @@ export class StatsSampler {
    * and then sample every 60 minutes.
    */
   public start(): void {
-    if (this.timer) {
+    if (this.timer || this.initialTimeout) {
       return; // Already running
     }
 
@@ -25,7 +26,7 @@ export class StatsSampler {
       (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
 
     // Wait until next :00:00, then start the interval
-    setTimeout(() => {
+    this.initialTimeout = setTimeout(() => {
       this.sample(); // Take first sample
       this.timer = setInterval(() => this.sample(), 3600_000); // Then every 60 minutes
     }, msUntilNextHour);
@@ -33,6 +34,10 @@ export class StatsSampler {
 
   /** Stop the sampler */
   public stop(): void {
+    if (this.initialTimeout) {
+      clearTimeout(this.initialTimeout);
+      this.initialTimeout = null;
+    }
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;

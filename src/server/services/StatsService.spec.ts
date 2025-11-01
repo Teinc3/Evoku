@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 
+import { StatsRange } from '../types/stats/online';
 import { StatsService } from './StatsService';
 import redisService from './RedisService';
 
@@ -21,6 +22,15 @@ describe('StatsService', () => {
   let statsService: StatsService;
   let mockSessionManager: SessionManager;
   let mockRoomManager: RoomManager;
+
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,7 +141,7 @@ describe('StatsService', () => {
         .mockResolvedValue(JSON.stringify(mockStats));
 
       // Act
-      const result = await statsService.getHistoricalStats('1h');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_HOUR);
 
       // Assert
       expect(redisService.keys).toHaveBeenCalledWith('stats:*');
@@ -145,7 +155,7 @@ describe('StatsService', () => {
       (redisService.keys as jest.Mock<() => Promise<string[]>>).mockResolvedValue([]);
 
       // Act
-      const result = await statsService.getHistoricalStats('1d');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_DAY);
 
       // Assert
       expect(result).toEqual([]);
@@ -162,7 +172,7 @@ describe('StatsService', () => {
         .mockResolvedValue('invalid json');
 
       // Act
-      const result = await statsService.getHistoricalStats('1w');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_WEEK);
 
       // Assert
       expect(result).toEqual([]);
@@ -196,15 +206,15 @@ describe('StatsService', () => {
       });
 
       // Act
-      const result = await statsService.getHistoricalStats('1d');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_DAY);
 
       // Assert
       expect(result.length).toBe(3);
       
-      // Check that stats are sorted by timestamp
-      expect(result[0].at).toBe(stats1.at);
+      // Check that stats are sorted by timestamp (newest first)
+      expect(result[0].at).toBe(stats2.at);
       expect(result[1].at).toBe(stats3.at);
-      expect(result[2].at).toBe(stats2.at);
+      expect(result[2].at).toBe(stats1.at);
     });
 
     it('should filter stats by time range', async () => {
@@ -242,7 +252,7 @@ describe('StatsService', () => {
         });
 
       // Act
-      const result = await statsService.getHistoricalStats('1h');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_HOUR);
 
       // Assert
       expect(result.length).toBe(1);
@@ -276,7 +286,7 @@ describe('StatsService', () => {
         });
 
       // Act
-      const result = await statsService.getHistoricalStats('1w');
+      const result = await statsService.getHistoricalStats(StatsRange.ONE_WEEK);
 
       // Assert - should be limited to 200 (only keys within 1w range)
       expect(result.length).toBeLessThanOrEqual(200);

@@ -136,8 +136,11 @@ export default class HTTPServer {
 
   /** Close the HTTP server */
   public async close() {
-    this.server.close(() => {
-      console.log('HTTP server closed');
+    return new Promise<void>(resolve => {
+      this.server.close(() => {
+        console.log('HTTP server closed');
+        resolve();
+      });
     });
   }
 }

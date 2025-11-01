@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
 
+import { StatsRange } from '../types/stats/online';
 import HTTPServer from '../core/HTTPServer';
 
 import type { StatsService } from '../services/StatsService';
@@ -17,11 +18,30 @@ jest.mock('../services/GuestAuthService', () => ({
   },
 }));
 
+jest.mock('../services/RedisService', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: {
+    set: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    get: jest.fn<() => Promise<string | null>>().mockResolvedValue(null),
+    keys: jest.fn<() => Promise<string[]>>().mockResolvedValue([]),
+  },
+}));
+
 describe('HTTPServer - Stats API', () => {
   let httpServer: HTTPServer;
   let mockWsServer: WSServer;
   let mockSessionManager: SessionManager;
   let mockRoomManager: RoomManager;
+
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -149,11 +169,11 @@ describe('HTTPServer - Stats API', () => {
 
         const response = await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '1h' })
+          .query({ range: StatsRange.ONE_HOUR })
           .expect(200);
 
         expect(response.body).toEqual(mockData);
-        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1h');
+        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith(StatsRange.ONE_HOUR);
       });
 
       it('should return historical data for 1d range', async () => {
@@ -165,11 +185,11 @@ describe('HTTPServer - Stats API', () => {
 
         const response = await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '1d' })
+          .query({ range: StatsRange.ONE_DAY })
           .expect(200);
 
         expect(response.body).toEqual(mockData);
-        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1d');
+        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith(StatsRange.ONE_DAY);
       });
 
       it('should return historical data for 1w range', async () => {
@@ -178,10 +198,10 @@ describe('HTTPServer - Stats API', () => {
 
         await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '1w' })
+          .query({ range: StatsRange.ONE_WEEK })
           .expect(200);
 
-        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith('1w');
+        expect(mockStatsService.getHistoricalStats).toHaveBeenCalledWith(StatsRange.ONE_WEEK);
       });
     });
 
@@ -242,7 +262,7 @@ describe('HTTPServer - Stats API', () => {
 
         await request(httpServer.app)
           .get('/api/stats')
-          .query({ range: '1h' })
+          .query({ range: StatsRange.ONE_HOUR })
           .expect(500);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
