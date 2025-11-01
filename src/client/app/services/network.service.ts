@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { Injectable, Optional } from '@angular/core';
 
 import WebSocketService from '../../networking/services/WebSocketService';
@@ -33,6 +34,27 @@ export default class NetworkService {
   }
 
   getWSService(): WebSocketService { return this.wsService; }
+
+  /**
+   * Subscribe to packets of a specific action type.
+   * @param action The action to filter by
+   * @returns Observable that emits only the data portion of packets matching the action
+   */
+  onPacket<GenericAction extends ActionEnum>(
+    action: GenericAction
+  ): Observable<ActionMap[GenericAction]> {
+    return new Observable(observer => {
+      const subscription = this.wsService.packetSubject.subscribe(packet => {
+        if (packet.action === action) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { action, ...data } = packet;
+          observer.next(data as ActionMap[GenericAction]);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }
 
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {

@@ -1,7 +1,8 @@
+import { Subject } from 'rxjs';
+
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
 import ClientSocket from '../transport/ClientSocket';
-import ClientPacketHandler from '../handlers/ClientPacketHandler';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -15,16 +16,15 @@ import type ActionMap from '@shared/types/actionmap';
  */
 export default class WebSocketService {
   private socket: ClientSocket;
-  private packetHandler: ClientPacketHandler;
+  readonly packetSubject = new Subject<AugmentAction<ActionEnum>>();
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
   private authToken: string | null = null;
 
-  constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
+  constructor(socket?: ClientSocket) {
     this.socket = socket || new ClientSocket();
-    this.packetHandler = packetHandler || new ClientPacketHandler(this);
 
     this.pingTimer = null;
     this.lastPingAt = null;
@@ -50,7 +50,7 @@ export default class WebSocketService {
    */
   async connect(): Promise<void> {
     await this.socket.connect();
-    this.socket.setListener(this.handlePacket);
+    this.socket.setListener(data => this.packetSubject.next(data));
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
     
@@ -104,21 +104,11 @@ export default class WebSocketService {
    */
   destroy(): void {
     this.clearTimers();
+    this.packetSubject.complete();
     this.socket.close();
   }
 
   // Private methods
-
-  private handlePacket = (augmentedAction: AugmentAction<ActionEnum>): void => {
-    const { action } = augmentedAction;
-
-    // Dispatch to composite handler architecture
-    try {
-      this.packetHandler.handleData(augmentedAction);
-    } catch (error) {
-      console.error(`Error in packet handler for action ${String(action)}:`, error);
-    }
-  };
 
   private handleClose = (): void => {
     this.clearTimers();

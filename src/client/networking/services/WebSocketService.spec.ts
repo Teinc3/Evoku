@@ -105,21 +105,14 @@ class MockClientSocket {
   }
 }
 
-// Mock ClientPacketHandler
-class MockClientPacketHandler {
-  handleData = jasmine.createSpy('handleData');
-}
-
 // Mock the dependencies
 let mockClientSocket: MockClientSocket;
-let mockClientPacketHandler: MockClientPacketHandler;
 let originalWebSocket: typeof WebSocket;
 
 // Import the actual classes to mock them
 import WebSocketService from './WebSocketService';
 
 import type ClientSocket from '../transport/ClientSocket';
-import type ClientPacketHandler from '../handlers/ClientPacketHandler';
 
 
 describe('WebSocketService', () => {
@@ -142,15 +135,13 @@ describe('WebSocketService', () => {
   beforeEach(() => {
     // Create fresh mocks for each test
     mockClientSocket = new MockClientSocket();
-    mockClientPacketHandler = new MockClientPacketHandler();
 
     (window as Window & { WebSocket: typeof WebSocket }).WebSocket =
       MockWebSocket as unknown as typeof WebSocket;
 
     // Create service instance with mocked dependencies
     service = new WebSocketService(
-      mockClientSocket as unknown as ClientSocket,
-      mockClientPacketHandler as unknown as ClientPacketHandler
+      mockClientSocket as unknown as ClientSocket
     );
   });
 
@@ -355,51 +346,23 @@ describe('WebSocketService', () => {
       await connectPromise;
     });
 
-    it('should handle incoming packets', () => {
+    it('should broadcast incoming packets via Subject', done => {
       const mockPacket = {
-        action: SessionActions.HEARTBEAT,
-        timestamp: Date.now()
+        action: SessionActions.HEARTBEAT
       };
 
-      // Access private method
-      const handlePacket = service['handlePacket'];
-      handlePacket(mockPacket);
+      // Subscribe to packet subject
+      service.packetSubject.subscribe(packet => {
+        expect(packet.action).toBe(SessionActions.HEARTBEAT);
+        done();
+      });
 
-      expect(mockClientPacketHandler.handleData).toHaveBeenCalledWith(mockPacket);
-    });
-
-    it('should handle packet handler errors gracefully', () => {
-      spyOn(console, 'error');
-
-      const mockPacket = {
-        action: SessionActions.HEARTBEAT,
-        timestamp: Date.now()
-      };
-
-      // Make packet handler throw an error
-      mockClientPacketHandler.handleData.and.throwError('Handler error');
-
-      const handlePacket = service['handlePacket'];
-      handlePacket(mockPacket);
-
-      expect(console.error).toHaveBeenCalledWith(
-        `Error in packet handler for action ${SessionActions.HEARTBEAT}:`,
-        jasmine.any(Error)
-      );
+      // Trigger packet directly via subject
+      service.packetSubject.next(mockPacket);
     });
 
     it('should handle close events', () => {
       spyOn(console, 'log');
-      const disconnectCallback = jasmine.createSpy('disconnectCallback');
-      service.setDisconnectCallback(disconnectCallback);
-
-      const handleClose = service['handleClose'];
-      handleClose();
-
-      expect(disconnectCallback).toHaveBeenCalled();
-    });
-
-    it('should handle close events', () => {
       const disconnectCallback = jasmine.createSpy('disconnectCallback');
       service.setDisconnectCallback(disconnectCallback);
 
@@ -421,12 +384,14 @@ describe('WebSocketService', () => {
   });
 
   describe('Cleanup', () => {
-    it('should clear timers on destroy', () => {
+    it('should clear timers and complete subject on destroy', () => {
       service['pingTimer'] = setInterval(() => {}, 1000);
+      const completeSpy = spyOn(service.packetSubject, 'complete');
 
       service.destroy();
 
       expect(service['pingTimer']).toBeNull();
+      expect(completeSpy).toHaveBeenCalled();
     });
 
     it('should clear ping timer when clearing timers', () => {
