@@ -1,13 +1,14 @@
 import request from 'supertest';
 import { jest } from '@jest/globals';
 
-import HTTPServer from '../core/HTTPServer';
 import redisService from '../services/RedisService';
+import HTTPServer from '../core/HTTPServer';
 
 import type { Application } from 'express';
 
 
 jest.mock('../services/RedisService', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
     zRangeByScoreWithScores: jest.fn<
@@ -18,6 +19,7 @@ jest.mock('../services/RedisService', () => ({
 }));
 
 jest.mock('../services/GuestAuthService', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
     authenticate: jest.fn(),

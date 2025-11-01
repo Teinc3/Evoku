@@ -1,10 +1,10 @@
 import { WebSocketServer } from 'ws';
 
+import OnlineSampler from '../services/online.sampler';
 import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import SystemHandler from '../handlers/system';
-import OnlineSampler from '../services/online.sampler';
 
 import type { Server as HttpServer } from 'http';
 
@@ -42,6 +42,14 @@ export default class WSServer {
       const socket = new ServerSocket(ws);
       this.sessionManager.createSession(socket);
     });
+  }
+
+  public getSessionManager(): SessionManager {
+    return this.sessionManager;
+  }
+
+  public getRoomManager(): RoomManager {
+    return this.roomManager;
   }
 
   public close(): void {

@@ -1,12 +1,13 @@
 import { jest } from '@jest/globals';
 
-import OnlineSampler from './online.sampler';
 import redisService from './RedisService';
+import OnlineSampler from './online.sampler';
 
 import type SessionManager from '../managers/SessionManager';
 
 
 jest.mock('./RedisService', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
     zAdd: jest.fn<() => Promise<number>>().mockResolvedValue(1),

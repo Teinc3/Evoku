@@ -1,8 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { createServer } from 'http';
-import express from 'express';
 import { rateLimit } from 'express-rate-limit';
+import express from 'express';
 
 import redisService from '../services/RedisService';
 import guestAuthService from '../services/GuestAuthService';
@@ -10,8 +10,9 @@ import guestAuthService from '../services/GuestAuthService';
 import type { Server as HttpServer } from 'http';
 import type { Application, Request, Response, NextFunction } from 'express';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
-import type { IOnlineStats, IOnlineDataPoint, OnlineStatsRange, OnlineStatsFormat } 
+import type { IOnlineStats, IOnlineDataPoint, OnlineStatsRange, OnlineStatsFormat, IServerStats } 
   from '../types/stats/online';
+import type WSServer from './WSServer';
 
 
 /**
@@ -21,13 +22,20 @@ export default class HTTPServer {
   public readonly app: Application;
   public readonly server: HttpServer;
   private readonly port: number;
+  private wsServer: WSServer | null = null;
+  private serverStartTime: number;
 
   constructor(port: number) {
     this.port = port;
     this.app = express();
     this.server = createServer(this.app);
+    this.serverStartTime = Date.now();
 
     this.configureRoutes();
+  }
+
+  public setWsServer(wsServer: WSServer): void {
+    this.wsServer = wsServer;
   }
 
   private configureRoutes(): void {
@@ -111,6 +119,17 @@ export default class HTTPServer {
       }
     });
 
+    // General server stats endpoint
+    this.app.get('/api/stats', apiKeyAuth, statsLimiter, async (_req, res) => {
+      try {
+        const stats = await this.getServerStats();
+        res.json(stats);
+      } catch (error) {
+        console.error('Error in server stats endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
     // Current online count endpoint
     this.app.get('/api/stats/online', apiKeyAuth, statsLimiter, async (req, res) => {
       try {
@@ -166,6 +185,24 @@ export default class HTTPServer {
     return {
       online: parseInt(latest.value, 10),
       at: latest.score,
+    };
+  }
+
+  /** Get general server statistics */
+  private async getServerStats(): Promise<IServerStats> {
+    if (!this.wsServer) {
+      throw new Error('WS server not initialized');
+    }
+
+    const sessionManager = this.wsServer.getSessionManager();
+    const roomManager = this.wsServer.getRoomManager();
+    const now = Date.now();
+
+    return {
+      activeSessions: sessionManager.getOnlineCount(),
+      activeRooms: roomManager.getActiveRoomsCount(),
+      serverUptime: now - this.serverStartTime,
+      at: now,
     };
   }
 

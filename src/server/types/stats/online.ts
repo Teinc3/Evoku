@@ -19,3 +19,15 @@ export type OnlineStatsRange = '1h' | '24h' | '7d';
 
 /** Valid output formats for historical stats query */
 export type OnlineStatsFormat = 'json' | 'text';
+
+/** General server statistics */
+export interface IServerStats {
+  /** Current number of active sessions (online users) */
+  activeSessions: number;
+  /** Current number of active rooms */
+  activeRooms: number;
+  /** Server uptime in milliseconds */
+  serverUptime: number;
+  /** Timestamp (epoch milliseconds) when these stats were recorded */
+  at: number;
+}
