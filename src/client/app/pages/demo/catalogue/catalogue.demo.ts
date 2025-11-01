@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
+import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import ViewStateService from '../../../services/view-state.service';
 import NetworkService from '../../../services/network.service';
 import AppView from '../../../../types/enums/app-view.enum';
-import LobbyActions from '@shared/types/enums/actions/system/lobby';
 
 
 @Component({

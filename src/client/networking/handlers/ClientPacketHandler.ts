@@ -6,8 +6,8 @@ import MatchHandler from "./match";
 import type ActionEnum from "@shared/types/enums/actions";
 import type WebSocketService from "../services/WebSocketService";
 import type { SomeClientHandlerMapEntry } from "../../types/networking";
-import type MatchmakingService from "../../app/services/matchmaking.service";
 import type ViewStateService from "../../app/services/view-state.service";
+import type MatchmakingService from "../../app/services/matchmaking.service";
 
 
 /**

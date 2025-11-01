@@ -2,9 +2,9 @@ import { Injectable, Optional } from '@angular/core';
 
 import WebSocketService from '../../networking/services/WebSocketService';
 import APIService from '../../networking/services/APIService';
-import CookieService from './cookie.service';
-import MatchmakingService from './matchmaking.service';
 import ViewStateService from './view-state.service';
+import MatchmakingService from './matchmaking.service';
+import CookieService from './cookie.service';
 
 import type ActionEnum from '@shared/types/enums/actions';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';

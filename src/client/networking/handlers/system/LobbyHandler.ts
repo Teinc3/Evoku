@@ -3,8 +3,8 @@ import EnumHandler from "../EnumHandler";
 import AppView from "../../../types/enums/app-view.enum";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type MatchmakingService from "../../../app/services/matchmaking.service";
 import type ViewStateService from "../../../app/services/view-state.service";
+import type MatchmakingService from "../../../app/services/matchmaking.service";
 
 
 export default class LobbyHandler extends EnumHandler<LobbyActions> {

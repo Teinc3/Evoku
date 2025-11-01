@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import MatchmakingService from '../../../../services/matchmaking.service';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
@@ -10,7 +11,6 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
-import MatchmakingService from '../../../../services/matchmaking.service';
 
 
 @Component({

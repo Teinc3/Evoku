@@ -5,8 +5,8 @@ import LobbyHandler from "./LobbyHandler";
 
 import type SystemActions from "@shared/types/enums/actions/system";
 import type { SomeClientHandlerMapEntry } from "../../../types/networking";
-import type MatchmakingService from "../../../app/services/matchmaking.service";
 import type ViewStateService from "../../../app/services/view-state.service";
+import type MatchmakingService from "../../../app/services/matchmaking.service";
 
 
 export default class SystemHandler extends UnionHandler<SystemActions> {

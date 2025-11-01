@@ -22,9 +22,11 @@ describe('LoadingDemoPageComponent', () => {
     const networkSpy = jasmine.createSpyObj('NetworkService', ['send', 'disconnect'], {
       isConnected: false
     });
-    const matchmakingSpy = jasmine.createSpyObj('MatchmakingService', ['clearMatchInfo'], {
-      playersInQueue: signal(0)
-    });
+    const matchmakingSpy = jasmine.createSpyObj(
+      'MatchmakingService',
+      ['clearMatchInfo'],
+      { playersInQueue: signal(0) }
+    );
 
     await TestBed.configureTestingModule({
       imports: [LoadingDemoPageComponent],
@@ -39,7 +41,8 @@ describe('LoadingDemoPageComponent', () => {
     component = fixture.componentInstance;
     viewStateServiceSpy = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
     networkServiceSpy = TestBed.inject(NetworkService) as jasmine.SpyObj<NetworkService>;
-    matchmakingServiceSpy = TestBed.inject(MatchmakingService) as jasmine.SpyObj<MatchmakingService>;
+    matchmakingServiceSpy = 
+      TestBed.inject(MatchmakingService) as jasmine.SpyObj<MatchmakingService>;
     fixture.detectChanges();
   });
 
@@ -73,12 +76,38 @@ describe('LoadingDemoPageComponent', () => {
     expect(factElement.nativeElement.textContent).toContain('Beta Testers');
   });
 
-  it('should navigate to catalogue when cancel button is clicked', () => {
+  it('should navigate to catalogue when cancel button is clicked', fakeAsync(() => {
+    // Configure network service to be connected
+    Object.defineProperty(networkServiceSpy, 'isConnected', { value: true, writable: true });
+
     const cancelButton = fixture.debugElement.query(By.css('.cancel-button'));
     cancelButton.nativeElement.click();
 
+    tick(); // Allow async operations to complete
+
+    // Should send LEAVE_QUEUE packet
+    expect(networkServiceSpy.send).toHaveBeenCalled();
+    // Should disconnect from server
+    expect(networkServiceSpy.disconnect).toHaveBeenCalled();
+    // Should clear matchmaking state
+    expect(matchmakingServiceSpy.clearMatchInfo).toHaveBeenCalled();
+    // Should navigate to catalogue
     expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
-  });
+  }));
+
+  it('should navigate to catalogue even when disconnection fails', fakeAsync(() => {
+    // Configure network service to throw error on send
+    networkServiceSpy.send.and.throwError('Network error');
+    Object.defineProperty(networkServiceSpy, 'isConnected', { value: true, writable: true });
+
+    const cancelButton = fixture.debugElement.query(By.css('.cancel-button'));
+    cancelButton.nativeElement.click();
+
+    tick(); // Allow async operations to complete
+
+    // Should still navigate to catalogue despite error
+    expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
+  }));
 
   it('should show tooltip when powerup cell is clicked', () => {
     // Find a cell with a powerup (should have an img element)
@@ -384,4 +413,11 @@ describe('LoadingDemoPageComponent', () => {
     expect(component['tooltipVisible']).toBe(true);
     expect(component['currentTooltipPupName']).toBe('NonExistentPup');
   });
+
+  it('should display player count from matchmaking service', () => {
+    const playerCountElement = fixture.debugElement.query(By.css('.player-count'));
+    expect(playerCountElement).toBeTruthy();
+    expect(playerCountElement.nativeElement.textContent).toContain('0 players online');
+  });
 });
+
