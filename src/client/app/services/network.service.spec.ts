@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
@@ -16,6 +17,7 @@ class MockWebSocketService {
   lastPacketSentAt = 0;
   disconnectCallback: (() => void) | null = null;
   authToken: string | null = null;
+  packetSubject = new Subject<Record<string, unknown>>();
 
   async connect(): Promise<void> {
     this.ready = true;
@@ -226,6 +228,71 @@ describe('NetworkService', () => {
 
         expect(console.error).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Packet subscription', () => {
+    it('should emit data when action matches', done => {
+      const testData = { someData: 'test' };
+      const subscription = service.onPacket(SessionActions.HEARTBEAT).subscribe(data => {
+        expect(data).toEqual(testData);
+        done();
+      });
+
+      mockWebSocketService.packetSubject.next({ action: SessionActions.HEARTBEAT, ...testData });
+
+      subscription.unsubscribe();
+    });
+
+    it('should not emit when action does not match', () => {
+      let emitted = false;
+      const subscription = service.onPacket(SessionActions.HEARTBEAT).subscribe(() => {
+        emitted = true;
+      });
+
+      mockWebSocketService.packetSubject.next({ action: 'OTHER_ACTION', someData: 'test' });
+
+      expect(emitted).toBe(false);
+
+      subscription.unsubscribe();
+    });
+
+    it('should handle multiple packets with matching actions', done => {
+      const emittedData: unknown[] = [];
+      const subscription = service.onPacket(SessionActions.HEARTBEAT).subscribe(data => {
+        emittedData.push(data);
+        if (emittedData.length === 2) {
+          expect(emittedData).toEqual([{ someData: 'first' }, { someData: 'second' }]);
+          done();
+        }
+      });
+
+      mockWebSocketService.packetSubject.next({
+        action: SessionActions.HEARTBEAT,
+        someData: 'first'
+      });
+      mockWebSocketService.packetSubject.next({
+        action: SessionActions.HEARTBEAT,
+        someData: 'second'
+      });
+
+      subscription.unsubscribe();
+    });
+
+    it('should unsubscribe properly', () => {
+      let emitted = false;
+      const subscription = service.onPacket(SessionActions.HEARTBEAT).subscribe(() => {
+        emitted = true;
+      });
+
+      subscription.unsubscribe();
+
+      mockWebSocketService.packetSubject.next({
+        action: SessionActions.HEARTBEAT,
+        someData: 'test'
+      });
+
+      expect(emitted).toBe(false);
     });
   });
 });
