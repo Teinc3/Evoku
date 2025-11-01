@@ -46,11 +46,9 @@ export default class NetworkService {
     return new Observable(observer => {
       const subscription = this.wsService.packetSubject.subscribe(packet => {
         if (packet.action === action) {
-          // Extract all properties except 'action'
-          const data = Object.fromEntries(
-            Object.entries(packet).filter(([key]) => key !== 'action')
-          ) as ActionMap[GenericAction];
-          observer.next(data);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { action, ...data } = packet;
+          observer.next(data as ActionMap[GenericAction]);
         }
       });
 
