@@ -1,7 +1,7 @@
 <app-universal-progress-bar
   [percentage]="boardProgress1"
   [isVertical]="false"
->[NERD] Player 1 (1234)</app-universal-progress-bar>
+>[{{ player1Username }}] Player 1 ({{ player1ID }})</app-universal-progress-bar>
 
 <app-phase-timer
   [timeMs]="phaseTimeMs"
@@ -12,4 +12,4 @@
   [percentage]="boardProgress2"
   [isVertical]="false"
   [flipDirection]="true"
->[Goon] Player 2 (5678)</app-universal-progress-bar>
+>[{{ player2Username }}] Player 2 ({{ player2ID }})</app-universal-progress-bar>

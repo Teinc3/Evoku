@@ -3,7 +3,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
+import NetworkService from '../../../services/network.service';
+import MatchmakingService from '../../../services/matchmaking.service';
 import AppView from '../../../../types/enums/app-view.enum';
+import LobbyActions from '@shared/types/enums/actions/system/lobby';
 
 
 /**
@@ -55,7 +58,11 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private dotsSubscription: Subscription | null = null;
   private pupConfigMap: Map<string, typeof pupConfig[0]> = new Map();
 
-  constructor(public viewStateService: ViewStateService) {
+  constructor(
+    public viewStateService: ViewStateService,
+    private readonly networkService: NetworkService,
+    public readonly matchmakingService: MatchmakingService
+  ) {
     // Initialize pup config map for O(1) lookups
     pupConfig.forEach(pup => {
       this.pupConfigMap.set(pup.name, pup);
@@ -241,5 +248,28 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   protected hideTooltip(): void {
     this.tooltipVisible = false;
     this.currentTooltipPupName = null;
+  }
+
+  /**
+   * Handle cancel button click - leave queue and return to catalogue
+   */
+  protected async cancelMatchmaking(): Promise<void> {
+    try {
+      // Send LEAVE_QUEUE packet if connected
+      if (this.networkService.isConnected) {
+        this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
+        this.networkService.disconnect();
+      }
+
+      // Clear matchmaking state
+      this.matchmakingService.clearMatchInfo();
+
+      // Navigate back to catalogue
+      this.viewStateService.navigateToView(AppView.CATALOGUE);
+    } catch (error) {
+      console.error('Failed to cancel matchmaking:', error);
+      // Still navigate back to catalogue even if there's an error
+      this.viewStateService.navigateToView(AppView.CATALOGUE);
+    }
   }
 }

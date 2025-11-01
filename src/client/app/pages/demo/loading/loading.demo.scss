@@ -16,6 +16,15 @@
   transform: translateY(-2rem);
 }
 
+.player-count {
+  font-size: 1.2rem;
+  color: #d0d0d0;
+  text-align: center;
+  margin-top: 0.5rem;
+  user-select: none;
+  transform: translateY(-2rem);
+}
+
 .powerup-grid {
   margin-top: 8rem;
   display: grid;

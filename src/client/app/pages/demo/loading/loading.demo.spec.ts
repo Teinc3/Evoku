@@ -1,8 +1,11 @@
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { signal } from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
+import NetworkService from '../../../services/network.service';
+import MatchmakingService from '../../../services/matchmaking.service';
 import AppView from '../../../../types/enums/app-view.enum';
 import LoadingDemoPageComponent from './loading.demo';
 
@@ -11,20 +14,32 @@ describe('LoadingDemoPageComponent', () => {
   let component: LoadingDemoPageComponent;
   let fixture: ComponentFixture<LoadingDemoPageComponent>;
   let viewStateServiceSpy: jasmine.SpyObj<ViewStateService>;
+  let networkServiceSpy: jasmine.SpyObj<NetworkService>;
+  let matchmakingServiceSpy: jasmine.SpyObj<MatchmakingService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('ViewStateService', ['navigateToView']);
+    const viewStateSpy = jasmine.createSpyObj('ViewStateService', ['navigateToView']);
+    const networkSpy = jasmine.createSpyObj('NetworkService', ['send', 'disconnect'], {
+      isConnected: false
+    });
+    const matchmakingSpy = jasmine.createSpyObj('MatchmakingService', ['clearMatchInfo'], {
+      playersInQueue: signal(0)
+    });
 
     await TestBed.configureTestingModule({
       imports: [LoadingDemoPageComponent],
       providers: [
-        { provide: ViewStateService, useValue: spy }
+        { provide: ViewStateService, useValue: viewStateSpy },
+        { provide: NetworkService, useValue: networkSpy },
+        { provide: MatchmakingService, useValue: matchmakingSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoadingDemoPageComponent);
     component = fixture.componentInstance;
     viewStateServiceSpy = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
+    networkServiceSpy = TestBed.inject(NetworkService) as jasmine.SpyObj<NetworkService>;
+    matchmakingServiceSpy = TestBed.inject(MatchmakingService) as jasmine.SpyObj<MatchmakingService>;
     fixture.detectChanges();
   });
 
@@ -131,7 +146,11 @@ describe('LoadingDemoPageComponent', () => {
 
   it('should initialize component state on ngOnInit', () => {
     // Create a fresh component instance to test ngOnInit behavior
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy,
+      matchmakingServiceSpy
+    );
 
     // Before ngOnInit, cells should be initialized but no pups assigned
     expect(freshComponent['cells'].length).toBe(9);
@@ -319,7 +338,11 @@ describe('LoadingDemoPageComponent', () => {
 
   it('should show tooltip with "No powerup selected" when cell has no pup', () => {
     // Create a fresh component instance to avoid initial pup assignment
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy,
+      matchmakingServiceSpy
+    );
 
     // Mock assignInitialPups to do nothing
     const originalAssignInitialPups = freshComponent['assignInitialPups'];

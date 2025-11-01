@@ -10,6 +10,7 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
+import MatchmakingService from '../../../../services/matchmaking.service';
 
 
 @Component({
@@ -28,4 +29,36 @@ import BoardModelComponent from '../../../../components/board/board.component';
   styleUrl: './duel.demo.scss'
 })
 export default class DuelDemoPageComponent {
+  constructor(protected readonly matchmakingService: MatchmakingService) {}
+
+  /**
+   * Get the player's username
+   */
+  get myUsername(): string {
+    const myInfo = this.matchmakingService.getMyInfo();
+    return myInfo?.username ?? 'Player 1';
+  }
+
+  /**
+   * Get the opponent's username
+   */
+  get opponentUsername(): string {
+    const opponent = this.matchmakingService.getOpponent();
+    return opponent?.username ?? 'Player 2';
+  }
+
+  /**
+   * Get the player's ID
+   */
+  get myPlayerID(): number {
+    return this.matchmakingService.myPlayerID() ?? 0;
+  }
+
+  /**
+   * Get the opponent's ID
+   */
+  get opponentPlayerID(): number {
+    const opponent = this.matchmakingService.getOpponent();
+    return opponent?.playerID ?? 1;
+  }
 }

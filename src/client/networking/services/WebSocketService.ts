@@ -6,6 +6,8 @@ import ClientPacketHandler from '../handlers/ClientPacketHandler';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
 import type ActionMap from '@shared/types/actionmap';
+import type MatchmakingService from '../../app/services/matchmaking.service';
+import type ViewStateService from '../../app/services/view-state.service';
 
 
 /**
@@ -22,9 +24,18 @@ export default class WebSocketService {
   private disconnectCallback: (() => void) | null = null;
   private authToken: string | null = null;
 
-  constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
+  constructor(
+    socket?: ClientSocket,
+    packetHandler?: ClientPacketHandler,
+    matchmakingService?: MatchmakingService,
+    viewStateService?: ViewStateService
+  ) {
     this.socket = socket || new ClientSocket();
-    this.packetHandler = packetHandler || new ClientPacketHandler(this);
+    this.packetHandler = packetHandler || new ClientPacketHandler(
+      this,
+      matchmakingService,
+      viewStateService
+    );
 
     this.pingTimer = null;
     this.lastPingAt = null;
@@ -36,6 +47,20 @@ export default class WebSocketService {
    */
   setAuthToken(token: string): void {
     this.authToken = token;
+  }
+
+  /**
+   * Set the matchmaking service instance
+   */
+  setMatchmakingService(service: MatchmakingService): void {
+    this.packetHandler.setMatchmakingService(service);
+  }
+
+  /**
+   * Set the view state service instance
+   */
+  setViewStateService(service: ViewStateService): void {
+    this.packetHandler.setViewStateService(service);
   }
 
   /**

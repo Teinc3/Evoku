@@ -1,5 +1,6 @@
 <div class="loading-demo">
   <h2 class="loading-title">Searching for Opponent{{ dots }}</h2>
+  <p class="player-count">{{ matchmakingService.playersInQueue() }} players online</p>
 
   <div class="powerup-grid">
     @for (cell of cells; track cell.id) {
@@ -7,7 +8,7 @@
         <button
           class="cancel-button"
           type="button"
-          (click)="viewStateService.navigateToView(AppView.CATALOGUE)"
+          (click)="cancelMatchmaking()"
           [attr.aria-label]="'Cancel matchmaking'">
           <span class="cancel-text">Cancel</span>
         </button>

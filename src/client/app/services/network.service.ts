@@ -3,6 +3,8 @@ import { Injectable, Optional } from '@angular/core';
 import WebSocketService from '../../networking/services/WebSocketService';
 import APIService from '../../networking/services/APIService';
 import CookieService from './cookie.service';
+import MatchmakingService from './matchmaking.service';
+import ViewStateService from './view-state.service';
 
 import type ActionEnum from '@shared/types/enums/actions';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
@@ -25,11 +27,26 @@ export default class NetworkService {
   constructor(
     @Optional() wsService?: WebSocketService,
     @Optional() apiService?: APIService,
-    @Optional() cookieService?: CookieService
+    @Optional() cookieService?: CookieService,
+    @Optional() matchmakingService?: MatchmakingService,
+    @Optional() viewStateService?: ViewStateService
   ) {
-    this.wsService = wsService ?? new WebSocketService();
+    this.wsService = wsService ?? new WebSocketService(
+      undefined,
+      undefined,
+      matchmakingService,
+      viewStateService
+    );
     this.apiService = apiService ?? new APIService();
     this.cookieService = cookieService ?? new CookieService();
+
+    // Set services if they were provided
+    if (matchmakingService) {
+      this.wsService.setMatchmakingService(matchmakingService);
+    }
+    if (viewStateService) {
+      this.wsService.setViewStateService(viewStateService);
+    }
   }
 
   getWSService(): WebSocketService { return this.wsService; }
