@@ -105,21 +105,24 @@ class MockClientSocket {
   }
 }
 
-// Mock ClientPacketHandler
-class MockClientPacketHandler {
-  handleData = jasmine.createSpy('handleData');
+// Mock PacketBroadcaster
+class MockPacketBroadcaster {
+  broadcast = jasmine.createSpy('broadcast');
+  getPacketStream = jasmine.createSpy('getPacketStream');
+  onPacket = jasmine.createSpy('onPacket');
+  destroy = jasmine.createSpy('destroy');
 }
 
 // Mock the dependencies
 let mockClientSocket: MockClientSocket;
-let mockClientPacketHandler: MockClientPacketHandler;
+let mockPacketBroadcaster: MockPacketBroadcaster;
 let originalWebSocket: typeof WebSocket;
 
 // Import the actual classes to mock them
 import WebSocketService from './WebSocketService';
 
 import type ClientSocket from '../transport/ClientSocket';
-import type ClientPacketHandler from '../handlers/ClientPacketHandler';
+import type PacketBroadcaster from './PacketBroadcaster';
 
 
 describe('WebSocketService', () => {
@@ -142,7 +145,7 @@ describe('WebSocketService', () => {
   beforeEach(() => {
     // Create fresh mocks for each test
     mockClientSocket = new MockClientSocket();
-    mockClientPacketHandler = new MockClientPacketHandler();
+    mockPacketBroadcaster = new MockPacketBroadcaster();
 
     (window as Window & { WebSocket: typeof WebSocket }).WebSocket =
       MockWebSocket as unknown as typeof WebSocket;
@@ -150,7 +153,7 @@ describe('WebSocketService', () => {
     // Create service instance with mocked dependencies
     service = new WebSocketService(
       mockClientSocket as unknown as ClientSocket,
-      mockClientPacketHandler as unknown as ClientPacketHandler
+      mockPacketBroadcaster as unknown as PacketBroadcaster
     );
   });
 
@@ -355,7 +358,7 @@ describe('WebSocketService', () => {
       await connectPromise;
     });
 
-    it('should handle incoming packets', () => {
+    it('should broadcast incoming packets', () => {
       const mockPacket = {
         action: SessionActions.HEARTBEAT,
         timestamp: Date.now()
@@ -365,10 +368,13 @@ describe('WebSocketService', () => {
       const handlePacket = service['handlePacket'];
       handlePacket(mockPacket);
 
-      expect(mockClientPacketHandler.handleData).toHaveBeenCalledWith(mockPacket);
+      expect(mockPacketBroadcaster.broadcast).toHaveBeenCalledWith(
+        SessionActions.HEARTBEAT,
+        { timestamp: jasmine.any(Number) }
+      );
     });
 
-    it('should handle packet handler errors gracefully', () => {
+    it('should handle broadcast errors gracefully', () => {
       spyOn(console, 'error');
 
       const mockPacket = {
@@ -376,14 +382,14 @@ describe('WebSocketService', () => {
         timestamp: Date.now()
       };
 
-      // Make packet handler throw an error
-      mockClientPacketHandler.handleData.and.throwError('Handler error');
+      // Make broadcaster throw an error
+      mockPacketBroadcaster.broadcast.and.throwError('Broadcast error');
 
       const handlePacket = service['handlePacket'];
       handlePacket(mockPacket);
 
       expect(console.error).toHaveBeenCalledWith(
-        `Error in packet handler for action ${SessionActions.HEARTBEAT}:`,
+        `Error broadcasting packet for action ${SessionActions.HEARTBEAT}:`,
         jasmine.any(Error)
       );
     });
@@ -427,6 +433,7 @@ describe('WebSocketService', () => {
       service.destroy();
 
       expect(service['pingTimer']).toBeNull();
+      expect(mockPacketBroadcaster.destroy).toHaveBeenCalled();
     });
 
     it('should clear ping timer when clearing timers', () => {
@@ -436,6 +443,13 @@ describe('WebSocketService', () => {
 
       expect(service['pingTimer']).toBeNull();
       expect(service['lastPingAt']).toBeNull();
+    });
+  });
+
+  describe('getBroadcaster', () => {
+    it('should return the packet broadcaster', () => {
+      const broadcaster = service.getBroadcaster();
+      expect(broadcaster).toBe(mockPacketBroadcaster as unknown as PacketBroadcaster);
     });
   });
 });

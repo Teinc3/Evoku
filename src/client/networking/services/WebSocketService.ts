@@ -1,7 +1,7 @@
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
 import ClientSocket from '../transport/ClientSocket';
-import ClientPacketHandler from '../handlers/ClientPacketHandler';
+import PacketBroadcaster from './PacketBroadcaster';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -15,20 +15,27 @@ import type ActionMap from '@shared/types/actionmap';
  */
 export default class WebSocketService {
   private socket: ClientSocket;
-  private packetHandler: ClientPacketHandler;
+  private broadcaster: PacketBroadcaster;
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
   private disconnectCallback: (() => void) | null = null;
   private authToken: string | null = null;
 
-  constructor(socket?: ClientSocket, packetHandler?: ClientPacketHandler) {
+  constructor(socket?: ClientSocket, broadcaster?: PacketBroadcaster) {
     this.socket = socket || new ClientSocket();
-    this.packetHandler = packetHandler || new ClientPacketHandler(this);
+    this.broadcaster = broadcaster || new PacketBroadcaster();
 
     this.pingTimer = null;
     this.lastPingAt = null;
     this.lastPacketSentAt = 0;
+  }
+
+  /**
+   * Get the packet broadcaster for subscribing to packet events.
+   */
+  getBroadcaster(): PacketBroadcaster {
+    return this.broadcaster;
   }
 
   /**
@@ -104,19 +111,20 @@ export default class WebSocketService {
    */
   destroy(): void {
     this.clearTimers();
+    this.broadcaster.destroy();
     this.socket.close();
   }
 
   // Private methods
 
   private handlePacket = (augmentedAction: AugmentAction<ActionEnum>): void => {
-    const { action } = augmentedAction;
+    const { action, ...data } = augmentedAction;
 
-    // Dispatch to composite handler architecture
+    // Broadcast the decoded packet to all subscribers
     try {
-      this.packetHandler.handleData(augmentedAction);
+      this.broadcaster.broadcast(action, data);
     } catch (error) {
-      console.error(`Error in packet handler for action ${String(action)}:`, error);
+      console.error(`Error broadcasting packet for action ${String(action)}:`, error);
     }
   };
 

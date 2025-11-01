@@ -7,6 +7,8 @@ import CookieService from './cookie.service';
 import type ActionEnum from '@shared/types/enums/actions';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 import type ActionMap from '@shared/types/actionmap';
+import type { Observable } from 'rxjs';
+import type PacketBroadcaster from '../../networking/services/PacketBroadcaster';
 
 
 /**
@@ -33,6 +35,25 @@ export default class NetworkService {
   }
 
   getWSService(): WebSocketService { return this.wsService; }
+
+  /**
+   * Subscribe to all packet broadcasts.
+   * @returns Observable that emits packet events
+   */
+  getPacketStream(): Observable<{ action: ActionEnum; data: ActionMap[ActionEnum] }> {
+    return this.wsService.getBroadcaster().getPacketStream();
+  }
+
+  /**
+   * Subscribe to packets of a specific action type.
+   * @param action The action to filter by
+   * @returns Observable that emits only packets matching the action
+   */
+  onPacket<GenericAction extends ActionEnum>(
+    action: GenericAction
+  ): Observable<ActionMap[GenericAction]> {
+    return this.wsService.getBroadcaster().onPacket(action);
+  }
 
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {
