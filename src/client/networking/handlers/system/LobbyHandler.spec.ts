@@ -30,7 +30,7 @@ describe('LobbyHandler', () => {
       privateHandler(queueUpdateData);
 
       expect(console.debug)
-        .toHaveBeenCalledWith('Queue status updated with data:', queueUpdateData);
+        .toHaveBeenCalledWith('Queue status updated:', queueUpdateData);
     });
 
     it('should handle QUEUE_UPDATE action with different data', () => {
@@ -45,7 +45,7 @@ describe('LobbyHandler', () => {
       privateHandler(queueUpdateData);
 
       expect(console.debug)
-        .toHaveBeenCalledWith('Queue status updated with data:', queueUpdateData);
+        .toHaveBeenCalledWith('Queue status updated:', queueUpdateData);
     });
   });
 
@@ -66,7 +66,7 @@ describe('LobbyHandler', () => {
       const privateHandler = handler['handleMatchFound'].bind(handler);
       privateHandler(matchFoundData);
 
-      expect(console.debug).toHaveBeenCalledWith('Match found with data:', matchFoundData);
+      expect(console.debug).toHaveBeenCalledWith('Match found:', matchFoundData);
     });
 
     it('should handle MATCH_FOUND action with different player data', () => {
@@ -84,7 +84,7 @@ describe('LobbyHandler', () => {
       const privateHandler = handler['handleMatchFound'].bind(handler);
       privateHandler(matchFoundData);
 
-      expect(console.debug).toHaveBeenCalledWith('Match found with data:', matchFoundData);
+      expect(console.debug).toHaveBeenCalledWith('Match found:', matchFoundData);
     });
   });
 
@@ -100,7 +100,7 @@ describe('LobbyHandler', () => {
       handler.handleData(queueUpdateData);
 
       expect(console.debug)
-        .toHaveBeenCalledWith('Queue status updated with data:', queueUpdateData);
+        .toHaveBeenCalledWith('Queue status updated:', queueUpdateData);
     });
 
     it('should route MATCH_FOUND action to handleMatchFound', () => {
@@ -114,7 +114,7 @@ describe('LobbyHandler', () => {
 
       handler.handleData(matchFoundData);
 
-      expect(console.debug).toHaveBeenCalledWith('Match found with data:', matchFoundData);
+      expect(console.debug).toHaveBeenCalledWith('Match found:', matchFoundData);
     });
 
     it('should handle errors in handler methods gracefully', () => {
