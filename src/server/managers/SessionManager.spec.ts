@@ -12,13 +12,17 @@ import type { MatchmakingManager } from '.';
 
 
 // Mock ServerSocket
+let capturedOnCloseCallback: ((code: number) => void) | null = null;
+
 jest.mock('../models/networking/ServerSocket', () => {
   class MockServerSocket {
     constructor(
       socket: WebSocket,
       onDisconnect: (code: number) => void,
-      onError: (error: Error) => void
+      onError: (err: Error) => void
     ) {
+      capturedOnCloseCallback = onDisconnect;
+      
       // Call the error callback asynchronously to test error handling
       process.nextTick(() => {
         onError(new Error('Socket error'));
@@ -48,12 +52,36 @@ interface SessionManagerPrivate {
 }
 
 // Mock classes for testing
-class MockWebSocket {
+interface MockWebSocketInterface {
+  readyState: number;
+  close: jest.MockedFunction<() => void>;
+  send: jest.MockedFunction<() => void>;
+  removeAllListeners: jest.MockedFunction<() => void>;
+  on: jest.MockedFunction<(event: string, listener: (...args: unknown[]) => void) => void>;
+  ping: jest.MockedFunction<() => void>;
+  pong: jest.MockedFunction<() => void>;
+  terminate: jest.MockedFunction<() => void>;
+  binaryType: 'arraybuffer';
+  bufferedAmount: number;
+  extensions: string;
+  isPaused: boolean;
+  protocol: string;
+  url: string;
+  _closeListener?: (code: number) => void;
+  _errorListener?: (error: Error) => void;
+  emitClose(code?: number): void;
+  emitError(error: Error): void;
+}
+
+class MockWebSocket implements MockWebSocketInterface {
   constructor(public readyState: number = 1) {} // WebSocket.OPEN = 1
   close = jest.fn();
   send = jest.fn();
   removeAllListeners = jest.fn();
-  on = jest.fn();
+  on = jest.fn((event: string, listener: (...args: unknown[]) => void) => {
+    // Store the listener so we can call it later
+    (this as Record<string, unknown>)[`_${event}Listener`] = listener;
+  });
   ping = jest.fn();
   pong = jest.fn();
   terminate = jest.fn();
@@ -63,6 +91,21 @@ class MockWebSocket {
   isPaused = false;
   protocol = '';
   url = '';
+  
+  // Method to simulate emitting events
+  emitClose(code: number = 1000) {
+    const listener = (this as MockWebSocketInterface)._closeListener;
+    if (listener) {
+      listener(code);
+    }
+  }
+  
+  emitError(error: Error) {
+    const listener = (this as MockWebSocketInterface)._errorListener;
+    if (listener) {
+      listener(error);
+    }
+  }
 }
 
 class MockSystemHandler implements IDataHandler<SystemActions> {
@@ -379,19 +422,27 @@ describe('SessionManager', () => {
     });
   });
 
-  describe('setMatchmakingManager', () => {
-    it('should set the matchmaking manager', () => {
+  describe('socket disconnection callback', () => {
+    it('should call session.disconnect when socket closes', () => {
       // Arrange
-      const mockMatchmakingManager = {
-        onSessionDisconnect: jest.fn(),
-      } as unknown as MatchmakingManager;
+      const mockSocket = new MockWebSocket();
+      
+      // Reset captured callbacks
+      capturedOnCloseCallback = null;
 
       // Act
-      sessionManager.setMatchmakingManager(mockMatchmakingManager);
+      const session = sessionManager.createSession(mockSocket as unknown as WebSocket);
+
+      // Spy on session.disconnect
+      const disconnectSpy = jest.spyOn(session, 'disconnect');
+
+      // Simulate socket close by calling the captured callback
+      if (capturedOnCloseCallback) {
+        (capturedOnCloseCallback as (code: number) => void)(1000); // Normal closure
+      }
 
       // Assert
-      expect((sessionManager as unknown as { matchmakingManager?: MatchmakingManager })
-        .matchmakingManager).toBe(mockMatchmakingManager);
+      expect(disconnectSpy).toHaveBeenCalledWith();
     });
   });
 

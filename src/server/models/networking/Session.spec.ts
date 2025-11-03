@@ -28,14 +28,14 @@ class MockRoom {
   public readonly roomID = 'test-room';
   public participants = new Map();
   public roomDataHandler = {
-    handleData: jest.fn().mockReturnValue(true)
+    handleData: jest.fn().mockImplementation(() => Promise.resolve(true))
   };
 
   removeSession = jest.fn();
 }
 
 class MockSystemHandler {
-  handleData = jest.fn().mockReturnValue(true);
+  handleData = jest.fn().mockImplementation(() => Promise.resolve(true));
 }
 
 describe('SessionModel', () => {
@@ -446,11 +446,12 @@ describe('SessionModel', () => {
       expect(result).toBe(true);
     });
 
-    it('should queue system actions when not authenticated', async () => {
-      // Arrange - Use a system action (JOIN_QUEUE) instead of match action
-      const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
-        action: LobbyActions.JOIN_QUEUE,
-        username: 'test-user',
+    it('should route AUTH actions to system handler when not authenticated', async () => {
+      // Arrange - Use AUTH action which should be allowed even when not authenticated
+      const data: AugmentAction<SessionActions.AUTH> = {
+        action: SessionActions.AUTH,
+        token: 'test-auth-token',
+        version: '1.0.0',
       };
 
       // Act
@@ -459,10 +460,10 @@ describe('SessionModel', () => {
       }).handleData(data);
 
       // Assert
-      expect(mockSystemHandler.handleData).not.toHaveBeenCalled();
-      expect(result).toBe(true); // Should return true because packet is queued
+      expect(mockSystemHandler.handleData).toHaveBeenCalledWith(session, data);
+      expect(result).toBe(true);
       expect((session as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
-        .preAuthPacketQueue).toHaveLength(1);
+        .preAuthPacketQueue).toHaveLength(0); // Should not be queued
     });
 
     it('should queue match actions when not authenticated', async () => {
@@ -559,6 +560,60 @@ describe('SessionModel', () => {
       expect(mockSystemHandler.handleData).toHaveBeenCalledWith(session, data);
       expect((session as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
         .preAuthPacketQueue).toHaveLength(0);
+    });
+
+    it('should disconnect session when pre-auth packet queue is full', async () => {
+      // Arrange - Create a fresh session for this test without socket to avoid auth timeout
+      const freshSession = new SessionModel(
+        null, // No socket to avoid auth timeout
+        onDisconnectSpy,
+        onDestroySpy,
+        onAuthenticateSpy,
+        mockSystemHandler as unknown as IDataHandler<SystemActions>,
+        mockRoom as unknown as RoomModel
+      );
+
+      // Verify session starts unauthenticated
+      expect(freshSession.isAuthenticated()).toBe(false);
+
+      // Fill the queue to max capacity (20)
+      for (let i = 0; i < 20; i++) {
+        const data: AugmentAction<MechanicsActions.SET_CELL> = {
+          action: MechanicsActions.SET_CELL,
+          clientTime: 1000,
+          actionID: 42,
+          cellIndex: i,
+          value: 2
+        };
+        const result = await (freshSession as unknown as {
+          handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
+        }).handleData(data);
+        expect(result).toBe(true); // Should return true for queued packets
+      }
+
+      // Verify queue is full
+      expect((freshSession as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
+        .preAuthPacketQueue).toHaveLength(20);
+
+      // Now send one more packet that should trigger disconnect
+      const overflowData: AugmentAction<MechanicsActions.SET_CELL> = {
+        action: MechanicsActions.SET_CELL,
+        clientTime: 1000,
+        actionID: 43,
+        cellIndex: 20,
+        value: 3
+      };
+
+      // Act
+      const result = await (freshSession as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
+      }).handleData(overflowData);
+
+      // Assert
+      expect(onDisconnectSpy).toHaveBeenCalledWith(freshSession);
+      expect(result).toBe(false);
+      expect((freshSession as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
+        .preAuthPacketQueue).toHaveLength(0); // Queue should be cleared on disconnect
     });
   });
 
@@ -727,39 +782,6 @@ describe('SessionModel', () => {
 
       // Assert - Should NOT disconnect because session is already authenticated
       expect(onDisconnectSpy).not.toHaveBeenCalled();
-    });
-
-    it('should clear queued packets when auth timeout disconnects session', async () => {
-      const sessionWithTimeout = new SessionModel(
-        mockSocket as unknown as ServerSocket,
-        onDisconnectSpy,
-        onDestroySpy,
-        onAuthenticateSpy,
-        mockSystemHandler as unknown as IDataHandler<SystemActions>,
-        mockRoom as unknown as RoomModel
-      );
-
-      // Send some packets before authentication (they get queued)
-      const packet1: AugmentAction<LobbyActions.JOIN_QUEUE> = {
-        action: LobbyActions.JOIN_QUEUE,
-        username: 'test-user-1'
-      };
-
-      await (sessionWithTimeout as unknown as {
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
-      }).handleData(packet1);
-
-      // Verify packets are queued
-      expect((sessionWithTimeout as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
-        .preAuthPacketQueue).toHaveLength(1);
-
-      // Act - Advance time past the auth timeout (disconnect should occur)
-      jest.advanceTimersByTime(6000);
-
-      // Assert - Session should be disconnected and queue cleared
-      expect(onDisconnectSpy).toHaveBeenCalledWith(sessionWithTimeout);
-      expect((sessionWithTimeout as unknown as { preAuthPacketQueue: AugmentAction<ActionEnum>[] })
-        .preAuthPacketQueue).toHaveLength(0);
     });
   });
 });

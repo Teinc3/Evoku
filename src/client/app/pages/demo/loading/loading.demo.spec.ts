@@ -20,6 +20,11 @@ describe('LoadingDemoPageComponent', () => {
   let networkServiceSpy: jasmine.SpyObj<NetworkService>;
 
   beforeEach(async () => {
+    // Mock console methods to prevent test output pollution
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+
     const viewStateSpy = jasmine.createSpyObj('ViewStateService',
       ['navigateToView', 'navigateToViewWithData']);
     const networkSpy = jasmine.createSpyObj('NetworkService', [
