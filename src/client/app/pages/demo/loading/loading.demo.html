@@ -1,6 +1,8 @@
 <div class="loading-demo">
-  <h2 class="loading-title">Searching for Opponent{{ dots }}</h2>
-  <p class="online-count">{{ onlineCount }} players online</p>
+  <h2 class="loading-title" [class.error]="errorMessage">{{ errorMessage || ('Searching for Opponent' + dots) }}</h2>
+  @if (onlineCount >= 0) {
+    <p class="online-count">{{ onlineCount }} players online</p>
+  }
 
   <div class="powerup-grid">
     @for (cell of cells; track cell.id) {
@@ -14,14 +16,17 @@
         </button>
       } @else {
         @if (cell.pupIcon) {
-          <img
-            [src]="cell.pupIcon"
-            class="powerup-cell"
-            [style.opacity]="cell.opacity"
+          <div
+            class="powerup-cell-wrapper"
             (click)="onCellClick($event, cell.id)"
             tabindex="0"
-            [attr.aria-label]="'Powerup: ' + cell.pupName"
-            alt="Powerup icon">
+            [attr.aria-label]="'Powerup: ' + cell.pupName">
+            <img
+              [src]="cell.pupIcon"
+              class="powerup-cell"
+              [style.opacity]="cell.opacity"
+              alt="Powerup icon">
+          </div>
         }
       }
     }

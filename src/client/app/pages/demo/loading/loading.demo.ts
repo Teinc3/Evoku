@@ -56,7 +56,8 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private queueUpdateSubscription: Subscription | null = null;
   private matchFoundSubscription: Subscription | null = null;
 
-  protected onlineCount: number = 0;
+  protected onlineCount: number = -1;
+  protected errorMessage: string | null = null;
 
   constructor(
     public viewStateService: ViewStateService,
@@ -258,7 +259,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       this.queueUpdateSubscription = this.networkService.onPacket(LobbyActions.QUEUE_UPDATE)
         .subscribe(data => {
           // Handle queue update - store online count for display
-          this.onlineCount = data.onlineCount || 0;
+          this.onlineCount = data.onlineCount || -1;
         });
 
       // Subscribe to match found
@@ -274,7 +275,9 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
 
     } catch (error) {
       console.error('Failed to connect and join queue:', error);
-      // Could show error message or retry
+      this.errorMessage = 'Failed to connect to server';
+      this.stopAnimation();
+      this.stopDotsAnimation();
     }
   }
 

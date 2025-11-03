@@ -31,20 +31,30 @@ export default class SessionManager {
   }
 
   public createSession(socket: WebSocket): SessionModel {
-    // Create a new ServerSocket instance and a SessionModel that wraps it
+    // Create session variable that will be assigned later
+    // The callback captures this variable by reference
+    let session: SessionModel | null = null;
+
+    // Create the ServerSocket with a callback that will use the session once assigned
     const serverSocket = new ServerSocket(
       socket,
-      (_code: number) => session.disconnect(), // Ends up also calling onDisconnect here
+      (_code: number) => {
+        if (session) {
+          session.disconnect();
+        }
+      },
       (err: Error) => console.error('Socket error:', err, err.stack)
     );
 
-    const session = new SessionModel(
+    // Now create the SessionModel
+    session = new SessionModel(
       serverSocket,
       session => this.onDisconnect(session),
       session => this.onDestroy(session),
       (session, userID) => this.onAuthenticate(session, userID),
       this.systemHandler
     );
+
     this.sessions.set(session.uuid, session);
     return session;
   }

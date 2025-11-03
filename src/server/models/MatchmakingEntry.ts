@@ -30,11 +30,6 @@ export default class MatchmakingEntryModel {
     });
   }
 
-  /** Check if the entry has been in pending queue for 5+ seconds */
-  public isReadyForActive(): boolean {
-    return Date.now() - this.joinTime >= 5000;
-  }
-
   /** Clean up resources */
   public destroy(): void {
     // No cleanup needed - timers are handled centrally

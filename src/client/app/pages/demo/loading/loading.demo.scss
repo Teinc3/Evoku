@@ -15,6 +15,11 @@
   white-space: pre;
   transform: translateY(-2rem);
   margin-bottom: 0;
+
+  &.error {
+    color: #c00;
+    font-weight: bold;
+  }
 }
 
 .online-count {
@@ -41,12 +46,21 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  cursor: pointer;
   transform: rotate(45deg) scale(1.5);
   transition: transform 0.2s ease, opacity 1s ease;
   user-select: none;
+  pointer-events: none; // Prevent transparent corners from blocking clicks
+}
 
-  &:hover {
+.powerup-cell-wrapper {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover .powerup-cell {
     transform: rotate(45deg) scale(1.55);
   }
 }
