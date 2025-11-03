@@ -147,6 +147,7 @@ We aim to achieve around 90-95% code coverage across the entire project.
 - For console warnings and errors due to unexpected input in source code,
   when testing them you will have to mute the output in the test file, otherwise it will pollute the test output.
 - When accessing private/protected properties/methods in tests, use string indexing (e.g. `obj['privateProp']`).
+- Backwards compatibility is not required when making edits. It just contaminates code unnecessarily especially during refactors.
 
 ### Environments
 - Client tests must use Jasmine/Karma framework, with an angular testbed setup (if required).

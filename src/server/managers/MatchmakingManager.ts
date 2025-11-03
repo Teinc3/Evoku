@@ -13,11 +13,15 @@ import type RoomManager from "./RoomManager";
 export default class MatchmakingManager {
   private pendingQueue = new Map<string, MatchmakingEntryModel>();
   private activeQueue: MatchmakingEntryModel[] = [];
+  private broadcastTimer?: NodeJS.Timeout;
 
   constructor(
     private sessionManager: SessionManager,
     private roomManager: RoomManager
-  ) {}
+  ) {
+    // Start periodic broadcasts to all authenticated sessions
+    this.startPeriodicBroadcasts();
+  }
 
   /**
    * Add a player to the matchmaking queue.
@@ -33,10 +37,10 @@ export default class MatchmakingManager {
     }
 
     const entry = new MatchmakingEntryModel(session, username, this.sessionManager);
-    entry.startUpdates();
+    // No longer start individual timers - handled by central broadcast
     this.pendingQueue.set(sessionId, entry);
 
-    // Send initial queue update
+    // Send initial queue update immediately when joining
     entry.sendQueueUpdate();
 
     // Promote to active queue after 5 seconds
@@ -75,12 +79,9 @@ export default class MatchmakingManager {
     }
 
     // Stop updates since they're now active
-    entry.stopUpdates();
-
+    // No longer needed - handled by central broadcast
     this.pendingQueue.delete(sessionId);
     this.activeQueue.push(entry);
-
-    console.log(`Player ${entry.username} promoted to active queue.`);
 
     // Try to match players
     this.tryMatchPlayers();
@@ -122,8 +123,6 @@ export default class MatchmakingManager {
       myID: 1,
       players: playersInfo
     });
-
-    console.log("matched players:", username1, "and", username2);
   }
 
   /** Get the current queue status for debugging/monitoring */
@@ -134,8 +133,38 @@ export default class MatchmakingManager {
     };
   }
 
+  /** Start periodic broadcasts of queue information to all authenticated sessions */
+  private startPeriodicBroadcasts(): void {
+    this.broadcastTimer = setInterval(() => {
+      this.broadcastQueueUpdate();
+    }, 15000); // Every 15 seconds
+  }
+
+  /** Stop periodic broadcasts */
+  private stopPeriodicBroadcasts(): void {
+    if (this.broadcastTimer) {
+      clearInterval(this.broadcastTimer);
+      this.broadcastTimer = undefined;
+    }
+  }
+
+  /** Broadcast queue update to all sessions in queue */
+  private broadcastQueueUpdate(): void {
+    const onlineCount = this.sessionManager.getOnlineCount();
+
+    // Forward to all sessions in the queue
+    for (const mmEntry of [...this.pendingQueue.values(), ...this.activeQueue]) {
+      mmEntry.session.forward(LobbyActions.QUEUE_UPDATE, {
+        inQueue: true,
+        onlineCount
+      });
+    }
+  }
+
   /** Clean up all timers and clear queues */
   public close(): void {
+    this.stopPeriodicBroadcasts();
+    
     // Clear all pending queue timers
     for (const entry of this.pendingQueue.values()) {
       entry.destroy();

@@ -12,7 +12,6 @@ export default class MatchmakingEntryModel {
   public readonly session: SessionModel;
   public readonly username: string;
   public readonly joinTime: number;
-  private updateTimer?: NodeJS.Timeout;
   private sessionManager: SessionManager;
 
   constructor(session: SessionModel, username: string, sessionManager: SessionManager) {
@@ -20,21 +19,6 @@ export default class MatchmakingEntryModel {
     this.username = username;
     this.joinTime = Date.now();
     this.sessionManager = sessionManager;
-  }
-
-  /** Start sending queue updates every 15 seconds */
-  public startUpdates(): void {
-    this.updateTimer = setInterval(() => {
-      this.sendQueueUpdate();
-    }, 15000);
-  }
-
-  /** Stop sending queue updates. */
-  public stopUpdates(): void {
-    if (this.updateTimer) {
-      clearInterval(this.updateTimer);
-      this.updateTimer = undefined;
-    }
   }
 
   /** Send a queue update packet to the session */
@@ -53,6 +37,6 @@ export default class MatchmakingEntryModel {
 
   /** Clean up resources */
   public destroy(): void {
-    this.stopUpdates();
+    // No cleanup needed - timers are handled centrally
   }
 }

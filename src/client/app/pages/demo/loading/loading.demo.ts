@@ -56,6 +56,8 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private queueUpdateSubscription: Subscription | null = null;
   private matchFoundSubscription: Subscription | null = null;
 
+  protected onlineCount: number = 0;
+
   constructor(
     public viewStateService: ViewStateService,
     private networkService: NetworkService
@@ -255,8 +257,8 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       // Subscribe to queue updates
       this.queueUpdateSubscription = this.networkService.onPacket(LobbyActions.QUEUE_UPDATE)
         .subscribe(data => {
-          // Handle queue update - could display player count
-          console.log('Queue update:', data);
+          // Handle queue update - store online count for display
+          this.onlineCount = data.onlineCount || 0;
         });
 
       // Subscribe to match found
