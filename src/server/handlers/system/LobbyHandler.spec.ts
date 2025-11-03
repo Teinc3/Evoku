@@ -52,6 +52,25 @@ describe('LobbyHandler', () => {
       expect(result).toBe(true);
       expect(mockMatchmakingManager.joinQueue).toHaveBeenCalledWith(mockSession, 'TestPlayer');
     });
+
+    it('should return false when matchmaking manager is not set', async () => {
+      // Arrange
+      const freshHandler = new LobbyHandler(); // No matchmaking manager set
+      const joinQueueData = {
+        action: LobbyActions.JOIN_QUEUE,
+        username: 'TestPlayer',
+        clientTime: 1000,
+      };
+
+      // Act
+      const result = await freshHandler.handleData(
+        mockSession as unknown as SessionModel,
+        joinQueueData
+      );
+
+      // Assert
+      expect(result).toBe(false);
+    });
   });
 
   describe('handleLeaveQueue', () => {
@@ -71,6 +90,24 @@ describe('LobbyHandler', () => {
       // Assert
       expect(result).toBe(true);
       expect(mockMatchmakingManager.leaveQueue).toHaveBeenCalledWith('test-session');
+    });
+
+    it('should return false when matchmaking manager is not set', async () => {
+      // Arrange
+      const freshHandler = new LobbyHandler(); // No matchmaking manager set
+      const leaveQueueData = {
+        action: LobbyActions.LEAVE_QUEUE,
+        clientTime: 1000,
+      };
+
+      // Act
+      const result = await freshHandler.handleData(
+        mockSession as unknown as SessionModel,
+        leaveQueueData
+      );
+
+      // Assert
+      expect(result).toBe(false);
     });
   });
 });

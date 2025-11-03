@@ -9,6 +9,9 @@ import NetworkService from '../../../services/network.service';
 import AppView from '../../../../types/enums/app-view.enum';
 import LoadingDemoPageComponent from './loading.demo';
 
+import type { QueueUpdateContract } from '@shared/types/contracts/system/lobby/QueueContract';
+import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+
 
 describe('LoadingDemoPageComponent', () => {
   let component: LoadingDemoPageComponent;
@@ -26,7 +29,10 @@ describe('LoadingDemoPageComponent', () => {
       'onPacket'
     ]);
 
-    // Mock onPacket to return empty observables
+    // Mock connect to resolve successfully
+    networkSpy.connect.and.resolveTo();
+
+    // Mock onPacket to return empty observables by default
     networkSpy.onPacket.and.returnValue(of());
 
     await TestBed.configureTestingModule({
@@ -383,5 +389,90 @@ describe('LoadingDemoPageComponent', () => {
     expect(component['tooltipText']).toBe('No description available');
     expect(component['tooltipVisible']).toBe(true);
     expect(component['currentTooltipPupName']).toBe('NonExistentPup');
+  });
+
+  it('should handle connection failure in connectAndJoinQueue', async () => {
+    // Mock networkService.connect to throw an error
+    networkServiceSpy.connect.and.rejectWith(new Error('Connection failed'));
+
+    // Create a fresh component to test the connection failure
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Start the connection process
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should set error message and stop animations
+    expect(freshComponent['errorMessage']).toBe('Failed to connect to server');
+    expect(freshComponent['animationSubscription']).toBeNull();
+    expect(freshComponent['dotsSubscription']).toBeNull();
+  });
+
+  it('should generate guest username with proper format', () => {
+    // Mock Math.random to return a predictable value
+    spyOn(Math, 'random').and.returnValue(0.01234);
+
+    const username = component['generateGuestUsername']();
+
+    expect(username).toBe('Guest 0123');
+  });
+
+  it('should handle queue update packets correctly', async () => {
+    // Mock onPacket to return observable with queue update data
+    const queueUpdateData: QueueUpdateContract = { inQueue: true, onlineCount: 42 };
+    networkServiceSpy.onPacket.and.returnValue(of(queueUpdateData));
+
+    // Create fresh component and call connectAndJoinQueue to set up subscriptions
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Call connectAndJoinQueue to set up the subscriptions
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should have received the online count
+    expect(freshComponent['onlineCount']).toBe(42);
+  });
+
+  it('should handle match found packets correctly', async () => {
+    // Mock onPacket to return observable with match found data
+    const matchData: MatchFoundContract = { myID: 0, players: [] };
+    networkServiceSpy.onPacket.and.returnValue(of(matchData));
+
+    // Create fresh component and call connectAndJoinQueue to set up subscriptions
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Call connectAndJoinQueue to set up the subscriptions
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should navigate to duel demo with match data
+    expect(viewStateServiceSpy.navigateToViewWithData).toHaveBeenCalledWith(
+      AppView.DUEL_DEMO,
+      matchData
+    );
+  });
+
+  it('should clean up network subscriptions on destroy', () => {
+    // Create fresh component
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Initialize to set up subscriptions
+    freshComponent.ngOnInit();
+
+    // Destroy component
+    freshComponent.ngOnDestroy();
+
+    // Network subscriptions should be cleaned up
+    expect(freshComponent['queueUpdateSubscription']).toBeNull();
+    expect(freshComponent['matchFoundSubscription']).toBeNull();
   });
 });

@@ -160,6 +160,26 @@ describe('MatchmakingManager', () => {
       expect(manager.pendingQueue.has('session-1')).toBe(false);
       expect(manager.activeQueue.length).toBe(1);
     });
+
+    it('should attempt to match players when promoting to active queue', () => {
+      // Arrange
+      const session1 = new MockSession('session-1');
+      const session2 = new MockSession('session-2');
+      matchmakingManager.joinQueue(session1 as unknown as SessionModel, 'Player1');
+      matchmakingManager.joinQueue(session2 as unknown as SessionModel, 'Player2');
+
+      // Act - Advance time to promote first player (should trigger tryMatchPlayers)
+      jest.advanceTimersByTime(5000);
+
+      // Assert - Both players should be matched and removed from queues
+      const manager = matchmakingManager as unknown as {
+        pendingQueue: Map<string, MatchmakingEntryModel>;
+        activeQueue: MatchmakingEntryModel[];
+      };
+      expect(manager.pendingQueue.size).toBe(0);
+      expect(manager.activeQueue.length).toBe(0);
+      expect(mockRoomManager.createRoom).toHaveBeenCalled();
+    });
   });
 
   describe('leaveQueue', () => {

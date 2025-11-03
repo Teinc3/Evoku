@@ -11,6 +11,35 @@ import type IDataHandler from '../types/handler';
 import type { MatchmakingManager } from '.';
 
 
+// Mock ServerSocket
+jest.mock('../models/networking/ServerSocket', () => {
+  class MockServerSocket {
+    constructor(
+      socket: WebSocket,
+      onDisconnect: (code: number) => void,
+      onError: (error: Error) => void
+    ) {
+      // Call the error callback asynchronously to test error handling
+      process.nextTick(() => {
+        onError(new Error('Socket error'));
+      });
+    }
+
+    setListener = jest.fn();
+    close = jest.fn();
+    send = jest.fn();
+    readyState = 1; // WebSocket.OPEN
+  }
+
+  return MockServerSocket;
+});
+
+// Mock console methods to prevent test output pollution
+jest.spyOn(console, 'log').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
+
+
 // Type definitions for accessing private methods
 interface SessionManagerPrivate {
   sessions: Map<UUID, SessionModel>;
