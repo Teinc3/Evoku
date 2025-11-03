@@ -171,7 +171,8 @@ describe('NetworkService', () => {
       it('should authenticate without existing token', async () => {
         const mockResponse = {
           token: 'new-test-token',
-          elo: 0
+          elo: 0,
+          userID: 'test-user-id'
         };
 
         mockCookieService.get.and.returnValue(null);
@@ -193,7 +194,8 @@ describe('NetworkService', () => {
         const existingToken = 'existing-test-token';
         const mockResponse = {
           token: 'new-test-token',
-          elo: 1500
+          elo: 1500,
+          userID: 'test-user-id'
         };
 
         mockCookieService.get.and.returnValue(existingToken);

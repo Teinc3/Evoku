@@ -35,7 +35,7 @@ describe('App', () => {
     
     // Mock initGuestAuth to prevent actual API calls during tests
     spyOn(networkService, 'initGuestAuth').and.returnValue(
-      Promise.resolve({ token: 'test-token', elo: 0 })
+      Promise.resolve({ token: 'test-token', elo: 0, userID: 'test-user-id' })
     );
   });
 
