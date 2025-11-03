@@ -31,7 +31,6 @@ export class StatsService {
     try {
       const isoTime = new Date(this.serverStartTime).toISOString();
       await redisService.set('server:startup', isoTime);
-      console.log(`Server startup time logged: ${isoTime}`);
     } catch (error) {
       console.error('Failed to log startup time to Redis:', error);
     }

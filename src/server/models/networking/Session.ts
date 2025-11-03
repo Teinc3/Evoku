@@ -21,6 +21,7 @@ import type RoomModel from "./Room";
  */
 export default class SessionModel {
   private static readonly AUTH_TIMEOUT_MS = 5000; // 5 seconds
+  private static readonly MAX_PRE_AUTH_QUEUE_SIZE = 20; // Maximum packets to queue before auth
 
   public uuid: UUID;
   private disconnected: boolean;
@@ -200,6 +201,12 @@ export default class SessionModel {
           data as AugmentAction<SystemActions>
         );
       } else {
+        // Check queue size limit to prevent abuse
+        if (this.preAuthPacketQueue.length >= SessionModel.MAX_PRE_AUTH_QUEUE_SIZE) {
+          this.disconnect(true);
+          return false;
+        }
+        
         // Queue valid packets for processing after authentication
         // If after 5 seconds (auth timeout) the session still isn't authed
         // Then we just disconnect the session, simple and effective

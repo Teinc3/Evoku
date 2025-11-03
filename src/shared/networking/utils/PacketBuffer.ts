@@ -163,7 +163,8 @@ export default class PacketBuffer implements IPacketBuffer {
   // Write Methods
   write(data: ArrayBuffer | Uint8Array, offset?: number): number {
     if (data instanceof ArrayBuffer) {
-      // Create a non-resizable copy to avoid TextDecoder issues with resizable ArrayBuffers
+      // Create a non-resizable copy to ensure compatibility with buffer operations
+      // that expect fixed-size ArrayBuffers (resizable buffers can cause issues)
       const nonResizableBuffer = new ArrayBuffer(data.byteLength);
       new Uint8Array(nonResizableBuffer).set(new Uint8Array(data));
       data = new Uint8Array(nonResizableBuffer);

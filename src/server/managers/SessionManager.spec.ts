@@ -8,6 +8,7 @@ import type { WebSocket } from 'ws';
 import type { UUID } from 'crypto';
 import type SystemActions from '@shared/types/enums/actions/system';
 import type IDataHandler from '../types/handler';
+import type { MatchmakingManager } from '.';
 
 
 // Type definitions for accessing private methods
@@ -182,6 +183,24 @@ describe('SessionManager', () => {
       expect((sessionManager as unknown as SessionManagerPrivate)
         .sessions.has(session.uuid)).toBe(true);
     });
+
+    it('should notify matchmaking manager when session disconnects', () => {
+      // Arrange
+      const mockMatchmakingManager = {
+        onSessionDisconnect: jest.fn(),
+      } as unknown as MatchmakingManager;
+
+      sessionManager.setMatchmakingManager(mockMatchmakingManager);
+
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
+
+      // Act
+      sessionManager.onDisconnect(session);
+
+      // Assert
+      expect(mockMatchmakingManager.onSessionDisconnect).toHaveBeenCalledWith(session.uuid);
+    });
   });
 
   describe('onDestroy', () => {
@@ -328,6 +347,74 @@ describe('SessionManager', () => {
 
       // Assert
       expect((sessionManager as unknown as SessionManagerPrivate).sessions.size).toBe(0);
+    });
+  });
+
+  describe('setMatchmakingManager', () => {
+    it('should set the matchmaking manager', () => {
+      // Arrange
+      const mockMatchmakingManager = {
+        onSessionDisconnect: jest.fn(),
+      } as unknown as MatchmakingManager;
+
+      // Act
+      sessionManager.setMatchmakingManager(mockMatchmakingManager);
+
+      // Assert
+      expect((sessionManager as unknown as { matchmakingManager?: MatchmakingManager })
+        .matchmakingManager).toBe(mockMatchmakingManager);
+    });
+  });
+
+  describe('onAuthenticate', () => {
+    it('should assign userID as session UUID when no existing session exists', () => {
+      // Arrange
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
+      const originalUuid = session.uuid;
+      const userId = 'user-123' as UUID;
+
+      // Act
+      sessionManager.onAuthenticate(session, userId);
+
+      // Assert
+      expect(session.uuid).toBe(userId);
+      expect((sessionManager as unknown as SessionManagerPrivate)
+        .sessions.has(originalUuid)).toBe(false);
+      expect((sessionManager as unknown as SessionManagerPrivate)
+        .sessions.has(userId)).toBe(true);
+      expect(sessionManager.getSession(userId)).toBe(session);
+    });
+
+    it('should reconnect existing session when userID already has a session', () => {
+      // Arrange
+      const socket1 = new MockWebSocket();
+      const socket2 = new MockWebSocket();
+      const existingSession = sessionManager.createSession(socket1 as unknown as WebSocket);
+      const userId = 'user-456' as UUID;
+
+      // Authenticate first session
+      sessionManager.onAuthenticate(existingSession, userId);
+
+      // Create second session (simulating new connection from same user)
+      const newSession = sessionManager.createSession(socket2 as unknown as WebSocket);
+      const newSessionUuid = newSession.uuid;
+
+      // Spy on reconnect method
+      const reconnectSpy = jest.spyOn(existingSession, 'reconnect');
+      const destroySpy = jest.spyOn(newSession, 'destroy');
+
+      // Act - Authenticate second session with same userID
+      sessionManager.onAuthenticate(newSession, userId);
+
+      // Assert
+      expect(reconnectSpy).toHaveBeenCalledWith(expect.any(Object)); // ServerSocket instance
+      expect(destroySpy).toHaveBeenCalledWith(true);
+      expect((sessionManager as unknown as SessionManagerPrivate)
+        .sessions.has(newSessionUuid)).toBe(false); // New session removed
+      expect((sessionManager as unknown as SessionManagerPrivate)
+        .sessions.has(userId)).toBe(true); // Existing session remains
+      expect(sessionManager.getSession(userId)).toBe(existingSession);
     });
   });
 });
