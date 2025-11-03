@@ -44,6 +44,7 @@ describe('SessionModel', () => {
   let mockSystemHandler: MockSystemHandler;
   let onDisconnectSpy: jest.MockedFunction<(session: SessionModel) => void>;
   let onDestroySpy: jest.MockedFunction<(session: SessionModel) => void>;
+  let onAuthenticateSpy: jest.MockedFunction<(session: SessionModel, playerID: string) => void>;
   let session: SessionModel;
 
   beforeEach(() => {
@@ -58,11 +59,13 @@ describe('SessionModel', () => {
     mockSystemHandler = new MockSystemHandler();
     onDisconnectSpy = jest.fn();
     onDestroySpy = jest.fn();
+    onAuthenticateSpy = jest.fn();
 
     session = new SessionModel(
       mockSocket as unknown as ServerSocket,
       onDisconnectSpy,
       onDestroySpy,
+      onAuthenticateSpy,
       mockSystemHandler as unknown as IDataHandler<SystemActions>,
       mockRoom as unknown as RoomModel
     );
@@ -93,6 +96,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>
       );
       const afterTime = Date.now();
@@ -133,6 +137,7 @@ describe('SessionModel', () => {
         null,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>
       );
 
@@ -166,6 +171,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         freshOnDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         mockRoom as unknown as RoomModel
       );
@@ -196,6 +202,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         null
       );
@@ -298,6 +305,7 @@ describe('SessionModel', () => {
         null,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>
       );
       const action = SessionActions.HEARTBEAT;
@@ -330,7 +338,7 @@ describe('SessionModel', () => {
   describe('dataListener', () => {
     it('should update last active time when data is handled successfully', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440000'); // Authenticate first
       const originalTime = session.lastActiveTime;
       jest.advanceTimersByTime(1000); // Advance time by 1 second
 
@@ -375,7 +383,7 @@ describe('SessionModel', () => {
 
     it('should handle match actions when room exists', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440001'); // Authenticate first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -395,7 +403,7 @@ describe('SessionModel', () => {
 
     it('should handle system actions when authenticated', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440002'); // Authenticate first
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
         username: 'test-user'
@@ -431,7 +439,8 @@ describe('SessionModel', () => {
     it('should route match actions to room handler ' +
       'when room exists and authenticated', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate the session first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440003');
+      // Authenticate the session first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -441,8 +450,8 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      const result = await (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      const result = await (session as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -458,8 +467,8 @@ describe('SessionModel', () => {
       };
 
       // Act
-      const result = await (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      const result = await (session as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -493,10 +502,12 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         null
       );
-      sessionWithoutRoom.setAuthenticated(); // Authenticate so we can test room logic
+      sessionWithoutRoom.setAuthenticated('550e8400-e29b-41d4-a716-446655440004');
+      // Authenticate so we can test room logic
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         clientTime: 1000,
@@ -506,8 +517,8 @@ describe('SessionModel', () => {
       };
 
       // Act - Call the private method via type assertion
-      const result = await (sessionWithoutRoom as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      const result = await (sessionWithoutRoom as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -517,15 +528,15 @@ describe('SessionModel', () => {
 
     it('should route system actions to system handler when authenticated', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440005'); // Authenticate first
       const data: AugmentAction<LobbyActions.JOIN_QUEUE> = {
         action: LobbyActions.JOIN_QUEUE,
         username: 'test-user'
       };
 
       // Act - Call the private method via type assertion
-      const result = await (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      const result = await (session as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -541,8 +552,8 @@ describe('SessionModel', () => {
       } as unknown as AugmentAction<ActionEnum>;
 
       // Act - Call the private method via type assertion
-      const result = await (session as unknown as { 
-        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean> 
+      const result = await (session as unknown as {
+        handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
       // Assert
@@ -553,7 +564,7 @@ describe('SessionModel', () => {
 
     it('should propagate handler return values', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440006'); // Authenticate first
       const data: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         cellIndex: 0,
@@ -565,7 +576,7 @@ describe('SessionModel', () => {
       mockRoom.roomDataHandler.handleData.mockReturnValue(false);
 
       // Act - Call the private method via type assertion
-      const result = await (session as unknown as { 
+      const result = await (session as unknown as {
         handleData: (data: AugmentAction<ActionEnum>) => Promise<boolean>
       }).handleData(data);
 
@@ -601,7 +612,8 @@ describe('SessionModel', () => {
 
     it('should handle data flow correctly', async () => {
       // Arrange
-      session.setAuthenticated(); // Authenticate first to allow match actions
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440007');
+      // Authenticate first to allow match actions
       const matchData: AugmentAction<MechanicsActions.SET_CELL> = {
         action: MechanicsActions.SET_CELL,
         cellIndex: 5,
@@ -646,7 +658,7 @@ describe('SessionModel', () => {
 
     it('should set authenticated to true when setAuthenticated is called', () => {
       // Act
-      session.setAuthenticated();
+      session.setAuthenticated('550e8400-e29b-41d4-a716-446655440008');
 
       // Assert
       expect(session.isAuthenticated()).toBe(true);
@@ -658,6 +670,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         mockRoom as unknown as RoomModel,
         Date.now(),
@@ -677,6 +690,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         mockRoom as unknown as RoomModel,
         Date.now(),
@@ -684,7 +698,7 @@ describe('SessionModel', () => {
       );
 
       // Authenticate the session
-      sessionWithTimeout.setAuthenticated();
+      sessionWithTimeout.setAuthenticated('550e8400-e29b-41d4-a716-446655440009');
 
       // Act - Advance time past the auth timeout
       jest.advanceTimersByTime(6000);
@@ -699,6 +713,7 @@ describe('SessionModel', () => {
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         mockRoom as unknown as RoomModel,
         Date.now(),
@@ -718,17 +733,19 @@ describe('SessionModel', () => {
       expect(onDisconnectSpy).not.toHaveBeenCalled();
     });
 
-    it('should start new auth timeout on reconnect', () => {
-      // Arrange - Create and disconnect a session
+    it('should not start auth timeout on reconnect for authenticated sessions', () => {
+      // Arrange - Create and authenticate a session, then disconnect
       const sessionWithTimeout = new SessionModel(
         mockSocket as unknown as ServerSocket,
         onDisconnectSpy,
         onDestroySpy,
+        onAuthenticateSpy,
         mockSystemHandler as unknown as IDataHandler<SystemActions>,
         mockRoom as unknown as RoomModel,
         Date.now(),
         5000
       );
+      sessionWithTimeout.setAuthenticated('550e8400-e29b-41d4-a716-446655440008');
       sessionWithTimeout.disconnect(false); // Disconnect without triggering event
       onDisconnectSpy.mockClear();
 
@@ -739,8 +756,8 @@ describe('SessionModel', () => {
       // Advance time past the auth timeout
       jest.advanceTimersByTime(6000);
 
-      // Assert - Should disconnect due to new auth timeout
-      expect(onDisconnectSpy).toHaveBeenCalledWith(sessionWithTimeout);
+      // Assert - Should NOT disconnect because session is already authenticated
+      expect(onDisconnectSpy).not.toHaveBeenCalled();
     });
   });
 });

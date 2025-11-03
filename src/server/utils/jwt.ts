@@ -10,7 +10,7 @@ import crypto from 'crypto';
 /**
  * Generate a unique player ID for a guest user
  */
-export function generatePlayerId(): string {
+export function generatePlayerId(): crypto.UUID {
   return crypto.randomUUID();
 }
 
@@ -36,14 +36,14 @@ export function signGuestToken(playerID: string): string {
  * Verify and decode a JWT token
  * Returns the player ID if valid, null otherwise
  */
-export function verifyGuestToken(token: string): string | null {
+export function verifyGuestToken(token: string): crypto.UUID | null {
   const secret = process.env['JWT_SECRET'];
   if (!secret) {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
   try {
-    const decoded = jwt.verify(token, secret) as { playerID: string };
+    const decoded = jwt.verify(token, secret) as { playerID: crypto.UUID };
     return decoded.playerID;
   } catch {
     return null;

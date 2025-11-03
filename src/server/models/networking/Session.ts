@@ -20,7 +20,7 @@ import type RoomModel from "./Room";
  * @optional @param room - The room this session is currently in.
  */
 export default class SessionModel {
-  public readonly uuid: UUID;
+  public uuid: UUID;
   private disconnected: boolean;
   private authenticated: boolean;
   private authTimeout: NodeJS.Timeout | null;
@@ -29,6 +29,7 @@ export default class SessionModel {
     public socketInstance: ServerSocket | null, // Require a Socket to be initialised
     private readonly onDisconnect: (session: SessionModel) => void,
     private readonly onDestroy: (session: SessionModel) => void,
+    private readonly onAuthenticate: (session: SessionModel, userID: UUID) => void,
     private readonly systemHandler: IDataHandler<SystemActions>,
     public room: RoomModel | null = null,
     public lastActiveTime: number = (new Date).getTime(),
@@ -95,19 +96,22 @@ export default class SessionModel {
    * Clears the reconnection timer and references the new socket.
    */
   public reconnect(socket: ServerSocket): void {
-    // Plug in the new socket
+    // Plug in the new socket.
+    // We know it's valid since the socket has completed auth again.
     this.socketInstance = socket;
     this.socketInstance.setListener(this.dataListener.bind(this));
     this.disconnected = false; // Reset disconnected flag
-    this.startAuthTimeout();
   }
 
   /**
    * Marks the session as authenticated, clearing the authentication timeout.
    */
-  public setAuthenticated(): void {
+  public setAuthenticated(id: UUID): void {
     this.authenticated = true;
     this.clearAuthTimeout();
+
+    // Call sessionmanager to associate the new userID (and swap sockets for existing sessions)
+    this.onAuthenticate(this, id);
   }
 
   /**

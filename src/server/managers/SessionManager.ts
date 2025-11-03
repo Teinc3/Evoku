@@ -60,6 +60,26 @@ export default class SessionManager {
   }
 
   /**
+   * Event handler when a session is authenticated.
+   * @param session The session that was authenticated.
+   * @param userID The ID of the user that was authenticated.
+   */
+  public onAuthenticate(session: SessionModel, userID: UUID): void {
+    // Check if there is an existing session for this userID
+    if (this.sessions.has(userID)) {
+      // Swap the socket
+      const existingSession = this.sessions.get(userID)!;
+      existingSession.reconnect(session.socketInstance!);
+      session.destroy(true); // Remove the new session
+    } else {
+      // Simply assign the existing userID as the session's UUID
+      this.sessions.delete(session.uuid);
+      this.sessions.set(userID, session);
+      session.uuid = userID;
+    }
+  }
+
+  /**
    * Cleanup function to remove sessions that are no longer active.
    * 
    * Criteria for cleanup:

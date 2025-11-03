@@ -21,8 +21,8 @@ describe('GuestAuthService', () => {
 
   describe('authenticate', () => {
     describe('without existing token', () => {
-      it('should create a new guest player', async () => {
-        const mockPlayerId = 'new-player-id';
+      it('should create a new guest player with token', async () => {
+        const mockPlayerId = '550e8400-e29b-41d4-a716-446655440000';
         const mockToken = 'new-jwt-token';
         
         mockGeneratePlayerId.mockReturnValue(mockPlayerId);
@@ -39,14 +39,15 @@ describe('GuestAuthService', () => {
         );
         expect(result).toEqual({
           token: mockToken,
-          elo: 0
+          elo: 0,
+          userID: '550e8400-e29b-41d4-a716-446655440000'
         });
       });
     });
 
     describe('with valid existing token', () => {
       it('should return existing player data with refreshed token', async () => {
-        const existingPlayerId = 'existing-player-id';
+        const existingPlayerId = '550e8400-e29b-41d4-a716-446655440001';
         const oldToken = 'old-jwt-token';
         const newToken = 'new-jwt-token';
         const existingElo = 1500;
@@ -67,7 +68,8 @@ describe('GuestAuthService', () => {
         );
         expect(result).toEqual({
           token: newToken,
-          elo: existingElo
+          elo: existingElo,
+          userID: '550e8400-e29b-41d4-a716-446655440001'
         });
       });
     });
@@ -75,7 +77,7 @@ describe('GuestAuthService', () => {
     describe('with invalid token', () => {
       it('should create a new guest player', async () => {
         const invalidToken = 'invalid-token';
-        const mockPlayerId = 'new-player-id';
+        const mockPlayerId = '550e8400-e29b-41d4-a716-446655440002';
         const mockToken = 'new-jwt-token';
 
         mockVerifyGuestToken.mockReturnValue(null);
@@ -89,16 +91,17 @@ describe('GuestAuthService', () => {
         expect(mockSignGuestToken).toHaveBeenCalledWith(mockPlayerId);
         expect(result).toEqual({
           token: mockToken,
-          elo: 0
+          elo: 0,
+          userID: '550e8400-e29b-41d4-a716-446655440002'
         });
       });
     });
 
     describe('with valid token but no Redis record', () => {
       it('should create a new guest player', async () => {
-        const existingPlayerId = 'existing-player-id';
+        const existingPlayerId = '550e8400-e29b-41d4-a716-446655440003';
         const oldToken = 'old-jwt-token';
-        const mockPlayerId = 'new-player-id';
+        const mockPlayerId = '550e8400-e29b-41d4-a716-446655440004';
         const mockToken = 'new-jwt-token';
 
         mockVerifyGuestToken.mockReturnValue(existingPlayerId);
@@ -114,7 +117,8 @@ describe('GuestAuthService', () => {
         expect(mockSignGuestToken).toHaveBeenCalledWith(mockPlayerId);
         expect(result).toEqual({
           token: mockToken,
-          elo: 0
+          elo: 0,
+          userID: '550e8400-e29b-41d4-a716-446655440004'
         });
       });
     });
