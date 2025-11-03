@@ -264,9 +264,8 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       // Subscribe to match found
       this.matchFoundSubscription = this.networkService.onPacket(LobbyActions.MATCH_FOUND)
         .subscribe(data => {
-          // Handle match found - transition to game
-          console.log('Match found:', data);
-          this.viewStateService.navigateToView(AppView.DUEL_DEMO);
+          // Handle match found - navigate with match data
+          this.viewStateService.navigateToViewWithData(AppView.DUEL_DEMO, data);
         });
 
       // Send JOIN_QUEUE packet

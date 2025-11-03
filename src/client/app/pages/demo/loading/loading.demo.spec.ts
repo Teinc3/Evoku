@@ -17,7 +17,8 @@ describe('LoadingDemoPageComponent', () => {
   let networkServiceSpy: jasmine.SpyObj<NetworkService>;
 
   beforeEach(async () => {
-    const viewStateSpy = jasmine.createSpyObj('ViewStateService', ['navigateToView']);
+    const viewStateSpy = jasmine.createSpyObj('ViewStateService',
+      ['navigateToView', 'navigateToViewWithData']);
     const networkSpy = jasmine.createSpyObj('NetworkService', [
       'connect',
       'disconnect',
@@ -152,7 +153,10 @@ describe('LoadingDemoPageComponent', () => {
 
   it('should initialize component state on ngOnInit', () => {
     // Create a fresh component instance to test ngOnInit behavior
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
 
     // Before ngOnInit, cells should be initialized but no pups assigned
     expect(freshComponent['cells'].length).toBe(9);
@@ -335,7 +339,10 @@ describe('LoadingDemoPageComponent', () => {
 
   it('should show tooltip with "No powerup selected" when cell has no pup', () => {
     // Create a fresh component instance to avoid initial pup assignment
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
 
     // Mock assignInitialPups to do nothing
     const originalAssignInitialPups = freshComponent['assignInitialPups'];
