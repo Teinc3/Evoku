@@ -20,10 +20,13 @@ import type RoomModel from "./Room";
  * @optional @param room - The room this session is currently in.
  */
 export default class SessionModel {
+  private static readonly AUTH_TIMEOUT_MS = 5000; // 5 seconds
+
   public uuid: UUID;
   private disconnected: boolean;
   private authenticated: boolean;
   private authTimeout: NodeJS.Timeout | null;
+  private preAuthPacketQueue: AugmentAction<ActionEnum>[];
 
   constructor(
     public socketInstance: ServerSocket | null, // Require a Socket to be initialised
@@ -32,8 +35,7 @@ export default class SessionModel {
     private readonly onAuthenticate: (session: SessionModel, userID: UUID) => void,
     private readonly systemHandler: IDataHandler<SystemActions>,
     public room: RoomModel | null = null,
-    public lastActiveTime: number = (new Date).getTime(),
-    private readonly authTimeoutMs: number = 10000 // 10 seconds by default
+    public lastActiveTime: number = (new Date).getTime()
   ) {
     this.disconnected = false;
     this.authenticated = false;
@@ -42,6 +44,9 @@ export default class SessionModel {
     this.room = room;
     this.onDisconnect = onDisconnect.bind(this);
     this.onDestroy = onDestroy.bind(this);
+    this.onAuthenticate = onAuthenticate.bind(this);
+
+    this.preAuthPacketQueue = [];
 
     if (this.socketInstance) {
       this.socketInstance.setListener(this.dataListener.bind(this));
@@ -55,6 +60,9 @@ export default class SessionModel {
    */
   public disconnect(triggerEvent: boolean = true): void {
     this.clearAuthTimeout();
+    
+    // Clear any queued packets
+    this.preAuthPacketQueue.length = 0;
     
     if (this.socketInstance) {
       // Removes socket references
@@ -74,6 +82,9 @@ export default class SessionModel {
    */
   public destroy(triggerEvent: boolean = true): void {
     this.clearAuthTimeout();
+    
+    // Clear any queued packets
+    this.preAuthPacketQueue.length = 0;
     
     // Remove all references
     if (this.room) {
@@ -106,12 +117,27 @@ export default class SessionModel {
   /**
    * Marks the session as authenticated, clearing the authentication timeout.
    */
-  public setAuthenticated(id: UUID): void {
+  public async setAuthenticated(id: UUID): Promise<void> {
     this.authenticated = true;
     this.clearAuthTimeout();
 
     // Call sessionmanager to associate the new userID (and swap sockets for existing sessions)
     this.onAuthenticate(this, id);
+
+    // Process any packets that were queued before authentication
+    await this.processQueuedPackets();
+  }
+
+  /**
+   * Process any packets that were received before authentication completed.
+   */
+  private async processQueuedPackets(): Promise<void> {
+    // Process queued packets in order
+    while (this.preAuthPacketQueue.length > 0) {
+      const packet = this.preAuthPacketQueue.shift()!;
+      // Handle the packet using the data listener routine
+      await this.dataListener(packet);
+    }
   }
 
   /**
@@ -131,7 +157,7 @@ export default class SessionModel {
       if (!this.authenticated) {
         this.disconnect(true);
       }
-    }, this.authTimeoutMs);
+    }, SessionModel.AUTH_TIMEOUT_MS);
   }
 
   /**
@@ -166,24 +192,23 @@ export default class SessionModel {
    * @param data The augmented action data.
    */
   private async handleData(data: AugmentAction<ActionEnum>): Promise<boolean> {
-    // First packet must be AUTH if not authenticated
-    if (!this.authenticated && !ActionGuard.isSystemActionsData(data)) {
-      return false;
-    }
-
-    // If it's a system action but not AUTH and we're not authenticated, reject
-    if (!this.authenticated && ActionGuard.isSystemActionsData(data)) {
-      if (data.action !== SessionActions.AUTH) {
-        return false;
+    // If not authenticated, only allow AUTH packets or queue valid packets
+    if (!this.authenticated) {
+      if (data.action === SessionActions.AUTH) {
+        return await this.systemHandler.handleData(
+          this,
+          data as AugmentAction<SystemActions>
+        );
+      } else {
+        // Queue valid packets for processing after authentication
+        // If after 5 seconds (auth timeout) the session still isn't authed
+        // Then we just disconnect the session, simple and effective
+        this.preAuthPacketQueue.push(data);
+        return true;
       }
     }
 
-    if (ActionGuard.isMatchActionsData(data)) {
-      // Match actions require authentication
-      if (!this.authenticated) {
-        return false;
-      }
-      
+    if (ActionGuard.isMatchActionsData(data)) {      
       if (this.room) {
         return this.room.roomDataHandler.handleData(this, data);
       } else {

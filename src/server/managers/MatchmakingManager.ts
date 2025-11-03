@@ -27,13 +27,14 @@ export default class MatchmakingManager {
    * Add a player to the matchmaking queue.
    * Player starts in pending queue for 5 seconds before becoming active.
    */
-  public joinQueue(session: SessionModel, username: string): void {
+  public joinQueue(session: SessionModel, username: string): boolean {
     const sessionId = session.uuid;
 
     // Don't add if already in queue
     if (this.pendingQueue.has(sessionId) ||
-        this.activeQueue.some(entry => entry.session.uuid === sessionId)) {
-      return;
+        this.activeQueue.some(entry => entry.session.uuid === sessionId)
+    ) {
+      return false;
     }
 
     const entry = new MatchmakingEntryModel(session, username, this.sessionManager);
@@ -47,6 +48,7 @@ export default class MatchmakingManager {
     setTimeout(() => {
       this.promoteToActive(sessionId);
     }, 5000);
+    return true;
   }
 
   /** Remove a player from the matchmaking queue */

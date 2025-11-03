@@ -31,8 +31,7 @@ export default class LobbyHandler extends EnumHandler<LobbyActions> {
     if (!this.matchmakingManager) {
       return false;
     }
-    this.matchmakingManager.joinQueue(session, data.username);
-    return true;
+    return this.matchmakingManager.joinQueue(session, data.username);
   }
 
   private handleLeaveQueue(

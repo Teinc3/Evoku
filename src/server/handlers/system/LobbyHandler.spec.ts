@@ -16,7 +16,7 @@ class MockSession {
 }
 
 class MockMatchmakingManager {
-  joinQueue = jest.fn();
+  joinQueue = jest.fn().mockReturnValue(true);
   leaveQueue = jest.fn();
 }
 
