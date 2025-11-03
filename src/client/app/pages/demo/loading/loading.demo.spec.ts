@@ -1,30 +1,57 @@
+import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
+import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
+import NetworkService from '../../../services/network.service';
 import AppView from '../../../../types/enums/app-view.enum';
 import LoadingDemoPageComponent from './loading.demo';
+
+import type { QueueUpdateContract } from '@shared/types/contracts/system/lobby/QueueContract';
+import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
 
 
 describe('LoadingDemoPageComponent', () => {
   let component: LoadingDemoPageComponent;
   let fixture: ComponentFixture<LoadingDemoPageComponent>;
   let viewStateServiceSpy: jasmine.SpyObj<ViewStateService>;
+  let networkServiceSpy: jasmine.SpyObj<NetworkService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('ViewStateService', ['navigateToView']);
+    // Mock console methods to prevent test output pollution
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+
+    const viewStateSpy = jasmine.createSpyObj('ViewStateService',
+      ['navigateToView', 'navigateToViewWithData']);
+    const networkSpy = jasmine.createSpyObj('NetworkService', [
+      'connect',
+      'disconnect',
+      'send',
+      'onPacket'
+    ]);
+
+    // Mock connect to resolve successfully
+    networkSpy.connect.and.resolveTo();
+
+    // Mock onPacket to return empty observables by default
+    networkSpy.onPacket.and.returnValue(of());
 
     await TestBed.configureTestingModule({
       imports: [LoadingDemoPageComponent],
       providers: [
-        { provide: ViewStateService, useValue: spy }
+        { provide: ViewStateService, useValue: viewStateSpy },
+        { provide: NetworkService, useValue: networkSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoadingDemoPageComponent);
     component = fixture.componentInstance;
     viewStateServiceSpy = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
+    networkServiceSpy = TestBed.inject(NetworkService) as jasmine.SpyObj<NetworkService>;
     fixture.detectChanges();
   });
 
@@ -62,6 +89,8 @@ describe('LoadingDemoPageComponent', () => {
     const cancelButton = fixture.debugElement.query(By.css('.cancel-button'));
     cancelButton.nativeElement.click();
 
+    expect(networkServiceSpy.send).toHaveBeenCalledWith(LobbyActions.LEAVE_QUEUE, {});
+    expect(networkServiceSpy.disconnect).toHaveBeenCalled();
     expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
   });
 
@@ -120,6 +149,8 @@ describe('LoadingDemoPageComponent', () => {
     expect(component['animationSubscription']).toBeDefined();
     expect(component['timeoutSubscription']).toBeDefined();
     expect(component['dotsSubscription']).toBeDefined();
+    expect(component['queueUpdateSubscription']).toBeDefined();
+    expect(component['matchFoundSubscription']).toBeDefined();
 
     component.ngOnDestroy();
 
@@ -127,11 +158,16 @@ describe('LoadingDemoPageComponent', () => {
     expect(component['animationSubscription']).toBeNull();
     expect(component['timeoutSubscription']).toBeNull();
     expect(component['dotsSubscription']).toBeNull();
+    expect(component['queueUpdateSubscription']).toBeNull();
+    expect(component['matchFoundSubscription']).toBeNull();
   });
 
   it('should initialize component state on ngOnInit', () => {
     // Create a fresh component instance to test ngOnInit behavior
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
 
     // Before ngOnInit, cells should be initialized but no pups assigned
     expect(freshComponent['cells'].length).toBe(9);
@@ -147,6 +183,8 @@ describe('LoadingDemoPageComponent', () => {
     expect(freshComponent['animationSubscription']).toBeDefined();
     expect(freshComponent['timeoutSubscription']).toBeDefined();
     expect(freshComponent['dotsSubscription']).toBeDefined();
+    expect(freshComponent['queueUpdateSubscription']).toBeDefined();
+    expect(freshComponent['matchFoundSubscription']).toBeDefined();
   });
 
   it('should filter pups correctly in getAvailablePups', () => {
@@ -278,27 +316,20 @@ describe('LoadingDemoPageComponent', () => {
   });
 
   it('should trigger animation callback after interval', fakeAsync(() => {
-    // Spy on updateCellColors to verify it's called
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    spyOn(component as any, 'updateCellColors');
+    // Store initial cell states
+    const initialCell0Black = component['cells'][0].isBlack;
+    const initialCell8Black = component['cells'][8].isBlack;
 
     component['startAnimation']();
 
     // Fast-forward time by the animation interval (2 seconds)
     tick(2000);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((component as any).updateCellColors).toHaveBeenCalled();
+    // Cell colors should have changed (the animation flips cells 0 and 8)
+    expect(component['cells'][0].isBlack).not.toBe(initialCell0Black);
+    expect(component['cells'][8].isBlack).not.toBe(initialCell8Black);
+
     component['stopAnimation']();
-  }));
-
-  it('should trigger timeout callback after delay', fakeAsync(() => {
-    component['startTimeout']();
-
-    // Fast-forward time by the timeout duration (30 seconds)
-    tick(30000);
-
-    expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.DUEL_DEMO);
   }));
 
   it('should handle cancel button click in onCellClick (no tooltip)', () => {
@@ -319,7 +350,10 @@ describe('LoadingDemoPageComponent', () => {
 
   it('should show tooltip with "No powerup selected" when cell has no pup', () => {
     // Create a fresh component instance to avoid initial pup assignment
-    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy);
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
 
     // Mock assignInitialPups to do nothing
     const originalAssignInitialPups = freshComponent['assignInitialPups'];
@@ -360,5 +394,90 @@ describe('LoadingDemoPageComponent', () => {
     expect(component['tooltipText']).toBe('No description available');
     expect(component['tooltipVisible']).toBe(true);
     expect(component['currentTooltipPupName']).toBe('NonExistentPup');
+  });
+
+  it('should handle connection failure in connectAndJoinQueue', async () => {
+    // Mock networkService.connect to throw an error
+    networkServiceSpy.connect.and.rejectWith(new Error('Connection failed'));
+
+    // Create a fresh component to test the connection failure
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Start the connection process
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should set error message and stop animations
+    expect(freshComponent['errorMessage']).toBe('Failed to connect to server');
+    expect(freshComponent['animationSubscription']).toBeNull();
+    expect(freshComponent['dotsSubscription']).toBeNull();
+  });
+
+  it('should generate guest username with proper format', () => {
+    // Mock Math.random to return a predictable value
+    spyOn(Math, 'random').and.returnValue(0.01234);
+
+    const username = component['generateGuestUsername']();
+
+    expect(username).toBe('Guest 0123');
+  });
+
+  it('should handle queue update packets correctly', async () => {
+    // Mock onPacket to return observable with queue update data
+    const queueUpdateData: QueueUpdateContract = { inQueue: true, onlineCount: 42 };
+    networkServiceSpy.onPacket.and.returnValue(of(queueUpdateData));
+
+    // Create fresh component and call connectAndJoinQueue to set up subscriptions
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Call connectAndJoinQueue to set up the subscriptions
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should have received the online count
+    expect(freshComponent['onlineCount']).toBe(42);
+  });
+
+  it('should handle match found packets correctly', async () => {
+    // Mock onPacket to return observable with match found data
+    const matchData: MatchFoundContract = { myID: 0, players: [] };
+    networkServiceSpy.onPacket.and.returnValue(of(matchData));
+
+    // Create fresh component and call connectAndJoinQueue to set up subscriptions
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Call connectAndJoinQueue to set up the subscriptions
+    await freshComponent['connectAndJoinQueue']();
+
+    // Should navigate to duel demo with match data
+    expect(viewStateServiceSpy.navigateToViewWithData).toHaveBeenCalledWith(
+      AppView.DUEL_DEMO,
+      matchData
+    );
+  });
+
+  it('should clean up network subscriptions on destroy', () => {
+    // Create fresh component
+    const freshComponent = new LoadingDemoPageComponent(
+      viewStateServiceSpy,
+      networkServiceSpy
+    );
+
+    // Initialize to set up subscriptions
+    freshComponent.ngOnInit();
+
+    // Destroy component
+    freshComponent.ngOnDestroy();
+
+    // Network subscriptions should be cleaned up
+    expect(freshComponent['queueUpdateSubscription']).toBeNull();
+    expect(freshComponent['matchFoundSubscription']).toBeNull();
   });
 });

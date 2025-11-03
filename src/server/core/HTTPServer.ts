@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { rateLimit } from 'express-rate-limit';
 import express from 'express';
 
-import StatsService from '../services/StatsService';
+import statsService, { type StatsService } from '../services/StatsService';
 import guestAuthService from '../services/GuestAuthService';
 
 import type { Server as HttpServer } from 'http';
@@ -32,7 +32,8 @@ export default class HTTPServer {
   }
 
   public setWsServer(wsServer: WSServer): void {
-    this.statsService = new StatsService(wsServer.sessionManager, wsServer.roomManager);
+    this.statsService = statsService;
+    statsService.initialize(wsServer.sessionManager, wsServer.roomManager);
   }
 
   private configureRoutes(): void {

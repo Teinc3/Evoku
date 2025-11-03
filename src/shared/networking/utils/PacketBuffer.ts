@@ -17,7 +17,7 @@ export default class PacketBuffer implements IPacketBuffer {
 
 
   constructor(initialSize: number = 256) {
-    this._buffer = new ArrayBuffer(initialSize, { maxByteLength: 2**16 });
+    this._buffer = new ArrayBuffer(initialSize);
     this._dataView = new DataView(this._buffer);
     this._index = 0;
     this._maxWritten = 0; // Track the maximum index written to
@@ -73,13 +73,14 @@ export default class PacketBuffer implements IPacketBuffer {
     while (newSize < requiredSize) {
       // Double the buffer size until it is large enough
       newSize *= 2;
-      if (this._buffer.byteLength >= this._buffer.maxByteLength!) {
-        throw new RangeError("Buffer size exceeds maximum allowed size.");
-      }
     }
 
-    this._buffer.resize(newSize);
-    this._dataView = new DataView(this._buffer); // Recreate DataView to reflect new buffer size
+    // Create new non-resizable buffer and copy existing data
+    const newBuffer = new ArrayBuffer(newSize);
+    new Uint8Array(newBuffer).set(new Uint8Array(this._buffer, 0, this._maxWritten));
+    
+    this._buffer = newBuffer;
+    this._dataView = new DataView(this._buffer); // Recreate DataView to reflect new buffer
   }
 
   private _performRead<DType>(
@@ -140,19 +141,19 @@ export default class PacketBuffer implements IPacketBuffer {
   }
 
   readByte(): number {
-    return this._performRead(1, this._dataView.getInt8.bind(this._dataView));
+    return this._performRead(1, pos => this._dataView.getInt8(pos));
   }
 
   readShort(): number {
-    return this._performRead(2, this._dataView.getInt16.bind(this._dataView));
+    return this._performRead(2, pos => this._dataView.getInt16(pos));
   }
 
   readInt(): number {
-    return this._performRead(4, this._dataView.getInt32.bind(this._dataView));
+    return this._performRead(4, pos => this._dataView.getInt32(pos));
   }
 
   readFloat(): number {
-    return this._performRead(4, this._dataView.getFloat32.bind(this._dataView));
+    return this._performRead(4, pos => this._dataView.getFloat32(pos));
   }
 
   readString(): string {
@@ -162,7 +163,11 @@ export default class PacketBuffer implements IPacketBuffer {
   // Write Methods
   write(data: ArrayBuffer | Uint8Array, offset?: number): number {
     if (data instanceof ArrayBuffer) {
-      data = new Uint8Array(data);
+      // Create a non-resizable copy to ensure compatibility with buffer operations
+      // that expect fixed-size ArrayBuffers (resizable buffers can cause issues)
+      const nonResizableBuffer = new ArrayBuffer(data.byteLength);
+      new Uint8Array(nonResizableBuffer).set(new Uint8Array(data));
+      data = new Uint8Array(nonResizableBuffer);
     }
     return this._performWrite(data.length, this._writeBytes.bind(this), data, offset);
   }
@@ -172,19 +177,19 @@ export default class PacketBuffer implements IPacketBuffer {
   }
 
   writeByte(value: number, offset?: number): number {
-    return this._performWrite(1, this._dataView.setInt8.bind(this._dataView), value, offset);
+    return this._performWrite(1, (pos, val) => this._dataView.setInt8(pos, val), value, offset);
   }
 
   writeShort(value: number, offset?: number): number {
-    return this._performWrite(2, this._dataView.setInt16.bind(this._dataView), value, offset);
+    return this._performWrite(2, (pos, val) => this._dataView.setInt16(pos, val), value, offset);
   }
 
   writeInt(value: number, offset?: number): number {
-    return this._performWrite(4, this._dataView.setInt32.bind(this._dataView), value, offset);
+    return this._performWrite(4, (pos, val) => this._dataView.setInt32(pos, val), value, offset);
   }
 
   writeFloat(value: number, offset?: number): number {
-    return this._performWrite(4, this._dataView.setFloat32.bind(this._dataView), value, offset);
+    return this._performWrite(4, (pos, val) => this._dataView.setFloat32(pos, val), value, offset);
   }
 
   writeString(value: string, offset?: number): number {

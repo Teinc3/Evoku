@@ -5,6 +5,6 @@
     }
   },
   "security": {
-    "packetScramblerSeed": "dev-scrambler-seed-123"
+    "packetScramblerSeed": ""
   }
 }

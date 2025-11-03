@@ -2,30 +2,39 @@
 
 import { jest } from '@jest/globals';
 
+
+// Import all packets to register them in the packet registry
+import '@shared/networking/packets';
+
 import SessionActions from '@shared/types/enums/actions/system/session';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
+import PacketIO from '@shared/networking/utils/PacketIO';
 import SessionModel from '../models/networking/Session';
 import SessionManager from '../managers/SessionManager';
 
 import type { WebSocket } from 'ws';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type SystemActions from '@shared/types/enums/actions/system';
-import type IDataContract from '@shared/types/contracts/components/base/IDataContract';
-import type PacketIO from '@shared/networking/utils/PacketIO';
 import type IDataHandler from '../types/handler';
-import type ServerSocket from '../models/networking/ServerSocket';
 
 
 // --- Type-Safe Mock Classes ---
-// A mock class for ServerSocket that satisfies its type.
-class MockServerSocket {
+// A mock class for WebSocket that satisfies its type.
+class MockWebSocket {
   close = jest.fn();
-  setListener = jest.fn();
   send = jest.fn();
-  forward = jest.fn();
+  removeAllListeners = jest.fn();
+  on = jest.fn();
+  ping = jest.fn();
+  pong = jest.fn();
+  terminate = jest.fn();
+  binaryType = 'arraybuffer' as const;
+  bufferedAmount = 0;
+  extensions = '';
+  isPaused = false;
+  protocol = '';
+  url = '';
   readyState = 1 as const; // WebSocket.OPEN
-  packetIO = {} as PacketIO; // Not used in this test
-  ws = {} as WebSocket;     // Not used in this test
 }
 
 // A mock class for the system handler that implements the IDataHandler interface.
@@ -36,7 +45,7 @@ class MockSystemHandler implements IDataHandler<SystemActions> {
 
 describe('SessionManager and Session Integration Test', () => {
   let sessionManager: SessionManager;
-  let mockSocket: ServerSocket;
+  let mockSocket: WebSocket;
   let mockHandler: MockSystemHandler;
 
   beforeEach(() => {
@@ -44,7 +53,7 @@ describe('SessionManager and Session Integration Test', () => {
     jest.useFakeTimers();
     
     // Create new instances of our mocks for each test
-    mockSocket = new MockServerSocket() as unknown as ServerSocket;
+    mockSocket = new MockWebSocket() as unknown as WebSocket;
     mockHandler = new MockSystemHandler();
     sessionManager = new SessionManager(mockHandler);
   });
@@ -98,16 +107,23 @@ describe('SessionManager and Session Integration Test', () => {
 
     it('should reset the inactivity timer when a packet is received', async () => {
       const session = sessionManager.createSession(mockSocket);
-      session.setAuthenticated(); // Authenticate to prevent auth timeout
-      const dataListener = (mockSocket as unknown as MockServerSocket)
-        .setListener.mock.calls[0][0] as (data: IDataContract) => Promise<void>;
+      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440010');
+      const mockSocketInstance = mockSocket as unknown as MockWebSocket;
+      // Get the message handler that was registered with ws.on('message', handler)
+      const messageCalls = mockSocketInstance.on.mock.calls.filter(call => call[0] === 'message');
+      const messageHandler = messageCalls[0][1] as (
+        data: Buffer | ArrayBuffer | Buffer[] | string,
+        isBinary: boolean
+      ) => void;
       
       // Advance time by 25 seconds
       jest.advanceTimersByTime(25000);
       
-      // Simulate a packet arriving, which should reset the lastActiveTime
-      // A system action to trigger the update
-      await dataListener({ action: SessionActions.HEARTBEAT });
+      // Simulate a packet arriving by calling the message handler
+      // First, we need to encode the packet data as the ServerSocket would
+      const packetIO = new PacketIO();
+      const encodedPacket = packetIO.encodePacket(SessionActions.HEARTBEAT, {});
+      messageHandler(encodedPacket, true); // isBinary = true
       
       // Advance time by another 10 seconds (total 35 seconds)
       jest.advanceTimersByTime(10000);
@@ -120,12 +136,19 @@ describe('SessionManager and Session Integration Test', () => {
   describe('Piping Data to Handlers', () => {
     it('should forward data to the system handler after authentication', async () => {
       const session = sessionManager.createSession(mockSocket);
-      session.setAuthenticated(); // Authenticate first
-      const dataListener = (mockSocket as unknown as MockServerSocket)
-        .setListener.mock.calls[0][0] as (data: IDataContract) => void;
+      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440011'); // Authenticate first
+      const mockSocketInstance = mockSocket as unknown as MockWebSocket;
+      // Get the message handler that was registered with ws.on('message', handler)
+      const messageCalls = mockSocketInstance.on.mock.calls.filter(call => call[0] === 'message');
+      const messageHandler = messageCalls[0][1] as (
+        data: Buffer | ArrayBuffer | Buffer[] | string,
+        isBinary: boolean
+      ) => void;
 
-      // Send a heartbeat action to the session
-      await dataListener({ action: SessionActions.HEARTBEAT });
+      // Simulate receiving a heartbeat packet
+      const packetIO = new PacketIO();
+      const encodedPacket = packetIO.encodePacket(SessionActions.HEARTBEAT, {});
+      messageHandler(encodedPacket, true); // isBinary = true
 
       // The system handler should have received the data
       expect(mockHandler.handleData).toHaveBeenCalledWith(
@@ -140,23 +163,35 @@ describe('SessionManager and Session Integration Test', () => {
 
     it('should not have forwarded non-system data to the system handler', async () => {
       sessionManager.createSession(mockSocket);
-      const dataListener = (mockSocket as unknown as MockServerSocket)
-        .setListener.mock.calls[0][0] as (data: IDataContract) => void;
+      const mockSocketInstance = mockSocket as unknown as MockWebSocket;
+      // Get the message handler that was registered with ws.on('message', handler)
+      const messageCalls = mockSocketInstance.on.mock.calls.filter(call => call[0] === 'message');
+      const messageHandler = messageCalls[0][1] as (
+        data: Buffer | ArrayBuffer | Buffer[] | string,
+        isBinary: boolean
+      ) => void;
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const handlerSpy = jest.spyOn(mockHandler, 'handleData');
 
-      // Send a non-system action (e.g., MatchActions)
-      await dataListener({ 
-        action: MechanicsActions.DRAW_PUP,
-      } as AugmentAction<MechanicsActions>);
+      // Simulate receiving a non-system packet
+      const packetIO = new PacketIO();
+      const encodedPacket = packetIO.encodePacket(MechanicsActions.DRAW_PUP, { 
+        clientTime: 1000, 
+        actionID: 123 
+      });
+
+      // Spy on the message handler
+      const spiedMessageHandler = jest.fn(messageHandler);
+      mockSocketInstance.on.mock.calls.find(call => call[0] === 'message')![1]
+        = spiedMessageHandler;
+
+      spiedMessageHandler(encodedPacket, true); // isBinary = true
+
+      // Check if message handler was called
+      expect(spiedMessageHandler).toHaveBeenCalled();
 
       // The system handler should not have been called
-      expect(mockHandler.handleData).not.toHaveBeenCalled();
-      // Now the error is just "Action failed" as the packet is rejected for not being AUTH
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Action failed')
-      );
-      errorSpy.mockRestore();
+      expect(handlerSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -230,11 +230,16 @@ describe('BoardModelComponent', () => {
       // Find other cells with value 1 (cells 9, 18, 27... have values 2, 3, 4... respectively)
       // Since our puzzle has value (i/9)+1 at every 9th position
       // Cell 0 has 1, so no other cells should match
+      let foundSameNumberCells = 0;
       for (let i = 1; i < 81; i++) {
         if (component.getCellModel(i).value === 1) {
           expect(component.isSameNumberCell(i)).toBeTrue();
+          foundSameNumberCells++;
         }
       }
+      
+      // Verify that no other cells have the same number (1) as cell 0
+      expect(foundSameNumberCells).toBe(0);
     });
 
     it('does not highlight same number when value is 0', () => {

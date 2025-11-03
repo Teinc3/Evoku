@@ -58,7 +58,11 @@ describe('SessionHandler', () => {
       };
 
       (guestAuthService.authenticate as jest.MockedFunction<typeof guestAuthService.authenticate>)
-        .mockResolvedValue({ token: 'new-token', elo: 1000 });
+        .mockResolvedValue({
+          token: 'new-token',
+          elo: 1000,
+          userID: '550e8400-e29b-41d4-a716-446655440000'
+        });
 
       // Act
       const result = await sessionHandler.handleData(

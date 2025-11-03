@@ -127,15 +127,17 @@ export default class ClientSocket {
     try {
       const buffer = ev.data instanceof ArrayBuffer
         ? ev.data
-        : ev.data instanceof Blob
-          ? await ev.data.arrayBuffer()
-          : null;
+        : null;
 
       if (!buffer || !this.packetHandler) {
         return;
       }
 
-      const data = this.io.decodePacket(buffer);
+      // Create a fixed-size copy to ensure compatibility among browsers
+      const fixedBuffer = new ArrayBuffer(buffer.byteLength);
+      new Uint8Array(fixedBuffer).set(new Uint8Array(buffer));
+
+      const data = this.io.decodePacket(fixedBuffer);
       this.packetHandler(data);
     } catch {
       // Swallow malformed frames like ServerSocket does

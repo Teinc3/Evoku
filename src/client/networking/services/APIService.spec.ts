@@ -12,7 +12,8 @@ describe('APIService', () => {
     it('should call API without token when no token provided', async () => {
       const mockResponse = {
         token: 'new-token',
-        elo: 0
+        elo: 0,
+        userID: 'test-user-id'
       };
 
       spyOn(window, 'fetch').and.returnValue(
@@ -35,7 +36,8 @@ describe('APIService', () => {
       const existingToken = 'existing-token';
       const mockResponse = {
         token: 'refreshed-token',
-        elo: 1500
+        elo: 1500,
+        userID: 'test-user-id'
       };
 
       spyOn(window, 'fetch').and.returnValue(

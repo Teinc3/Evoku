@@ -1,20 +1,32 @@
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import ViewStateService from '../../../../services/view-state.service';
 import DuelDemoPageComponent from './duel.demo';
+
+import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
 
 
 describe('DuelDemoPageComponent', () => {
   let fixture: ComponentFixture<DuelDemoPageComponent>;
   let component: DuelDemoPageComponent;
+  let viewStateServiceSpy: jasmine.SpyObj<ViewStateService>;
 
   beforeEach(async () => {
+    const spy = jasmine.createSpyObj('ViewStateService', [], {
+      getNavigationData: jasmine.createSpy('getNavigationData')
+    });
+
     await TestBed.configureTestingModule({
       imports: [DuelDemoPageComponent],
+      providers: [
+        { provide: ViewStateService, useValue: spy }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DuelDemoPageComponent);
     component = fixture.componentInstance;
+    viewStateServiceSpy = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
     fixture.detectChanges();
   });
 
@@ -167,6 +179,53 @@ describe('DuelDemoPageComponent', () => {
       centerBars.forEach(bar => {
         expect(bar.componentInstance.isVertical).toBe(true);
       });
+    });
+  });
+
+  describe('Component Lifecycle and Navigation Data', () => {
+    it('should load match data from navigation service when available', () => {
+      const mockMatchData: MatchFoundContract = {
+        myID: 1,
+        players: [
+          { playerID: 1, username: 'Player1' },
+          { playerID: 2, username: 'Player2' }
+        ]
+      };
+
+      // Mock the service to return navigation data
+      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
+
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      spyOn(newComponent['matchState'], 'setMatchData');
+
+      newComponent.ngOnInit();
+
+      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
+      expect(newComponent['matchState'].setMatchData).toHaveBeenCalledWith(mockMatchData);
+    });
+
+    it('should not set match data when navigation data is null', () => {
+      // Mock the service to return null
+      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(null);
+
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      spyOn(newComponent['matchState'], 'setMatchData');
+
+      newComponent.ngOnInit();
+
+      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
+      expect(newComponent['matchState'].setMatchData).not.toHaveBeenCalled();
+    });
+
+    it('should clear match data on destroy', () => {
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      spyOn(newComponent['matchState'], 'clearMatchData');
+
+      newComponent.ngOnDestroy();
+
+      expect(newComponent['matchState'].clearMatchData).toHaveBeenCalled();
     });
   });
 });

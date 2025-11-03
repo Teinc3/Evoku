@@ -1,8 +1,10 @@
 import { interval, Subscription, timer } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
+import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state.service';
+import NetworkService from '../../../services/network.service';
 import AppView from '../../../../types/enums/app-view.enum';
 
 
@@ -23,7 +25,6 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private static readonly TOTAL_CELLS = 9;
   private static readonly CANCEL_BUTTON_CELL_ID = 4;
   private static readonly FADE_TRANSITION_MS = 1200;
-  private static readonly AUTO_TRANSITION_TIMEOUT_MS = 30000;
   private static readonly DOTS_INTERVAL_MS = 1000;
   private static readonly DOTS_PAUSE_MS = 3000;
 
@@ -40,10 +41,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     })
   );
 
-  private timer: number | null = null;
   private frameIndex = -1;
-  private timeoutId: number | null = null;
-  private dotsTimer: number | null = null;
   private currentDotsIndex = -1;
   private currentTooltipPupName: string | null = null;
   protected tooltipVisible = false;
@@ -55,7 +53,16 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   private dotsSubscription: Subscription | null = null;
   private pupConfigMap: Map<string, typeof pupConfig[0]> = new Map();
 
-  constructor(public viewStateService: ViewStateService) {
+  private queueUpdateSubscription: Subscription | null = null;
+  private matchFoundSubscription: Subscription | null = null;
+
+  protected onlineCount: number = -1;
+  protected errorMessage: string | null = null;
+
+  constructor(
+    public viewStateService: ViewStateService,
+    private networkService: NetworkService
+  ) {
     // Initialize pup config map for O(1) lookups
     pupConfig.forEach(pup => {
       this.pupConfigMap.set(pup.name, pup);
@@ -105,13 +112,13 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     this.assignInitialPups();
     this.startAnimation();
     this.startDotsAnimation();
-    this.startTimeout();
+    this.connectAndJoinQueue();
   }
 
   ngOnDestroy(): void {
     this.stopAnimation();
     this.stopDotsAnimation();
-    this.clearTimeout();
+    this.cleanupNetworkSubscriptions();
   }
 
   private startAnimation(): void {
@@ -130,7 +137,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateCellColors(): void {
+  protected updateCellColors(): void {
     const elementToFlip = LoadingDemoPageComponent.SEQUENCE[this.frameIndex];
     const oppositeElement = LoadingDemoPageComponent.TOTAL_CELLS - 1 - elementToFlip;
 
@@ -164,21 +171,6 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
       cell.pupIcon = newIcon;
       cell.pupName = newName;
       cell.opacity = 1;
-    }
-  }
-
-  private startTimeout(): void {
-    this.timeoutSubscription = timer(
-      LoadingDemoPageComponent.AUTO_TRANSITION_TIMEOUT_MS
-    ).subscribe(() => {
-      this.viewStateService.navigateToView(AppView.DUEL_DEMO);
-    });
-  }
-
-  private clearTimeout(): void {
-    if (this.timeoutSubscription) {
-      this.timeoutSubscription.unsubscribe();
-      this.timeoutSubscription = null;
     }
   }
 
@@ -238,8 +230,65 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     this.tooltipVisible = true;
   }
 
+  protected onCancelClick(): void {
+    // Send LEAVE_QUEUE packet and disconnect
+    this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
+    this.networkService.disconnect();
+    
+    // Navigate back to catalogue
+    this.viewStateService.navigateToView(AppView.CATALOGUE);
+  }
+
   protected hideTooltip(): void {
     this.tooltipVisible = false;
     this.currentTooltipPupName = null;
+  }
+
+  private generateGuestUsername(): string {
+    // Generate a simple guest username
+    const randomNum = Math.floor(Math.random() * 10000);
+    return `Guest ${randomNum.toString().padStart(4, '0')}`;
+  }
+
+  private async connectAndJoinQueue(): Promise<void> {
+    try {
+      // Connect to WebSocket
+      await this.networkService.connect();
+
+      // Subscribe to queue updates
+      this.queueUpdateSubscription = this.networkService.onPacket(LobbyActions.QUEUE_UPDATE)
+        .subscribe(data => {
+          // Handle queue update - store online count for display
+          this.onlineCount = data.onlineCount || -1;
+        });
+
+      // Subscribe to match found
+      this.matchFoundSubscription = this.networkService.onPacket(LobbyActions.MATCH_FOUND)
+        .subscribe(data => {
+          // Handle match found - navigate with match data
+          this.viewStateService.navigateToViewWithData(AppView.DUEL_DEMO, data);
+        });
+
+      // Send JOIN_QUEUE packet
+      const username = this.generateGuestUsername();
+      this.networkService.send(LobbyActions.JOIN_QUEUE, { username });
+
+    } catch (error) {
+      console.error('Failed to connect and join queue:', error);
+      this.errorMessage = 'Failed to connect to server';
+      this.stopAnimation();
+      this.stopDotsAnimation();
+    }
+  }
+
+  private cleanupNetworkSubscriptions(): void {
+    if (this.queueUpdateSubscription) {
+      this.queueUpdateSubscription.unsubscribe();
+      this.queueUpdateSubscription = null;
+    }
+    if (this.matchFoundSubscription) {
+      this.matchFoundSubscription.unsubscribe();
+      this.matchFoundSubscription = null;
+    }
   }
 }

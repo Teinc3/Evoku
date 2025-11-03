@@ -1,9 +1,11 @@
 import SessionModel from "../models/networking/Session";
+import ServerSocket from "../models/networking/ServerSocket";
 
+import type { WebSocket } from "ws";
 import type { UUID } from "crypto";
 import type SystemActions from "@shared/types/enums/actions/system";
 import type IDataHandler from "../types/handler";
-import type ServerSocket from "../models/networking/ServerSocket";
+import type { MatchmakingManager } from ".";
 
 
 /**
@@ -12,6 +14,7 @@ import type ServerSocket from "../models/networking/ServerSocket";
 export default class SessionManager {
   private sessions: Map<UUID, SessionModel>;
   private cleanupInterval: NodeJS.Timeout | null;
+  private matchmakingManager?: MatchmakingManager;
 
   constructor (private systemHandler: IDataHandler<SystemActions>) {
     this.sessions = new Map();
@@ -23,13 +26,35 @@ export default class SessionManager {
     ); // Check every 10 seconds
   }
 
-  public createSession(socket: ServerSocket): SessionModel {
-    const session = new SessionModel(
+  public setMatchmakingManager(matchmakingManager: MatchmakingManager): void {
+    this.matchmakingManager = matchmakingManager;
+  }
+
+  public createSession(socket: WebSocket): SessionModel {
+    // Create session variable that will be assigned later
+    // The callback captures this variable by reference
+    let session: SessionModel | null = null;
+
+    // Create the ServerSocket with a callback that will use the session once assigned
+    const serverSocket = new ServerSocket(
       socket,
+      (_code: number) => {
+        if (session) {
+          session.disconnect();
+        }
+      },
+      (err: Error) => console.error('Socket error:', err, err.stack)
+    );
+
+    // Now create the SessionModel
+    session = new SessionModel(
+      serverSocket,
       session => this.onDisconnect(session),
       session => this.onDestroy(session),
+      (session, userID) => this.onAuthenticate(session, userID),
       this.systemHandler
     );
+
     this.sessions.set(session.uuid, session);
     return session;
   }
@@ -47,8 +72,9 @@ export default class SessionManager {
    * Event handler when the socket of a session disconnects.
    * @param session The session which socket disconnected.
    */
-  public onDisconnect(_session: SessionModel): void {
-    // TODO: Add sth here (idk what to add lol)
+  public onDisconnect(session: SessionModel): void {
+    // Notify matchmaking manager to remove player from queue (if they are in queue)
+    this.matchmakingManager?.onSessionDisconnect(session.uuid);
   }
 
   /**
@@ -57,6 +83,26 @@ export default class SessionManager {
    */
   public onDestroy(session: SessionModel): void {
     this.sessions.delete(session.uuid);
+  }
+
+  /**
+   * Event handler when a session is authenticated.
+   * @param session The session that was authenticated.
+   * @param userID The ID of the user that was authenticated.
+   */
+  public onAuthenticate(session: SessionModel, userID: UUID): void {
+    // Check if there is an existing session for this userID
+    if (this.sessions.has(userID)) {
+      // Swap the socket
+      const existingSession = this.sessions.get(userID)!;
+      existingSession.reconnect(session.socketInstance!);
+      session.destroy(true); // Remove the new session
+    } else {
+      // Simply assign the existing userID as the session's UUID
+      this.sessions.delete(session.uuid);
+      this.sessions.set(userID, session);
+      session.uuid = userID;
+    }
   }
 
   /**

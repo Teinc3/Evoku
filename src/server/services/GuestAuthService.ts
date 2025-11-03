@@ -1,6 +1,7 @@
 import { generatePlayerId, signGuestToken, verifyGuestToken } from '../utils/jwt';
 import redisService from './RedisService';
 
+import type { UUID } from 'crypto';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';
 
 
@@ -47,7 +48,7 @@ export class GuestAuthService {
    * If a token is provided and valid, returns existing player data with a refreshed token.
    * Otherwise, creates a new guest player.
    */
-  async authenticate(token?: string): Promise<IGuestAuthResponse> {
+  async authenticate(token?: string): Promise<IGuestAuthResponse<UUID>> {
     // If token is provided, try to verify it
     if (token) {
       const playerId = verifyGuestToken(token);
@@ -60,21 +61,23 @@ export class GuestAuthService {
           const newToken = signGuestToken(playerId);
           return {
             token: newToken,
-            elo: playerData.elo
+            elo: playerData.elo,
+            userID: playerId
           };
         }
       }
     }
 
     // Create new guest player
-    const playerId = generatePlayerId();
+    const playerID = generatePlayerId();
     const elo = this.defaultElo;
-    await this.setPlayerData(playerId, elo, true); // Set with expiration for new players
-    const newToken = signGuestToken(playerId);
+    await this.setPlayerData(playerID, elo, true); // Set with expiration for new players
+    const newToken = signGuestToken(playerID);
 
     return {
       token: newToken,
-      elo
+      elo,
+      userID: playerID
     };
   }
 }

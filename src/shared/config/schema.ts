@@ -15,7 +15,7 @@ export const SharedConfigSchema = z.object({
     }),
   }),
   security: z.object({
-    packetScramblerSeed: z.string().nonempty(),
+    packetScramblerSeed: z.string(),
   }),
   version: z.string().regex(
     /^\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?$/,
