@@ -4,6 +4,7 @@ import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import LobbyHandler from './LobbyHandler';
 
 import type SessionModel from '../../models/networking/Session';
+import type { MatchmakingManager } from '../../managers';
 
 
 // Mock classes for testing
@@ -11,16 +12,25 @@ class MockSession {
   constructor(public readonly uuid: string) {}
   send = jest.fn();
   forward = jest.fn();
+  isAuthenticated = jest.fn().mockReturnValue(true);
+}
+
+class MockMatchmakingManager {
+  joinQueue = jest.fn();
+  leaveQueue = jest.fn();
 }
 
 describe('LobbyHandler', () => {
   let lobbyHandler: LobbyHandler;
   let mockSession: MockSession;
+  let mockMatchmakingManager: MockMatchmakingManager;
 
   beforeEach(() => {
     jest.clearAllMocks();
     lobbyHandler = new LobbyHandler();
     mockSession = new MockSession('test-session');
+    mockMatchmakingManager = new MockMatchmakingManager();
+    lobbyHandler.setMatchmakingManager(mockMatchmakingManager as unknown as MatchmakingManager);
   });
 
   describe('handleJoinQueue', () => {
@@ -28,6 +38,7 @@ describe('LobbyHandler', () => {
       // Arrange
       const joinQueueData = {
         action: LobbyActions.JOIN_QUEUE,
+        username: 'TestPlayer',
         clientTime: 1000,
       };
 
@@ -39,6 +50,7 @@ describe('LobbyHandler', () => {
 
       // Assert
       expect(result).toBe(true);
+      expect(mockMatchmakingManager.joinQueue).toHaveBeenCalledWith(mockSession, 'TestPlayer');
     });
   });
 
@@ -58,6 +70,7 @@ describe('LobbyHandler', () => {
 
       // Assert
       expect(result).toBe(true);
+      expect(mockMatchmakingManager.leaveQueue).toHaveBeenCalledWith('test-session');
     });
   });
 });

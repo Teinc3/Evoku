@@ -3,9 +3,12 @@ import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SessionModel from "../../models/networking/Session";
+import type { MatchmakingManager } from "../../managers";
 
 
 export default class LobbyHandler extends EnumHandler<LobbyActions> {
+  private matchmakingManager?: MatchmakingManager;
+
   constructor() {
     super();
 
@@ -17,11 +20,29 @@ export default class LobbyHandler extends EnumHandler<LobbyActions> {
     this.setHandlerMap(handlerMap);
   }
 
-  private handleJoinQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): boolean {
+  public setMatchmakingManager(matchmakingManager: MatchmakingManager): void {
+    this.matchmakingManager = matchmakingManager;
+  }
+
+  private handleJoinQueue(
+    session: SessionModel,
+    data: AugmentAction<LobbyActions.JOIN_QUEUE>
+  ): boolean {
+    if (!this.matchmakingManager) {
+      return false;
+    }
+    this.matchmakingManager.joinQueue(session, data.username);
     return true;
   }
 
-  private handleLeaveQueue(_session: SessionModel, _data: AugmentAction<LobbyActions>): boolean {
+  private handleLeaveQueue(
+    session: SessionModel,
+    _data: AugmentAction<LobbyActions.LEAVE_QUEUE>
+  ): boolean {
+    if (!this.matchmakingManager) {
+      return false;
+    }
+    this.matchmakingManager.leaveQueue(session.uuid);
     return true;
   }
 }
