@@ -12,13 +12,18 @@ import type RoomManager from '../managers/RoomManager';
 export class StatsService {
   private readonly redisKeyPrefix = 'stats:';
   private readonly serverStartTime: number;
+  private sessionManager!: SessionManager;
+  private roomManager!: RoomManager;
 
-  constructor(
-    private sessionManager: SessionManager,
-    private roomManager: RoomManager
-  ) {
+  constructor() {
     this.serverStartTime = Date.now();
     this.logStartupTime();
+  }
+
+  /** Initialize the service with required dependencies */
+  public initialize(sessionManager: SessionManager, roomManager: RoomManager): void {
+    this.sessionManager = sessionManager;
+    this.roomManager = roomManager;
   }
 
   /** Log server startup time to Redis */
@@ -114,4 +119,6 @@ export class StatsService {
   }
 }
 
-export default StatsService;
+// Create singleton instance and export as default
+const statsService = new StatsService();
+export default statsService;

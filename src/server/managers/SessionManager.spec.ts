@@ -1,12 +1,13 @@
 import { jest } from '@jest/globals';
 
 import SessionModel from '../models/networking/Session';
+import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from "./SessionManager";
 
+import type { WebSocket } from 'ws';
 import type { UUID } from 'crypto';
 import type SystemActions from '@shared/types/enums/actions/system';
 import type IDataHandler from '../types/handler';
-import type ServerSocket from '../models/networking/ServerSocket';
 
 
 // Type definitions for accessing private methods
@@ -17,13 +18,21 @@ interface SessionManagerPrivate {
 }
 
 // Mock classes for testing
-class MockServerSocket {
+class MockWebSocket {
   constructor(public readyState: number = 1) {} // WebSocket.OPEN = 1
   close = jest.fn();
   send = jest.fn();
-  setListener = jest.fn();
   removeAllListeners = jest.fn();
   on = jest.fn();
+  ping = jest.fn();
+  pong = jest.fn();
+  terminate = jest.fn();
+  binaryType = 'arraybuffer' as const;
+  bufferedAmount = 0;
+  extensions = '';
+  isPaused = false;
+  protocol = '';
+  url = '';
 }
 
 class MockSystemHandler implements IDataHandler<SystemActions> {
@@ -62,10 +71,10 @@ describe('SessionManager', () => {
   describe('createSession', () => {
     it('should create and store a new session', () => {
       // Arrange
-      const socket = new MockServerSocket();
+      const socket = new MockWebSocket();
 
       // Act
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Assert
       expect(session).toBeInstanceOf(SessionModel);
@@ -75,13 +84,13 @@ describe('SessionManager', () => {
 
     it('should pass correct parameters to SessionModel constructor', () => {
       // Arrange
-      const socket = new MockServerSocket();
+      const socket = new MockWebSocket();
 
       // Act
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Assert
-      expect(session.socketInstance).toBe(socket);
+      expect(session.socketInstance).toBeInstanceOf(ServerSocket);
       expect(typeof session.uuid).toBe('string');
     });
   });
@@ -89,8 +98,8 @@ describe('SessionManager', () => {
   describe('getSession', () => {
     it('should return session if it exists', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Act
       const retrieved = sessionManager.getSession(session.uuid);
@@ -119,8 +128,8 @@ describe('SessionManager', () => {
 
     it('should return correct count with one session', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      sessionManager.createSession(socket as unknown as WebSocket);
 
       // Act
       const count = sessionManager.getOnlineCount();
@@ -131,12 +140,12 @@ describe('SessionManager', () => {
 
     it('should return correct count with multiple sessions', () => {
       // Arrange
-      const socket1 = new MockServerSocket();
-      const socket2 = new MockServerSocket();
-      const socket3 = new MockServerSocket();
-      sessionManager.createSession(socket1 as unknown as ServerSocket);
-      sessionManager.createSession(socket2 as unknown as ServerSocket);
-      sessionManager.createSession(socket3 as unknown as ServerSocket);
+      const socket1 = new MockWebSocket();
+      const socket2 = new MockWebSocket();
+      const socket3 = new MockWebSocket();
+      sessionManager.createSession(socket1 as unknown as WebSocket);
+      sessionManager.createSession(socket2 as unknown as WebSocket);
+      sessionManager.createSession(socket3 as unknown as WebSocket);
 
       // Act
       const count = sessionManager.getOnlineCount();
@@ -147,8 +156,8 @@ describe('SessionManager', () => {
 
     it('should decrease count when session is destroyed', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
       expect(sessionManager.getOnlineCount()).toBe(1);
 
       // Act
@@ -162,8 +171,8 @@ describe('SessionManager', () => {
   describe('onDisconnect', () => {
     it('should handle disconnection event', () => {
       // Arrange - Create a session using the manager so it's properly stored
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Act
       sessionManager.onDisconnect(session);
@@ -178,8 +187,8 @@ describe('SessionManager', () => {
   describe('onDestroy', () => {
     it('should remove session from sessions map', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
       const sessionId = session.uuid;
 
       // Verify session exists
@@ -198,8 +207,8 @@ describe('SessionManager', () => {
   describe('cleanupSessions', () => {
     it('should destroy sessions inactive for more than 2 minutes', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Spy on the destroy method
       const destroySpy = jest.spyOn(session, 'destroy');
@@ -219,8 +228,8 @@ describe('SessionManager', () => {
 
     it('should disconnect sockets for sessions inactive for more than 30 seconds', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Spy on the disconnect method
       const disconnectSpy = jest.spyOn(session, 'disconnect');
@@ -240,8 +249,8 @@ describe('SessionManager', () => {
 
     it('should not affect sessions that are recently active', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      const session = sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      const session = sessionManager.createSession(socket as unknown as WebSocket);
 
       // Spy on the methods
       const disconnectSpy = jest.spyOn(session, 'disconnect');
@@ -292,10 +301,10 @@ describe('SessionManager', () => {
 
     it('should destroy all sessions', () => {
       // Arrange
-      const socket1 = new MockServerSocket();
-      const socket2 = new MockServerSocket();
-      const session1 = sessionManager.createSession(socket1 as unknown as ServerSocket);
-      const session2 = sessionManager.createSession(socket2 as unknown as ServerSocket);
+      const socket1 = new MockWebSocket();
+      const socket2 = new MockWebSocket();
+      const session1 = sessionManager.createSession(socket1 as unknown as WebSocket);
+      const session2 = sessionManager.createSession(socket2 as unknown as WebSocket);
 
       // Spy on the destroy methods
       const destroySpy1 = jest.spyOn(session1, 'destroy');
@@ -311,8 +320,8 @@ describe('SessionManager', () => {
 
     it('should clear the sessions map', () => {
       // Arrange
-      const socket = new MockServerSocket();
-      sessionManager.createSession(socket as unknown as ServerSocket);
+      const socket = new MockWebSocket();
+      sessionManager.createSession(socket as unknown as WebSocket);
 
       // Act
       sessionManager.close();

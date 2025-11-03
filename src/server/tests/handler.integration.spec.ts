@@ -8,6 +8,7 @@ import MatchHandler from '../handlers/match';
 
 import type SessionModel from '../models/networking/Session';
 import type RoomModel from '../models/networking/Room';
+import type { MatchmakingManager } from '../managers';
 import type SessionHandler from '../handlers/system/SessionHandler';
 import type LobbyHandler from '../handlers/system/LobbyHandler';
 import type FirePUPHandler from '../handlers/match/player/powerups/FirePUPHandler';
@@ -21,6 +22,12 @@ class MockSession {
   // Add any other properties or methods the handlers might need
   send = jest.fn();
   forward = jest.fn();
+  isAuthenticated = jest.fn().mockReturnValue(true);
+}
+
+class MockMatchmakingManager {
+  joinQueue = jest.fn();
+  leaveQueue = jest.fn();
 }
 
 class MockRoom {
@@ -33,12 +40,15 @@ describe('System Handler Integration Test', () => {
   let systemHandler: SystemHandler;
   let sessionHandler: SessionHandler;
   let lobbyHandler: LobbyHandler;
+  let mockMatchmakingManager: MockMatchmakingManager;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockSession = new MockSession('mock-uuid-123') as unknown as SessionModel;
+    mockMatchmakingManager = new MockMatchmakingManager();
 
     systemHandler = new SystemHandler();
+    systemHandler.setMatchmakingManager(mockMatchmakingManager as unknown as MatchmakingManager);
     // @ts-expect-error ts(2341) - Accessing private property for test purposes
     sessionHandler = systemHandler.handlerMap[0][1];
     // @ts-expect-error ts(2341)

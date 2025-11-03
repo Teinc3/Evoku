@@ -15,8 +15,12 @@ export default class ServerSocket {
 
   constructor(
     private ws: WebSocket,
+    private onClose: (code: number) => void,
+    private onError: (err: Error) => void
   ) {
     this.packetIO = new PacketIO();
+    this.ws.on('close', code => this.onClose(code));
+    this.ws.on('error', err => this.onError(err));
   }
 
   /**

@@ -46,7 +46,11 @@ describe('ServerSocket', () => {
 
   beforeEach(() => {
     mockWs = mockWebSocket();
-    serverSocket = new ServerSocket(mockWs as unknown as WebSocket);
+    serverSocket = new ServerSocket(
+      mockWs as unknown as WebSocket,
+      jest.fn(),
+      jest.fn()
+    );
     // Get the mocked PacketIO instance
     mockPacketIO = (serverSocket as unknown as { packetIO: typeof mockPacketIO }).packetIO;
   });
@@ -189,7 +193,7 @@ describe('ServerSocket', () => {
       serverSocket.setListener(handler2);
 
       expect(mockWs.removeAllListeners).toHaveBeenCalledTimes(2);
-      expect(mockWs.on).toHaveBeenCalledTimes(2);
+      expect(mockWs.on).toHaveBeenCalledTimes(4); // 2 from constructor + 2 from setListener
     });
   });
 

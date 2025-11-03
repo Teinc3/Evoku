@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
-import ServerSocket from '../models/networking/ServerSocket';
 import SessionManager from '../managers/SessionManager';
 import RoomManager from '../managers/RoomManager';
 import WSServer from "./WSServer";
@@ -88,17 +87,8 @@ describe('WSServer Integration Test', () => {
     const mockClientSocket = {}; // A simple object to represent the client connection
     mockWssInstance.emit('connection', mockClientSocket);
 
-    // Assert that a new ServerSocket was created with the client's socket
-    // This will now pass correctly.
-    expect(ServerSocket).toHaveBeenCalledTimes(1);
-    expect(ServerSocket).toHaveBeenCalledWith(mockClientSocket);
-
     // Assert that the SessionManager was told to create a new session
     expect(createSessionSpy).toHaveBeenCalledTimes(1);
-    
-    // Get the ServerSocket instance that was created
-    const serverSocketInstance = (ServerSocket as jest.Mock).mock.instances[0];
-    // Assert that createSession was called with that exact instance
-    expect(createSessionSpy).toHaveBeenCalledWith(serverSocketInstance);
+    expect(createSessionSpy).toHaveBeenCalledWith(mockClientSocket);
   });
 });

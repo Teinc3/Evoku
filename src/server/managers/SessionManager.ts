@@ -1,9 +1,11 @@
 import SessionModel from "../models/networking/Session";
+import ServerSocket from "../models/networking/ServerSocket";
 
+import type { WebSocket } from "ws";
 import type { UUID } from "crypto";
 import type SystemActions from "@shared/types/enums/actions/system";
 import type IDataHandler from "../types/handler";
-import type ServerSocket from "../models/networking/ServerSocket";
+import type { MatchmakingManager } from ".";
 
 
 /**
@@ -12,6 +14,7 @@ import type ServerSocket from "../models/networking/ServerSocket";
 export default class SessionManager {
   private sessions: Map<UUID, SessionModel>;
   private cleanupInterval: NodeJS.Timeout | null;
+  private matchmakingManager?: MatchmakingManager;
 
   constructor (private systemHandler: IDataHandler<SystemActions>) {
     this.sessions = new Map();
@@ -23,11 +26,23 @@ export default class SessionManager {
     ); // Check every 10 seconds
   }
 
-  public createSession(socket: ServerSocket): SessionModel {
-    const session = new SessionModel(
+  public setMatchmakingManager(matchmakingManager: MatchmakingManager): void {
+    this.matchmakingManager = matchmakingManager;
+  }
+
+  public createSession(socket: WebSocket): SessionModel {
+    // Create a new ServerSocket instance and a SessionModel that wraps it
+    const serverSocket = new ServerSocket(
       socket,
+      (_code: number) => session.disconnect(), // Ends up also calling onDisconnect here
+      (err: Error) => console.error('Socket error:', err, err.stack)
+    );
+
+    const session = new SessionModel(
+      serverSocket,
       session => this.onDisconnect(session),
       session => this.onDestroy(session),
+      (session, userID) => this.onAuthenticate(session, userID),
       this.systemHandler
     );
     this.sessions.set(session.uuid, session);
@@ -47,8 +62,9 @@ export default class SessionManager {
    * Event handler when the socket of a session disconnects.
    * @param session The session which socket disconnected.
    */
-  public onDisconnect(_session: SessionModel): void {
-    // TODO: Add sth here (idk what to add lol)
+  public onDisconnect(session: SessionModel): void {
+    // Notify matchmaking manager to remove player from queue (if they are in queue)
+    this.matchmakingManager?.onSessionDisconnect(session.uuid);
   }
 
   /**

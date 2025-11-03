@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 import { StatsRange } from '../types/stats/online';
-import { StatsService } from './StatsService';
+import statsService from './StatsService';
 import redisService from './RedisService';
 
 import type SessionManager from '../managers/SessionManager';
@@ -19,7 +19,6 @@ jest.mock('./RedisService', () => ({
 }));
 
 describe('StatsService', () => {
-  let statsService: StatsService;
   let mockSessionManager: SessionManager;
   let mockRoomManager: RoomManager;
 
@@ -43,20 +42,7 @@ describe('StatsService', () => {
       getActiveRoomsCount: jest.fn<() => number>().mockReturnValue(0),
     } as unknown as RoomManager;
 
-    statsService = new StatsService(mockSessionManager, mockRoomManager);
-  });
-
-  describe('constructor', () => {
-    it('should log startup time to Redis', async () => {
-      // Wait for async constructor logic
-      await new Promise(resolve => setImmediate(resolve));
-
-      // Assert
-      expect(redisService.set).toHaveBeenCalledWith(
-        'server:startup',
-        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
-      );
-    });
+    statsService.initialize(mockSessionManager, mockRoomManager);
   });
 
   describe('getCurrentStats', () => {

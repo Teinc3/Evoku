@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 
-import StatsService from '../services/StatsService';
+import statsService, { type StatsService } from '../services/StatsService';
 import OnlineSampler from '../services/OnlineSampler.service';
 import { SessionManager, RoomManager, MatchmakingManager } from '../managers';
 import SystemHandler from '../handlers/system';
@@ -34,6 +34,7 @@ export default class WSServer {
     this.roomManager = new RoomManager();
     this.matchmakingManager = new MatchmakingManager(this.sessionManager, this.roomManager);
     this.statsService = statsService;
+    statsService.initialize(this.sessionManager, this.roomManager);
     this.statsSampler = new OnlineSampler(this.statsService);
     
     // Wire up matchmaking manager to handlers and session manager
@@ -46,9 +47,7 @@ export default class WSServer {
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
       ws.binaryType = 'arraybuffer';
-      // Create a new ServerSocket instance and a SessionModel that wraps it
-      const socket = new ServerSocket(ws);
-      this.sessionManager.createSession(socket);
+      this.sessionManager.createSession(ws);
     });
   }
 

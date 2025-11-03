@@ -1,4 +1,4 @@
-import type StatsService from './StatsService';
+import type { StatsService } from './StatsService';
 
 
 /**
