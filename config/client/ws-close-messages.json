@@ -1,0 +1,28 @@
+{
+  "wsCloseMessages": {
+    "1000": "Connection closed normally",
+    "1001": "Server is going away or browser navigated away",
+    "1002": "Protocol error occurred",
+    "1003": "Unsupported data type received",
+    "1005": "No status code received",
+    "1006": "Connection closed abnormally",
+    "1007": "Invalid message data received",
+    "1008": "Message violates policy",
+    "1009": "Message too large to process",
+    "1010": "Required extension not negotiated",
+    "1011": "Internal server error occurred",
+    "1012": "Server is restarting",
+    "1013": "Server temporarily unavailable",
+    "1014": "Bad gateway response",
+    "1015": "TLS handshake failed",
+    "4000": "Authentication timeout - please reconnect",
+    "4001": "Authentication failed - invalid credentials",
+    "4002": "Session expired - please log in again",
+    "4003": "Too many pending requests before authentication",
+    "4004": "Invalid data sent to server",
+    "4005": "Too many requests - please slow down",
+    "4006": "Client version incompatible - please refresh",
+    "4007": "Server is shutting down",
+    "4008": "Logged in from another location"
+  }
+}

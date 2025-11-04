@@ -1,4 +1,5 @@
 import WSCloseCode from '@shared/types/enums/ws-codes.enum';
+import wsCloseMessagesConfig from '@config/client/ws-close-messages.json';
 
 
 /**
@@ -6,35 +7,12 @@ import WSCloseCode from '@shared/types/enums/ws-codes.enum';
  * Provides meaningful feedback to users when disconnection occurs.
  */
 export default class WSCloseMessageMapper {
-  private static readonly messages: Map<number, string> = new Map([
-    // Standard RFC 6455 codes
-    [WSCloseCode.NORMAL_CLOSURE, 'Connection closed normally'],
-    [WSCloseCode.GOING_AWAY, 'Server is going away or browser navigated away'],
-    [WSCloseCode.PROTOCOL_ERROR, 'Protocol error occurred'],
-    [WSCloseCode.UNSUPPORTED_DATA, 'Unsupported data type received'],
-    [WSCloseCode.NO_STATUS_RECEIVED, 'No status code received'],
-    [WSCloseCode.ABNORMAL_CLOSURE, 'Connection closed abnormally'],
-    [WSCloseCode.INVALID_FRAME_PAYLOAD, 'Invalid message data received'],
-    [WSCloseCode.POLICY_VIOLATION, 'Message violates policy'],
-    [WSCloseCode.MESSAGE_TOO_BIG, 'Message too large to process'],
-    [WSCloseCode.MANDATORY_EXTENSION, 'Required extension not negotiated'],
-    [WSCloseCode.INTERNAL_ERROR, 'Internal server error occurred'],
-    [WSCloseCode.SERVICE_RESTART, 'Server is restarting'],
-    [WSCloseCode.TRY_AGAIN_LATER, 'Server temporarily unavailable'],
-    [WSCloseCode.BAD_GATEWAY, 'Bad gateway response'],
-    [WSCloseCode.TLS_HANDSHAKE_FAILED, 'TLS handshake failed'],
-    
-    // Custom application codes
-    [WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout - please reconnect'],
-    [WSCloseCode.AUTH_FAILED, 'Authentication failed - invalid credentials'],
-    [WSCloseCode.AUTH_TOKEN_EXPIRED, 'Session expired - please log in again'],
-    [WSCloseCode.AUTH_QUEUE_OVERFLOW, 'Too many pending requests before authentication'],
-    [WSCloseCode.INVALID_PACKET, 'Invalid data sent to server'],
-    [WSCloseCode.RATE_LIMIT_EXCEEDED, 'Too many requests - please slow down'],
-    [WSCloseCode.VERSION_MISMATCH, 'Client version incompatible - please refresh'],
-    [WSCloseCode.SERVER_SHUTDOWN, 'Server is shutting down'],
-    [WSCloseCode.DUPLICATE_SESSION, 'Logged in from another location'],
-  ]);
+  private static readonly messages: Map<number, string> = new Map(
+    Object.entries(wsCloseMessagesConfig.wsCloseMessages).map(([code, message]) => [
+      parseInt(code, 10),
+      message,
+    ])
+  );
 
   /**
    * Get a user-friendly message for a WebSocket close code.
