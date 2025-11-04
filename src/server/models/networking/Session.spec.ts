@@ -255,7 +255,7 @@ describe('SessionModel', () => {
       const newSocket = new MockServerSocket();
 
       // Act
-      session.reconnect(newSocket as unknown as ServerSocket);
+      session.reconnect(newSocket as unknown as ServerSocket, []);
 
       // Assert
       expect(session.socketInstance).toBe(newSocket);
@@ -266,7 +266,7 @@ describe('SessionModel', () => {
       const newSocket = new MockServerSocket();
 
       // Act
-      session.reconnect(newSocket as unknown as ServerSocket);
+      session.reconnect(newSocket as unknown as ServerSocket, []);
 
       // Assert
       expect(newSocket.setListener).toHaveBeenCalledWith(expect.any(Function));
@@ -278,7 +278,7 @@ describe('SessionModel', () => {
       const originalSocket = session.socketInstance;
 
       // Act
-      session.reconnect(newSocket as unknown as ServerSocket);
+      session.reconnect(newSocket as unknown as ServerSocket, []);
 
       // Assert
       expect(session.socketInstance).toBe(newSocket);
@@ -632,7 +632,7 @@ describe('SessionModel', () => {
       expect(onDisconnectSpy).toHaveBeenCalledWith(session);
 
       // Reconnect
-      session.reconnect(newSocket as unknown as ServerSocket);
+      session.reconnect(newSocket as unknown as ServerSocket, []);
       expect(session.socketInstance).toBe(newSocket);
 
       // Destroy
@@ -775,13 +775,16 @@ describe('SessionModel', () => {
 
       // Act - Reconnect with a new socket
       const newSocket = new MockServerSocket();
-      sessionWithTimeout.reconnect(newSocket as unknown as ServerSocket);
+      sessionWithTimeout.reconnect(newSocket as unknown as ServerSocket, []);
+
+      // Assert - Disconnect should have been called once during reconnect
+      expect(onDisconnectSpy).toHaveBeenCalledTimes(1);
 
       // Advance time past the auth timeout
       jest.advanceTimersByTime(6000);
 
-      // Assert - Should NOT disconnect because session is already authenticated
-      expect(onDisconnectSpy).not.toHaveBeenCalled();
+      // Assert - Should NOT disconnect again because session is already authenticated
+      expect(onDisconnectSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

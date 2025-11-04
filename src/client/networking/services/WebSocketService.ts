@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
@@ -17,6 +17,7 @@ import type ActionMap from '@shared/types/actionmap';
 export default class WebSocketService {
   private socket: ClientSocket;
   readonly packetSubject = new Subject<AugmentAction<ActionEnum>>();
+  private disconnectSubject = new Subject<void>();
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
@@ -38,11 +39,14 @@ export default class WebSocketService {
     this.authToken = token;
   }
 
-  /**
-   * Whether the socket is ready for communication
-   */
+  /** Whether the socket is ready for communication */
   get ready(): boolean {
     return this.socket.isOpen;
+  }
+
+  /** Observable that emits when the WebSocket disconnects */
+  get onDisconnect(): Observable<void> {
+    return this.disconnectSubject.asObservable();
   }
 
   /**
@@ -105,6 +109,7 @@ export default class WebSocketService {
   destroy(): void {
     this.clearTimers();
     this.packetSubject.complete();
+    this.disconnectSubject.complete();
     this.socket.close();
   }
 
@@ -117,6 +122,9 @@ export default class WebSocketService {
     if (this.disconnectCallback) {
       this.disconnectCallback(event.code, event.reason);
     }
+
+    // Emit disconnect event
+    this.disconnectSubject.next();
   };
 
   private handleError = (error: Event): void => {

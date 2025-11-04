@@ -120,12 +120,23 @@ export default class SessionModel {
    * Sets a reconnecting socket back to this session.
    * Clears the reconnection timer and references the new socket.
    */
-  public reconnect(socket: ServerSocket): void {
+  public reconnect(socket: ServerSocket, packetQueue: AugmentAction<ActionEnum>[]): void {
+    // Disconnect old socket, triggering events (i.e. removing from queue)
+    this.disconnect();
+
     // Plug in the new socket.
     // We know it's valid since the socket has completed auth again.
     this.socketInstance = socket;
     this.socketInstance.setListener(this.dataListener.bind(this));
     this.disconnected = false; // Reset disconnected flag
+
+    // Restore any queued packets
+    this.preAuthPacketQueue.push(...packetQueue);
+
+    // Now process any queued packets
+    this.processQueuedPackets();
+    // This will run asynchronously
+    // while processing these queued packets sessionmanager kills the old session and socket
   }
 
   /**
@@ -152,6 +163,16 @@ export default class SessionModel {
       // Handle the packet using the data listener routine
       await this.dataListener(packet);
     }
+  }
+
+  /**
+   * Drains the pre-auth packet queue and returns all queued packets.
+   * This method clears the queue and returns its contents for transfer to another session.
+   */
+  public drainPreAuthPacketQueue(): AugmentAction<ActionEnum>[] {
+    const queue = [...this.preAuthPacketQueue];
+    this.preAuthPacketQueue.length = 0;
+    return queue;
   }
 
   /**

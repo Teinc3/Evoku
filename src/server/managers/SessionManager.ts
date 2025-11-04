@@ -93,9 +93,10 @@ export default class SessionManager {
   public onAuthenticate(session: SessionModel, userID: UUID): void {
     // Check if there is an existing session for this userID
     if (this.sessions.has(userID)) {
-      // Swap the socket
       const existingSession = this.sessions.get(userID)!;
-      existingSession.reconnect(session.socketInstance!);
+      const packetQueue = session.drainPreAuthPacketQueue();
+      existingSession.reconnect(session.socketInstance!, packetQueue);
+      session.socketInstance = null; // Prevent the new session from closing the socket
       session.destroy(true); // Remove the new session
     } else {
       // Simply assign the existing userID as the session's UUID

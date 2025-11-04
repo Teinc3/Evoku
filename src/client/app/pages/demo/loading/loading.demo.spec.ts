@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
@@ -31,14 +31,21 @@ describe('LoadingDemoPageComponent', () => {
       'connect',
       'disconnect',
       'send',
-      'onPacket'
-    ]);
+      'onPacket',
+      'onDisconnect',
+      'isConnected'
+    ], {
+      isConnected: true
+    });
 
     // Mock connect to resolve successfully
     networkSpy.connect.and.resolveTo();
 
     // Mock onPacket to return empty observables by default
     networkSpy.onPacket.and.returnValue(of());
+
+    // Mock onDisconnect to return empty observable
+    networkSpy.onDisconnect.and.returnValue(of());
 
     await TestBed.configureTestingModule({
       imports: [LoadingDemoPageComponent],
@@ -463,21 +470,40 @@ describe('LoadingDemoPageComponent', () => {
     );
   });
 
-  it('should clean up network subscriptions on destroy', () => {
-    // Create fresh component
-    const freshComponent = new LoadingDemoPageComponent(
-      viewStateServiceSpy,
-      networkServiceSpy
-    );
+  it('should handle disconnection events correctly', () => {
+    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+    let disconnectCallback: () => void;
 
-    // Initialize to set up subscriptions
+    // Mock onDisconnect to capture the callback
+    networkServiceSpy.onDisconnect.and.returnValue({
+      subscribe: (callback: () => void) => {
+        disconnectCallback = callback;
+        return { unsubscribe: jasmine.createSpy('unsubscribe') };
+      }
+    } as unknown as Observable<void>);
+
     freshComponent.ngOnInit();
 
-    // Destroy component
+    // Trigger disconnect
+    disconnectCallback!();
+
+    expect(freshComponent['errorMessage']).toBe('Connection lost to server, please try again.');
+    expect(freshComponent['animationSubscription']).toBeNull();
+    expect(freshComponent['dotsSubscription']).toBeNull();
+  });
+
+  it('should unsubscribe from disconnection events on destroy', () => {
+    const freshComponent = new LoadingDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+    const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+
+    // Mock onDisconnect to return subscription with unsubscribe spy
+    networkServiceSpy.onDisconnect.and.returnValue({
+      subscribe: () => ({ unsubscribe: unsubscribeSpy })
+    } as unknown as Observable<void>);
+
+    freshComponent.ngOnInit();
     freshComponent.ngOnDestroy();
 
-    // Network subscriptions should be cleaned up
-    expect(freshComponent['queueUpdateSubscription']).toBeNull();
-    expect(freshComponent['matchFoundSubscription']).toBeNull();
+    expect(unsubscribeSpy).toHaveBeenCalled();
   });
 });
