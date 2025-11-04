@@ -31,14 +31,21 @@ describe('LoadingDemoPageComponent', () => {
       'connect',
       'disconnect',
       'send',
-      'onPacket'
-    ]);
+      'onPacket',
+      'onDisconnect',
+      'isConnected'
+    ], {
+      isConnected: true
+    });
 
     // Mock connect to resolve successfully
     networkSpy.connect.and.resolveTo();
 
     // Mock onPacket to return empty observables by default
     networkSpy.onPacket.and.returnValue(of());
+
+    // Mock onDisconnect to return empty observable
+    networkSpy.onDisconnect.and.returnValue(of());
 
     await TestBed.configureTestingModule({
       imports: [LoadingDemoPageComponent],

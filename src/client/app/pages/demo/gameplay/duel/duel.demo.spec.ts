@@ -2,6 +2,7 @@ import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import ViewStateService from '../../../../services/view-state.service';
+import NetworkService from '../../../../services/network.service';
 import DuelDemoPageComponent from './duel.demo';
 
 import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
@@ -11,22 +12,30 @@ describe('DuelDemoPageComponent', () => {
   let fixture: ComponentFixture<DuelDemoPageComponent>;
   let component: DuelDemoPageComponent;
   let viewStateServiceSpy: jasmine.SpyObj<ViewStateService>;
+  let networkServiceSpy: jasmine.SpyObj<NetworkService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('ViewStateService', [], {
+    const viewStateSpy = jasmine.createSpyObj('ViewStateService', [], {
       getNavigationData: jasmine.createSpy('getNavigationData')
+    });
+    const networkSpy = jasmine.createSpyObj('NetworkService', [], {
+      onDisconnect: jasmine.createSpy('onDisconnect').and.returnValue({
+        subscribe: jasmine.createSpy('subscribe')
+      })
     });
 
     await TestBed.configureTestingModule({
       imports: [DuelDemoPageComponent],
       providers: [
-        { provide: ViewStateService, useValue: spy }
+        { provide: ViewStateService, useValue: viewStateSpy },
+        { provide: NetworkService, useValue: networkSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DuelDemoPageComponent);
     component = fixture.componentInstance;
     viewStateServiceSpy = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
+    networkServiceSpy = TestBed.inject(NetworkService) as jasmine.SpyObj<NetworkService>;
     fixture.detectChanges();
   });
 
@@ -196,7 +205,7 @@ describe('DuelDemoPageComponent', () => {
       (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
 
       // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
       spyOn(newComponent['matchState'], 'setMatchData');
 
       newComponent.ngOnInit();
@@ -210,7 +219,7 @@ describe('DuelDemoPageComponent', () => {
       (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(null);
 
       // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
       spyOn(newComponent['matchState'], 'setMatchData');
 
       newComponent.ngOnInit();
@@ -220,7 +229,7 @@ describe('DuelDemoPageComponent', () => {
     });
 
     it('should clear match data on destroy', () => {
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy);
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
       spyOn(newComponent['matchState'], 'clearMatchData');
 
       newComponent.ngOnDestroy();

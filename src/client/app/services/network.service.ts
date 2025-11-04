@@ -56,6 +56,14 @@ export default class NetworkService {
     });
   }
 
+  /**
+   * Subscribe to WebSocket disconnection events.
+   * @returns Observable that emits when the WebSocket disconnects
+   */
+  onDisconnect(): Observable<void> {
+    return this.wsService.onDisconnect;
+  }
+
   /** Connect to the WebSocket server */
   async connect(): Promise<void> {
     // Ensure we have an auth token before connecting

@@ -55,6 +55,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
 
   private queueUpdateSubscription: Subscription | null = null;
   private matchFoundSubscription: Subscription | null = null;
+  private disconnectionSubscription: Subscription | null = null;
 
   protected onlineCount: number = -1;
   protected errorMessage: string | null = null;
@@ -113,11 +114,22 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
     this.startAnimation();
     this.startDotsAnimation();
     this.connectAndJoinQueue();
+
+    // Subscribe to disconnection events
+    this.disconnectionSubscription = this.networkService.onDisconnect().subscribe(() => {
+      this.errorMessage = 'Connection lost to server, please try again.';
+      this.stopAnimation();
+      this.stopDotsAnimation();
+    });
   }
 
   ngOnDestroy(): void {
     this.stopAnimation();
     this.stopDotsAnimation();
+    if (this.disconnectionSubscription) {
+      this.disconnectionSubscription.unsubscribe();
+      this.disconnectionSubscription = null;
+    }
     this.cleanupNetworkSubscriptions();
   }
 
@@ -232,8 +244,10 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
 
   protected onCancelClick(): void {
     // Send LEAVE_QUEUE packet and disconnect
-    this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
-    this.networkService.disconnect();
+    if (this.networkService.isConnected) {
+      this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
+      this.networkService.disconnect();
+    }
     
     // Navigate back to catalogue
     this.viewStateService.navigateToView(AppView.CATALOGUE);

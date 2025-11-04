@@ -1,6 +1,8 @@
+import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import ViewStateService from '../../../../services/view-state.service';
+import NetworkService from '../../../../services/network.service';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
@@ -11,6 +13,7 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
+import AppView from '../../../../../types/enums/app-view.enum';
 import GameStateModel from '../../../../../models/GameState';
 
 import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
@@ -33,8 +36,12 @@ import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchF
 })
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   private matchState: GameStateModel;
+  private disconnectionSubscription: Subscription | null = null;
 
-  constructor(private viewStateService: ViewStateService) {
+  constructor(
+    private viewStateService: ViewStateService,
+    private networkService: NetworkService
+  ) {
     this.matchState = new GameStateModel();
   }
 
@@ -44,11 +51,22 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     if (matchData) {
       this.matchState.setMatchData(matchData);
     }
+
+    // Subscribe to disconnection events
+    this.disconnectionSubscription = this.networkService.onDisconnect().subscribe(() => {
+      // Navigate back to catalogue on disconnect
+      this.viewStateService.navigateToView(AppView.CATALOGUE);
+    });
   }
 
   ngOnDestroy(): void {
     // Clear our local match state
     this.matchState.clearMatchData();
+
+    if (this.disconnectionSubscription) {
+      this.disconnectionSubscription.unsubscribe();
+      this.disconnectionSubscription = null;
+    }
   }
 
   /**
