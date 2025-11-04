@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 
+import WSCloseCode from '@shared/types/enums/ws-codes.enum';
 import PacketIO from '@shared/networking/utils/PacketIO';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -49,7 +50,7 @@ export default class ServerSocket {
           const data = this.packetIO.decodePacket(arrayBuffer as ArrayBuffer);
           handler(data);
         } else {
-          this.close();
+          this.close(WSCloseCode.UNSUPPORTED_DATA);
         }
       } catch {
         // console.error('Failed to decode packet:', err);
@@ -60,12 +61,14 @@ export default class ServerSocket {
   /**
    * Proxy for closing the socket.
    * This will remove all listeners and close the WebSocket connection.
+   * @param code WebSocket close code (defaults to NORMAL_CLOSURE)
+   * @param reason Optional reason string
    */
-  close() {
+  close(code: number = WSCloseCode.NORMAL_CLOSURE, reason?: string) {
     this.ws.removeAllListeners();
 
     if (this.ws.readyState === WebSocket.OPEN) {
-      this.ws.close();
+      this.ws.close(code, reason);
     }
   }
 

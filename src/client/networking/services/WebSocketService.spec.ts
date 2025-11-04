@@ -374,9 +374,13 @@ describe('WebSocketService', () => {
       service.setDisconnectCallback(disconnectCallback);
 
       const handleClose = service['handleClose'];
-      handleClose();
+      const mockCloseEvent = new CloseEvent('close', {
+        code: 1000,
+        reason: 'Normal closure',
+      });
+      handleClose(mockCloseEvent);
 
-      expect(disconnectCallback).toHaveBeenCalled();
+      expect(disconnectCallback).toHaveBeenCalledWith(1000, 'Normal closure');
     });
 
     it('should handle error events', () => {

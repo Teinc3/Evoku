@@ -108,7 +108,7 @@ export default class ClientSocket {
   /**
    * Set close and error handlers
    */
-  onClose(handler: () => void): void {
+  onClose(handler: (event: CloseEvent) => void): void {
     if (this.ws) {
       this.ws.addEventListener('close', handler);
     }
