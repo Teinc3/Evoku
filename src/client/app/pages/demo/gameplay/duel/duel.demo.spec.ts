@@ -1,8 +1,10 @@
+import { Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import ViewStateService from '../../../../services/view-state.service';
 import NetworkService from '../../../../services/network.service';
+import AppView from '../../../../../types/enums/app-view.enum';
 import DuelDemoPageComponent from './duel.demo';
 
 import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
@@ -15,7 +17,7 @@ describe('DuelDemoPageComponent', () => {
   let networkServiceSpy: jasmine.SpyObj<NetworkService>;
 
   beforeEach(async () => {
-    const viewStateSpy = jasmine.createSpyObj('ViewStateService', [], {
+    const viewStateSpy = jasmine.createSpyObj('ViewStateService', ['navigateToView'], {
       getNavigationData: jasmine.createSpy('getNavigationData')
     });
     const networkSpy = jasmine.createSpyObj('NetworkService', [], {
@@ -228,6 +230,43 @@ describe('DuelDemoPageComponent', () => {
       expect(newComponent['matchState'].setMatchData).not.toHaveBeenCalled();
     });
 
+    it('should subscribe to disconnection events on init', () => {
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      const subscribeSpy = jasmine.createSpy('subscribe');
+
+      // Mock onDisconnect to return an observable with subscribe spy
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: subscribeSpy
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+
+      expect(networkServiceSpy.onDisconnect).toHaveBeenCalled();
+      expect(subscribeSpy).toHaveBeenCalled();
+    });
+
+    it('should navigate to catalogue when disconnection occurs', () => {
+      // Create a new component instance
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      let disconnectCallback: () => void;
+
+      // Mock onDisconnect to capture the callback
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: (callback: () => void) => {
+          disconnectCallback = callback;
+          return { unsubscribe: jasmine.createSpy('unsubscribe') };
+        }
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+
+      // Trigger disconnect
+      disconnectCallback!();
+
+      expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
+    });
+
     it('should clear match data on destroy', () => {
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
       spyOn(newComponent['matchState'], 'clearMatchData');
@@ -235,6 +274,21 @@ describe('DuelDemoPageComponent', () => {
       newComponent.ngOnDestroy();
 
       expect(newComponent['matchState'].clearMatchData).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from disconnection events on destroy', () => {
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+
+      // Mock onDisconnect to return subscription with unsubscribe spy
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: () => ({ unsubscribe: unsubscribeSpy })
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+      newComponent.ngOnDestroy();
+
+      expect(unsubscribeSpy).toHaveBeenCalled();
     });
   });
 });

@@ -167,6 +167,13 @@ describe('WebSocketService', () => {
       expect(service.ready).toBe(false);
     });
 
+    it('should return the disconnect observable', () => {
+      const disconnectObservable = service.onDisconnect;
+      expect(disconnectObservable).toBeDefined();
+      // Check that it's an observable by checking its type
+      expect(typeof disconnectObservable.subscribe).toBe('function');
+    });
+
     it('should set auth token', () => {
       const testToken = 'test-auth-token';
       service.setAuthToken(testToken);

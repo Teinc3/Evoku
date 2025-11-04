@@ -18,6 +18,7 @@ class MockWebSocketService {
   disconnectCallback: (() => void) | null = null;
   authToken: string | null = null;
   packetSubject = new Subject<Record<string, unknown>>();
+  onDisconnect = new Subject<void>();
 
   async connect(): Promise<void> {
     this.ready = true;
@@ -146,6 +147,11 @@ describe('NetworkService', () => {
 
       mockWebSocketService.ready = false;
       expect(service.isConnected).toBe(false);
+    });
+
+    it('should return the WebSocket disconnect observable', () => {
+      const disconnectObservable = service.onDisconnect();
+      expect(disconnectObservable).toBe(mockWebSocketService.onDisconnect);
     });
   });
 

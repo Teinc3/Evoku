@@ -94,8 +94,8 @@ export default class SessionManager {
     // Check if there is an existing session for this userID
     if (this.sessions.has(userID)) {
       const existingSession = this.sessions.get(userID)!;
-      existingSession.reconnect(session.socketInstance!, session.preAuthPacketQueue);
-      session.preAuthPacketQueue.length = 0;
+      const packetQueue = session.drainPreAuthPacketQueue();
+      existingSession.reconnect(session.socketInstance!, packetQueue);
       session.socketInstance = null; // Prevent the new session from closing the socket
       session.destroy(true); // Remove the new session
     } else {

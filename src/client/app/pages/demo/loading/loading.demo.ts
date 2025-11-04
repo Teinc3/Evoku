@@ -243,14 +243,17 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   }
 
   protected onCancelClick(): void {
-    // Send LEAVE_QUEUE packet and disconnect
-    if (this.networkService.isConnected) {
-      this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
+    try {
+      if (this.networkService.isConnected) {
+        this.networkService.send(LobbyActions.LEAVE_QUEUE, {});
+      }
+    } catch (error) {
+      console.error('Failed to send LEAVE_QUEUE packet on cancel:', error);
+    } finally {
+      // Always disconnect and navigate back to ensure the user is not stuck.
       this.networkService.disconnect();
+      this.viewStateService.navigateToView(AppView.CATALOGUE);
     }
-    
-    // Navigate back to catalogue
-    this.viewStateService.navigateToView(AppView.CATALOGUE);
   }
 
   protected hideTooltip(): void {
