@@ -1,6 +1,7 @@
 import { randomUUID, type UUID } from "crypto";
 
 import ActionGuard from "@shared/types/utils/typeguards/actions";
+import WSCloseCode from "@shared/types/enums/ws-codes.enum";
 import SessionActions from "@shared/types/enums/actions/system/session";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
@@ -58,8 +59,14 @@ export default class SessionModel {
   /**
    * Disconnects the socket from this session.
    * @param triggerEvent If the disconnect event should be triggered.
+   * @param code WebSocket close code (defaults to NORMAL_CLOSURE)
+   * @param reason Optional reason string
    */
-  public disconnect(triggerEvent: boolean = true): void {
+  public disconnect(
+    triggerEvent: boolean = true,
+    code: number = WSCloseCode.NORMAL_CLOSURE,
+    reason?: string
+  ): void {
     this.clearAuthTimeout();
     
     // Clear any queued packets
@@ -67,7 +74,7 @@ export default class SessionModel {
     
     if (this.socketInstance) {
       // Removes socket references
-      this.socketInstance.close();
+      this.socketInstance.close(code, reason);
       this.socketInstance = null;
     }
 
@@ -80,8 +87,14 @@ export default class SessionModel {
   /**
    * Destroys the session, cleaning up all resources.
    * @param triggerEvent If the destroy event should be triggered.
+   * @param code WebSocket close code (defaults to NORMAL_CLOSURE)
+   * @param reason Optional reason string
    */
-  public destroy(triggerEvent: boolean = true): void {
+  public destroy(
+    triggerEvent: boolean = true,
+    code: number = WSCloseCode.NORMAL_CLOSURE,
+    reason?: string
+  ): void {
     this.clearAuthTimeout();
     
     // Clear any queued packets
@@ -94,7 +107,7 @@ export default class SessionModel {
     }
     
     if (this.socketInstance) {
-      this.socketInstance.close();
+      this.socketInstance.close(code, reason);
       this.socketInstance = null;
     }
 
@@ -156,7 +169,7 @@ export default class SessionModel {
     this.clearAuthTimeout();
     this.authTimeout = setTimeout(() => {
       if (!this.authenticated) {
-        this.disconnect(true);
+        this.disconnect(true, WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout');
       }
     }, SessionModel.AUTH_TIMEOUT_MS);
   }
@@ -184,7 +197,7 @@ export default class SessionModel {
     } else {
       // Log the error and force disconnection
       console.error(`Action failed: ${data.action}`);
-      this.disconnect(true);
+      this.disconnect(true, WSCloseCode.INVALID_PACKET, 'Invalid packet');
     }
   }
 
@@ -203,7 +216,7 @@ export default class SessionModel {
       } else {
         // Check queue size limit to prevent abuse
         if (this.preAuthPacketQueue.length >= SessionModel.MAX_PRE_AUTH_QUEUE_SIZE) {
-          this.disconnect(true);
+          this.disconnect(true, WSCloseCode.QUEUE_OVERFLOW, 'Pre-auth packet queue overflow');
           return false;
         }
         

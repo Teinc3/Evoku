@@ -20,7 +20,7 @@ export default class WebSocketService {
   private pingTimer: ReturnType<typeof setInterval> | null;
   public lastPingAt: number | null;
   private lastPacketSentAt: number;
-  private disconnectCallback: (() => void) | null = null;
+  private disconnectCallback: ((code: number, reason: string) => void) | null = null;
   private authToken: string | null = null;
 
   constructor(socket?: ClientSocket) {
@@ -76,7 +76,7 @@ export default class WebSocketService {
   /**
    * Set a callback to be called when the socket disconnects
    */
-  setDisconnectCallback(callback: () => void): void {
+  setDisconnectCallback(callback: (code: number, reason: string) => void): void {
     this.disconnectCallback = callback;
   }
 
@@ -110,12 +110,12 @@ export default class WebSocketService {
 
   // Private methods
 
-  private handleClose = (): void => {
+  private handleClose = (event: CloseEvent): void => {
     this.clearTimers();
 
     // Notify any listeners about the disconnect
     if (this.disconnectCallback) {
-      this.disconnectCallback();
+      this.disconnectCallback(event.code, event.reason);
     }
   };
 
