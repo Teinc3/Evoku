@@ -488,7 +488,10 @@ describe('SessionManager', () => {
       sessionManager.onAuthenticate(newSession, userId);
 
       // Assert
-      expect(reconnectSpy).toHaveBeenCalledWith(expect.any(Object)); // ServerSocket instance
+      expect(reconnectSpy).toHaveBeenCalledWith(
+        expect.any(Object), 
+        expect.any(Array)
+      ); // ServerSocket instance and packetQueue
       expect(destroySpy).toHaveBeenCalledWith(true);
       expect((sessionManager as unknown as SessionManagerPrivate)
         .sessions.has(newSessionUuid)).toBe(false); // New session removed
