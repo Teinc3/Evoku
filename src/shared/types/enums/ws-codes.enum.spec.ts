@@ -1,3 +1,4 @@
+import wsCloseMessagesConfig from '@config/shared/ws-close-messages.json';
 import WSCloseCode from './ws-codes.enum';
 
 
@@ -71,6 +72,63 @@ describe('WSCloseCode', () => {
 
       customCodeNames.forEach(name => {
         expect(WSCloseCode[name as keyof typeof WSCloseCode]).toBeDefined();
+      });
+    });
+  });
+
+  describe('JSON config validation', () => {
+    it('should have valid JSON structure', () => {
+      expect(wsCloseMessagesConfig).toBeDefined();
+      expect(wsCloseMessagesConfig.wsCloseMessages).toBeDefined();
+      expect(typeof wsCloseMessagesConfig.wsCloseMessages).toBe('object');
+    });
+
+    it('should have messages for all enum codes', () => {
+      const allCodes = [
+        WSCloseCode.NORMAL_CLOSURE,
+        WSCloseCode.GOING_AWAY,
+        WSCloseCode.PROTOCOL_ERROR,
+        WSCloseCode.UNSUPPORTED_DATA,
+        WSCloseCode.NO_STATUS_RECEIVED,
+        WSCloseCode.ABNORMAL_CLOSURE,
+        WSCloseCode.INVALID_FRAME_PAYLOAD,
+        WSCloseCode.POLICY_VIOLATION,
+        WSCloseCode.MESSAGE_TOO_BIG,
+        WSCloseCode.MANDATORY_EXTENSION,
+        WSCloseCode.INTERNAL_ERROR,
+        WSCloseCode.SERVICE_RESTART,
+        WSCloseCode.TRY_AGAIN_LATER,
+        WSCloseCode.BAD_GATEWAY,
+        WSCloseCode.TLS_HANDSHAKE_FAILED,
+        WSCloseCode.AUTH_TIMEOUT,
+        WSCloseCode.AUTH_FAILED,
+        WSCloseCode.AUTH_TOKEN_EXPIRED,
+        WSCloseCode.AUTH_QUEUE_OVERFLOW,
+        WSCloseCode.INVALID_PACKET,
+        WSCloseCode.RATE_LIMIT_EXCEEDED,
+        WSCloseCode.VERSION_MISMATCH,
+        WSCloseCode.SERVER_SHUTDOWN,
+        WSCloseCode.DUPLICATE_SESSION,
+      ];
+
+      allCodes.forEach(code => {
+        const codeStr = code.toString() as keyof typeof wsCloseMessagesConfig.wsCloseMessages;
+        const message = wsCloseMessagesConfig.wsCloseMessages[codeStr];
+        expect(message).toBeDefined();
+        expect(typeof message).toBe('string');
+        expect(message.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should only have messages for valid codes', () => {
+      const configKeys = Object.keys(wsCloseMessagesConfig.wsCloseMessages);
+      configKeys.forEach(key => {
+        const code = parseInt(key, 10);
+        expect(code).not.toBeNaN();
+        // Should be either standard (1000-1999) or custom (4000-4999)
+        expect(
+          (code >= 1000 && code < 2000) || (code >= 4000 && code < 5000)
+        ).toBe(true);
       });
     });
   });

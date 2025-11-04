@@ -1,5 +1,4 @@
-import WSCloseCode from '@shared/types/enums/ws-codes.enum';
-import wsCloseMessagesConfig from '@config/client/ws-close-messages.json';
+import wsCloseMessagesConfig from '@config/shared/ws-close-messages.json';
 
 
 /**
@@ -29,29 +28,5 @@ export default class WSCloseMessageMapper {
     
     // Default message for unknown codes
     return serverReason || `Connection closed with code ${code}`;
-  }
-
-  /**
-   * Check if a close code indicates a client error.
-   * @param code The WebSocket close code
-   * @returns True if the code indicates a client-side issue
-   */
-  static isClientError(code: number): boolean {
-    return code >= 4000 && code < 5000;
-  }
-
-  /**
-   * Check if a close code indicates a server error.
-   * @param code The WebSocket close code
-   * @returns True if the code indicates a server-side issue
-   */
-  static isServerError(code: number): boolean {
-    return (
-      code === WSCloseCode.INTERNAL_ERROR ||
-      code === WSCloseCode.SERVICE_RESTART ||
-      code === WSCloseCode.TRY_AGAIN_LATER ||
-      code === WSCloseCode.BAD_GATEWAY ||
-      code === WSCloseCode.SERVER_SHUTDOWN
-    );
   }
 }

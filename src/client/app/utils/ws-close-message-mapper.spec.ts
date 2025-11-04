@@ -33,37 +33,6 @@ describe('WSCloseMessageMapper', () => {
     });
   });
 
-  describe('isClientError', () => {
-    it('should return true for custom application codes', () => {
-      expect(WSCloseMessageMapper.isClientError(WSCloseCode.AUTH_TIMEOUT)).toBe(true);
-      expect(WSCloseMessageMapper.isClientError(WSCloseCode.AUTH_FAILED)).toBe(true);
-      expect(WSCloseMessageMapper.isClientError(WSCloseCode.INVALID_PACKET)).toBe(true);
-      expect(WSCloseMessageMapper.isClientError(4999)).toBe(true);
-    });
-
-    it('should return false for standard codes', () => {
-      expect(WSCloseMessageMapper.isClientError(WSCloseCode.NORMAL_CLOSURE)).toBe(false);
-      expect(WSCloseMessageMapper.isClientError(WSCloseCode.INTERNAL_ERROR)).toBe(false);
-      expect(WSCloseMessageMapper.isClientError(1000)).toBe(false);
-    });
-  });
-
-  describe('isServerError', () => {
-    it('should return true for server error codes', () => {
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.INTERNAL_ERROR)).toBe(true);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.SERVICE_RESTART)).toBe(true);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.TRY_AGAIN_LATER)).toBe(true);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.BAD_GATEWAY)).toBe(true);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.SERVER_SHUTDOWN)).toBe(true);
-    });
-
-    it('should return false for non-server error codes', () => {
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.NORMAL_CLOSURE)).toBe(false);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.AUTH_FAILED)).toBe(false);
-      expect(WSCloseMessageMapper.isServerError(WSCloseCode.PROTOCOL_ERROR)).toBe(false);
-    });
-  });
-
   describe('Coverage for all codes', () => {
     it('should have messages for all standard codes', () => {
       const standardCodes = [

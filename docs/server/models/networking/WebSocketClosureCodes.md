@@ -99,25 +99,12 @@ import WSCloseMessageMapper from '@client/app/utils/ws-close-message-mapper';
 
 // Get user-friendly message
 const message = WSCloseMessageMapper.getMessage(code, reason);
-
-// Check error type
-if (WSCloseMessageMapper.isClientError(code)) {
-  // Handle client-side error
-} else if (WSCloseMessageMapper.isServerError(code)) {
-  // Handle server-side error
-}
 ```
 
 ### Helper Methods
 
 #### `getMessage(code: number, serverReason?: string): string`
 Returns a user-friendly error message for the given closure code.
-
-#### `isClientError(code: number): boolean`
-Returns `true` if the code indicates a client-side issue (4000-4999 range).
-
-#### `isServerError(code: number): boolean`
-Returns `true` if the code indicates a server-side issue.
 
 ## Best Practices
 

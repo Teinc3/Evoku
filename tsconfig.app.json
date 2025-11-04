@@ -14,8 +14,7 @@
   "include": [
     "src/client/**/*.ts",
     "src/shared/**/*.ts",
-    "config/shared/*.json",
-    "config/client/*.json"
+    "config/shared/*.json"
   ],
   "exclude": [
     /* Shared bundle tests only run on jest */
