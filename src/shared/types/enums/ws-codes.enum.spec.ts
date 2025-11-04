@@ -27,14 +27,12 @@ describe('WSCloseCode', () => {
       expect(WSCloseCode.AUTH_TIMEOUT).toBe(4000);
       expect(WSCloseCode.AUTH_FAILED).toBe(4001);
       expect(WSCloseCode.AUTH_TOKEN_EXPIRED).toBe(4002);
-      expect(WSCloseCode.INVALID_PACKET).toBe(4003);
-      expect(WSCloseCode.RATE_LIMIT_EXCEEDED).toBe(4004);
-      expect(WSCloseCode.VERSION_MISMATCH).toBe(4005);
-      expect(WSCloseCode.QUEUE_OVERFLOW).toBe(4006);
+      expect(WSCloseCode.AUTH_QUEUE_OVERFLOW).toBe(4003);
+      expect(WSCloseCode.INVALID_PACKET).toBe(4004);
+      expect(WSCloseCode.RATE_LIMIT_EXCEEDED).toBe(4005);
+      expect(WSCloseCode.VERSION_MISMATCH).toBe(4006);
       expect(WSCloseCode.SERVER_SHUTDOWN).toBe(4007);
-      expect(WSCloseCode.KICKED).toBe(4008);
-      expect(WSCloseCode.BANNED).toBe(4009);
-      expect(WSCloseCode.DUPLICATE_SESSION).toBe(4010);
+      expect(WSCloseCode.DUPLICATE_SESSION).toBe(4008);
     });
 
     it('should not conflict with standard codes', () => {
@@ -42,13 +40,11 @@ describe('WSCloseCode', () => {
         WSCloseCode.AUTH_TIMEOUT,
         WSCloseCode.AUTH_FAILED,
         WSCloseCode.AUTH_TOKEN_EXPIRED,
+        WSCloseCode.AUTH_QUEUE_OVERFLOW,
         WSCloseCode.INVALID_PACKET,
         WSCloseCode.RATE_LIMIT_EXCEEDED,
         WSCloseCode.VERSION_MISMATCH,
-        WSCloseCode.QUEUE_OVERFLOW,
         WSCloseCode.SERVER_SHUTDOWN,
-        WSCloseCode.KICKED,
-        WSCloseCode.BANNED,
         WSCloseCode.DUPLICATE_SESSION,
       ];
 
@@ -65,13 +61,11 @@ describe('WSCloseCode', () => {
         'AUTH_TIMEOUT',
         'AUTH_FAILED',
         'AUTH_TOKEN_EXPIRED',
+        'AUTH_QUEUE_OVERFLOW',
         'INVALID_PACKET',
         'RATE_LIMIT_EXCEEDED',
         'VERSION_MISMATCH',
-        'QUEUE_OVERFLOW',
         'SERVER_SHUTDOWN',
-        'KICKED',
-        'BANNED',
         'DUPLICATE_SESSION',
       ];
 

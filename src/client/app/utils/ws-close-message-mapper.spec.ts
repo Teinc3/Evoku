@@ -64,28 +64,6 @@ describe('WSCloseMessageMapper', () => {
     });
   });
 
-  describe('shouldReconnect', () => {
-    it('should return false for permanent failures', () => {
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.AUTH_FAILED)).toBe(false);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.VERSION_MISMATCH)).toBe(false);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.KICKED)).toBe(false);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.BANNED)).toBe(false);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.DUPLICATE_SESSION)).toBe(false);
-    });
-
-    it('should return true for temporary failures', () => {
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.ABNORMAL_CLOSURE)).toBe(true);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.SERVICE_RESTART)).toBe(true);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.TRY_AGAIN_LATER)).toBe(true);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.AUTH_TIMEOUT)).toBe(true);
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.AUTH_TOKEN_EXPIRED)).toBe(true);
-    });
-
-    it('should return false for normal closure', () => {
-      expect(WSCloseMessageMapper.shouldReconnect(WSCloseCode.NORMAL_CLOSURE)).toBe(false);
-    });
-  });
-
   describe('Coverage for all codes', () => {
     it('should have messages for all standard codes', () => {
       const standardCodes = [
@@ -117,13 +95,11 @@ describe('WSCloseMessageMapper', () => {
         WSCloseCode.AUTH_TIMEOUT,
         WSCloseCode.AUTH_FAILED,
         WSCloseCode.AUTH_TOKEN_EXPIRED,
+        WSCloseCode.AUTH_QUEUE_OVERFLOW,
         WSCloseCode.INVALID_PACKET,
         WSCloseCode.RATE_LIMIT_EXCEEDED,
         WSCloseCode.VERSION_MISMATCH,
-        WSCloseCode.QUEUE_OVERFLOW,
         WSCloseCode.SERVER_SHUTDOWN,
-        WSCloseCode.KICKED,
-        WSCloseCode.BANNED,
         WSCloseCode.DUPLICATE_SESSION,
       ];
 

@@ -190,7 +190,7 @@ export default class SessionModel {
     this.clearAuthTimeout();
     this.authTimeout = setTimeout(() => {
       if (!this.authenticated) {
-        this.disconnect(true, WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout');
+        this.disconnect(true, WSCloseCode.AUTH_TIMEOUT);
       }
     }, SessionModel.AUTH_TIMEOUT_MS);
   }
@@ -218,7 +218,7 @@ export default class SessionModel {
     } else {
       // Log the error and force disconnection
       console.error(`Action failed: ${data.action}`);
-      this.disconnect(true, WSCloseCode.INVALID_PACKET, 'Invalid packet');
+      this.disconnect(true, WSCloseCode.INVALID_PACKET);
     }
   }
 
@@ -237,7 +237,7 @@ export default class SessionModel {
       } else {
         // Check queue size limit to prevent abuse
         if (this.preAuthPacketQueue.length >= SessionModel.MAX_PRE_AUTH_QUEUE_SIZE) {
-          this.disconnect(true, WSCloseCode.QUEUE_OVERFLOW, 'Pre-auth packet queue overflow');
+          this.disconnect(true, WSCloseCode.AUTH_QUEUE_OVERFLOW);
           return false;
         }
         

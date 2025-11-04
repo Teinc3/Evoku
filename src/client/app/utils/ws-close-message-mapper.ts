@@ -28,13 +28,11 @@ export default class WSCloseMessageMapper {
     [WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout - please reconnect'],
     [WSCloseCode.AUTH_FAILED, 'Authentication failed - invalid credentials'],
     [WSCloseCode.AUTH_TOKEN_EXPIRED, 'Session expired - please log in again'],
+    [WSCloseCode.AUTH_QUEUE_OVERFLOW, 'Too many pending requests before authentication'],
     [WSCloseCode.INVALID_PACKET, 'Invalid data sent to server'],
     [WSCloseCode.RATE_LIMIT_EXCEEDED, 'Too many requests - please slow down'],
     [WSCloseCode.VERSION_MISMATCH, 'Client version incompatible - please refresh'],
-    [WSCloseCode.QUEUE_OVERFLOW, 'Too many pending requests'],
     [WSCloseCode.SERVER_SHUTDOWN, 'Server is shutting down'],
-    [WSCloseCode.KICKED, 'You have been kicked from the server'],
-    [WSCloseCode.BANNED, 'Your account has been banned'],
     [WSCloseCode.DUPLICATE_SESSION, 'Logged in from another location'],
   ]);
 
@@ -76,33 +74,6 @@ export default class WSCloseMessageMapper {
       code === WSCloseCode.TRY_AGAIN_LATER ||
       code === WSCloseCode.BAD_GATEWAY ||
       code === WSCloseCode.SERVER_SHUTDOWN
-    );
-  }
-
-  /**
-   * Check if a close code indicates the client should attempt to reconnect.
-   * @param code The WebSocket close code
-   * @returns True if reconnection is recommended
-   */
-  static shouldReconnect(code: number): boolean {
-    // Don't reconnect on client errors or bans
-    if (
-      code === WSCloseCode.AUTH_FAILED ||
-      code === WSCloseCode.VERSION_MISMATCH ||
-      code === WSCloseCode.KICKED ||
-      code === WSCloseCode.BANNED ||
-      code === WSCloseCode.DUPLICATE_SESSION
-    ) {
-      return false;
-    }
-    
-    // Reconnect on network issues and temporary server problems
-    return (
-      code === WSCloseCode.ABNORMAL_CLOSURE ||
-      code === WSCloseCode.SERVICE_RESTART ||
-      code === WSCloseCode.TRY_AGAIN_LATER ||
-      code === WSCloseCode.AUTH_TIMEOUT ||
-      code === WSCloseCode.AUTH_TOKEN_EXPIRED
     );
   }
 }

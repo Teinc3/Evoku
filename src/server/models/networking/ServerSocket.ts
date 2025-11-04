@@ -50,7 +50,7 @@ export default class ServerSocket {
           const data = this.packetIO.decodePacket(arrayBuffer as ArrayBuffer);
           handler(data);
         } else {
-          this.close(WSCloseCode.UNSUPPORTED_DATA, 'Only binary messages are supported');
+          this.close(WSCloseCode.UNSUPPORTED_DATA);
         }
       } catch {
         // console.error('Failed to decode packet:', err);

@@ -42,19 +42,17 @@ disconnection reasons.
 
 ## Custom Application Codes
 
-| Code | Name | Description | Reconnect? |
-|------|------|-------------|------------|
-| 4000 | AUTH_TIMEOUT | Authentication timeout | Yes |
-| 4001 | AUTH_FAILED | Invalid authentication credentials | No |
-| 4002 | AUTH_TOKEN_EXPIRED | Authentication token expired | Yes |
-| 4003 | INVALID_PACKET | Invalid or malformed packet | No |
-| 4004 | RATE_LIMIT_EXCEEDED | Too many requests sent | No |
-| 4005 | VERSION_MISMATCH | Client version incompatible | No |
-| 4006 | QUEUE_OVERFLOW | Pre-auth packet queue exceeded | No |
-| 4007 | SERVER_SHUTDOWN | Server shutting down gracefully | Yes |
-| 4008 | KICKED | Kicked by admin/moderator | No |
-| 4009 | BANNED | Account banned | No |
-| 4010 | DUPLICATE_SESSION | Logged in from another location | No |
+| Code | Name | Description |
+|------|------|-------------|
+| 4000 | AUTH_TIMEOUT | Authentication timeout |
+| 4001 | AUTH_FAILED | Invalid authentication credentials |
+| 4002 | AUTH_TOKEN_EXPIRED | Authentication token expired |
+| 4003 | AUTH_QUEUE_OVERFLOW | Pre-auth packet queue exceeded |
+| 4004 | INVALID_PACKET | Invalid or malformed packet |
+| 4005 | RATE_LIMIT_EXCEEDED | Too many requests sent |
+| 4006 | VERSION_MISMATCH | Client version incompatible |
+| 4007 | SERVER_SHUTDOWN | Server shutting down gracefully |
+| 4008 | DUPLICATE_SESSION | Logged in from another location |
 
 ## Server Usage
 
@@ -64,25 +62,21 @@ disconnection reasons.
 // Normal closure
 session.disconnect(true, WSCloseCode.NORMAL_CLOSURE);
 
-// With reason
-session.disconnect(true, WSCloseCode.AUTH_FAILED, 'Invalid token');
+// With specific code (reason strings should not be used - code is self-explanatory)
+session.disconnect(true, WSCloseCode.AUTH_FAILED);
 ```
 
 ### Common Scenarios
 
 ```typescript
 // Authentication timeout
-session.disconnect(true, WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout');
+session.disconnect(true, WSCloseCode.AUTH_TIMEOUT);
 
 // Invalid packet received
-session.disconnect(true, WSCloseCode.INVALID_PACKET, 'Invalid packet');
+session.disconnect(true, WSCloseCode.INVALID_PACKET);
 
 // Queue overflow
-session.disconnect(
-  true,
-  WSCloseCode.QUEUE_OVERFLOW,
-  'Pre-auth packet queue overflow'
-);
+session.disconnect(true, WSCloseCode.AUTH_QUEUE_OVERFLOW);
 ```
 
 ## Client Usage
@@ -106,11 +100,6 @@ import WSCloseMessageMapper from '@client/app/utils/ws-close-message-mapper';
 // Get user-friendly message
 const message = WSCloseMessageMapper.getMessage(code, reason);
 
-// Check if reconnection is recommended
-if (WSCloseMessageMapper.shouldReconnect(code)) {
-  // Attempt to reconnect
-}
-
 // Check error type
 if (WSCloseMessageMapper.isClientError(code)) {
   // Handle client-side error
@@ -130,14 +119,11 @@ Returns `true` if the code indicates a client-side issue (4000-4999 range).
 #### `isServerError(code: number): boolean`
 Returns `true` if the code indicates a server-side issue.
 
-#### `shouldReconnect(code: number): boolean`
-Returns `true` if the client should attempt to reconnect after this closure.
-
 ## Best Practices
 
 ### Server-Side
 - Always provide a meaningful close code
-- Include a reason string for custom codes
+- The close code should be self-explanatory; avoid redundant reason strings
 - Use the most specific code available for the error condition
 
 ### Client-Side
@@ -151,8 +137,12 @@ Returns `true` if the client should attempt to reconnect after this closure.
 ```typescript
 private startAuthTimeout(): void {
   this.authTimeout = setTimeout(() => {
+### Server: Authentication Timeout
+```typescript
+private startAuthTimeout(): void {
+  this.authTimeout = setTimeout(() => {
     if (!this.authenticated) {
-      this.disconnect(true, WSCloseCode.AUTH_TIMEOUT, 'Authentication timeout');
+      this.disconnect(true, WSCloseCode.AUTH_TIMEOUT);
     }
   }, AUTH_TIMEOUT_MS);
 }
@@ -161,7 +151,7 @@ private startAuthTimeout(): void {
 ### Server: Invalid Packet
 ```typescript
 if (!isValidPacket(data)) {
-  session.disconnect(true, WSCloseCode.INVALID_PACKET, 'Invalid packet format');
+  session.disconnect(true, WSCloseCode.INVALID_PACKET);
 }
 ```
 
@@ -170,12 +160,8 @@ if (!isValidPacket(data)) {
 wsService.setDisconnectCallback((code, reason) => {
   const message = WSCloseMessageMapper.getMessage(code, reason);
   
-  if (WSCloseMessageMapper.shouldReconnect(code)) {
-    showNotification(`Connection lost: ${message}. Reconnecting...`);
-    scheduleReconnect();
-  } else {
-    showError(`Disconnected: ${message}`);
-  }
+  // Application decides whether to reconnect based on business logic
+  showError(`Disconnected: ${message}`);
 });
 ```
 

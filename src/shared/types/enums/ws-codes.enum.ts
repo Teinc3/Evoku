@@ -107,29 +107,23 @@ enum WSCloseCode {
   /** Client's authentication token has expired. */
   AUTH_TOKEN_EXPIRED = 4002,
   
+  /** Client exceeded maximum packet queue size before authentication. */
+  AUTH_QUEUE_OVERFLOW = 4003,
+  
   /** Client sent an invalid or malformed packet. */
-  INVALID_PACKET = 4003,
+  INVALID_PACKET = 4004,
   
   /** Client exceeded the rate limit for packets. */
-  RATE_LIMIT_EXCEEDED = 4004,
+  RATE_LIMIT_EXCEEDED = 4005,
   
   /** Client version is incompatible with the server. */
-  VERSION_MISMATCH = 4005,
-  
-  /** Client exceeded maximum packet queue size before authentication. */
-  QUEUE_OVERFLOW = 4006,
+  VERSION_MISMATCH = 4006,
   
   /** Server is shutting down gracefully. */
   SERVER_SHUTDOWN = 4007,
   
-  /** Client was kicked by an administrator or moderator. */
-  KICKED = 4008,
-  
-  /** Client account was banned. */
-  BANNED = 4009,
-  
   /** Client session was terminated due to duplicate login from another location. */
-  DUPLICATE_SESSION = 4010,
+  DUPLICATE_SESSION = 4008,
 }
 
 export default WSCloseCode;
