@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { Subject, type Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -310,5 +310,102 @@ describe('DuelDemoPageComponent', () => {
     });
   });
 
+  describe('Component Lifecycle and Navigation Data', () => {
+    it('should load match data from navigation service when available', () => {
+      const mockMatchData: MatchFoundContract = {
+        myID: 1,
+        players: [
+          { playerID: 1, username: 'Player1' },
+          { playerID: 2, username: 'Player2' }
+        ]
+      };
 
+      // Mock the service to return navigation data
+      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
+
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      spyOn(newComponent['gameState'], 'createGame');
+
+      newComponent.ngOnInit();
+
+      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
+      expect(newComponent['gameState'].createGame).toHaveBeenCalledWith(mockMatchData);
+    });
+
+    it('should not set match data when navigation data is null', () => {
+      // Mock the service to return null
+      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(null);
+
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      spyOn(newComponent['gameState'], 'createGame');
+
+      newComponent.ngOnInit();
+
+      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
+      expect(newComponent['gameState'].createGame).not.toHaveBeenCalled();
+    });
+
+    it('should subscribe to disconnection events on init', () => {
+      // Create a new component instance to test ngOnInit
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      const subscribeSpy = jasmine.createSpy('subscribe');
+
+      // Mock onDisconnect to return an observable with subscribe spy
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: subscribeSpy
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+
+      expect(networkServiceSpy.onDisconnect).toHaveBeenCalled();
+      expect(subscribeSpy).toHaveBeenCalled();
+    });
+
+    it('should navigate to catalogue when disconnection occurs', () => {
+      // Create a new component instance
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      let disconnectCallback: () => void;
+
+      // Mock onDisconnect to capture the callback
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: (callback: () => void) => {
+          disconnectCallback = callback;
+          return { unsubscribe: jasmine.createSpy('unsubscribe') };
+        }
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+
+      // Trigger disconnect
+      disconnectCallback!();
+
+      expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
+    });
+
+    it('should clear match data on destroy', () => {
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      spyOn(newComponent['gameState'], 'clearMatchData');
+
+      newComponent.ngOnDestroy();
+
+      expect(newComponent['gameState'].clearMatchData).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe from disconnection events on destroy', () => {
+      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
+      const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+
+      // Mock onDisconnect to return subscription with unsubscribe spy
+      networkServiceSpy.onDisconnect.and.returnValue({
+        subscribe: () => ({ unsubscribe: unsubscribeSpy })
+      } as unknown as Observable<void>);
+
+      newComponent.ngOnInit();
+      newComponent.ngOnDestroy();
+
+      expect(unsubscribeSpy).toHaveBeenCalled();
+    });
+  });
 });
