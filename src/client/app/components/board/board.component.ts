@@ -1,8 +1,9 @@
 import {
-  Component, Input, signal, HostListener,
+  Component, Input, Output, EventEmitter, signal, HostListener,
   type DoCheck, type OnDestroy,
 } from '@angular/core';
 
+import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import { CursorDirectionEnum } from '../../../types/enums';
@@ -10,6 +11,8 @@ import ClientBoardModel from '../../../models/Board';
 import SudokuCellComponent from './cell/cell.component';
 
 import type { WritableSignal } from '@angular/core';
+import type AugmentAction from '@shared/types/utils/AugmentAction';
+import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
 import type ClientCellModel from '../../../models/Cell';
 
 
@@ -23,6 +26,9 @@ import type ClientCellModel from '../../../models/Cell';
 export default class BoardModelComponent implements DoCheck, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   @Input() public model!: ClientBoardModel;
+  @Output() public sendPacket = new EventEmitter<
+    OmitBaseAttrs<AugmentAction<MechanicsActions>>
+  >();
   public isNoteMode = false;
 
   readonly indices: number[];
@@ -34,7 +40,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     this.selected = signal<number | null>(null);
     this.cooldownHelper = new CooldownAnimationHelper();
   }
-  
+
   ngDoCheck(): void {
     this.cooldownHelper.checkCooldownChanges(
       this.model.pendingGlobalCooldownEnd,
@@ -145,6 +151,13 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     if (this.isNoteMode) {
       this.model.toggleNote(i, num);
     } else {
+      // Emit generic packet request for parent to handle networking
+      this.sendPacket.emit({
+        action: MechanicsActions.SET_CELL,
+        cellIndex: i,
+        value: num
+      });
+      // Set pending state for optimistic UI
       this.model.setPendingCell(i, num, performance.now());
     }
   }
