@@ -23,7 +23,7 @@ export default abstract class BaseBoardModel<
     this.initBoard(cellValues);
   }
 
-  protected initBoard(cellValues: number[]): void {
+  public initBoard(cellValues: number[]): void {
     for (let i = 0; i < cellValues.length; i++) {
       this.board[i] = new this.CellModelClass(cellValues[i], cellValues[i] !== 0);
     }

@@ -14,6 +14,7 @@ import NumericButtonsHolderComponent
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
+import ClientBoardModel from '../../../../../models/Board';
 
 
 @Component({
@@ -42,8 +43,12 @@ export default class TimeAttackDemoPageComponent implements OnInit {
   ngOnInit(): void {
     // Generate a new easy puzzle on each load
     this.puzzle = BoardConverter.toBoardArray(getSudoku('easy').puzzle);
+    
+    // Create and set the board model with puzzle data
+    const boardModel = new ClientBoardModel(this.puzzle);
+    this.board.model = boardModel;
+    
     // Enable demo auto-accept for optimistic pending visualization (time attack sandbox)
-    this.board.model.autoAcceptPending = true;
-    this.board.loadPuzzle(this.puzzle);
+    boardModel.autoAcceptPending = true;
   }
 }

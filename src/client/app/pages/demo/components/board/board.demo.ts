@@ -1,6 +1,7 @@
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardModelComponent from '../../../../components/board/board.component';
+import ClientBoardModel from '../../../../../models/Board';
 
 
 @Component({
@@ -26,9 +27,9 @@ export default class BoardDemoPageComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Enable demo auto-accept for optimistic pending visualization
-    this.board.model.autoAcceptPending = true;
-    this.board.loadPuzzle(this.puzzle);
+    // Create and set the board model with puzzle data
+    const boardModel = new ClientBoardModel(this.puzzle);
+    this.board.model = boardModel;
 
     // Showcase cells: notes (2-3), pending (2-3), dynamic placed (2-3)
     const notesCells = [
@@ -54,7 +55,7 @@ export default class BoardDemoPageComponent implements OnInit {
 
     // Use the given api so as to show the cd effect dynamically.
     pendingCells.forEach(c => {
-      this.board.model.setPendingCell(c.idx, c.value, performance.now());
+      boardModel.setPendingCell(c.idx, c.value, performance.now());
     });
   }
 }

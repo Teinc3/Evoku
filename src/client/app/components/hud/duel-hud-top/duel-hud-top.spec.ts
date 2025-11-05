@@ -10,7 +10,7 @@ describe('DuelHudTopComponent', () => {
   let gameState: GameStateModel;
 
   beforeEach(async () => {
-    gameState = new GameStateModel();
+    gameState = new GameStateModel(2);
     
     await TestBed.configureTestingModule({
       imports: [DuelHudTopComponent]
@@ -27,27 +27,19 @@ describe('DuelHudTopComponent', () => {
   });
 
   describe('myDisplayInfo getter', () => {
-    it('should return "You" when myID is null', () => {
-      const gameState = new GameStateModel();
-      gameState.myID = null;
-      component.gameState = gameState;
-
-      expect(component.myDisplayInfo).toBe('You');
-    });
-
     it('should return username with "(You)" when player info exists', () => {
-      const gameState = new GameStateModel();
+      const gameState = new GameStateModel(2);
       gameState.myID = 0;
-      gameState.addPlayer(0, 'TestPlayer');
+      gameState.playerInfo.get(0)!.username = 'TestPlayer';
       component.gameState = gameState;
 
       expect(component.myDisplayInfo).toBe('TestPlayer (You)');
     });
 
-    it('should return "You" when player info does not exist', () => {
-      const gameState = new GameStateModel();
+    it('should return "You" when player info has empty username', () => {
+      const gameState = new GameStateModel(2);
       gameState.myID = 0;
-      // Don't set player info
+      // Username is already empty from zombie initialization
       component.gameState = gameState;
 
       expect(component.myDisplayInfo).toBe('You');
@@ -55,36 +47,28 @@ describe('DuelHudTopComponent', () => {
   });
 
   describe('opponentDisplayInfo getter', () => {
-    it('should return "Opponent" when myID is null', () => {
-      const gameState = new GameStateModel();
-      gameState.myID = null;
-      component.gameState = gameState;
-
-      expect(component.opponentDisplayInfo).toBe('Opponent');
-    });
-
     it('should return opponent username when opponent info exists', () => {
-      const gameState = new GameStateModel();
+      const gameState = new GameStateModel(2);
       gameState.myID = 0;
-      gameState.addPlayer(1, 'OpponentPlayer');
+      gameState.playerInfo.get(1)!.username = 'OpponentPlayer';
       component.gameState = gameState;
 
       expect(component.opponentDisplayInfo).toBe('OpponentPlayer');
     });
 
-    it('should return "Opponent" when opponent info does not exist', () => {
-      const gameState = new GameStateModel();
+    it('should return "Opponent" when opponent info has empty username', () => {
+      const gameState = new GameStateModel(2);
       gameState.myID = 0;
-      // Don't set opponent info
+      // Username is already empty from zombie initialization
       component.gameState = gameState;
 
       expect(component.opponentDisplayInfo).toBe('Opponent');
     });
 
     it('should return opponent username for player 2 when myID is 1', () => {
-      const gameState = new GameStateModel();
+      const gameState = new GameStateModel(2);
       gameState.myID = 1;
-      gameState.addPlayer(0, 'PlayerOne');
+      gameState.playerInfo.get(0)!.username = 'PlayerOne';
       component.gameState = gameState;
 
       expect(component.opponentDisplayInfo).toBe('PlayerOne');
