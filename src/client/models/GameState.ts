@@ -14,29 +14,48 @@ export default class GameStateModel {
   private readonly gameStates: Map<number, IPlayerState<ClientBoardModel>> = new Map();
   /** Player information (username, etc.) keyed by playerID */
   public readonly playerInfo: Map<number, { username: string }> = new Map();
-  /** Current player's ID */
-  public myID: number | null = null;
+  /** Home player's ID */
+  public myID: number;
+
+  constructor(private expectedPlayerCount: number) {
+    this.myID = 0; // Default to player 0, will be overridden by createGame
+    this.initBlankState();
+  }
 
   /**
-   * Set the match data from the MATCH_FOUND packet and initialize player states
-   * @param data The match found contract data
+   * Initialize blank state with empty/default data for duel games
+   * This ensures components always have valid data to bind to
    */
-  public setMatchData(data: MatchFoundContract): void {
-    this.myID = data.myID;
-
-    // Initialize player states and info for all players in the match
-    for (const player of data.players) {
-      this.addPlayer(player.playerID, player.username);
+  private initBlankState(): void {
+    // Initialize blank game states with empty boards
+    for (let i = 0; i < this.expectedPlayerCount; i++) {
+      this.addPlayer(i, '');
     }
   }
 
   /**
-   * Clear all game state and player information
+   * Initialise the gamestate based on data from the MATCH_FOUND packet
+   * @param data The match found contract data
    */
-  public clearMatchData(): void {
-    this.myID = null;
-    this.gameStates.clear();
+  public createGame(data: MatchFoundContract): void {
+    this.myID = data.myID;
+
+    // Override with real data
     this.playerInfo.clear();
+    this.gameStates.clear();
+
+    for (const player of data.players) {
+      this.addPlayer(player.playerID, player.username);
+    }
+  }
+  
+  /** Clear all game state and player information, resetting to clean state */
+  public clearMatchData(): void {
+    // Reset to clean state
+    this.myID = 0;
+    this.playerInfo.clear();
+    this.gameStates.clear();
+    this.initBlankState();
   }
 
   /**
@@ -50,8 +69,15 @@ export default class GameStateModel {
       return false; // Player already exists
     }
 
-    this.gameStates.set(playerID, { playerID });
     this.playerInfo.set(playerID, { username });
+    this.gameStates.set(playerID, {
+      playerID,
+      gameState: {
+        boardState: new ClientBoardModel(),
+        pupProgress: 0,
+        powerups: []
+      }
+    });
     return true;
   }
 
@@ -69,14 +95,10 @@ export default class GameStateModel {
   /**
    * Get a player's information by ID
    * @param playerID The player's ID
-   * @returns Player info or null if not found
+   * @returns Player info
    */
-  public getPlayerInfo(playerID: number): { username: string; playerID: number } | null {
-    const info = this.playerInfo.get(playerID);
-    if (!info) {
-      return null;
-    }
-
+  public getPlayerInfo(playerID: number): { username: string; playerID: number } {
+    const info = this.playerInfo.get(playerID)!;
     return {
       username: info.username,
       playerID
@@ -86,10 +108,19 @@ export default class GameStateModel {
   /**
    * Get a player's game state
    * @param playerID The player's ID
-   * @returns The player's state or undefined if not found
+   * @returns The player's state
    */
-  public getPlayerState(playerID: number): IPlayerState<ClientBoardModel> | undefined {
-    return this.gameStates.get(playerID);
+  public getPlayerState(playerID: number): IPlayerState<ClientBoardModel> {
+    return this.gameStates.get(playerID)!;
+  }
+
+  /**
+   * Get a player's board by ID
+   * @param playerID The player's ID
+   * @returns The player's board
+   */
+  public getPlayerBoard(playerID: number): ClientBoardModel {
+    return this.getPlayerState(playerID).gameState!.boardState;
   }
 
   /**
@@ -98,15 +129,8 @@ export default class GameStateModel {
    */
   public initGameStates(initialBoard: number[]): void {
     for (const playerState of this.gameStates.values()) {
-      // Create board instance for each player
-      const board = new ClientBoardModel(initialBoard);
-
-      // Set the initial game state
-      playerState.gameState = {
-        boardState: board,
-        pupProgress: 0,
-        powerups: [] // Feature TODO: Add entry powerups in the future.
-      };
+      // Load puzzle data into existing zombie board
+      playerState.gameState!.boardState.initBoard(initialBoard);
     }
   }
 }

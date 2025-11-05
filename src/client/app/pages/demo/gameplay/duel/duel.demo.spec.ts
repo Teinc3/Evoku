@@ -23,6 +23,9 @@ describe('DuelDemoPageComponent', () => {
     const networkSpy = jasmine.createSpyObj('NetworkService', [], {
       onDisconnect: jasmine.createSpy('onDisconnect').and.returnValue({
         subscribe: jasmine.createSpy('subscribe')
+      }),
+      onPacket: jasmine.createSpy('onPacket').and.returnValue({
+        subscribe: jasmine.createSpy('subscribe')
       })
     });
 
@@ -208,12 +211,12 @@ describe('DuelDemoPageComponent', () => {
 
       // Create a new component instance to test ngOnInit
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['matchState'], 'setMatchData');
+      spyOn(newComponent['matchState'], 'createGame');
 
       newComponent.ngOnInit();
 
       expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['matchState'].setMatchData).toHaveBeenCalledWith(mockMatchData);
+      expect(newComponent['matchState'].createGame).toHaveBeenCalledWith(mockMatchData);
     });
 
     it('should not set match data when navigation data is null', () => {
@@ -222,12 +225,12 @@ describe('DuelDemoPageComponent', () => {
 
       // Create a new component instance to test ngOnInit
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['matchState'], 'setMatchData');
+      spyOn(newComponent['matchState'], 'createGame');
 
       newComponent.ngOnInit();
 
       expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['matchState'].setMatchData).not.toHaveBeenCalled();
+      expect(newComponent['matchState'].createGame).not.toHaveBeenCalled();
     });
 
     it('should subscribe to disconnection events on init', () => {

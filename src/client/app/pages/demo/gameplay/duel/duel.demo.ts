@@ -1,6 +1,7 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
+import LifecycleActions from '@shared/types/enums/actions/match/lifecycle';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
@@ -35,21 +36,23 @@ import type { MatchFoundContract } from '@shared/types/contracts';
   styleUrl: './duel.demo.scss'
 })
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
+  static readonly MAX_PLAYER_COUNT = 2;
   private matchState: GameStateModel;
   private disconnectionSubscription: Subscription | null = null;
+  private gameInitSubscription: Subscription | null = null;
 
   constructor(
     private viewStateService: ViewStateService,
     private networkService: NetworkService
   ) {
-    this.matchState = new GameStateModel();
+    this.matchState = new GameStateModel(DuelDemoPageComponent.MAX_PLAYER_COUNT);
   }
 
   ngOnInit(): void {
     // Load match data from navigation and transfer to our owned model
     const matchData = this.viewStateService.getNavigationData<MatchFoundContract>();
     if (matchData) {
-      this.matchState.setMatchData(matchData);
+      this.matchState.createGame(matchData);
     }
 
     // Subscribe to disconnection events
@@ -57,6 +60,13 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       // Navigate back to catalogue on disconnect
       this.viewStateService.navigateToView(AppView.CATALOGUE);
     });
+
+    // Subscribe to game initialization events
+    this.gameInitSubscription = this.networkService.onPacket(LifecycleActions.GAME_INIT)
+      .subscribe(data => {
+        // Initialize game states with the board data from server
+        this.matchState.initGameStates(data.cellValues);
+      });
   }
 
   ngOnDestroy(): void {
@@ -66,6 +76,11 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     if (this.disconnectionSubscription) {
       this.disconnectionSubscription.unsubscribe();
       this.disconnectionSubscription = null;
+    }
+
+    if (this.gameInitSubscription) {
+      this.gameInitSubscription.unsubscribe();
+      this.gameInitSubscription = null;
     }
   }
 

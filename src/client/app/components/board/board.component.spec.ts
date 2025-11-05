@@ -2,6 +2,7 @@ import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import UtilityAction from '../../../types/utility';
+import ClientBoardModel from '../../../models/Board';
 import BoardModelComponent from './board.component';
 
 
@@ -19,6 +20,8 @@ describe('BoardModelComponent', () => {
 
     fixture = TestBed.createComponent(BoardModelComponent);
     component = fixture.componentInstance;
+    // Initialize component with a board model
+    component.model = new ClientBoardModel([]);
     fixture.detectChanges();
   });
 
@@ -36,7 +39,7 @@ describe('BoardModelComponent', () => {
   });
 
   it('supports puzzle seeding via loadPuzzle()', () => {
-    component.loadPuzzle(puzzle);
+    component.model.initBoard(puzzle);
     fixture.detectChanges();
     expect(component.getCellModel(0).fixed).toBeTrue();
     expect(component.getCellModel(0).value).toBe(1);
@@ -110,7 +113,7 @@ describe('BoardModelComponent', () => {
   });
 
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
-    component.initBoard([]);
+    component.model.initBoard([]);
     component.onCellSelected(0);
     // Add notes mode then add a note
     component.onUtilityAction(UtilityAction.NOTE);
@@ -127,12 +130,6 @@ describe('BoardModelComponent', () => {
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(wipeSpy).toHaveBeenCalled();
     expect(component.getCellModel(0).notes.length).toBe(0);
-  });
-
-  it('loadPuzzle early returns on invalid length', () => {
-    const initialFirst = component.getCellModel(0).value;
-    component.loadPuzzle([] as unknown as number[]); // invalid length 0
-    expect(component.getCellModel(0).value).toBe(initialFirst);
   });
 
   it('ignores number key when no selection', () => {
@@ -172,7 +169,7 @@ describe('BoardModelComponent', () => {
   describe('Cell Highlighting', () => {
     beforeEach(() => {
       // Load a simple puzzle with some values
-      component.loadPuzzle(puzzle);
+      component.model.initBoard(puzzle);
       fixture.detectChanges();
     });
 
@@ -260,7 +257,7 @@ describe('BoardModelComponent', () => {
     });
 
     it('identifies notes that should be highlighted', () => {
-      component.loadPuzzle(puzzle);
+      component.model.initBoard(puzzle);
       component.onCellSelected(0); // Cell with value 1
       
       // Note with digit 1 should be highlighted
@@ -287,7 +284,7 @@ describe('BoardModelComponent', () => {
     });
 
     it('applies highlight classes correctly in template', () => {
-      component.loadPuzzle(puzzle);
+      component.model.initBoard(puzzle);
       component.onCellSelected(0); // Select cell 0 with value 1
       fixture.detectChanges();
       
