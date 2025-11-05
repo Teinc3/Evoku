@@ -15,11 +15,13 @@
   <app-board-model
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
+    (sendPacket)="onPacketRequest($event)"
   />
   <app-utility-buttons-holder/>
   <app-board-model
     #board2
     [model]="gameState.getPlayerBoard(1 - gameState.myID)"
+    (sendPacket)="onPacketRequest($event)"
   />
   <app-universal-progress-bar
     [percentage]="80"

@@ -1,6 +1,8 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
+import AugmentAction from '@shared/types/utils/AugmentAction';
+import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import LifecycleActions from '@shared/types/enums/actions/match/lifecycle';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
@@ -18,6 +20,7 @@ import { AppView } from '../../../../../types/enums';
 import GameStateModel from '../../../../../models/GameState';
 
 import type { MatchFoundContract } from '@shared/types/contracts';
+import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
 
 @Component({
@@ -40,6 +43,8 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   private matchState: GameStateModel;
   private disconnectionSubscription: Subscription | null = null;
   private gameInitSubscription: Subscription | null = null;
+  private cellSetSubscription: Subscription | null = null;
+  private nextActionId = 0;
 
   constructor(
     private viewStateService: ViewStateService,
@@ -67,6 +72,16 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         // Initialize game states with the board data from server
         this.matchState.initGameStates(data.cellValues);
       });
+
+    // Subscribe to cell set confirmations
+    this.cellSetSubscription = this.networkService.onPacket(MechanicsActions.CELL_SET)
+      .subscribe(data => {
+        // Confirm the cell placement
+        const board = this.matchState.getPlayerBoard(data.playerID);
+        if (board) {
+          board.confirmCellSet(data.cellIndex, data.value, data.serverTime);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -82,6 +97,23 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       this.gameInitSubscription.unsubscribe();
       this.gameInitSubscription = null;
     }
+
+    if (this.cellSetSubscription) {
+      this.cellSetSubscription.unsubscribe();
+      this.cellSetSubscription = null;
+    }
+  }
+
+  /**
+   * Handle packet requests from board components
+   */
+  onPacketRequest(request: OmitBaseAttrs<AugmentAction<MechanicsActions>>): void {
+    const { action, ...data } = request;
+    this.networkService.send(action, {
+      clientTime: 0,
+      actionID: this.nextActionId++,
+      ...data
+    });
   }
 
   /**
