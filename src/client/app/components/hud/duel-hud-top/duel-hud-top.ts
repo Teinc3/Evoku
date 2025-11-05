@@ -27,23 +27,17 @@ export default class DuelHudTopComponent {
    * Get the current player's display information
    */
   get myDisplayInfo(): string {
-    if (this.gameState.myID === null) {
-      return 'You';
-    }
     const info = this.gameState.getPlayerInfo(this.gameState.myID);
-    return info ? info.username + ' (You)' : 'You';
+    return info.username ? info.username + ' (You)' : 'You';
   }
 
   /**
    * Get the opponent player's display information
    */
   get opponentDisplayInfo(): string {
-    if (this.gameState.myID === null) {
-      return 'Opponent';
-    }
     // For 2-player games, opponent is the other player
     const opponentID = 1 - this.gameState.myID;
     const info = this.gameState.getPlayerInfo(opponentID);
-    return info ? info.username : 'Opponent';
+    return info.username || 'Opponent';
   }
 }

@@ -5,17 +5,17 @@ describe('GameStateModel', () => {
   let gameState: GameStateModel;
 
   beforeEach(() => {
-    gameState = new GameStateModel();
+    gameState = new GameStateModel(2);
   });
 
   it('should be created', () => {
     expect(gameState).toBeTruthy();
   });
 
-  it('should initially have no match data', () => {
-    expect(gameState.myID).toBeNull();
-    expect(gameState.getPlayerInfo(1)).toBeNull();
-    expect(gameState.getPlayerInfo(2)).toBeNull();
+  it('should initially have zombie state', () => {
+    expect(gameState.myID).toBe(0); // Zombie state defaults to player 0
+    expect(gameState.getPlayerInfo(0)).toEqual({ playerID: 0, username: '' });
+    expect(gameState.getPlayerInfo(1)).toEqual({ playerID: 1, username: '' });
   });
 
   it('should store and retrieve match data', () => {
@@ -27,7 +27,7 @@ describe('GameStateModel', () => {
       ]
     };
 
-    gameState.setMatchData(mockMatchData);
+    gameState.createGame(mockMatchData);
     expect(gameState.myID).toBe(1);
   });
 
@@ -40,7 +40,7 @@ describe('GameStateModel', () => {
       ]
     };
 
-    gameState.setMatchData(mockMatchData);
+    gameState.createGame(mockMatchData);
 
     // Check that player states were created
     expect(gameState.getPlayerState(1)).toBeDefined();
@@ -62,7 +62,7 @@ describe('GameStateModel', () => {
       ]
     };
 
-    gameState.setMatchData(mockMatchData);
+    gameState.createGame(mockMatchData);
     const opponentInfo = gameState.getPlayerInfo(2);
     expect(opponentInfo).toEqual({
       playerID: 2,
@@ -79,7 +79,7 @@ describe('GameStateModel', () => {
       ]
     };
 
-    gameState.setMatchData(mockMatchData);
+    gameState.createGame(mockMatchData);
     const myInfo = gameState.getPlayerInfo(1);
     expect(myInfo).toEqual({
       playerID: 1,
@@ -87,11 +87,13 @@ describe('GameStateModel', () => {
     });
   });
 
-  it('should return null opponent info when no match data', () => {
-    expect(gameState.getPlayerInfo(2)).toBeNull();
+  it('should return zombie opponent info when no match data', () => {
+    // With zombie state, opponent info is always available
+    const opponentInfo = gameState.getPlayerInfo(1);
+    expect(opponentInfo).toEqual({ playerID: 1, username: '' });
   });
 
-  it('should clear match data and player states', () => {
+  it('should clear match data and reset to zombie state', () => {
     const mockMatchData = {
       myID: 1,
       players: [
@@ -100,31 +102,36 @@ describe('GameStateModel', () => {
       ]
     };
 
-    gameState.setMatchData(mockMatchData);
-    expect(gameState.myID).toBeTruthy();
-    expect(gameState.getPlayerState(1)).toBeDefined();
+    gameState.createGame(mockMatchData);
+    expect(gameState.myID).toBe(1);
+    expect(gameState.getPlayerInfo(1).username).toBe('Player1');
 
     gameState.clearMatchData();
-    expect(gameState.myID).toBeNull();
-    expect(gameState.getPlayerInfo(1)).toBeNull();
-    expect(gameState.getPlayerInfo(2)).toBeNull();
-    expect(gameState.getPlayerState(1)).toBeUndefined();
-    expect(gameState.getPlayerInfo(1)).toBeNull();
+    expect(gameState.myID).toBe(0); // Reset to zombie state
+    expect(gameState.getPlayerInfo(0)).toEqual({ playerID: 0, username: '' });
+    expect(gameState.getPlayerInfo(1)).toEqual({ playerID: 1, username: '' });
   });
 
   it('should add and remove players', () => {
-    expect(gameState.addPlayer(1, 'Player1')).toBeTrue();
-    expect(gameState.getPlayerState(1)).toBeDefined();
-    expect(gameState.getPlayerState(1)?.playerID).toBe(1);
-    expect(gameState.getPlayerInfo(1)).toEqual({ playerID: 1, username: 'Player1' });
-
+    // Players 0 and 1 already exist in zombie state
+    expect(gameState.addPlayer(0, 'Player0')).toBeFalse(); // Already exists
     expect(gameState.addPlayer(1, 'Player1')).toBeFalse(); // Already exists
+    
+    // Update existing player info
+    gameState.playerInfo.get(0)!.username = 'Player0';
+    expect(gameState.getPlayerInfo(0)).toEqual({ playerID: 0, username: 'Player0' });
 
-    expect(gameState.removePlayer(1)).toBeTrue();
-    expect(gameState.getPlayerState(1)).toBeUndefined();
-    expect(gameState.getPlayerInfo(1)).toBeNull();
+    // Add a new player
+    expect(gameState.addPlayer(2, 'Player2')).toBeTrue();
+    expect(gameState.getPlayerState(2)).toBeDefined();
+    expect(gameState.getPlayerState(2)?.playerID).toBe(2);
+    expect(gameState.getPlayerInfo(2)).toEqual({ playerID: 2, username: 'Player2' });
 
-    expect(gameState.removePlayer(1)).toBeFalse(); // Doesn't exist
+    expect(gameState.removePlayer(2)).toBeTrue();
+    expect(gameState.getPlayerState(2)).toBeUndefined();
+    // Player info for 2 is removed, but zombie players 0 and 1 remain
+    expect(gameState.getPlayerInfo(0)).toEqual({ playerID: 0, username: 'Player0' });
+    expect(gameState.getPlayerInfo(1)).toEqual({ playerID: 1, username: '' });
   });
 
   it('should initialize game states with boards', () => {
@@ -138,7 +145,7 @@ describe('GameStateModel', () => {
 
     const initialBoard = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    gameState.setMatchData(mockMatchData);
+    gameState.createGame(mockMatchData);
     gameState.initGameStates(initialBoard);
 
     const player1State = gameState.getPlayerState(1);

@@ -1,10 +1,6 @@
 import {
-  Component,
-  signal,
-  HostListener,
-  type OnInit,
-  type DoCheck,
-  type OnDestroy,
+  Component, Input, signal, HostListener,
+  type DoCheck, type OnDestroy,
 } from '@angular/core';
 
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
@@ -24,9 +20,9 @@ import type ClientCellModel from '../../../models/Cell';
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
-export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
+export default class BoardModelComponent implements DoCheck, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
-  public readonly model: ClientBoardModel;
+  @Input() public model!: ClientBoardModel;
   public isNoteMode = false;
 
   readonly indices: number[];
@@ -34,19 +30,11 @@ export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
   public readonly cooldownHelper: CooldownAnimationHelper;
 
   constructor() {
-    this.model = new ClientBoardModel();
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
     this.cooldownHelper = new CooldownAnimationHelper();
   }
-
-  ngOnInit(): void {
-    // Initialize with 81 empty cells only if nothing has been loaded yet.
-    if (this.model.board.length === 0) {
-      this.initBoard([]);
-    }
-  }
-
+  
   ngDoCheck(): void {
     this.cooldownHelper.checkCooldownChanges(
       this.model.pendingGlobalCooldownEnd,
@@ -93,23 +81,6 @@ export default class BoardModelComponent implements OnInit, DoCheck, OnDestroy {
         this.moveSelection(CursorDirectionEnum.RIGHT);
         break;
     }
-  }
-
-  /** Initialize the board with a given set of values */
-  public initBoard(values: ReadonlyArray<number>): void {
-    // Initialize board with provided puzzle, marking non-zero as fixed
-    for (let i = 0; i < 81; i++) {
-      const v = values[i] ?? 0;
-      this.model.board[i] = new this.model.CellModelClass(v, v !== 0);
-    }
-  }
-
-  /** Load/overwrite a puzzle at any time (expected length: 81). */
-  public loadPuzzle(values: ReadonlyArray<number>): void {
-    if (!Array.isArray(values) || values.length !== 81) {
-      return;
-    }
-    this.initBoard(values);
   }
 
   /** Moves the selection on the board */

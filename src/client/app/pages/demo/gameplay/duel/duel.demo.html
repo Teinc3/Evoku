@@ -14,10 +14,12 @@
   />
   <app-board-model
     #board1
+    [model]="gameState.getPlayerBoard(gameState.myID)"
   />
   <app-utility-buttons-holder/>
   <app-board-model
     #board2
+    [model]="gameState.getPlayerBoard(1 - gameState.myID)"
   />
   <app-universal-progress-bar
     [percentage]="80"

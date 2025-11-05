@@ -19,7 +19,6 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
    */
   public autoAcceptPending = false;
 
-
   /**
    * Set a pending cell value for optimistic updates while waiting for server confirmation.
    * @param cellIndex The index of the cell to set as pending.
