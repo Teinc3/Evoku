@@ -5,7 +5,7 @@ import SessionManager from ".";
 
 import type { WebSocket } from 'ws';
 import type { UUID } from 'crypto';
-import type SystemActions from '@shared/types/enums/actions/system';
+import type { SystemActions } from '@shared/types/enums/actions';
 import type IDataHandler from '../../types/handler';
 import type { MatchmakingManager } from '..';
 

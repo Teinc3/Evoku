@@ -1,7 +1,7 @@
 import { interval, Subscription, timer } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import LobbyActions from '@shared/types/enums/actions/system/lobby';
+import { LobbyActions } from '@shared/types/enums/actions';
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state';
 import NetworkService from '../../../services/network';

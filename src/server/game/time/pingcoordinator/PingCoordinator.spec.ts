@@ -1,4 +1,4 @@
-import ProtocolActions from '@shared/types/enums/actions/match/protocol';
+import { ProtocolActions } from '@shared/types/enums/actions';
 import { PendingPingStore, type SyncProfile } from '..';
 import PingCoordinator from '.';
 

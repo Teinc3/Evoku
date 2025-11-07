@@ -1,5 +1,4 @@
-import ProtocolActions from "@shared/types/enums/actions/match/protocol";
-import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
+import { ProtocolActions, MechanicsActions } from "@shared/types/enums/actions";
 import EnumHandler from "../../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";

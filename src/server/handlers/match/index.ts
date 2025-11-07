@@ -4,7 +4,7 @@ import ProtocolHandler from "./ProtocolHandler";
 import PlayerHandler from "./player";
 import LifecycleHandler from "./LifecycleHandler";
 
-import type MatchActions from "@shared/types/enums/actions/match";
+import type { MatchActions } from "@shared/types/enums/actions";
 import type { SomeHandlerMapEntry } from "../../types/handler";
 import type { RoomModel } from "../../models/networking";
 

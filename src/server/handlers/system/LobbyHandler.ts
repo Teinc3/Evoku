@@ -1,4 +1,4 @@
-import LobbyActions from "@shared/types/enums/actions/system/lobby";
+import { LobbyActions } from "@shared/types/enums/actions";
 import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";

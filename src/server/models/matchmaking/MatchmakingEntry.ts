@@ -1,4 +1,4 @@
-import LobbyActions from "@shared/types/enums/actions/system/lobby";
+import { LobbyActions } from "@shared/types/enums/actions";
 
 import type { SessionModel } from "../networking";
 import type { SessionManager } from "../../managers";

@@ -1,15 +1,8 @@
-import SessionActions from '../../types/enums/actions/system/session';
-import LifecycleActions from '../../types/enums/actions/match/lifecycle';
+import {
+  SessionActions, LifecycleActions, type ActionEnum
+} from '../../types/enums/actions';
 
 
-// NOTE: We purposefully DO NOT import PacketScrambler at the top level.
-// The implementation reads its seed from a statically imported JSON config. To
-// vary the seed per test, we mock that JSON module before requiring the class.
-import type ActionEnum from '../../types/enums/actions';
-
-
-// PRNG mock used by dynamic module factory. We avoid a top-level jest.mock here
-// because jest hoists those calls before variable initialization (TDZ issue).
 const mockPrng = jest.fn();
 
 /**
@@ -22,7 +15,8 @@ const mockPrng = jest.fn();
  */
 function createScrambler(seed?: string) {
   jest.resetModules();
-  // Re‑mock seedrandom after reset
+  
+  // Mock seedrandom to return our mock PRNG function
   jest.doMock('seedrandom', () => jest.fn(() => mockPrng));
   jest.doMock('../../config', () => ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -31,10 +25,13 @@ function createScrambler(seed?: string) {
       security: { packetScramblerSeed: seed }
     }
   }), { virtual: true });
+  
   // Now require AFTER mocks are in place
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { PacketScrambler } = require('./scramble');
-  return new PacketScrambler();
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mockSeedrandom = require('seedrandom');
+  return { scrambler: new PacketScrambler(), mockSeedrandom };
 }
 
 describe('PacketScrambler', () => {
@@ -46,12 +43,12 @@ describe('PacketScrambler', () => {
 
   describe('constructor without seed', () => {
     it('should create PacketScrambler without seed', () => {
-      const scrambler = createScrambler(undefined);
+      const { scrambler } = createScrambler(undefined);
       expect(scrambler).toBeDefined();
     });
 
     it('should pass through IDs unchanged when no seed is provided', () => {
-      const scrambler = createScrambler(undefined);
+      const { scrambler } = createScrambler(undefined);
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
       expect(scrambler.scrambleID(testID)).toBe(testID);
       expect(scrambler.unscrambleID(testID)).toBe(testID);
@@ -60,28 +57,26 @@ describe('PacketScrambler', () => {
 
   describe('constructor with seed', () => {
     it('should create PacketScrambler with seed', () => {
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       expect(scrambler).toBeDefined();
     });
 
     it('should initialize maps when seed is provided', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       expect(scrambler).toBeDefined();
     });
 
     it('should use seedrandom with provided seed', () => {
       mockPrng.mockReturnValue(0.5);
-      createScrambler('my-test-seed');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const seedrandom = require('seedrandom');
-      expect(seedrandom).toHaveBeenCalledWith('my-test-seed');
+      const { mockSeedrandom } = createScrambler('my-test-seed');
+      expect(mockSeedrandom).toHaveBeenCalledWith('my-test-seed');
     });
   });
 
   describe('scrambleID', () => {
     it('should return original ID when no seed is configured', () => {
-      const scrambler = createScrambler(undefined);
+      const { scrambler } = createScrambler(undefined);
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
       const result = scrambler.scrambleID(testID);
       expect(result).toBe(testID);
@@ -91,7 +86,7 @@ describe('PacketScrambler', () => {
       const randVals = [0.1, 0.2, 0.3, 0.4, 0.5];
       let callCount = 0;
       mockPrng.mockImplementation(() => randVals[callCount++ % randVals.length]);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
       let different = false;
       for (let i = 0; i < 5; i++) {
@@ -103,7 +98,7 @@ describe('PacketScrambler', () => {
 
     it('should handle edge case IDs within byte range', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       const edgeIDs = [-128, -1, 0, 1, 127] as ActionEnum[];
       
       edgeIDs.forEach(id => {
@@ -116,7 +111,7 @@ describe('PacketScrambler', () => {
 
     it('should return original ID for unmapped values', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       const outOfRangeID = 999 as ActionEnum; // Outside byte range
       
       const result = scrambler.scrambleID(outOfRangeID);
@@ -127,7 +122,7 @@ describe('PacketScrambler', () => {
 
     it('should consistently scramble the same ID', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('consistent-seed');
+      const { scrambler } = createScrambler('consistent-seed');
       const testID = LifecycleActions.GAME_OVER as ActionEnum;
       
       const result1 = scrambler.scrambleID(testID);
@@ -139,7 +134,7 @@ describe('PacketScrambler', () => {
 
   describe('unscrambleID', () => {
     it('should return original ID when no seed is configured', () => {
-      const scrambler = createScrambler(undefined);
+      const { scrambler } = createScrambler(undefined);
       const testID = 42;
       const result = scrambler.unscrambleID(testID);
       expect(result).toBe(testID);
@@ -147,7 +142,7 @@ describe('PacketScrambler', () => {
 
     it('should unscramble ID when seed is configured', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       const scrambledID = 50; // Some scrambled value
       
       const result = scrambler.unscrambleID(scrambledID);
@@ -157,7 +152,7 @@ describe('PacketScrambler', () => {
 
     it('should return original ID for unmapped scrambled values', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('test-seed');
+      const { scrambler } = createScrambler('test-seed');
       const invalidScrambledID = 999; // Outside expected range
       
       const result = scrambler.unscrambleID(invalidScrambledID);
@@ -168,7 +163,7 @@ describe('PacketScrambler', () => {
 
     it('should consistently unscramble the same ID', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('consistent-seed');
+      const { scrambler } = createScrambler('consistent-seed');
       const scrambledID = 25;
       
       const result1 = scrambler.unscrambleID(scrambledID);
@@ -185,7 +180,7 @@ describe('PacketScrambler', () => {
         const values = [0.3, 0.7, 0.1, 0.9, 0.5];
         return values[callCount++ % values.length];
       });
-      const scrambler = createScrambler('roundtrip-seed');
+      const { scrambler } = createScrambler('roundtrip-seed');
       const testIDs = [
         LifecycleActions.GAME_INIT,
         LifecycleActions.GAME_OVER,
@@ -208,7 +203,7 @@ describe('PacketScrambler', () => {
         const values = [0.2, 0.8, 0.4, 0.6, 0.1, 0.9, 0.3, 0.7];
         return values[callCount++ % values.length];
       });
-      const scrambler = createScrambler('mapping-seed');
+      const { scrambler } = createScrambler('mapping-seed');
       // Test packet IDs, avoiding range where whitelisted IDs might appear as scrambled values
       const testRange = Array.from({ length: 20 }, (_, i) => i + 10) as ActionEnum[];
       const scrambledValues = new Set<number>();
@@ -230,9 +225,9 @@ describe('PacketScrambler', () => {
   describe('different seeds produce different mappings', () => {
     it('should produce different scrambled values with different seeds', () => {
       mockPrng.mockReturnValue(0.3);
-      const scrambler1 = createScrambler('seed1');
+      const { scrambler: scrambler1 } = createScrambler('seed1');
       mockPrng.mockReturnValue(0.7);
-      const scrambler2 = createScrambler('seed2');
+      const { scrambler: scrambler2 } = createScrambler('seed2');
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
       const scrambled1 = scrambler1.scrambleID(testID);
       const scrambled2 = scrambler2.scrambleID(testID);
@@ -245,7 +240,7 @@ describe('PacketScrambler', () => {
     it('should handle all values in byte range', () => {
       let callCount = 0;
       mockPrng.mockImplementation(() => (callCount++ * 0.123) % 1);
-      const scrambler = createScrambler('byte-range-seed');
+      const { scrambler } = createScrambler('byte-range-seed');
       
       // Test boundary values
       const boundaryValues = [-128, -127, -1, 0, 1, 126, 127] as ActionEnum[];
@@ -264,7 +259,7 @@ describe('PacketScrambler', () => {
   describe('whitelist functionality', () => {
     it('should not scramble whitelisted packet IDs', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('whitelist-seed');
+      const { scrambler } = createScrambler('whitelist-seed');
       const authID = SessionActions.AUTH as ActionEnum;
       
       // AUTH packet should pass through unchanged
@@ -278,7 +273,7 @@ describe('PacketScrambler', () => {
 
     it('should scramble non-whitelisted packet IDs', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('whitelist-seed');
+      const { scrambler } = createScrambler('whitelist-seed');
       const heartbeatID = SessionActions.HEARTBEAT as ActionEnum;
       
       // HEARTBEAT is not whitelisted, should be scrambled
@@ -293,7 +288,7 @@ describe('PacketScrambler', () => {
 
   describe('error handling', () => {
     it('should treat empty string seed as unseeded (pass-through)', () => {
-      const scrambler = createScrambler('');
+      const { scrambler } = createScrambler('');
       const testID = LifecycleActions.GAME_INIT as ActionEnum;
       const result = scrambler.scrambleID(testID);
       expect(result).toBe(testID);
@@ -303,7 +298,7 @@ describe('PacketScrambler', () => {
   describe('performance considerations', () => {
     it('should handle multiple operations efficiently', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('performance-seed');
+      const { scrambler } = createScrambler('performance-seed');
       const testID = LifecycleActions.GAME_OVER as ActionEnum;
       
       // Perform many operations
@@ -316,7 +311,7 @@ describe('PacketScrambler', () => {
 
     it('should maintain consistent performance across different IDs', () => {
       mockPrng.mockReturnValue(0.5);
-      const scrambler = createScrambler('consistency-seed');
+      const { scrambler } = createScrambler('consistency-seed');
       const testIDs = Array.from({ length: 100 }, (_, i) => i - 50) as ActionEnum[];
       
       const start = performance.now();

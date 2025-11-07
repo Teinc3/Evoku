@@ -2,15 +2,14 @@ import { of, Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
-import LobbyActions from '@shared/types/enums/actions/system/lobby';
+import { LobbyActions } from '@shared/types/enums/actions';
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state';
 import NetworkService from '../../../services/network';
 import { AppView } from '../../../../types/enums';
 import LoadingDemoPageComponent from './loading.demo';
 
-import type { QueueUpdateContract } from '@shared/types/contracts/system/lobby/QueueContract';
-import type { MatchFoundContract } from '@shared/types/contracts/system/lobby';
+import type { QueueUpdateContract, MatchFoundContract } from '@shared/types/contracts';
 
 
 describe('LoadingDemoPageComponent', () => {

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import ProtocolActions from '@shared/types/enums/actions/match/protocol';
+import { ProtocolActions } from '@shared/types/enums/actions';
 import ProtocolHandler from "./ProtocolHandler";
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';

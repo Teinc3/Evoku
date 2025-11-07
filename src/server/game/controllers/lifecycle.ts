@@ -1,7 +1,6 @@
+import GameOverReason from "@shared/types/enums/GameOverReason";
+import { ProtocolActions, LifecycleActions } from "@shared/types/enums/actions";
 import { MatchStatus } from "../../types/enums";
-import GameOverReason from "../../../shared/types/enums/GameOverReason";
-import ProtocolActions from "../../../shared/types/enums/actions/match/protocol";
-import LifecycleActions from "../../../shared/types/enums/actions/match/lifecycle";
 
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 import type { RoomModel } from "../../models/networking";

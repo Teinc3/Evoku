@@ -1,7 +1,7 @@
 import { TimeValidationReason } from '../../../types/enums';
 import ActionValidator from '.';
 
-import type PlayerActions from '@shared/types/enums/actions/match/player';
+import type { PlayerActions } from '@shared/types/enums/actions';
 import type SyncProfile from '../syncprofile';
 
 

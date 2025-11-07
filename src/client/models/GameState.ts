@@ -1,7 +1,7 @@
 import ClientBoardModel from './Board';
 
 import type IPlayerState from '@shared/types/gamestate';
-import type { MatchFoundContract } from '@shared/types/contracts/system/lobby';
+import type { MatchFoundContract } from '@shared/types/contracts';
 
 
 /**

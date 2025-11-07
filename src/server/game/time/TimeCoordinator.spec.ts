@@ -1,4 +1,4 @@
-import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
+import { MechanicsActions } from '@shared/types/enums/actions';
 import TimeCoordinator from '.';
 
 import type { RoomModel } from '../../models/networking';

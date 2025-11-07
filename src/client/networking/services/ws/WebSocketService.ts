@@ -1,6 +1,6 @@
 import { Subject, Observable } from 'rxjs';
 
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import sharedConfig from '@shared/config';
 import ClientSocket from '../../transport';
 

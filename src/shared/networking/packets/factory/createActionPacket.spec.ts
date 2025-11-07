@@ -1,7 +1,6 @@
 import { IntCodec } from '../../codecs/primitive';
 import INJECTABLE_CODECS from '../../codecs/custom/InjectableCodecs';
-import ProtocolActions from '../../../types/enums/actions/match/protocol';
-import MechanicsActions from '../../../types/enums/actions/match/player/mechanics';
+import { ProtocolActions, MechanicsActions } from '../../../types/enums/actions';
 import createActionPacket, { pickInjectables } from './createActionPacket';
 
 

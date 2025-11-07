@@ -1,6 +1,6 @@
 import { getSudoku } from "sudoku-gen";
 
-import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
+import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import { MatchStatus } from "../../types/enums";
 import ServerBoardModel from "../../models/logic/Board";

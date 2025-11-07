@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import LobbyActions from '@shared/types/enums/actions/system/lobby';
+import { LobbyActions } from '@shared/types/enums/actions';
 import MatchmakingEntryModel from ".";
 
 import type { UUID } from 'crypto';

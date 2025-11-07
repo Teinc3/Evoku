@@ -1,5 +1,5 @@
 import '@shared/networking/packets';
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import ClientSocket from '.';
 
 

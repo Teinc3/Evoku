@@ -1,9 +1,8 @@
 import { ByteCodec, IntCodec, ShortCodec } from '../../codecs/primitive';
 import createArrayCodec from '../../codecs/factory/createArrayCodec';
 import PlayerInfoCodec from '../../codecs/custom/PlayerInfoCodec';
-import LobbyActions from '../../../types/enums/actions/system/lobby';
-import ProtocolActions from '../../../types/enums/actions/match/protocol';
 import MechanicsActions from '../../../types/enums/actions/match/player/mechanics';
+import { ProtocolActions, LobbyActions } from '../../../types/enums/actions';
 import createPacket from './createPacket';
 
 

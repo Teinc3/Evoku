@@ -3,7 +3,7 @@ import SyncProfile from "./syncprofile";
 import PendingPingStore from "./pingstore";
 import PingCoordinator from "./pingcoordinator";
 
-import type PlayerActions from "@shared/types/enums/actions/match/player";
+import type { PlayerActions } from "@shared/types/enums/actions";
 import type { RoomModel } from "../../models/networking";
 
 

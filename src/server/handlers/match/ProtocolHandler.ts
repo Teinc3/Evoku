@@ -1,8 +1,8 @@
-import ProtocolActions from "@shared/types/enums/actions/match/protocol";
+import { ProtocolActions } from "@shared/types/enums/actions";
 import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type { PongContract } from "@shared/types/contracts/match/protocol/PingPongContract";
+import type { PongContract } from "@shared/types/contracts";
 import type { IMatchEnumHandler } from "../../types/handler";
 import type { RoomModel } from "../../models/networking";
 import type { SessionModel } from "../../models/networking";

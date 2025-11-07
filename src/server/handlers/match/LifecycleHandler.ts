@@ -1,7 +1,7 @@
 import EnumHandler from "../EnumHandler";
 
-import type LifecycleActions from "@shared/types/enums/actions/match/lifecycle";
-import type { IMatchEnumHandler } from "../../types/handler"
+import type { LifecycleActions } from "@shared/types/enums/actions";
+import type { IMatchEnumHandler } from "../../types/handler";
 import type { RoomModel } from "../../models/networking";
 
 

@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import CookieService from '../cookie';
 import { APIService } from "../../../networking/services";
 import { WebSocketService } from '../../../networking/services';

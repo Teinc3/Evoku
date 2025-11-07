@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import sharedConfig from '@shared/config';
 import guestAuthService from '../../services/auth';
 import SessionHandler from './SessionHandler';

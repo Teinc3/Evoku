@@ -2,7 +2,7 @@
 import { fakeAsync } from '@angular/core/testing';
 
 import '@shared/networking/packets';
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import WebSocketService from '.';
 
 import type ClientSocket from '../../transport/ClientSocket';

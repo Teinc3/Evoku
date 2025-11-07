@@ -1,4 +1,4 @@
-import LobbyActions from "@shared/types/enums/actions/system/lobby";
+import { LobbyActions } from "@shared/types/enums/actions";
 import MatchmakingEntryModel from "../../models/matchmaking/MatchmakingEntry";
 
 import type SessionManager from "../session/SessionManager";

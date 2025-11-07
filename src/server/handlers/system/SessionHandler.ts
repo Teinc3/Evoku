@@ -1,4 +1,4 @@
-import SessionActions from "@shared/types/enums/actions/system/session";
+import { SessionActions } from "@shared/types/enums/actions";
 import sharedConfig from "@shared/config";
 import EnumHandler from "../EnumHandler";
 import guestAuthService from "../../services/auth";
