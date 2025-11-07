@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 
 import ViewStateService from '../../services/view-state';
-import AppView from '../../../types/enums/app-view.enum';
+import { AppView } from '../../../types/enums';
 import NetworkDemoPageComponent from './misc/network/network.demo';
 import LoadingDemoPageComponent from './loading/loading.demo';
 import TimeAttackDemoPageComponent from './gameplay/time-attack/time-attack.demo';

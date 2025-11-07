@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import CookieService from '../cookie';
-import WebSocketService from '../../../networking/services/WebSocketService';
-import APIService from '../../../networking/services/APIService';
+import { APIService } from "../../../networking/services";
+import { WebSocketService } from '../../../networking/services';
 import NetworkService from '.';
 
 

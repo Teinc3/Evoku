@@ -2,7 +2,7 @@ import { Subject, Observable } from 'rxjs';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
 import sharedConfig from '@shared/config';
-import ClientSocket from '../transport/ClientSocket';
+import ClientSocket from '../../transport';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';

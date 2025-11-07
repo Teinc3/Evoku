@@ -5,7 +5,7 @@ import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../services/view-state';
 import NetworkService from '../../../services/network';
-import AppView from '../../../../types/enums/app-view.enum';
+import { AppView } from '../../../../types/enums';
 
 
 /**

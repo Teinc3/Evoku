@@ -1,4 +1,4 @@
-import APIService from './APIService';
+import APIService from '.';
 
 
 describe('APIService', () => {

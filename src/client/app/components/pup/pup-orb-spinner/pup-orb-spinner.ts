@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, HostListener, Input, Output } from '@angular/core';
 
-import PUPOrbState from '../../../../types/enums/pup-orb-state.enum';
+import { PUPOrbState } from '../../../../types/enums';
 
 
 @Component({

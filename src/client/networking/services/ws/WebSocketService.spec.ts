@@ -1,8 +1,11 @@
-/* eslint-disable import/order */
+ 
 import { fakeAsync } from '@angular/core/testing';
 
 import '@shared/networking/packets';
 import SessionActions from '@shared/types/enums/actions/system/session';
+import WebSocketService from '.';
+
+import type ClientSocket from '../../transport/ClientSocket';
 
 
 class MockWebSocket {
@@ -105,11 +108,6 @@ class MockClientSocket {
 // Mock the dependencies
 let mockClientSocket: MockClientSocket;
 let originalWebSocket: typeof WebSocket;
-
-// Import the actual classes to mock them
-import WebSocketService from './WebSocketService';
-
-import type ClientSocket from '../transport/ClientSocket';
 
 
 describe('WebSocketService', () => {

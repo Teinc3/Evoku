@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import PUPOrbState from '../../../../types/enums/pup-orb-state.enum';
+import { PUPOrbState } from '../../../../types/enums';
 import PupOrbSpinnerComponent from './pup-orb-spinner';
 
 

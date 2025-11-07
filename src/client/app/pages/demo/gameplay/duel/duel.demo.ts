@@ -13,7 +13,7 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
-import AppView from '../../../../../types/enums/app-view.enum';
+import { AppView } from '../../../../../types/enums';
 import GameStateModel from '../../../../../models/GameState';
 
 import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';

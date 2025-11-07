@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
-import AppView from '../../../../../types/enums/app-view.enum';
+import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
 import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';

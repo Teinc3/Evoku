@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import AppView from '../../../types/enums/app-view.enum';
+import { AppView } from '../../../types/enums';
 import ViewStateService from '.';
 
 

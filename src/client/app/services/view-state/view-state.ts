@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import AppView from '../../../types/enums/app-view.enum';
+import { AppView } from '../../../types/enums';
 
 
 /**
