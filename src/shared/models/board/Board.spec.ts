@@ -1,4 +1,4 @@
-import BaseCellModel from '../cell/Cell';
+import BaseCellModel from '../cell';
 import { createMockEffect } from '../../utils/MockEffect';
 import BaseBoardModel from '.';
 

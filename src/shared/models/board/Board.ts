@@ -1,4 +1,4 @@
-import type { default as BaseCellModel, CellModelConstructor } from "../cell/Cell";
+import type { default as BaseCellModel, CellModelConstructor } from "../cell";
 import type { IBoardState } from "../../types/gamestate/board";
 
 

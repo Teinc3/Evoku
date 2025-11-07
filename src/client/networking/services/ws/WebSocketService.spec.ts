@@ -5,7 +5,7 @@ import '@shared/networking/packets';
 import { SessionActions } from '@shared/types/enums/actions';
 import WebSocketService from '.';
 
-import type ClientSocket from '../../transport/ClientSocket';
+import type ClientSocket from '../../transport';
 
 
 class MockWebSocket {

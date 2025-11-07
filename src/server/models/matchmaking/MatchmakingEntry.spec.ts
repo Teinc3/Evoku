@@ -5,7 +5,7 @@ import MatchmakingEntryModel from ".";
 
 import type { UUID } from 'crypto';
 import type { SessionModel } from "../networking";
-import type SessionManager from '../../managers/session/SessionManager';
+import type SessionManager from '../../managers/session';
 
 
 // Mock classes for testing
