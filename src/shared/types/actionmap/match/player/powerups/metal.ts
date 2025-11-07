@@ -1,10 +1,10 @@
 import type MetalPUPActions from "../../../../enums/actions/match/player/powerups/metal";
-import type { 
+import type {
   LockContractC2S, LockContractS2C
-} from "../../../../contracts/match/player/powerups/metal/LockContract";
-import type { 
-  ForgeContractC2S, ForgeContractS2C 
-} from "../../../../contracts/match/player/powerups/metal/ForgeContract";
+} from "../../../../contracts/match/player/powerups/metal";
+import type {
+  ForgeContractC2S, ForgeContractS2C
+} from "../../../../contracts/match/player/powerups/metal";
 
 
 export default interface MetalPUPActionMap {

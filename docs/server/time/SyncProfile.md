@@ -104,7 +104,7 @@ Large drift values may indicate:
 ## Integration
 
 SyncProfile is used by:
-- **TimeService**: Creates and manages SyncProfile instances per player session
+- **TimeCoordinator**: Creates and manages SyncProfile instances per player session
 - **ActionValidator**: Uses time conversion methods for validation
 - **PingCoordinator**: Updates profiles with ping-pong response data
 

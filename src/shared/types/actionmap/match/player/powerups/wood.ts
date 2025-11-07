@@ -1,10 +1,10 @@
 import type WoodPUPActions from "../../../../enums/actions/match/player/powerups/wood";
-import type { 
-  WisdomContractC2S, WisdomContractS2C 
-} from "../../../../contracts/match/player/powerups/wood/WisdomContract";
-import type { 
-  EntangleContractC2S, EntangleContractS2C 
-} from "../../../../contracts/match/player/powerups/wood/EntangleContract";
+import type {
+  WisdomContractC2S, WisdomContractS2C
+} from "../../../../contracts/match/player/powerups/wood";
+import type {
+  EntangleContractC2S, EntangleContractS2C
+} from "../../../../contracts/match/player/powerups/wood";
 
 
 export default interface WoodPUPActionMap {

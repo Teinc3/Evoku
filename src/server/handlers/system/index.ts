@@ -3,7 +3,7 @@ import UnionHandler from "../UnionHandler";
 import SessionHandler from "./SessionHandler";
 import LobbyHandler from "./LobbyHandler";
 
-import type SystemActions from "@shared/types/enums/actions/system";
+import type { SystemActions } from "@shared/types/enums/actions";
 import type { SomeHandlerMapEntry } from "../../types/handler";
 import type { MatchmakingManager } from "../../managers";
 

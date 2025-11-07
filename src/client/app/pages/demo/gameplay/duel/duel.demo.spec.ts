@@ -2,12 +2,12 @@ import { Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import ViewStateService from '../../../../services/view-state.service';
-import NetworkService from '../../../../services/network.service';
-import AppView from '../../../../../types/enums/app-view.enum';
+import ViewStateService from '../../../../services/view-state';
+import NetworkService from '../../../../services/network';
+import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
-import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+import type { MatchFoundContract } from '@shared/types/contracts';
 
 
 describe('DuelDemoPageComponent', () => {

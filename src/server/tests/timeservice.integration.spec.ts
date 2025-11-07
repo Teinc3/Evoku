@@ -1,9 +1,9 @@
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import TimeValidationReason from '../types/enums/timevalidation';
-import TimeService from '../game/time';
+import { TimeValidationReason } from '../types/enums';
+import TimeCoordinator from '../game/time';
 
-import type RoomModel from '../models/networking/Room';
+import type { RoomModel } from '../models/networking';
 
 
 // Mock RoomModel for integration testing
@@ -37,13 +37,13 @@ const mockRoom = {
   })
 } as unknown as RoomModel;
 
-describe('TimeService Integration Tests', () => {
-  let timeService: TimeService;
+describe('TimeCoordinator Integration Tests', () => {
+  let timeService: TimeCoordinator;
 
   beforeEach(() => {
     jest.useFakeTimers();
     
-    timeService = new TimeService(mockRoom);
+    timeService = new TimeCoordinator(mockRoom);
     
     jest.clearAllMocks();
     mockSession.forward.mockClear();
@@ -86,7 +86,7 @@ describe('TimeService Integration Tests', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
       // Simulate ping being sent
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       // Get the server time that was sent in the ping
       const serverTime = getLatestPingServerTime();
@@ -115,16 +115,16 @@ describe('TimeService Integration Tests', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
       // Send multiple pings by advancing time
-      advanceTime(TimeService.PING_INTERVAL + 100);
+      advanceTime(TimeCoordinator.PING_INTERVAL + 100);
       const serverTime1 = getLatestPingServerTime();
       expect(serverTime1).toBeDefined();
 
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       const serverTime2 = getLatestPingServerTime();
       expect(serverTime2).toBeDefined();
       expect(serverTime2).not.toBe(serverTime1);
       
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       const serverTime3 = getLatestPingServerTime();
       expect(serverTime3).toBeDefined();
       expect(serverTime3).not.toBe(serverTime2);
@@ -142,7 +142,7 @@ describe('TimeService Integration Tests', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
       // Send ping and respond
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
@@ -170,7 +170,7 @@ describe('TimeService Integration Tests', () => {
 
     it('should return positive value for valid first action after sync', () => {
       // Establish sync using actual PING/PONG
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       const pingServerTime = getLatestPingServerTime();
       expect(pingServerTime).toBeDefined();
 
@@ -233,7 +233,7 @@ describe('TimeService Integration Tests', () => {
       mockSession.forward.mockClear();
       
       // Advance time by ping interval
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       expect(mockSession.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
         serverTime: expect.any(Number),
@@ -242,7 +242,7 @@ describe('TimeService Integration Tests', () => {
       
       // Advance time again - should send another ping
       mockSession.forward.mockClear();
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       expect(mockSession.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
         serverTime: expect.any(Number),
@@ -255,7 +255,7 @@ describe('TimeService Integration Tests', () => {
       timeService.addPlayerSession(1);
       
       // Advance time
-      advanceTime(TimeService.PING_INTERVAL * 3);
+      advanceTime(TimeCoordinator.PING_INTERVAL * 3);
       
       expect(mockSession.forward).not.toHaveBeenCalled();
     });
@@ -271,7 +271,7 @@ describe('TimeService Integration Tests', () => {
       mockSession.forward.mockClear();
       
       // Advance time
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       expect(mockSession.forward).not.toHaveBeenCalled();
     });
@@ -293,7 +293,7 @@ describe('TimeService Integration Tests', () => {
       tsPriv.pingCoordinator.sendImmediatePing(1);
 
       // Advance by the regular ping interval (both should be considered)
-      jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+      jest.advanceTimersByTime(TimeCoordinator.PING_INTERVAL);
 
       // Player 1 may be suppressed by MIN_PING_INTERVAL; player 2 must still get a ping
       expect(mockSession2.forward).toHaveBeenCalledWith(ProtocolActions.PING, {
@@ -312,9 +312,9 @@ describe('TimeService Integration Tests', () => {
       mockSession2.forward.mockClear();
 
       // Simulate player 1 being laggy (no PONG responses) while player 2 responds normally
-      const maxPings = TimeService.MAX_PENDING_PINGS;
+      const maxPings = TimeCoordinator.MAX_PENDING_PINGS;
       for (let i = 0; i < maxPings; i++) {
-        jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+        jest.advanceTimersByTime(TimeCoordinator.PING_INTERVAL);
         
         // Player 2 responds to pings (not laggy)
         const player2Ping = getLatestPingServerTime(mockSession2);
@@ -330,7 +330,7 @@ describe('TimeService Integration Tests', () => {
       mockSession2.forward.mockClear();
 
       // Next ping interval should skip player 1 (at limit) but ping player 2
-      jest.advanceTimersByTime(TimeService.PING_INTERVAL);
+      jest.advanceTimersByTime(TimeCoordinator.PING_INTERVAL);
 
       // Player 1 should not receive ping (circuit breaker active)
       expect(mockSession.forward).not.toHaveBeenCalled();
@@ -351,7 +351,7 @@ describe('TimeService Integration Tests', () => {
 
     it('should handle PONG and update player data with real timing', () => {
       // Start ping service and trigger a ping
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       
       // Get the server time from the ping
       const serverTime = getLatestPingServerTime();
@@ -369,7 +369,7 @@ describe('TimeService Integration Tests', () => {
 
     it('should convert between client and server time after sync', () => {
       // Establish real sync
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
       
@@ -391,7 +391,7 @@ describe('TimeService Integration Tests', () => {
 
     it('should maintain accurate time estimates with monotonic clamping', () => {
       // Establish sync
-      advanceTime(TimeService.PING_INTERVAL);
+      advanceTime(TimeCoordinator.PING_INTERVAL);
       const serverTime = getLatestPingServerTime();
       expect(serverTime).toBeDefined();
       

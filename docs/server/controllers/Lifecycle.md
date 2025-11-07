@@ -24,7 +24,7 @@ The LifecycleController serves as the match orchestrator, handling:
 ### Game Initialization
 - **Start Conditions:** Triggers game start when requirements met (≥2 players)
 - **Timing Control:** 5-second delay after minimum players reached
-- **State Setup:** Coordinates with GameState and TimeService initialization
+- **State Setup:** Coordinates with GameState and TimeCoordinator initialization
 
 ### Player Events
 - **Join Handling:** Processes new player arrivals and start conditions
@@ -103,7 +103,7 @@ Initializes the game when start conditions are met.
 
 **Process:**
 1. Transition status to ONGOING
-2. Start TimeService for synchronization
+2. Start TimeCoordinator for synchronization
 3. Initialize player game states
 4. Broadcast initial board to all participants
 
@@ -273,7 +273,7 @@ class LifecycleController {
 }
 ```
 
-### TimeService Integration
+### TimeCoordinator Integration
 ```typescript
 // Game initialization starts timing
 public initGame(): void {

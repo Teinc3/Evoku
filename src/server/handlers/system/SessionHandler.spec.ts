@@ -1,16 +1,16 @@
 import { jest } from '@jest/globals';
 
-import SessionActions from '@shared/types/enums/actions/system/session';
+import { SessionActions } from '@shared/types/enums/actions';
 import sharedConfig from '@shared/config';
-import guestAuthService from '../../services/GuestAuthService';
+import guestAuthService from '../../services/auth';
 import SessionHandler from './SessionHandler';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
-import type SessionModel from '../../models/networking/Session';
+import type { SessionModel } from '../../models/networking';
 
 
 // Mock dependencies
-jest.mock('../../services/GuestAuthService');
+jest.mock('../../services/auth');
 
 describe('SessionHandler', () => {
   let sessionHandler: SessionHandler;

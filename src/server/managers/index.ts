@@ -1,3 +1,3 @@
-export { default as MatchmakingManager } from './MatchmakingManager';
-export { default as RoomManager } from './RoomManager';
-export { default as SessionManager } from './SessionManager';
+export { default as MatchmakingManager } from './matchmaking';
+export { default as RoomManager } from './room';
+export { default as SessionManager } from './session';

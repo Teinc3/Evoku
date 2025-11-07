@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
-import SessionManager from '../managers/SessionManager';
-import RoomManager from '../managers/RoomManager';
+import { SessionManager, RoomManager } from '../managers';
 import WSServer from "./WSServer";
 
 import type { Server as HttpServer } from 'http';
@@ -21,10 +20,19 @@ jest.mock('ws', () => ({
 }));
 
 // Mock our internal classes. We want to spy on their methods.
-jest.mock('../managers/SessionManager');
-jest.mock('../managers/RoomManager');
-jest.mock('../models/networking/ServerSocket');
-jest.mock('../services/RedisService', () => ({
+const mockSessionManager = {
+  setMatchmakingManager: jest.fn(),
+  createSession: jest.fn(),
+  close: jest.fn(),
+};
+
+jest.mock('../managers', () => ({
+  SessionManager: jest.fn(() => mockSessionManager),
+  RoomManager: jest.fn(() => ({ close: jest.fn() })),
+  MatchmakingManager: jest.fn(() => ({ close: jest.fn() })),
+}));
+jest.mock('../models/networking/serversocket');
+jest.mock('../services/redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
@@ -78,10 +86,8 @@ describe('WSServer Integration Test', () => {
   });
 
   it('should create a new ServerSocket and a new Session when a client connects', () => {
-    // Get a reference to the mock SessionManager instance that WSServer created
-    const sessionManagerInstance
-      = (SessionManager as jest.Mock).mock.instances[0] as SessionManager;
-    const createSessionSpy = jest.spyOn(sessionManagerInstance, 'createSession');
+    // Spy on the mock session manager's createSession method
+    const createSessionSpy = jest.spyOn(mockSessionManager, 'createSession');
     
     // Simulate a new client connecting by manually emitting the 'connection' event
     const mockClientSocket = {}; // A simple object to represent the client connection

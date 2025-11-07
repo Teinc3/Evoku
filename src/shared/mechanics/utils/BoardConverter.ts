@@ -1,4 +1,4 @@
-import type { BoardCellStates } from "../../types/gamestate/board/cell";
+import type { BoardCellStates } from "../../types/gamestate/board";
 
 
 export default class BoardConverter {

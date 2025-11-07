@@ -1,8 +1,8 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import ViewStateService from '../../../../services/view-state.service';
-import NetworkService from '../../../../services/network.service';
+import ViewStateService from '../../../../services/view-state';
+import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
@@ -13,10 +13,10 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
-import AppView from '../../../../../types/enums/app-view.enum';
+import { AppView } from '../../../../../types/enums';
 import GameStateModel from '../../../../../models/GameState';
 
-import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+import type { MatchFoundContract } from '@shared/types/contracts';
 
 
 @Component({

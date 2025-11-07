@@ -161,7 +161,7 @@ The coordinator gracefully handles:
 
 ## See Also
 
-- [TimeService](./TimeService.md) - Main coordination facade
+- [TimeCoordinator](./TimeCoordinator.md) - Main coordination facade
 - [PendingPingStore](./PendingPingStore.md) - Ping tracking and validation
 - [SyncProfile](./SyncProfile.md) - Per-player synchronization data
 - [ActionValidator](./ActionValidator.md) - Timing validation

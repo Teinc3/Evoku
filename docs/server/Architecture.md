@@ -62,7 +62,7 @@ including game initialisations, phase transitions, and result declarations.
 
 #### /time
 
-Holds TimeService, a facade comprising timing-related utilities and logic.
+Holds TimeCoordinator, a facade comprising timing-related utilities and logic.
 
 #### /matchmaking
 

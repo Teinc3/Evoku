@@ -1,4 +1,4 @@
-import BaseCellModel from "../../../shared/models/Cell";
+import BaseCellModel from "../../../shared/models/cell";
 
 
 /**

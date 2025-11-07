@@ -1,14 +1,14 @@
 import { getSudoku } from "sudoku-gen";
 
-import MechanicsActions from "@shared/types/enums/actions/match/player/mechanics";
+import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
-import MatchStatus from "../../types/enums/matchstatus";
+import { MatchStatus } from "../../types/enums";
 import ServerBoardModel from "../../models/logic/Board";
 
 
 import type IPlayerState from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
-import type TimeService from "../time";
+import type TimeCoordinator from "../time";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 
 
@@ -27,7 +27,7 @@ export default class GameStateController {
   private callbacks!: GameLogicCallbacks;
 
   constructor(
-    private readonly timeService: TimeService,
+    private readonly timeService: TimeCoordinator,
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy",
   ) {
     this.gameStates = new Map();

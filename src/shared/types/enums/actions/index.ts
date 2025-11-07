@@ -4,4 +4,7 @@ import type MatchActions from "./match";
 
 type ActionEnum = MatchActions | SystemActions;
 
-export default ActionEnum;
+export type { ActionEnum as default, ActionEnum }
+
+export * from "./match";
+export * from "./system";

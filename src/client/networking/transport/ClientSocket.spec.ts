@@ -1,6 +1,6 @@
 import '@shared/networking/packets';
-import SessionActions from '@shared/types/enums/actions/system/session';
-import ClientSocket from './ClientSocket';
+import { SessionActions } from '@shared/types/enums/actions';
+import ClientSocket from '.';
 
 
 // Mock WebSocket API

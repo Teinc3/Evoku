@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
 
-import LobbyActions from '@shared/types/enums/actions/system/lobby';
+import { LobbyActions } from '@shared/types/enums/actions';
 import LobbyHandler from './LobbyHandler';
 
-import type SessionModel from '../../models/networking/Session';
+import type { SessionModel } from '../../models/networking';
 import type { MatchmakingManager } from '../../managers';
 
 

@@ -1,7 +1,7 @@
-import BaseCellModel from "../../shared/models/Cell";
+import BaseCellModel from "../../shared/models/cell";
 
 import type { IPendingCellState } from "../types/gamestate";
-import type BaseEffectModel from "../../shared/models/Effect";
+import type BaseEffectModel from "../../shared/models/effect";
 
 
 /** Client-side implementation of CellModel with pending state for optimistic updates. */

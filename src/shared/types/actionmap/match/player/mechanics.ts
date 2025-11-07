@@ -1,10 +1,10 @@
 import type MechanicsActions from "../../../enums/actions/match/player/mechanics";
-import type { 
+import type {
   SetCellContract, CellSetContract
-} from "../../../contracts/match/player/mechanics/SetCellContract";
+} from "../../../contracts/match/player/mechanics";
 import type {
   DrawPupContract, PupDrawnContract
-} from "../../../contracts/match/player/mechanics/DrawPupContract";
+} from "../../../contracts/match/player/mechanics";
 
 
 export default interface MechanicsActionMap {

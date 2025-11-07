@@ -1,10 +1,10 @@
-import SessionActions from "@shared/types/enums/actions/system/session";
+import { SessionActions } from "@shared/types/enums/actions";
 import sharedConfig from "@shared/config";
 import EnumHandler from "../EnumHandler";
-import guestAuthService from "../../services/GuestAuthService";
+import guestAuthService from "../../services/auth";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type SessionModel from "../../models/networking/Session";
+import type { SessionModel } from "../../models/networking";
 
 
 export default class SessionHandler extends EnumHandler<SessionActions> {

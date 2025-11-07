@@ -1,4 +1,4 @@
-import { createMockEffect } from '@shared/models/utils/MockEffect';
+import { createMockEffect } from '@shared/utils/MockEffect';
 import ServerCellModel from './Cell';
 import ServerBoardModel from './Board';
 

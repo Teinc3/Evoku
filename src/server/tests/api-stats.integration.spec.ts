@@ -4,13 +4,12 @@ import { jest } from '@jest/globals';
 import { StatsRange } from '../types/stats/online';
 import HTTPServer from '../core/HTTPServer';
 
-import type { StatsService } from '../services/StatsService';
-import type SessionManager from '../managers/SessionManager';
-import type RoomManager from '../managers/RoomManager';
+import type { StatsService } from '../services/stats/StatsService';
+import type { SessionManager, RoomManager } from '../managers';
 import type WSServer from '../core/WSServer';
 
 
-jest.mock('../services/GuestAuthService', () => ({
+jest.mock('../services/auth', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
@@ -18,7 +17,7 @@ jest.mock('../services/GuestAuthService', () => ({
   },
 }));
 
-jest.mock('../services/RedisService', () => ({
+jest.mock('../services/redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
@@ -37,6 +36,7 @@ describe('HTTPServer - Stats API', () => {
   beforeAll(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(() => {

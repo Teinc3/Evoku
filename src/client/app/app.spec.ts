@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
-import AppView from '../types/enums/app-view.enum';
-import WebSocketService from '../networking/services/WebSocketService';
-import ViewStateService from './services/view-state.service';
-import NetworkService from './services/network.service';
-import DynamicFaviconService from './services/dynamic-favicon.service';
+import { AppView } from '../types/enums';
+import { WebSocketService } from '../networking/services';
+import ViewStateService from './services/view-state';
+import NetworkService from './services/network';
+import DynamicFaviconService from './services/dynamic-favicon';
 import App from './app';
 
 

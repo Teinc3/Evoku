@@ -1,7 +1,7 @@
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type ActionEnum from "@shared/types/enums/actions";
 import type { default as IDataHandler, HandlerMap } from "../types/handler";
-import type SessionModel from "../models/networking/Session";
+import type { SessionModel } from "../models/networking";
 
 
 export default abstract class EnumHandler<GenericEnum extends ActionEnum>

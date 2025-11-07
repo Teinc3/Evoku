@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import express from 'express';
 import { jest } from '@jest/globals';
 
-import statsService from '../services/StatsService';
+import statsService from '../services/stats';
 import HTTPServer from './HTTPServer';
 
 import type WSServer from './WSServer';
@@ -20,8 +20,7 @@ jest.mock('../config/index', () => ({
 // Mock other dependencies
 jest.mock('express');
 jest.mock('http');
-jest.mock('../services/StatsService');
-jest.mock('../services/RedisService');
+jest.mock('../services/redis');
 
 // Mock process.exit to prevent test suite from exiting
 jest.spyOn(process, 'exit').mockImplementation(() => {
@@ -100,11 +99,14 @@ describe('HTTPServer', () => {
       wsServerWithManagers.sessionManager = mockSessionManager;
       wsServerWithManagers.roomManager = mockRoomManager;
 
+      // Spy on the initialize method
+      const initializeSpy = jest.spyOn(statsService, 'initialize');
+
       // Act
       httpServer.setWsServer(mockWsServer);
 
       // Assert
-      expect(statsService.initialize).toHaveBeenCalledWith(mockSessionManager, mockRoomManager);
+      expect(initializeSpy).toHaveBeenCalledWith(mockSessionManager, mockRoomManager);
     });
   });
 

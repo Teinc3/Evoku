@@ -4,8 +4,8 @@ import { createServer } from 'http';
 import { rateLimit } from 'express-rate-limit';
 import express from 'express';
 
-import statsService, { type StatsService } from '../services/StatsService';
-import guestAuthService from '../services/GuestAuthService';
+import statsService, { type StatsService } from '../services/stats';
+import guestAuthService from '../services/auth';
 
 import type { Server as HttpServer } from 'http';
 import type { Application } from 'express';

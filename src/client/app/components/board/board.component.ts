@@ -9,7 +9,7 @@ import {
 
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
-import CursorDirectionEnum from '../../../types/enums/cursor-direction.enum';
+import { CursorDirectionEnum } from '../../../types/enums';
 import ClientBoardModel from '../../../models/Board';
 import SudokuCellComponent from './cell/cell.component';
 

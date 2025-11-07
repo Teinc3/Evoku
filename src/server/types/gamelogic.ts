@@ -1,4 +1,4 @@
-import type MatchStatus from "./enums/matchstatus";
+import type { MatchStatus } from "./enums";
 
 
 /**

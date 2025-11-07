@@ -1,0 +1,1 @@
+export { default, type CellModelConstructor } from './Cell';

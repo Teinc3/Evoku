@@ -1,14 +1,14 @@
-import MatchStatus from '../../types/enums/matchstatus';
-import GameOverReason from '../../../shared/types/enums/GameOverReason';
-import LifecycleActions from '../../../shared/types/enums/actions/match/lifecycle';
+import GameOverReason from '@shared/types/enums/GameOverReason';
+import { LifecycleActions } from '@shared/types/enums/actions';
+import { MatchStatus } from '../../types/enums';
 import LifecycleController from './lifecycle';
 
-import type RoomModel from '../../models/networking/Room';
+import type { RoomModel } from '../../models/networking';
 import type GameStateController from './state';
 
 
 // Mock dependencies
-jest.mock('../../models/networking/Room');
+jest.mock('../../models/networking/room');
 jest.mock('./state');
 
 describe('LifecycleController', () => {

@@ -3,8 +3,8 @@ import { jest } from '@jest/globals';
 import FirePUPActions from '@shared/types/enums/actions/match/player/powerups/fire';
 import FirePUPHandler from "./FirePUPHandler";
 
-import type SessionModel from '../../../../models/networking/Session';
-import type RoomModel from '../../../../models/networking/Room';
+import type { RoomModel } from '../../../../models/networking';
+import type { SessionModel } from '../../../../models/networking';
 
 
 // Mock classes for testing
