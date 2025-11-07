@@ -1,5 +1,5 @@
 import BaseBoardModel from "../../../shared/models/Board";
-import ServerCellModel from "./Cell";
+import { ServerCellModel } from ".";
 
 
 /**

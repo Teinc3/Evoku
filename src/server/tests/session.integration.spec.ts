@@ -9,7 +9,7 @@ import '@shared/networking/packets';
 import SessionActions from '@shared/types/enums/actions/system/session';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import PacketIO from '@shared/networking/utils/PacketIO';
-import SessionModel from '../models/networking/Session';
+import { SessionModel } from '../models/networking';
 import { SessionManager } from '../managers';
 
 import type { WebSocket } from 'ws';

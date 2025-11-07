@@ -1,9 +1,9 @@
 import LobbyActions from "@shared/types/enums/actions/system/lobby";
-import MatchmakingEntryModel from "../../models/MatchmakingEntry";
+import MatchmakingEntryModel from "../../models/matchmaking/MatchmakingEntry";
 
 import type SessionManager from "../session/SessionManager";
 import type RoomManager from "../room";
-import type SessionModel from "../../models/networking/Session";
+import type { SessionModel } from "../../models/networking";
 
 
 /**

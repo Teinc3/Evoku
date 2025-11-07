@@ -4,7 +4,7 @@ import EnumHandler from "../EnumHandler";
 import guestAuthService from "../../services/GuestAuthService";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type SessionModel from "../../models/networking/Session";
+import type { SessionModel } from "../../models/networking";
 
 
 export default class SessionHandler extends EnumHandler<SessionActions> {

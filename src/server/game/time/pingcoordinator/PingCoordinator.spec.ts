@@ -2,7 +2,7 @@ import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import { PendingPingStore, type SyncProfile } from '..';
 import PingCoordinator from '.';
 
-import type RoomModel from '../../../models/networking/Room';
+import type { RoomModel } from '../../../models/networking';
 
 
 interface MockSession {

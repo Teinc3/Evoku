@@ -2,7 +2,7 @@ import LobbyActions from "@shared/types/enums/actions/system/lobby";
 import EnumHandler from "../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
-import type SessionModel from "../../models/networking/Session";
+import type { SessionModel } from "../../models/networking";
 import type { MatchmakingManager } from "../../managers";
 
 

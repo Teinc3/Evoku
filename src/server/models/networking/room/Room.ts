@@ -1,16 +1,16 @@
 import BiMap from "bidirectional-map";
 
-import MatchHandler from "../../handlers/match";
-import TimeCoordinator from "../../game/time";
-import GameStateController from "../../game/controllers/state";
-import LifecycleController from "../../game/controllers/lifecycle";
+import MatchHandler from "../../../handlers/match";
+import TimeCoordinator from "../../../game/time";
+import GameStateController from "../../../game/controllers/state";
+import LifecycleController from "../../../game/controllers/lifecycle";
 
 import type { UUID } from "crypto";
 import type MatchActions from "@shared/types/enums/actions/match";
 import type ActionMap from "@shared/types/actionmap";
-import type IDataHandler from "../../types/handler";
-import type BroadcastOptions from "../../types/broadcast";
-import type SessionModel from "./Session";
+import type IDataHandler from "../../../types/handler";
+import type BroadcastOptions from "../../../types/broadcast";
+import type { SessionModel } from "..";
 
 
 /**

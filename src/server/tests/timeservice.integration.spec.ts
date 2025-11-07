@@ -3,7 +3,7 @@ import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics
 import TimeValidationReason from '../types/enums/timevalidation';
 import TimeCoordinator from '../game/time';
 
-import type RoomModel from '../models/networking/Room';
+import type { RoomModel } from '../models/networking';
 
 
 // Mock RoomModel for integration testing

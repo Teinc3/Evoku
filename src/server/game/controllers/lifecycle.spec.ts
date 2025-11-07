@@ -3,7 +3,7 @@ import GameOverReason from '../../../shared/types/enums/GameOverReason';
 import LifecycleActions from '../../../shared/types/enums/actions/match/lifecycle';
 import LifecycleController from './lifecycle';
 
-import type RoomModel from '../../models/networking/Room';
+import type { RoomModel } from '../../models/networking';
 import type GameStateController from './state';
 
 

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import RoomModel from '../../models/networking/Room';
+import { RoomModel } from '../../models/networking';
 import RoomManager from ".";
 
 

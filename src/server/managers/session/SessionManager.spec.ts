@@ -1,7 +1,6 @@
 import { jest } from '@jest/globals';
 
-import SessionModel from '../../models/networking/Session';
-import ServerSocket from '../../models/networking/ServerSocket';
+import { SessionModel, ServerSocket } from '../../models/networking';
 import SessionManager from ".";
 
 import type { WebSocket } from 'ws';
@@ -12,16 +11,14 @@ import type { MatchmakingManager } from '..';
 
 
 // Mock ServerSocket
-let capturedOnCloseCallback: ((code: number) => void) | null = null;
-
-jest.mock('../../models/networking/ServerSocket', () => {
+jest.mock('../../models/networking', () => {
   class MockServerSocket {
     constructor(
       socket: WebSocket,
       onDisconnect: (code: number) => void,
       onError: (err: Error) => void
     ) {
-      capturedOnCloseCallback = onDisconnect;
+      socket.on('close', (code: number) => onDisconnect(code));
       
       // Call the error callback asynchronously to test error handling
       process.nextTick(() => {
@@ -35,7 +32,30 @@ jest.mock('../../models/networking/ServerSocket', () => {
     readyState = 1; // WebSocket.OPEN
   }
 
-  return MockServerSocket;
+  class MockSessionModel {
+    uuid: string;
+    socketInstance: MockServerSocket;
+    manager?: SessionManager;
+
+    constructor(serverSocket: MockServerSocket) {
+      this.socketInstance = serverSocket;
+      this.uuid = `mock-uuid-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    disconnect = jest.fn();
+    destroy = jest.fn(function(this: MockSessionModel) {
+      if (this.manager) {
+        this.manager.onDestroy(this as unknown as SessionModel);
+      }
+    });
+    reconnect = jest.fn();
+    drainPreAuthPacketQueue = jest.fn().mockReturnValue([]);
+  }
+
+  return {
+    SessionModel: MockSessionModel,
+    ServerSocket: MockServerSocket,
+  };
 });
 
 // Mock console methods to prevent test output pollution
@@ -427,19 +447,14 @@ describe('SessionManager', () => {
       // Arrange
       const mockSocket = new MockWebSocket();
       
-      // Reset captured callbacks
-      capturedOnCloseCallback = null;
-
       // Act
       const session = sessionManager.createSession(mockSocket as unknown as WebSocket);
 
       // Spy on session.disconnect
       const disconnectSpy = jest.spyOn(session, 'disconnect');
 
-      // Simulate socket close by calling the captured callback
-      if (capturedOnCloseCallback) {
-        (capturedOnCloseCallback as (code: number) => void)(1000); // Normal closure
-      }
+      // Simulate socket close
+      mockSocket.emitClose(1000);
 
       // Assert
       expect(disconnectSpy).toHaveBeenCalledWith();
@@ -471,6 +486,8 @@ describe('SessionManager', () => {
       const socket1 = new MockWebSocket();
       const socket2 = new MockWebSocket();
       const existingSession = sessionManager.createSession(socket1 as unknown as WebSocket);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (existingSession as any).manager = sessionManager;
       const userId = 'user-456' as UUID;
 
       // Authenticate first session
@@ -478,6 +495,8 @@ describe('SessionManager', () => {
 
       // Create second session (simulating new connection from same user)
       const newSession = sessionManager.createSession(socket2 as unknown as WebSocket);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (newSession as any).manager = sessionManager;
       const newSessionUuid = newSession.uuid;
 
       // Spy on reconnect method

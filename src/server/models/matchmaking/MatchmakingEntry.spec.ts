@@ -1,11 +1,11 @@
 import { jest } from '@jest/globals';
 
 import LobbyActions from '@shared/types/enums/actions/system/lobby';
-import MatchmakingEntryModel from "./MatchmakingEntry";
+import MatchmakingEntryModel from ".";
 
 import type { UUID } from 'crypto';
-import type SessionManager from '../managers/session/SessionManager';
-import type SessionModel from "./networking/Session";
+import type { SessionModel } from "../networking";
+import type SessionManager from '../../managers/session/SessionManager';
 
 
 // Mock classes for testing

@@ -1,7 +1,7 @@
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import TimeCoordinator from '.';
 
-import type RoomModel from '../../models/networking/Room';
+import type { RoomModel } from '../../models/networking';
 
 
 // Mock RoomModel for testing

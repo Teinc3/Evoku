@@ -1,5 +1,4 @@
-import SessionModel from "../../models/networking/Session";
-import ServerSocket from "../../models/networking/ServerSocket";
+import { SessionModel, ServerSocket } from "../../models/networking";
 
 import type { WebSocket } from "ws";
 import type { UUID } from "crypto";

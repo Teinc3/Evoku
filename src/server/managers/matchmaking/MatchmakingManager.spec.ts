@@ -6,9 +6,9 @@ import MatchmakingManager from ".";
 import type { UUID } from 'crypto';
 import type SessionManager from "../session";
 import type RoomManager from "../room";
-import type SessionModel from '../../models/networking/Session';
-import type RoomModel from '../../models/networking/Room';
-import type MatchmakingEntryModel from '../../models/MatchmakingEntry';
+import type { RoomModel } from '../../models/networking';
+import type { SessionModel } from '../../models/networking';
+import type MatchmakingEntryModel from '../../models/matchmaking/MatchmakingEntry';
 
 
 // Mock classes for testing

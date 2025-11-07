@@ -4,8 +4,8 @@ import EnumHandler from "../EnumHandler";
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type { PongContract } from "@shared/types/contracts/match/protocol/PingPongContract";
 import type { IMatchEnumHandler } from "../../types/handler";
-import type SessionModel from "../../models/networking/Session";
-import type RoomModel from "../../models/networking/Room";
+import type { RoomModel } from "../../models/networking";
+import type { SessionModel } from "../../models/networking";
 
 
 export default class ProtocolHandler extends EnumHandler<ProtocolActions>

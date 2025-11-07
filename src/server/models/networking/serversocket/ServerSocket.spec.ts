@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
-import ServerSocket from './ServerSocket';
+import ServerSocket from '.';
 
 
 // Mock WebSocket

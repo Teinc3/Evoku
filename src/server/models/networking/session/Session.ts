@@ -8,9 +8,9 @@ import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type SystemActions from "@shared/types/enums/actions/system";
 import type ActionEnum from "@shared/types/enums/actions";
 import type ActionMap from "@shared/types/actionmap";
-import type IDataHandler from "../../types/handler";
-import type ServerSocket from "./ServerSocket";
-import type RoomModel from "./Room";
+import type ServerSocket from "../serversocket/ServerSocket";
+import type RoomModel from "../room";
+import type IDataHandler from "../../../types/handler";
 
 
 /**

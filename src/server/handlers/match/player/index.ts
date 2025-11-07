@@ -5,7 +5,7 @@ import MechanicsHandler from "./MechanicsHandler";
 
 import type PlayerActions from "@shared/types/enums/actions/match/player";
 import type { SomeHandlerMapEntry } from "../../../types/handler";
-import type RoomModel from "../../../models/networking/Room";
+import type { RoomModel } from "../../../models/networking";
 
 
 export default class PlayerHandler extends UnionHandler<PlayerActions> {

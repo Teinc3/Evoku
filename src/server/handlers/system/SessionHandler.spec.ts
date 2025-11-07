@@ -6,7 +6,7 @@ import guestAuthService from '../../services/GuestAuthService';
 import SessionHandler from './SessionHandler';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
-import type SessionModel from '../../models/networking/Session';
+import type { SessionModel } from '../../models/networking';
 
 
 // Mock dependencies
