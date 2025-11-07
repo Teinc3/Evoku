@@ -46,7 +46,7 @@ export default class TimeCoordinator {
   /** Get monotonic server time (starts from 0 at game initialization) */
   private getServerTime(): number {
     if (this.startTimeMs === undefined) {
-      throw new Error("TimeCoordinator has not has not been initialized. Call start() first.");
+      throw new Error("TimeCoordinator has not been initialized. Call start() first.");
     }
     return Math.floor(globalThis.performance.now()) - this.startTimeMs;
   }
