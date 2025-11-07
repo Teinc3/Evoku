@@ -31,7 +31,7 @@ jest.mock('../managers', () => ({
   RoomManager: jest.fn(() => ({ close: jest.fn() })),
   MatchmakingManager: jest.fn(() => ({ close: jest.fn() })),
 }));
-jest.mock('../models/networking/ServerSocket');
+jest.mock('../models/networking/serversocket');
 jest.mock('../services/redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,

@@ -8,7 +8,7 @@ import type GameStateController from './state';
 
 
 // Mock dependencies
-jest.mock('../../models/networking/Room');
+jest.mock('../../models/networking/room');
 jest.mock('./state');
 
 describe('LifecycleController', () => {
