@@ -12,7 +12,7 @@ The GameStateController serves as the core game logic coordinator, maintaining:
 - Per-player board states and solutions
 - Move validation and timing enforcement
 - Progress tracking and completion detection
-- Integration with TimeService for action validation
+- Integration with TimeCoordinator for action validation
 
 ## Core Responsibilities
 
@@ -27,7 +27,7 @@ The GameStateController serves as the core game logic coordinator, maintaining:
 - **Solution Verification:** Provides hints and validates completion
 
 ### Timing Integration
-- **Action Assessment:** Coordinates with TimeService for move timing validation
+- **Action Assessment:** Coordinates with TimeCoordinator for move timing validation
 - **Cooldown Enforcement:** Ensures moves respect rate limiting constraints
 - **Server Time Synchronization:** Provides accurate timing for move validation
 
@@ -36,7 +36,7 @@ The GameStateController serves as the core game logic coordinator, maintaining:
 ### Constructor
 ```typescript
 constructor(
-  timeService: TimeService,
+  timeService: TimeCoordinator,
   difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy"
 )
 ```
@@ -91,7 +91,7 @@ Applies a move to a player's board with timing validation.
 ```
 
 **Validation Process:**
-1. Timing assessment via TimeService
+1. Timing assessment via TimeCoordinator
 2. Board state validation  
 3. Cooldown enforcement
 4. Server time synchronization
@@ -194,7 +194,7 @@ private checkBoardProgresses(playerIDs: number[] = []): void {
 
 ## Integration Patterns
 
-### TimeService Coordination
+### TimeCoordinator Coordination
 ```typescript
 // Two-phase timing validation
 const estServerTime = this.timeService.assessTiming(playerID, clientTime);
@@ -226,11 +226,11 @@ gameState.setCallbacks(callbacks);
 - **Player Management:** Add/remove operations and state validation
 - **Move Validation:** Valid and invalid move scenarios
 - **Progress Tracking:** Completion detection and callback triggering
-- **Timing Integration:** Coordination with mocked TimeService
+- **Timing Integration:** Coordination with mocked TimeCoordinator
 - **Error Handling:** Invalid inputs and edge cases
 
 ### Mock Dependencies
-- **TimeService:** Mock timing validation and server time
+- **TimeCoordinator:** Mock timing validation and server time
 - **BoardModel:** Mock board state and validation logic
 - **Callbacks:** Verify lifecycle integration calls
 

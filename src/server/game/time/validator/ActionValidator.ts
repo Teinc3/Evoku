@@ -1,8 +1,8 @@
-import TimeValidationReason from "../../types/enums/timevalidation";
+import TimeValidationReason from "../../../types/enums/timevalidation";
 
 import type PlayerActions from "@shared/types/enums/actions/match/player";
-import type { PlayerActionData } from "../../types/time";
-import type SyncProfile from "./SyncProfile";
+import type SyncProfile from "../syncprofile";
+import type { PlayerActionData } from "../../../types/time";
 
 
 /**

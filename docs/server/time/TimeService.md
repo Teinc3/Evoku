@@ -1,16 +1,16 @@
-# TimeService
+# TimeCoordinator
 
-The `TimeService` class acts as the main facade coordinating time synchronization between clients and server. It provides a stable public API and delegates to specialized components for specific functionality.
+The `TimeCoordinator` class acts as the main facade coordinating time synchronization between clients and server. It provides a stable public API and delegates to specialized components for specific functionality.
 
 ## Overview
 
-TimeService manages time synchronization for player sessions using a ping-pong protocol with robust validation against timing exploits. It maintains smooth gameplay while providing anti-cheat protection through monotonic validation, rate limiting, and drift detection.
+TimeCoordinator manages time synchronization for player sessions using a ping-pong protocol with robust validation against timing exploits. It maintains smooth gameplay while providing anti-cheat protection through monotonic validation, rate limiting, and drift detection.
 
 The service operates on player sessions rather than players directly, allowing sessions to disconnect and reconnect while preserving player state.
 
 ## Architecture
 
-TimeService is implemented as a coordinating facade that delegates to:
+TimeCoordinator is implemented as a coordinating facade that delegates to:
 - [`SyncProfile`](./SyncProfile.md): Per-player time synchronization data
 - [`PendingPingStore`](./PendingPingStore.md): PONG validation security  
 - [`PingCoordinator`](./PingCoordinator.md): Ping scheduling and sending
@@ -135,7 +135,7 @@ Uses `globalThis.performance.now()` for Jest fake timer compatibility in tests.
 
 ### Component Coordination
 
-TimeService creates and coordinates the specialized components:
+TimeCoordinator creates and coordinates the specialized components:
 
 ```typescript
 constructor(room: RoomModel) {

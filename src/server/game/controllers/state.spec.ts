@@ -1,11 +1,11 @@
 import MatchStatus from '../../types/enums/matchstatus';
-import GameStateController from './state';
+import GameStateController from '.';
 
 import type IPlayerState from '@shared/types/gamestate';
 import type { 
   SetCellContract
 } from '@shared/types/contracts/match/player/mechanics/SetCellContract';
-import type TimeService from '../time';
+import type TimeCoordinator from '../time';
 import type { GameLogicCallbacks } from '../../types/gamelogic';
 import type ServerBoardModel from '../../models/logic/Board';
 
@@ -39,16 +39,16 @@ jest.mock('../../models/logic/Board', () => {
 
 describe('GameStateController', () => {
   let gameState: GameStateController;
-  let mockTimeService: jest.Mocked<TimeService>;
+  let mockTimeService: jest.Mocked<TimeCoordinator>;
   let mockCallbacks: jest.Mocked<GameLogicCallbacks>;
 
   beforeEach(() => {
-    // Create mock TimeService
+    // Create mock TimeCoordinator
     mockTimeService = {
       assessTiming: jest.fn(),
       updateLastActionTime: jest.fn(),
       start: jest.fn()
-    } as unknown as jest.Mocked<TimeService>;
+    } as unknown as jest.Mocked<TimeCoordinator>;
 
     // Create GameStateController
     gameState = new GameStateController(mockTimeService, 'easy');

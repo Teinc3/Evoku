@@ -1,8 +1,8 @@
 import ProtocolActions from "@shared/types/enums/actions/match/protocol";
 
-import type RoomModel from "../../models/networking/Room";
-import type SyncProfile from "./SyncProfile";
-import type PendingPingStore from "./PendingPingStore";
+import type SyncProfile from "../syncprofile";
+import type PendingPingStore from "../pingstore";
+import type RoomModel from "../../../models/networking/Room";
 
 
 /**

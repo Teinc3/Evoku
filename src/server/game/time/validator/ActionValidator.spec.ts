@@ -1,9 +1,8 @@
-
-import TimeValidationReason from '../../types/enums/timevalidation';
-import ActionValidator from './ActionValidator';
+import TimeValidationReason from '../../../types/enums/timevalidation';
+import ActionValidator from '.';
 
 import type PlayerActions from '@shared/types/enums/actions/match/player';
-import type SyncProfile from './SyncProfile';
+import type SyncProfile from '../syncprofile';
 
 
 // Mock types

@@ -1,4 +1,4 @@
-import SyncProfile from './SyncProfile';
+import SyncProfile from '.';
 
 
 describe('SyncProfile', () => {

@@ -167,7 +167,7 @@ this.pendingPings.addPendingPing(playerID, serverTime);
 const lastPing = this.pendingPings.getLastPingTime(playerID);
 ```
 
-### TimeService Integration
+### TimeCoordinator Integration
 
 ```typescript
 // Validate incoming PONG
@@ -210,7 +210,7 @@ The store handles various error conditions gracefully:
 
 ## See Also
 
-- [TimeService](./TimeService.md) - Main coordination facade
+- [TimeCoordinator](./TimeCoordinator.md) - Main coordination facade
 - [PingCoordinator](./PingCoordinator.md) - Ping scheduling and sending
 - [SyncProfile](./SyncProfile.md) - Per-player synchronization data
 - [ActionValidator](./ActionValidator.md) - Timing validation

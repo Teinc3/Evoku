@@ -1,4 +1,4 @@
-import PendingPingStore from './PendingPingStore';
+import PendingPingStore from '.';
 
 
 describe('PendingPingStore', () => {

@@ -8,7 +8,7 @@ The time synchronization system uses a ping-pong protocol with robust validation
 
 ## Component Documentation
 
-### [TimeService](./TimeService.md)
+### [TimeCoordinator](./TimeCoordinator.md)
 The main facade coordinating time synchronization. Provides a stable public API and delegates to specialized components.
 
 **Key Responsibilities:**
@@ -59,7 +59,7 @@ Per-player time synchronization data and conversions.
 
 ```typescript
 // 1. Create service
-const timeService = new TimeService(room);
+const timeService = new TimeCoordinator(room);
 
 // 2. Start when game initializes  
 timeService.start();
@@ -105,7 +105,7 @@ switch (result) {
 
 ```
 ┌─────────────┐    ┌──────────────┐     ┌─────────────────┐
-│ Game Logic  │────│ TimeService  │─────│ PingCoordinator │
+│ Game Logic  │────│ TimeCoordinator  │─────│ PingCoordinator │
 └─────────────┘    │   (Facade)   │     └─────────────────┘
                    └──────────────┘              │
                           │                      │
@@ -152,7 +152,7 @@ switch (result) {
 
 ```
 src/server/game/time/
-├── index.ts              # TimeService facade
+├── index.ts              # TimeCoordinator facade
 ├── PingCoordinator.ts    # Ping scheduling  
 ├── PendingPingStore.ts   # PONG validation
 └── ActionValidator.ts    # Timing validation

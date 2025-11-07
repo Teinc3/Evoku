@@ -220,7 +220,7 @@ const newCumulativeDrift = syncProfile.calculateCumulativeDrift(clientTime, curr
 const estimated = syncProfile.clientToServerTime(clientTime);
 ```
 
-### TimeService Integration
+### TimeCoordinator Integration
 
 ```typescript
 // Validation pathway
@@ -273,7 +273,7 @@ Removes all action histories during service shutdown.
 
 ## See Also
 
-- [TimeService](./TimeService.md) - Main coordination facade
+- [TimeCoordinator](./TimeCoordinator.md) - Main coordination facade
 - [SyncProfile](./SyncProfile.md) - Time synchronization and drift calculation
 - [PingCoordinator](./PingCoordinator.md) - Ping scheduling and sending  
 - [PendingPingStore](./PendingPingStore.md) - PONG validation security

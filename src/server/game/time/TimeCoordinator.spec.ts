@@ -1,7 +1,7 @@
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import TimeService from './time';
+import TimeCoordinator from '.';
 
-import type RoomModel from '../models/networking/Room';
+import type RoomModel from '../../models/networking/Room';
 
 
 // Mock RoomModel for testing
@@ -25,12 +25,12 @@ const mockRoom = {
   })
 } as unknown as RoomModel;
 
-describe('TimeService Unit Tests', () => {
-  let timeService: TimeService;
+describe('TimeCoordinator Unit Tests', () => {
+  let timeService: TimeCoordinator;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    timeService = new TimeService(mockRoom);
+    timeService = new TimeCoordinator(mockRoom);
     jest.clearAllMocks();
     mockSession.forward.mockClear();
   });
@@ -102,7 +102,7 @@ describe('TimeService Unit Tests', () => {
 
     it('should maintain action history limit without throwing', () => {
       // Add more actions than the limit
-      for (let i = 0; i < TimeService.MAX_ACTION_HISTORY_COUNT + 5; i++) {
+      for (let i = 0; i < TimeCoordinator.MAX_ACTION_HISTORY_COUNT + 5; i++) {
         timeService.updateLastActionTime(1, MechanicsActions.SET_CELL, 1000 + i);
       }
       
@@ -148,15 +148,15 @@ describe('TimeService Unit Tests', () => {
 
   describe('Constants Export', () => {
     it('should export relevant constants for testing', () => {
-      expect(TimeService.MAX_ACTION_HISTORY_COUNT).toBeDefined();
-      expect(TimeService.PING_INTERVAL).toBeDefined();
-      expect(TimeService.MIN_PING_INTERVAL).toBeDefined();
-      expect(TimeService.MAX_PENDING_PINGS).toBeDefined();
+      expect(TimeCoordinator.MAX_ACTION_HISTORY_COUNT).toBeDefined();
+      expect(TimeCoordinator.PING_INTERVAL).toBeDefined();
+      expect(TimeCoordinator.MIN_PING_INTERVAL).toBeDefined();
+      expect(TimeCoordinator.MAX_PENDING_PINGS).toBeDefined();
       
-      expect(typeof TimeService.MAX_ACTION_HISTORY_COUNT).toBe('number');
-      expect(typeof TimeService.PING_INTERVAL).toBe('number');
-      expect(typeof TimeService.MIN_PING_INTERVAL).toBe('number');
-      expect(typeof TimeService.MAX_PENDING_PINGS).toBe('number');
+      expect(typeof TimeCoordinator.MAX_ACTION_HISTORY_COUNT).toBe('number');
+      expect(typeof TimeCoordinator.PING_INTERVAL).toBe('number');
+      expect(typeof TimeCoordinator.MIN_PING_INTERVAL).toBe('number');
+      expect(typeof TimeCoordinator.MAX_PENDING_PINGS).toBe('number');
     });
   });
 });

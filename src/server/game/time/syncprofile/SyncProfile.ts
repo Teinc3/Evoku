@@ -1,4 +1,4 @@
-import type { PlayerTimeData } from "../../types/time";
+import type { PlayerTimeData } from "../../../types/time";
 
 
 /**

@@ -1,7 +1,7 @@
 import BiMap from "bidirectional-map";
 
 import MatchHandler from "../../handlers/match";
-import TimeService from "../../game/time";
+import TimeCoordinator from "../../game/time";
 import GameStateController from "../../game/controllers/state";
 import LifecycleController from "../../game/controllers/lifecycle";
 
@@ -19,7 +19,7 @@ import type SessionModel from "./Session";
 export default class RoomModel {
   public readonly stateController: GameStateController;
   public readonly lifecycle: LifecycleController;
-  public readonly timeService: TimeService;
+  public readonly timeService: TimeCoordinator;
   public readonly roomDataHandler: IDataHandler<MatchActions>
 
   public participants: Map<UUID, SessionModel>
@@ -32,7 +32,7 @@ export default class RoomModel {
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy"
   ) {
     this.roomDataHandler = new MatchHandler(this);
-    this.timeService = new TimeService(this);
+    this.timeService = new TimeCoordinator(this);
     this.stateController = new GameStateController(this.timeService, difficulty);
     this.lifecycle = new LifecycleController(this, this.stateController);
 
