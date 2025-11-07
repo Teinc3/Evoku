@@ -1,7 +1,6 @@
 import "@shared/networking/packets";
 import redisService from "./services/RedisService";
-import WSServer from './core/WSServer';
-import HTTPServer from './core/HTTPServer';
+import { HTTPServer, WSServer } from './core';
 import serverConfig from './config';
 
 

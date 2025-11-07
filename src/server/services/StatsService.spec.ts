@@ -4,8 +4,8 @@ import { StatsRange } from '../types/stats/online';
 import statsService from './StatsService';
 import redisService from './RedisService';
 
-import type SessionManager from '../managers/SessionManager';
-import type RoomManager from '../managers/RoomManager';
+import type SessionManager from '../managers/session/SessionManager';
+import type RoomManager from '../managers/room/RoomManager';
 
 
 jest.mock('./RedisService', () => ({

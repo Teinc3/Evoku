@@ -1,11 +1,11 @@
-import SessionModel from "../models/networking/Session";
-import ServerSocket from "../models/networking/ServerSocket";
+import SessionModel from "../../models/networking/Session";
+import ServerSocket from "../../models/networking/ServerSocket";
 
 import type { WebSocket } from "ws";
 import type { UUID } from "crypto";
 import type SystemActions from "@shared/types/enums/actions/system";
-import type IDataHandler from "../types/handler";
-import type { MatchmakingManager } from ".";
+import type IDataHandler from "../../types/handler";
+import type { MatchmakingManager } from "..";
 
 
 /**

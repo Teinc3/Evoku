@@ -1,4 +1,4 @@
-import RoomModel from "../models/networking/Room";
+import RoomModel from "../../models/networking/Room";
 
 
 export default class RoomManager {

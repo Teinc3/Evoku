@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals';
 
 import LobbyActions from '@shared/types/enums/actions/system/lobby';
-import MatchmakingManager from "./MatchmakingManager";
+import MatchmakingManager from ".";
 
 import type { UUID } from 'crypto';
-import type SessionModel from '../models/networking/Session';
-import type RoomModel from '../models/networking/Room';
-import type MatchmakingEntryModel from '../models/MatchmakingEntry';
-import type SessionManager from "./SessionManager";
-import type RoomManager from "./RoomManager";
+import type SessionManager from "../session";
+import type RoomManager from "../room";
+import type SessionModel from '../../models/networking/Session';
+import type RoomModel from '../../models/networking/Room';
+import type MatchmakingEntryModel from '../../models/MatchmakingEntry';
 
 
 // Mock classes for testing

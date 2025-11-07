@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
-import RoomModel from '../models/networking/Room';
-import RoomManager from "./RoomManager";
+import RoomModel from '../../models/networking/Room';
+import RoomManager from ".";
 
 
 // Type definitions for accessing private methods

@@ -1,20 +1,20 @@
 import { jest } from '@jest/globals';
 
-import SessionModel from '../models/networking/Session';
-import ServerSocket from '../models/networking/ServerSocket';
-import SessionManager from "./SessionManager";
+import SessionModel from '../../models/networking/Session';
+import ServerSocket from '../../models/networking/ServerSocket';
+import SessionManager from ".";
 
 import type { WebSocket } from 'ws';
 import type { UUID } from 'crypto';
 import type SystemActions from '@shared/types/enums/actions/system';
-import type IDataHandler from '../types/handler';
-import type { MatchmakingManager } from '.';
+import type IDataHandler from '../../types/handler';
+import type { MatchmakingManager } from '..';
 
 
 // Mock ServerSocket
 let capturedOnCloseCallback: ((code: number) => void) | null = null;
 
-jest.mock('../models/networking/ServerSocket', () => {
+jest.mock('../../models/networking/ServerSocket', () => {
   class MockServerSocket {
     constructor(
       socket: WebSocket,

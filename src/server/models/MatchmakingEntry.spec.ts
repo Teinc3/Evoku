@@ -4,8 +4,8 @@ import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import MatchmakingEntryModel from "./MatchmakingEntry";
 
 import type { UUID } from 'crypto';
+import type SessionManager from '../managers/session/SessionManager';
 import type SessionModel from "./networking/Session";
-import type SessionManager from '../managers/SessionManager';
 
 
 // Mock classes for testing

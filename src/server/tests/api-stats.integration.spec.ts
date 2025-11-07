@@ -5,8 +5,8 @@ import { StatsRange } from '../types/stats/online';
 import HTTPServer from '../core/HTTPServer';
 
 import type { StatsService } from '../services/StatsService';
-import type SessionManager from '../managers/SessionManager';
-import type RoomManager from '../managers/RoomManager';
+import type SessionManager from '../managers/session/SessionManager';
+import type RoomManager from '../managers/room/RoomManager';
 import type WSServer from '../core/WSServer';
 
 

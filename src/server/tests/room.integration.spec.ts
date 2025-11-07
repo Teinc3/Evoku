@@ -4,7 +4,7 @@ import { jest } from '@jest/globals';
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import RoomModel from '../models/networking/Room';
-import RoomManager from '../managers/RoomManager';
+import { RoomManager } from '../managers';
 
 import type SessionModel from '../models/networking/Session';
 

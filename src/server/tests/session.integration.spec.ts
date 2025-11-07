@@ -10,7 +10,7 @@ import SessionActions from '@shared/types/enums/actions/system/session';
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import PacketIO from '@shared/networking/utils/PacketIO';
 import SessionModel from '../models/networking/Session';
-import SessionManager from '../managers/SessionManager';
+import { SessionManager } from '../managers';
 
 import type { WebSocket } from 'ws';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
