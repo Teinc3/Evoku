@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 
-import statsService, { type StatsService } from '../services/StatsService';
-import OnlineSampler from '../services/OnlineSampler.service';
+import statsService, { type StatsService } from '../services/stats/StatsService';
+import OnlineSampler from '../services/sampler/OnlineSampler';
 import { SessionManager, RoomManager, MatchmakingManager } from '../managers';
 import SystemHandler from '../handlers/system';
 

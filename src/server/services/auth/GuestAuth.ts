@@ -1,5 +1,5 @@
-import { generatePlayerId, signGuestToken, verifyGuestToken } from '../utils/jwt';
-import redisService from './RedisService';
+import redisService from '../redis';
+import { generatePlayerId, signGuestToken, verifyGuestToken } from '../../utils/jwt';
 
 import type { UUID } from 'crypto';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';

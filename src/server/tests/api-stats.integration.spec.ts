@@ -4,13 +4,13 @@ import { jest } from '@jest/globals';
 import { StatsRange } from '../types/stats/online';
 import HTTPServer from '../core/HTTPServer';
 
-import type { StatsService } from '../services/StatsService';
+import type { StatsService } from '../services/stats/StatsService';
 import type SessionManager from '../managers/session/SessionManager';
 import type RoomManager from '../managers/room/RoomManager';
 import type WSServer from '../core/WSServer';
 
 
-jest.mock('../services/GuestAuthService', () => ({
+jest.mock('../services/auth', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {
@@ -18,7 +18,7 @@ jest.mock('../services/GuestAuthService', () => ({
   },
 }));
 
-jest.mock('../services/RedisService', () => ({
+jest.mock('../services/redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {

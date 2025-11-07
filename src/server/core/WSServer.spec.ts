@@ -32,7 +32,7 @@ jest.mock('../managers', () => ({
   MatchmakingManager: jest.fn(() => ({ close: jest.fn() })),
 }));
 jest.mock('../models/networking/ServerSocket');
-jest.mock('../services/RedisService', () => ({
+jest.mock('../services/redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {

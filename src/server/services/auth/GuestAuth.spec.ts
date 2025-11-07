@@ -1,10 +1,10 @@
-import * as jwt from '../utils/jwt';
-import redisService from './RedisService';
-import { GuestAuthService } from './GuestAuthService';
+import redisService from '../redis';
+import * as jwt from '../../utils/jwt';
+import { GuestAuthService } from '.';
 
 
-jest.mock('./RedisService');
-jest.mock('../utils/jwt');
+jest.mock('../redis');
+jest.mock('../../utils/jwt');
 
 describe('GuestAuthService', () => {
   let service: GuestAuthService;

@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals';
 
-import { StatsRange } from '../types/stats/online';
-import statsService from './StatsService';
-import redisService from './RedisService';
+import redisService from '../redis';
+import { StatsRange } from '../../types/stats/online';
+import statsService from '.';
 
-import type SessionManager from '../managers/session/SessionManager';
-import type RoomManager from '../managers/room/RoomManager';
+import type SessionManager from '../../managers/session/SessionManager';
+import type RoomManager from '../../managers/room/RoomManager';
 
 
-jest.mock('./RedisService', () => ({
+jest.mock('../redis', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   __esModule: true,
   default: {

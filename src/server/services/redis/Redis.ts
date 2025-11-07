@@ -1,6 +1,6 @@
 import { createClient, type RedisClientType } from 'redis';
 
-import serverConfig from '../config';
+import serverConfig from '../../config';
 
 
 /** Service to manage Redis connections and operations for the server. */

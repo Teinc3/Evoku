@@ -1,12 +1,12 @@
 import { jest } from '@jest/globals';
 
-import { StatsSampler } from './OnlineSampler.service';
+import OnlineSampler from '.';
 
-import type { StatsService } from './StatsService';
+import type { StatsService } from '../stats';
 
 
-describe('StatsSampler', () => {
-  let sampler: StatsSampler;
+describe('OnlineSampler', () => {
+  let sampler: OnlineSampler;
   let mockStatsService: StatsService;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('StatsSampler', () => {
       sampleStats: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     } as unknown as StatsService;
 
-    sampler = new StatsSampler(mockStatsService);
+    sampler = new OnlineSampler(mockStatsService);
   });
 
   afterEach(() => {

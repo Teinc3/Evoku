@@ -1,9 +1,9 @@
-import { StatsRange } from '../types/stats/online';
-import redisService from './RedisService';
+import redisService from '../redis';
+import { StatsRange } from '../../types/stats/online';
 
-import type { IServerStats } from '../types/stats/online';
-import type SessionManager from '../managers/session/SessionManager';
-import type RoomManager from '../managers/room/RoomManager';
+import type { IServerStats } from '../../types/stats/online';
+import type SessionManager from '../../managers/session/SessionManager';
+import type RoomManager from '../../managers/room/RoomManager';
 
 
 /**

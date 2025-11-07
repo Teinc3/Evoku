@@ -1,11 +1,11 @@
-import type { StatsService } from './StatsService';
+import type { StatsService } from '../stats';
 
 
 /**
  * Sampler service that periodically records server statistics to Redis.
  * Samples every hour at xx:00:00.
  */
-export class StatsSampler {
+export default class OnlineSampler {
   private timer: NodeJS.Timeout | null = null;
   private initialTimeout: NodeJS.Timeout | null = null;
 
@@ -49,5 +49,3 @@ export class StatsSampler {
     await this.statsService.sampleStats();
   }
 }
-
-export default StatsSampler;

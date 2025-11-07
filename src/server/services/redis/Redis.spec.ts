@@ -1,6 +1,6 @@
 import { createClient, type RedisClientType } from 'redis';
 
-import { RedisService } from './RedisService';
+import { RedisService } from '.';
 
 
 jest.mock('node:fs', () => ({
