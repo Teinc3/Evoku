@@ -486,8 +486,6 @@ describe('SessionManager', () => {
       const socket1 = new MockWebSocket();
       const socket2 = new MockWebSocket();
       const existingSession = sessionManager.createSession(socket1 as unknown as WebSocket);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (existingSession as any).manager = sessionManager;
       const userId = 'user-456' as UUID;
 
       // Authenticate first session
@@ -495,9 +493,10 @@ describe('SessionManager', () => {
 
       // Create second session (simulating new connection from same user)
       const newSession = sessionManager.createSession(socket2 as unknown as WebSocket);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (newSession as any).manager = sessionManager;
       const newSessionUuid = newSession.uuid;
+
+      // Set the manager on the mock session so destroy works properly
+      (newSession as { manager?: SessionManager }).manager = sessionManager;
 
       // Spy on reconnect method
       const reconnectSpy = jest.spyOn(existingSession, 'reconnect');
