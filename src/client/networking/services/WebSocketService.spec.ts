@@ -1,10 +1,7 @@
-// eslint-disable-next-line import/newline-after-import
+/* eslint-disable import/order */
 import { fakeAsync } from '@angular/core/testing';
 
-// eslint-disable-next-line import/newline-after-import
 import '@shared/networking/packets';
- 
-// eslint-disable-next-line import/order
 import SessionActions from '@shared/types/enums/actions/system/session';
 
 
