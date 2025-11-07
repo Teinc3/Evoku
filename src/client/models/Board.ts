@@ -1,4 +1,4 @@
-import BaseBoardModel from "../../shared/models/Board";
+import BaseBoardModel from "../../shared/models/board/Board";
 import ClientCellModel from "./Cell";
 
 

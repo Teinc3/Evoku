@@ -1,6 +1,6 @@
-import { createMockEffect } from './utils/MockEffect';
+import { createMockEffect } from '../../utils/MockEffect';
 
-import type BaseEffectModel from './Effect';
+import type BaseEffectModel from '.';
 
 
 describe('BaseEffectModel', () => {

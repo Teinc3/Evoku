@@ -1,6 +1,6 @@
-import { createMockEffect } from './utils/MockEffect';
-import BaseCellModel from './Cell';
-import BaseBoardModel from './Board';
+import BaseCellModel from '../cell/Cell';
+import { createMockEffect } from '../../utils/MockEffect';
+import BaseBoardModel from '.';
 
 
 // Concrete implementation for testing since BaseBoardModel is abstract

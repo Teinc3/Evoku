@@ -1,5 +1,5 @@
-import { createMockEffect } from './utils/MockEffect';
-import BaseCellModel from './Cell';
+import { createMockEffect } from '../../utils/MockEffect';
+import BaseCellModel from '.';
 
 
 describe('BaseCellModel', () => {

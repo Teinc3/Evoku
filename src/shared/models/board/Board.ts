@@ -1,5 +1,5 @@
-import type IBoardState from "../types/gamestate/board";
-import type { default as BaseCellModel, CellModelConstructor } from "./Cell";
+import type { default as BaseCellModel, CellModelConstructor } from "../cell/Cell";
+import type IBoardState from "../../types/gamestate/board";
 
 
 /**

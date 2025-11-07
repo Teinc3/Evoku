@@ -1,4 +1,4 @@
-import BaseEffectModel from "../Effect";
+import BaseEffectModel from "../models/effect";
 
 
 class MockEffect extends BaseEffectModel {

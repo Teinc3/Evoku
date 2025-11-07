@@ -1,4 +1,4 @@
-import type BaseEffectModel from "@shared/models/Effect";
+import type BaseEffectModel from "@shared/models/effect";
 
 
 export interface IPendingCellState {
