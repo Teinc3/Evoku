@@ -1,4 +1,4 @@
-import BaseCellModel from "../../shared/models/cell/Cell";
+import BaseCellModel from "../../shared/models/cell";
 
 import type { IPendingCellState } from "../types/gamestate";
 import type BaseEffectModel from "../../shared/models/effect";

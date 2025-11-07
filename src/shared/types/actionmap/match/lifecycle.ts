@@ -1,6 +1,5 @@
 import type LifecycleActions from "../../enums/actions/match/lifecycle";
-import type GameOverContract from "../../contracts/match/lifecycle/GameOverContract";
-import type GameInitContract from "../../contracts/match/lifecycle/GameInitContract";
+import type { GameOverContract, GameInitContract } from "../../contracts/match/lifecycle";
 
 
 export default interface LifecycleActionMap {

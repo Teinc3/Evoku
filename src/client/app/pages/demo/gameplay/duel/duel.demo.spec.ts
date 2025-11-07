@@ -7,7 +7,7 @@ import NetworkService from '../../../../services/network';
 import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
-import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+import type { MatchFoundContract } from '@shared/types/contracts/system/lobby';
 
 
 describe('DuelDemoPageComponent', () => {

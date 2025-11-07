@@ -2,9 +2,9 @@ import { MatchStatus } from '../../types/enums';
 import GameStateController from '.';
 
 import type IPlayerState from '@shared/types/gamestate';
-import type { 
+import type {
   SetCellContract
-} from '@shared/types/contracts/match/player/mechanics/SetCellContract';
+} from '@shared/types/contracts/match/player/mechanics';
 import type TimeCoordinator from '../time';
 import type { GameLogicCallbacks } from '../../types/gamelogic';
 import type ServerBoardModel from '../../models/logic/Board';

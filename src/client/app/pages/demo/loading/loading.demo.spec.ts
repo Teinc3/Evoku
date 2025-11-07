@@ -10,7 +10,7 @@ import { AppView } from '../../../../types/enums';
 import LoadingDemoPageComponent from './loading.demo';
 
 import type { QueueUpdateContract } from '@shared/types/contracts/system/lobby/QueueContract';
-import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+import type { MatchFoundContract } from '@shared/types/contracts/system/lobby';
 
 
 describe('LoadingDemoPageComponent', () => {

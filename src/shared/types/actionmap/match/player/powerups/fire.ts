@@ -1,10 +1,10 @@
 import type FirePUPActions from "../../../../enums/actions/match/player/powerups/fire";
-import type { 
+import type {
   MetabolicContractC2S, MetabolicContractS2C
-} from "../../../../contracts/match/player/powerups/fire/MetabolicContract";
+} from "../../../../contracts/match/player/powerups/fire";
 import type {
   InfernoContractC2S, InfernoContractS2C
-} from "../../../../contracts/match/player/powerups/fire/InfernoContract";
+} from "../../../../contracts/match/player/powerups/fire";
 
 
 export default interface FirePUPActionMap {

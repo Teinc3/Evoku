@@ -16,7 +16,7 @@ import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
 import GameStateModel from '../../../../../models/GameState';
 
-import type MatchFoundContract from '@shared/types/contracts/system/lobby/MatchFoundContract';
+import type { MatchFoundContract } from '@shared/types/contracts/system/lobby';
 
 
 @Component({

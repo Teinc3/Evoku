@@ -1,8 +1,7 @@
 import type LifecycleActions from "../../enums/actions/system/lobby";
 import type {
-  JoinQueueContract, QueueUpdateContract, LeaveQueueContract
-} from "../../contracts/system/lobby/QueueContract";
-import type MatchFoundContract from "../../contracts/system/lobby/MatchFoundContract";
+  JoinQueueContract, QueueUpdateContract, LeaveQueueContract, MatchFoundContract
+} from "../../contracts/system/lobby";
 
 
 export default interface LobbyActionMap {
