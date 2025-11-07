@@ -3,3 +3,6 @@ import type MatchActionMap from "./match";
 
 
 export default interface ActionMap extends MatchActionMap, SystemActionMap {}
+
+export * from './match';
+export * from './system';

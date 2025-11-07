@@ -1,5 +1,5 @@
 import type PUPState from "./powerups";
-import type IBoardState from "./board";
+import type { IBoardState } from "./board";
 
 
 export default interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {

@@ -1,5 +1,5 @@
 import type BaseEffectModel from "../effect";
-import type ICellState from "../../types/gamestate/board/cell";
+import type { ICellState } from "../../types/gamestate/board";
 
 
 export type CellModelConstructor<PlatformSpecificCellModel extends BaseCellModel>

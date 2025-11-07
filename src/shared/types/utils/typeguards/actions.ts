@@ -1,30 +1,6 @@
-import SessionActionsEnum from "../../enums/actions/system/session";
-import LobbyActionsEnum from "../../enums/actions/system/lobby";
-import ProtocolActionsEnum from "../../enums/actions/match/protocol";
-import WoodPUPActionsEnum from "../../enums/actions/match/player/powerups/wood";
-import WaterPUPActionsEnum from "../../enums/actions/match/player/powerups/water";
-import MetalPUPActionsEnum from "../../enums/actions/match/player/powerups/metal";
-import FirePUPActionsEnum from "../../enums/actions/match/player/powerups/fire";
-import EarthPUPActionsEnum from "../../enums/actions/match/player/powerups/earth";
-import MechanicsActionsEnum from "../../enums/actions/match/player/mechanics";
-import LifecycleActionsEnum from "../../enums/actions/match/lifecycle";
+import * as Actions from "../../enums/actions";
 
 import type AugmentAction from "../AugmentAction";
-import type SessionActions from "../../enums/actions/system/session";
-import type LobbyActions from "../../enums/actions/system/lobby";
-import type SystemActions from "../../enums/actions/system";
-import type ProtocolActions from "../../enums/actions/match/protocol";
-import type WoodPUPActions from "../../enums/actions/match/player/powerups/wood";
-import type WaterPUPActions from "../../enums/actions/match/player/powerups/water";
-import type MetalPUPActions from "../../enums/actions/match/player/powerups/metal";
-import type FirePUPActions from "../../enums/actions/match/player/powerups/fire";
-import type EarthPUPActions from "../../enums/actions/match/player/powerups/earth";
-import type PUPActions from "../../enums/actions/match/player/powerups";
-import type MechanicsActions from "../../enums/actions/match/player/mechanics";
-import type PlayerActions from "../../enums/actions/match/player";
-import type LifecycleActions from "../../enums/actions/match/lifecycle";
-import type MatchActions from "../../enums/actions/match";
-import type ActionEnum from "../../enums/actions";
 
 
 /**
@@ -70,49 +46,49 @@ export default class ActionGuard {
     ) => parts.flat() as readonly Whole[];
 
   // --- Leaf arrays (preserve literal members) ---
-  private static readonly lobbyActionsArr = Object.values(LobbyActionsEnum)
-    .filter((v): v is LobbyActions => typeof v === 'number');
-  private static readonly sessionActionsArr = Object.values(SessionActionsEnum)
-    .filter((v): v is SessionActions => typeof v === 'number');
-  private static readonly mechanicsActionsArr = Object.values(MechanicsActionsEnum)
-    .filter((v): v is MechanicsActions => typeof v === 'number');
-  private static readonly firePUPActionsArr = Object.values(FirePUPActionsEnum)
-    .filter((v): v is FirePUPActions => typeof v === 'number');
-  private static readonly waterPUPActionsArr = Object.values(WaterPUPActionsEnum)
-    .filter((v): v is WaterPUPActions => typeof v === 'number');
-  private static readonly woodPUPActionsArr = Object.values(WoodPUPActionsEnum)
-    .filter((v): v is WoodPUPActions => typeof v === 'number');
-  private static readonly metalPUPActionsArr = Object.values(MetalPUPActionsEnum)
-    .filter((v): v is MetalPUPActions => typeof v === 'number');
-  private static readonly earthPUPActionsArr = Object.values(EarthPUPActionsEnum)
-    .filter((v): v is EarthPUPActions => typeof v === 'number');
-  private static readonly protocolActionsArr = Object.values(ProtocolActionsEnum)
-    .filter((v): v is ProtocolActions => typeof v === 'number');
-  private static readonly lifecycleActionsArr = Object.values(LifecycleActionsEnum)
-    .filter((v): v is LifecycleActions => typeof v === 'number');
+  private static readonly lobbyActionsArr = Object.values(Actions.LobbyActions)
+    .filter((v): v is Actions.LobbyActions => typeof v === 'number');
+  private static readonly sessionActionsArr = Object.values(Actions.SessionActions)
+    .filter((v): v is Actions.SessionActions => typeof v === 'number');
+  private static readonly mechanicsActionsArr = Object.values(Actions.MechanicsActions)
+    .filter((v): v is Actions.MechanicsActions => typeof v === 'number');
+  private static readonly firePUPActionsArr = Object.values(Actions.FirePUPActions)
+    .filter((v): v is Actions.FirePUPActions => typeof v === 'number');
+  private static readonly waterPUPActionsArr = Object.values(Actions.WaterPUPActions)
+    .filter((v): v is Actions.WaterPUPActions => typeof v === 'number');
+  private static readonly woodPUPActionsArr = Object.values(Actions.WoodPUPActions)
+    .filter((v): v is Actions.WoodPUPActions => typeof v === 'number');
+  private static readonly metalPUPActionsArr = Object.values(Actions.MetalPUPActions)
+    .filter((v): v is Actions.MetalPUPActions => typeof v === 'number');
+  private static readonly earthPUPActionsArr = Object.values(Actions.EarthPUPActions)
+    .filter((v): v is Actions.EarthPUPActions => typeof v === 'number');
+  private static readonly protocolActionsArr = Object.values(Actions.ProtocolActions)
+    .filter((v): v is Actions.ProtocolActions => typeof v === 'number');
+  private static readonly lifecycleActionsArr = Object.values(Actions.LifecycleActions)
+    .filter((v): v is Actions.LifecycleActions => typeof v === 'number');
 
   // --- Composite arrays with inline exhaustiveness checking ---
-  private static readonly pupActionsArr = ActionGuard.composeExhaustive<PUPActions>()(
+  private static readonly pupActionsArr = ActionGuard.composeExhaustive<Actions.PUPActions>()(
     ActionGuard.firePUPActionsArr,
     ActionGuard.waterPUPActionsArr,
     ActionGuard.woodPUPActionsArr,
     ActionGuard.metalPUPActionsArr,
     ActionGuard.earthPUPActionsArr,
   );
-  private static readonly playerActionsArr = ActionGuard.composeExhaustive<PlayerActions>()(
+  private static readonly playerActionsArr = ActionGuard.composeExhaustive<Actions.PlayerActions>()(
     ActionGuard.mechanicsActionsArr,
     ActionGuard.pupActionsArr,
   );
-  private static readonly matchActionsArr = ActionGuard.composeExhaustive<MatchActions>()(
+  private static readonly matchActionsArr = ActionGuard.composeExhaustive<Actions.MatchActions>()(
     ActionGuard.playerActionsArr,
     ActionGuard.protocolActionsArr,
     ActionGuard.lifecycleActionsArr, // remove one to trigger error here
   );
-  private static readonly systemActionsArr = ActionGuard.composeExhaustive<SystemActions>()(
+  private static readonly systemActionsArr = ActionGuard.composeExhaustive<Actions.SystemActions>()(
     ActionGuard.lobbyActionsArr,
     ActionGuard.sessionActionsArr,
   );
-  private static readonly actionEnumArr = ActionGuard.composeExhaustive<ActionEnum>()(
+  private static readonly actionEnumArr = ActionGuard.composeExhaustive<Actions.ActionEnum>()(
     ActionGuard.systemActionsArr,
     ActionGuard.matchActionsArr,
   );
@@ -136,63 +112,63 @@ export default class ActionGuard {
 
   // --- Type Guard Methods ---
 
-  static isActionEnum(action: number): action is ActionEnum {
+  static isActionEnum(action: number): action is Actions.ActionEnum {
     return ActionGuard.actionEnumValues.has(action);
   }
 
-  static isSystemActions(action: number): action is SystemActions {
+  static isSystemActions(action: number): action is Actions.SystemActions {
     return ActionGuard.systemActionValues.has(action);
   }
 
-  static isLobbyActions(action: number): action is LobbyActions {
+  static isLobbyActions(action: number): action is Actions.LobbyActions {
     return ActionGuard.lobbyActionValues.has(action);
   }
 
-  static isSessionActions(action: number): action is SessionActions {
+  static isSessionActions(action: number): action is Actions.SessionActions {
     return ActionGuard.sessionActionValues.has(action);
   }
 
-  static isMatchActions(action: number): action is MatchActions {
+  static isMatchActions(action: number): action is Actions.MatchActions {
     return ActionGuard.matchActionValues.has(action);
   }
 
-  static isPlayerActions(action: number): action is PlayerActions {
+  static isPlayerActions(action: number): action is Actions.PlayerActions {
     return ActionGuard.playerActionValues.has(action);
   }
 
-  static isMechanicsActions(action: number): action is MechanicsActions {
+  static isMechanicsActions(action: number): action is Actions.MechanicsActions {
     return ActionGuard.mechanicsActionValues.has(action);
   }
 
-  static isPUPActions(action: number): action is PUPActions {
+  static isPUPActions(action: number): action is Actions.PUPActions {
     return ActionGuard.pupActionValues.has(action);
   }
 
-  static isFirePUPActions(action: number): action is FirePUPActions {
+  static isFirePUPActions(action: number): action is Actions.FirePUPActions {
     return ActionGuard.firePUPActionValues.has(action);
   }
 
-  static isWaterPUPActions(action: number): action is WaterPUPActions {
+  static isWaterPUPActions(action: number): action is Actions.WaterPUPActions {
     return ActionGuard.waterPUPActionValues.has(action);
   }
 
-  static isWoodPUPActions(action: number): action is WoodPUPActions {
+  static isWoodPUPActions(action: number): action is Actions.WoodPUPActions {
     return ActionGuard.woodPUPActionValues.has(action);
   }
 
-  static isMetalPUPActions(action: number): action is MetalPUPActions {
+  static isMetalPUPActions(action: number): action is Actions.MetalPUPActions {
     return ActionGuard.metalPUPActionValues.has(action);
   }
 
-  static isEarthPUPActions(action: number): action is EarthPUPActions {
+  static isEarthPUPActions(action: number): action is Actions.EarthPUPActions {
     return ActionGuard.earthPUPActionValues.has(action);
   }
 
-  static isProtocolActions(action: number): action is ProtocolActions {
+  static isProtocolActions(action: number): action is Actions.ProtocolActions {
     return ActionGuard.protocolActionValues.has(action);
   }
 
-  static isLifecycleActions(action: number): action is LifecycleActions {
+  static isLifecycleActions(action: number): action is Actions.LifecycleActions {
     return ActionGuard.lifecycleActionValues.has(action);
   }
 
@@ -204,7 +180,7 @@ export default class ActionGuard {
    * @param enumGuard The simple type guard for the action enum.
    * @returns A new type guard that narrows the type of the entire packet object.
    */
-  private static createDataGuard<GenericActionOrType extends ActionEnum>(
+  private static createDataGuard<GenericActionOrType extends Actions.ActionEnum>(
     enumGuard: (action: number) => action is GenericActionOrType
   ): (packet: { action: number }) => packet is AugmentAction<GenericActionOrType> {
     return (packet: { action: number }): packet is AugmentAction<GenericActionOrType> => {

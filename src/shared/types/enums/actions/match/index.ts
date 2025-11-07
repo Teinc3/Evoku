@@ -5,4 +5,8 @@ import type LifecycleActions from "./lifecycle";
 
 type MatchActions = LifecycleActions | PlayerActions | ProtocolActions;
 
-export default MatchActions;
+export type { MatchActions as default, MatchActions }
+
+export { default as LifecycleActions } from "./lifecycle";
+export { default as ProtocolActions } from "./protocol";
+export * from "./player";

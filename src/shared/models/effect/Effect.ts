@@ -1,4 +1,4 @@
-import type ICellEffectState from "../../types/gamestate/board/effect";
+import type { ICellEffectState } from "../../types/gamestate/board";
 
 
 export default abstract class BaseEffectModel implements ICellEffectState {
