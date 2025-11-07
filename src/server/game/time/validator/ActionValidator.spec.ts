@@ -1,4 +1,4 @@
-import TimeValidationReason from '../../../types/enums/timevalidation';
+import { TimeValidationReason } from '../../../types/enums';
 import ActionValidator from '.';
 
 import type PlayerActions from '@shared/types/enums/actions/match/player';

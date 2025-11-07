@@ -1,4 +1,4 @@
-import MatchStatus from '../../types/enums/matchstatus';
+import { MatchStatus } from '../../types/enums';
 import GameStateController from '.';
 
 import type IPlayerState from '@shared/types/gamestate';

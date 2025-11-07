@@ -1,4 +1,4 @@
-import MatchStatus from "../../types/enums/matchstatus";
+import { MatchStatus } from "../../types/enums";
 import GameOverReason from "../../../shared/types/enums/GameOverReason";
 import ProtocolActions from "../../../shared/types/enums/actions/match/protocol";
 import LifecycleActions from "../../../shared/types/enums/actions/match/lifecycle";
