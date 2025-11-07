@@ -1,8 +1,8 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import ViewStateService from '../../../../services/view-state.service';
-import NetworkService from '../../../../services/network.service';
+import ViewStateService from '../../../../services/view-state';
+import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 

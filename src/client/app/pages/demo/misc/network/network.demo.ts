@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import SessionActions from '@shared/types/enums/actions/system/session';
-import NetworkService from '../../../../services/network.service';
+import NetworkService from '../../../../services/network';
 
 import type { OnInit } from '@angular/core';
 

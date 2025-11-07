@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
-import AppView from '../../types/enums/app-view.enum';
-import ViewStateService from './view-state.service';
+import AppView from '../../../types/enums/app-view.enum';
+import ViewStateService from '.';
 
 
 describe('ViewStateService', () => {

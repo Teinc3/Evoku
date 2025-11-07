@@ -4,7 +4,7 @@ import {
   type ApplicationConfig
 } from '@angular/core';
 
-import NetworkService from './services/network.service';
+import NetworkService from './services/network';
 import routes from './app.routes';
 
 

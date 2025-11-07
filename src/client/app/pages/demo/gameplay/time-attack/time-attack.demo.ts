@@ -2,7 +2,7 @@ import { getSudoku } from 'sudoku-gen';
 import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardConverter from '@shared/mechanics/utils/BoardConverter';
-import ViewStateService from '../../../../services/view-state.service';
+import ViewStateService from '../../../../services/view-state';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
 import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent

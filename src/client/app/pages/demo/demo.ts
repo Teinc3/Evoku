@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 
-import ViewStateService from '../../services/view-state.service';
+import ViewStateService from '../../services/view-state';
 import AppView from '../../../types/enums/app-view.enum';
 import NetworkDemoPageComponent from './misc/network/network.demo';
 import LoadingDemoPageComponent from './loading/loading.demo';

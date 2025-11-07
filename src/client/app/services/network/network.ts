@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 import { Injectable, Optional } from '@angular/core';
 
-import WebSocketService from '../../networking/services/WebSocketService';
-import APIService from '../../networking/services/APIService';
-import CookieService from './cookie.service';
+import CookieService from '../cookie';
+import WebSocketService from '../../../networking/services/WebSocketService';
+import APIService from '../../../networking/services/APIService';
 
 import type ActionEnum from '@shared/types/enums/actions';
 import type IGuestAuthResponse from '@shared/types/api/auth/guest-auth';

@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 
-import DynamicFaviconService from './dynamic-favicon.service';
+import DynamicFaviconService from '.';
 
 
 interface DynamicFaviconServicePrivate {

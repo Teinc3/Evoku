@@ -3,8 +3,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import pupConfig from '@config/shared/pup.json';
-import ViewStateService from '../../../services/view-state.service';
-import NetworkService from '../../../services/network.service';
+import ViewStateService from '../../../services/view-state';
+import NetworkService from '../../../services/network';
 import AppView from '../../../../types/enums/app-view.enum';
 
 
