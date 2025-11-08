@@ -1,11 +1,11 @@
-import GameStateModel from './GameState';
+import GameStateManager from './GameStateManager';
 
 
-describe('GameStateModel', () => {
-  let gameState: GameStateModel;
+describe('GameStateManager', () => {
+  let gameState: GameStateManager;
 
   beforeEach(() => {
-    gameState = new GameStateModel(2);
+    gameState = new GameStateManager(2);
   });
 
   it('should be created', () => {

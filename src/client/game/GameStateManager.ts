@@ -1,15 +1,15 @@
-import ClientBoardModel from './Board';
+import ClientBoardModel from '../models/Board';
 
 import type IPlayerState from '@shared/types/gamestate';
 import type { MatchFoundContract } from '@shared/types/contracts';
 
 
 /**
- * Client-side model representing the state of a game,
+ * Client-side manager representing the state of a game,
  * following the same pattern as server's GameStateController. 
  * Manages player states for a single game session, owned by UI pages.
  */
-export default class GameStateModel {
+export default class GameStateManager {
   /** Game state for each player in this game session */
   private readonly gameStates: Map<number, IPlayerState<ClientBoardModel>> = new Map();
   /** Player information (username, etc.) keyed by playerID */

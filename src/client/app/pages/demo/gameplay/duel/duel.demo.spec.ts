@@ -211,12 +211,12 @@ describe('DuelDemoPageComponent', () => {
 
       // Create a new component instance to test ngOnInit
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['matchState'], 'createGame');
+      spyOn(newComponent['gameState'], 'createGame');
 
       newComponent.ngOnInit();
 
       expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['matchState'].createGame).toHaveBeenCalledWith(mockMatchData);
+      expect(newComponent['gameState'].createGame).toHaveBeenCalledWith(mockMatchData);
     });
 
     it('should not set match data when navigation data is null', () => {
@@ -225,12 +225,12 @@ describe('DuelDemoPageComponent', () => {
 
       // Create a new component instance to test ngOnInit
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['matchState'], 'createGame');
+      spyOn(newComponent['gameState'], 'createGame');
 
       newComponent.ngOnInit();
 
       expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['matchState'].createGame).not.toHaveBeenCalled();
+      expect(newComponent['gameState'].createGame).not.toHaveBeenCalled();
     });
 
     it('should subscribe to disconnection events on init', () => {
@@ -272,11 +272,11 @@ describe('DuelDemoPageComponent', () => {
 
     it('should clear match data on destroy', () => {
       const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['matchState'], 'clearMatchData');
+      spyOn(newComponent['gameState'], 'clearMatchData');
 
       newComponent.ngOnDestroy();
 
-      expect(newComponent['matchState'].clearMatchData).toHaveBeenCalled();
+      expect(newComponent['gameState'].clearMatchData).toHaveBeenCalled();
     });
 
     it('should unsubscribe from disconnection events on destroy', () => {
