@@ -47,8 +47,5 @@ export default class TimeAttackDemoPageComponent implements OnInit {
     // Create and set the board model with puzzle data
     const boardModel = new ClientBoardModel(this.puzzle);
     this.board.model = boardModel;
-    
-    // Enable demo auto-accept for optimistic pending visualization (time attack sandbox)
-    boardModel.autoAcceptPending = true;
   }
 }
