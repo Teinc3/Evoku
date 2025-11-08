@@ -129,11 +129,7 @@ describe('TimeAttackDemoPageComponent', () => {
       expect(component.board.model).toBeTruthy();
       expect(component.board.model.board.length).toBe(81);
     });
-
-    it('should have auto-accept pending enabled for demo mode', () => {
-      expect(component.board.model.autoAcceptPending).toBeTrue();
-    });
-
+    
     it('should connect numeric buttons to board parseNumberKey', () => {
       const numericButtons = fixture.debugElement.query(
         By.css('app-numeric-buttons-holder')

@@ -5,19 +5,16 @@ import ClientCellModel from "./Cell";
 /**
  * Client-side implementation of BoardModel with pending state for optimistic updates.
  */
-export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
-   
+export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {   
   get CellModelClass(): typeof ClientCellModel {
     return ClientCellModel;
   }
   
+  constructor(cellValues: number[] = []) {
+    super(cellValues);
+  }
+  
   public pendingGlobalCooldownEnd?: number;
-  /**
-   * Demo-only flag: when true, pending values auto-confirm after a short delay to simulate
-   * server round‑trip while no networking layer is wired for confirmation yet.
-   * Default false; can be toggled via component Input after construction.
-   */
-  public autoAcceptPending = false;
 
   /**
    * Set a pending cell value for optimistic updates while waiting for server confirmation.
@@ -36,16 +33,6 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
       // Set pending global cooldown
       if (time !== undefined) {
         this.pendingGlobalCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
-      }
-      if (this.autoAcceptPending) {
-        // Auto-confirm after 1 second
-        // This branch is only for demo purposes, so we just use perf now and 1s delay
-        const newServerTime = performance.now();
-        setTimeout(() => {
-          if (cell.pendingCellState.pendingValue === value) {
-            this.confirmCellSet(cellIndex, value, newServerTime);
-          }
-        }, 1000);
       }
       return true;
     }

@@ -120,18 +120,7 @@ describe('ClientBoardModel', () => {
     expect(m.board[1].value).toBe(7);
     expect(m.board[1].notes).toEqual([2]);
   });
-
-  it('autoAcceptPending confirms after timeout', () => {
-    const m = createModel();
-    m.autoAcceptPending = true;
-    const now = performance.now();
-    m.setPendingCell(0, 4, now);
-    expect(m.board[0].pendingCellState.pendingValue).toBe(4);
-    jasmine.clock().tick(1000); // advance 1s
-    expect(m.board[0].pendingCellState.pendingValue).toBeUndefined();
-    expect(m.board[0].value).toBe(4);
-  });
-
+  
   it('validate returns false during global cooldown', () => {
     const m = createModel();
     const now = performance.now();
