@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import GameStateModel from '../../../../models/GameState';
+import GameStateManager from '../../../../game/GameStateManager';
 import DuelHudTopComponent from './duel-hud-top';
 
 
 describe('DuelHudTopComponent', () => {
   let component: DuelHudTopComponent;
   let fixture: ComponentFixture<DuelHudTopComponent>;
-  let gameState: GameStateModel;
+  let gameState: GameStateManager;
 
   beforeEach(async () => {
-    gameState = new GameStateModel(2);
+    gameState = new GameStateManager(2);
     
     await TestBed.configureTestingModule({
       imports: [DuelHudTopComponent]
@@ -28,7 +28,7 @@ describe('DuelHudTopComponent', () => {
 
   describe('myDisplayInfo getter', () => {
     it('should return username with "(You)" when player info exists', () => {
-      const gameState = new GameStateModel(2);
+      const gameState = new GameStateManager(2);
       gameState.myID = 0;
       gameState.playerInfo.get(0)!.username = 'TestPlayer';
       component.gameState = gameState;
@@ -37,7 +37,7 @@ describe('DuelHudTopComponent', () => {
     });
 
     it('should return "You" when player info has empty username', () => {
-      const gameState = new GameStateModel(2);
+      const gameState = new GameStateManager(2);
       gameState.myID = 0;
       // Username is already empty from zombie initialization
       component.gameState = gameState;
@@ -48,7 +48,7 @@ describe('DuelHudTopComponent', () => {
 
   describe('opponentDisplayInfo getter', () => {
     it('should return opponent username when opponent info exists', () => {
-      const gameState = new GameStateModel(2);
+      const gameState = new GameStateManager(2);
       gameState.myID = 0;
       gameState.playerInfo.get(1)!.username = 'OpponentPlayer';
       component.gameState = gameState;
@@ -57,7 +57,7 @@ describe('DuelHudTopComponent', () => {
     });
 
     it('should return "Opponent" when opponent info has empty username', () => {
-      const gameState = new GameStateModel(2);
+      const gameState = new GameStateManager(2);
       gameState.myID = 0;
       // Username is already empty from zombie initialization
       component.gameState = gameState;
@@ -66,7 +66,7 @@ describe('DuelHudTopComponent', () => {
     });
 
     it('should return opponent username for player 2 when myID is 1', () => {
-      const gameState = new GameStateModel(2);
+      const gameState = new GameStateManager(2);
       gameState.myID = 1;
       gameState.playerInfo.get(0)!.username = 'PlayerOne';
       component.gameState = gameState;
