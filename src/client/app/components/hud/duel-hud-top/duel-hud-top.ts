@@ -3,7 +3,7 @@ import { Input, Component } from '@angular/core';
 import UniversalProgressBarComponent
   from '../universal-progress-bar/universal-progress-bar.component';
 import PhaseTimerComponent from '../phase-timer/phase-timer.component';
-import GameStateModel from '../../../../models/GameState';
+import GameStateManager from '../../../../game/GameStateManager';
 
 
 @Component({
@@ -21,7 +21,7 @@ export default class DuelHudTopComponent {
   @Input()
   phaseTimeMs: number = 0;
   @Input()
-  gameState!: GameStateModel;
+  gameState!: GameStateManager;
 
   /**
    * Get the current player's display information

@@ -1,13 +1,13 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import AugmentAction from '@shared/types/utils/AugmentAction';
-import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
-import LifecycleActions from '@shared/types/enums/actions/match/lifecycle';
+import { MechanicsActions, LifecycleActions } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
-import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
-import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
+import PupSlotsHolderComponent 
+  from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
+import PupOrbSpinnerComponent 
+  from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import DuelHudTopComponent from '../../../../components/hud/duel-hud-top/duel-hud-top';
@@ -17,8 +17,9 @@ import NumericButtonsHolderComponent
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
-import GameStateModel from '../../../../../models/GameState';
+import GameStateManager from '../../../../../game/GameStateManager';
 
+import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { MatchFoundContract } from '@shared/types/contracts';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
@@ -40,7 +41,7 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 })
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   static readonly MAX_PLAYER_COUNT = 2;
-  private matchState: GameStateModel;
+  public readonly gameState: GameStateManager;
   private disconnectionSubscription: Subscription | null = null;
   private gameInitSubscription: Subscription | null = null;
   private cellSetSubscription: Subscription | null = null;
@@ -50,14 +51,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     private viewStateService: ViewStateService,
     private networkService: NetworkService
   ) {
-    this.matchState = new GameStateModel(DuelDemoPageComponent.MAX_PLAYER_COUNT);
+    this.gameState = new GameStateManager(DuelDemoPageComponent.MAX_PLAYER_COUNT);
   }
 
   ngOnInit(): void {
     // Load match data from navigation and transfer to our owned model
     const matchData = this.viewStateService.getNavigationData<MatchFoundContract>();
     if (matchData) {
-      this.matchState.createGame(matchData);
+      this.gameState.createGame(matchData);
     }
 
     // Subscribe to disconnection events
@@ -70,14 +71,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     this.gameInitSubscription = this.networkService.onPacket(LifecycleActions.GAME_INIT)
       .subscribe(data => {
         // Initialize game states with the board data from server
-        this.matchState.initGameStates(data.cellValues);
+        this.gameState.initGameStates(data.cellValues);
       });
 
     // Subscribe to cell set confirmations
     this.cellSetSubscription = this.networkService.onPacket(MechanicsActions.CELL_SET)
       .subscribe(data => {
         // Confirm the cell placement
-        const board = this.matchState.getPlayerBoard(data.playerID);
+        const board = this.gameState.getPlayerBoard(data.playerID);
         if (board) {
           board.confirmCellSet(data.cellIndex, data.value, data.serverTime);
         }
@@ -86,7 +87,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // Clear our local match state
-    this.matchState.clearMatchData();
+    this.gameState.clearMatchData();
 
     if (this.disconnectionSubscription) {
       this.disconnectionSubscription.unsubscribe();
@@ -104,9 +105,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Handle packet requests from board components
-   */
+  /** Handle packet requests from board components */
   onPacketRequest(request: OmitBaseAttrs<AugmentAction<MechanicsActions>>): void {
     const { action, ...data } = request;
     this.networkService.send(action, {
@@ -114,12 +113,5 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       actionID: this.nextActionId++,
       ...data
     });
-  }
-
-  /**
-   * Get the game state model for HUD components
-   */
-  get gameState(): GameStateModel {
-    return this.matchState;
   }
 }
