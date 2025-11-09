@@ -71,6 +71,7 @@ export default defineConfig([
       "@stylistic/arrow-parens": ["error", "as-needed"],
       "@stylistic/object-curly-spacing": ["error", "always"],
       "@stylistic/array-bracket-spacing": ["error", "never"],
+      "@stylistic/eol-last": ["error", "always"],
 
       // Import Rules (safe without TS type info)
       "import/newline-after-import": [
