@@ -1,7 +1,9 @@
+import { ProtocolActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
+import ClientTimeCoordinator from './ClientTimeCoordinator';
 
 import type IPlayerState from '@shared/types/gamestate';
-import type { MatchFoundContract } from '@shared/types/contracts';
+import type { MatchFoundContract, PingContract, PongContract } from '@shared/types/contracts';
 
 
 /**
@@ -10,6 +12,8 @@ import type { MatchFoundContract } from '@shared/types/contracts';
  * Manages player states for a single game session, owned by UI pages.
  */
 export default class GameStateManager {
+  /** Time Coordinator Class */
+  public readonly timeCoordinator: ClientTimeCoordinator;
   /** Game state for each player in this game session */
   private readonly gameStates: Map<number, IPlayerState<ClientBoardModel>> = new Map();
   /** Player information (username, etc.) keyed by playerID */
@@ -18,6 +22,7 @@ export default class GameStateManager {
   public myID: number;
 
   constructor(private expectedPlayerCount: number) {
+    this.timeCoordinator = new ClientTimeCoordinator();
     this.myID = 0; // Default to player 0, will be overridden by createGame
     this.initBlankState();
   }
@@ -132,5 +137,19 @@ export default class GameStateManager {
       // Load puzzle data into existing zombie board
       playerState.gameState!.boardState.initBoard(initialBoard);
     }
+  }
+
+  /**
+   * Handle incoming ping packet from server for time synchronization
+   * @param ping The ping packet from server
+   * @param sendPong Callback to send pong response
+   */
+  public handlePing(
+    ping: PingContract,
+    sendPong: (action: typeof ProtocolActions.PONG, data: PongContract) => void
+  ): void {
+    this.timeCoordinator.handlePing(ping, pong => {
+      sendPong(ProtocolActions.PONG, pong);
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { MechanicsActions, LifecycleActions } from '@shared/types/enums/actions/';
+import { MechanicsActions, LifecycleActions, ProtocolActions } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent 
@@ -45,6 +45,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   private disconnectionSubscription: Subscription | null = null;
   private gameInitSubscription: Subscription | null = null;
   private cellSetSubscription: Subscription | null = null;
+  private pingSubscription: Subscription | null = null;
   private nextActionId = 0;
 
   constructor(
@@ -83,6 +84,15 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
           board.confirmCellSet(data.cellIndex, data.value, data.serverTime);
         }
       });
+
+    // Subscribe to ping packets for time synchronization
+    this.pingSubscription = this.networkService.onPacket(ProtocolActions.PING)
+      .subscribe(data => {
+        // Handle ping and send pong response
+        this.gameState.handlePing(data, (action, pongData) => {
+          this.networkService.send(action, pongData);
+        });
+      });
   }
 
   ngOnDestroy(): void {
@@ -102,6 +112,11 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     if (this.cellSetSubscription) {
       this.cellSetSubscription.unsubscribe();
       this.cellSetSubscription = null;
+    }
+
+    if (this.pingSubscription) {
+      this.pingSubscription.unsubscribe();
+      this.pingSubscription = null;
     }
   }
 
