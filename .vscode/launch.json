@@ -25,6 +25,10 @@
         "watch",
         "src/server/index.ts"
       ],
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "-r dotenv/config"
+      },
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "openOnSessionStart",
