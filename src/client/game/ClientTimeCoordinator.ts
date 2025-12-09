@@ -34,9 +34,10 @@ export default class ClientTimeCoordinator {
    * @param ping Ping packet from server
    * @param sendPong Callback to send the pong packet
    */
-  public handlePing(ping: PingContract, sendPong: (packet: PongContract) => void): void {    
+  public handlePing(ping: PingContract, sendPong: (packet: PongContract) => void): void {
+    const clientTime = this.clientTime;
     const pongPacket: PongContract = {
-      clientTime: this.clientTime,
+      clientTime,
       serverTime: ping.serverTime
     };
     sendPong(pongPacket);
@@ -44,7 +45,7 @@ export default class ClientTimeCoordinator {
     // Calculate True Offset: Client - Server - Latency
     // This aligns with Server's SyncProfile logic
     const latency = ping.clientPing / 2;
-    this.updateSync(this.clientTime - ping.serverTime - latency, ping.clientPing);
+    this.updateSync(clientTime - ping.serverTime - latency, ping.clientPing);
   }
 
   /**

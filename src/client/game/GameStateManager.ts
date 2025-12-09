@@ -103,9 +103,10 @@ export default class GameStateManager {
    * @returns Player info
    */
   public getPlayerInfo(playerID: number): { username: string; playerID: number } {
-    const info = this.playerInfo.get(playerID)!;
+    const info = this.playerInfo.get(playerID);
+    const username = info ? info.username : 'Unknown Player';
     return {
-      username: info.username,
+      username,
       playerID
     };
   }
