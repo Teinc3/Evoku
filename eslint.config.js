@@ -145,7 +145,8 @@ export default defineConfig([
         },
         { 
           selector: ["variable"], 
-          format: ["camelCase", "UPPER_CASE", "PascalCase"], 
+          format: ["camelCase", "UPPER_CASE", "PascalCase"],
+          leadingUnderscore: "allow",
           modifiers: ["const"] 
         },
         { 
