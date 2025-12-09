@@ -7,40 +7,26 @@ on:
     branches: [master] # Lint on PR updates targeting master
 
 jobs:
-  type-check:
-    name: Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Project
-        uses: ./.github/actions/setup-project
-      
-      - name: Run TS Compiler
-        run: npm run comp
+  comp:
+    name: Compile Check
+    uses: ./.github/workflows/setup.yml
+    with:
+      command: npm run comp
 
   lint:
     name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Project
-        uses: ./.github/actions/setup-project
-
-      - name: Lint code
-        run: npm run lint
+    uses: ./.github/workflows/setup.yml
+    with:
+      command: npm run lint
 
   test:
     name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Project
-        uses: ./.github/actions/setup-project
-
-      - name: Test code
-        run: npm run test-ci
-
-      - name: Upload results to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+    uses: ./.github/workflows/setup.yml
+    with:
+      command: npm run test-ci
+      upload-coverage: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
