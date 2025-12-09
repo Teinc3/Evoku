@@ -24,8 +24,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Set production environment
+# Set production environment and disable Husky
 ENV NODE_ENV=production
+ENV HUSKY=0
 
 # Install only production dependencies
 RUN npm ci --omit=dev
