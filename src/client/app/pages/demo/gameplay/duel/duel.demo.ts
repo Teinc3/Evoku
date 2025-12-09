@@ -124,7 +124,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   onPacketRequest(request: OmitBaseAttrs<AugmentAction<MechanicsActions>>): void {
     const { action, ...data } = request;
     this.networkService.send(action, {
-      clientTime: 0,
+      clientTime: this.gameState.timeCoordinator.clientTime,
       actionID: this.nextActionId++,
       ...data
     });

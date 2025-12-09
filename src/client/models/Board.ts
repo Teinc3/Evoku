@@ -43,7 +43,7 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
    * Confirm a pending cell value from server response.
    * @param cellIndex The index of the cell to confirm.
    * @param value The confirmed value from the server.
-   * @param time Server time
+   * @param time Timestamp of the action (Must be converted to Client Time)
    * @returns Whether the value was confirmed.
    */
   public confirmCellSet(cellIndex: number, value: number, time?: number): boolean {
