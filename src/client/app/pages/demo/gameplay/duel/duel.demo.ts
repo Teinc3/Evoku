@@ -42,10 +42,7 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
-  private disconnectionSubscription: Subscription | null = null;
-  private gameInitSubscription: Subscription | null = null;
-  private cellSetSubscription: Subscription | null = null;
-  private pingSubscription: Subscription | null = null;
+  private subscriptions = new Subscription();
   private nextActionId = 0;
 
   constructor(
@@ -63,61 +60,42 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     }
 
     // Subscribe to disconnection events
-    this.disconnectionSubscription = this.networkService.onDisconnect().subscribe(() => {
+    this.subscriptions.add(this.networkService.onDisconnect().subscribe(() => {
       // Navigate back to catalogue on disconnect
       this.viewStateService.navigateToView(AppView.CATALOGUE);
-    });
+    }));
 
     // Subscribe to game initialization events
-    this.gameInitSubscription = this.networkService.onPacket(LifecycleActions.GAME_INIT)
+    this.subscriptions.add(this.networkService.onPacket(LifecycleActions.GAME_INIT)
       .subscribe(data => {
         // Initialize game states with the board data from server
         this.gameState.initGameStates(data.cellValues);
-      });
+      }));
 
     // Subscribe to cell set confirmations
-    this.cellSetSubscription = this.networkService.onPacket(MechanicsActions.CELL_SET)
+    this.subscriptions.add(this.networkService.onPacket(MechanicsActions.CELL_SET)
       .subscribe(data => {
         // Confirm the cell placement
         const board = this.gameState.getPlayerBoard(data.playerID);
         if (board) {
           board.confirmCellSet(data.cellIndex, data.value, data.serverTime);
         }
-      });
+      }));
 
     // Subscribe to ping packets for time synchronization
-    this.pingSubscription = this.networkService.onPacket(ProtocolActions.PING)
+    this.subscriptions.add(this.networkService.onPacket(ProtocolActions.PING)
       .subscribe(data => {
         // Handle ping and send pong response
         this.gameState.handlePing(data, (action, pongData) => {
           this.networkService.send(action, pongData);
         });
-      });
+      }));
   }
 
   ngOnDestroy(): void {
     // Clear our local match state
     this.gameState.clearMatchData();
-
-    if (this.disconnectionSubscription) {
-      this.disconnectionSubscription.unsubscribe();
-      this.disconnectionSubscription = null;
-    }
-
-    if (this.gameInitSubscription) {
-      this.gameInitSubscription.unsubscribe();
-      this.gameInitSubscription = null;
-    }
-
-    if (this.cellSetSubscription) {
-      this.cellSetSubscription.unsubscribe();
-      this.cellSetSubscription = null;
-    }
-
-    if (this.pingSubscription) {
-      this.pingSubscription.unsubscribe();
-      this.pingSubscription = null;
-    }
+    this.subscriptions.unsubscribe();
   }
 
   /** Handle packet requests from board components */

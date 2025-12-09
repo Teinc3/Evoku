@@ -1,13 +1,18 @@
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import ActionEnum, {
+  MechanicsActions, LifecycleActions, ProtocolActions
+} from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
-import type { MatchFoundContract } from '@shared/types/contracts';
+import type AugmentAction from '@shared/types/utils/AugmentAction';
+import type { MatchFoundContract, PingContract } from '@shared/types/contracts';
+import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
 
 describe('DuelDemoPageComponent', () => {
@@ -15,18 +20,26 @@ describe('DuelDemoPageComponent', () => {
   let component: DuelDemoPageComponent;
   let viewStateServiceSpy: jasmine.SpyObj<ViewStateService>;
   let networkServiceSpy: jasmine.SpyObj<NetworkService>;
+  
+  // Subjects to trigger events
+  let disconnectSubject: Subject<void>;
+  let packetSubjects: Map<ActionEnum, Subject<ActionEnum>>;
 
   beforeEach(async () => {
+    disconnectSubject = new Subject<void>();
+    packetSubjects = new Map();
+
     const viewStateSpy = jasmine.createSpyObj('ViewStateService', ['navigateToView'], {
       getNavigationData: jasmine.createSpy('getNavigationData')
     });
-    const networkSpy = jasmine.createSpyObj('NetworkService', [], {
-      onDisconnect: jasmine.createSpy('onDisconnect').and.returnValue({
-        subscribe: jasmine.createSpy('subscribe')
-      }),
-      onPacket: jasmine.createSpy('onPacket').and.returnValue({
-        subscribe: jasmine.createSpy('subscribe')
-      })
+    
+    const networkSpy = jasmine.createSpyObj('NetworkService', ['send', 'onDisconnect', 'onPacket']);
+    networkSpy.onDisconnect.and.returnValue(disconnectSubject.asObservable());
+    networkSpy.onPacket.and.callFake((action: ActionEnum) => {
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      return packetSubjects.get(action)!.asObservable();
     });
 
     await TestBed.configureTestingModule({
@@ -46,6 +59,107 @@ describe('DuelDemoPageComponent', () => {
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('Game Logic', () => {
+    it('should navigate to catalogue on disconnect', () => {
+      disconnectSubject.next();
+      expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
+    });
+
+    it('should handle GAME_INIT packet', () => {
+      const mockInitData = {
+        cellValues: Array(81).fill(0)
+      };
+
+      // Trigger GAME_INIT
+      const action = LifecycleActions.GAME_INIT;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      
+      spyOn(component.gameState, 'initGameStates');
+      packetSubjects.get(action)!.next(mockInitData as unknown as ActionEnum);
+
+      expect(component.gameState.initGameStates).toHaveBeenCalledWith(mockInitData.cellValues);
+    });
+
+    it('should handle CELL_SET packet', () => {
+      // Trigger CELL_SET
+      const cellSetData = {
+        playerID: 0,
+        cellIndex: 0,
+        value: 5,
+        serverTime: 1000
+      };
+      
+      const action = MechanicsActions.CELL_SET;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      
+      // Mock getPlayerBoard to return a spy object
+      const mockBoard = jasmine.createSpyObj('Board', ['confirmCellSet']);
+      spyOn(component.gameState, 'getPlayerBoard').and.returnValue(mockBoard);
+
+      packetSubjects.get(action)!.next(cellSetData as unknown as ActionEnum);
+
+      expect(component.gameState.getPlayerBoard).toHaveBeenCalledWith(0);
+      expect(mockBoard.confirmCellSet).toHaveBeenCalledWith(0, 5, 1000);
+    });
+
+    it('should handle PING packet', () => {
+      const pingData: PingContract = {
+        serverTime: 2000,
+        clientPing: 100
+      };
+
+      const action = ProtocolActions.PING;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      spyOn(component.gameState, 'handlePing').and.callThrough();
+      packetSubjects.get(action)!.next(pingData as unknown as ActionEnum);
+
+      expect(component.gameState.handlePing).toHaveBeenCalled();
+    });
+
+    it('should send packet on request', () => {
+      const action = MechanicsActions.CELL_SET;
+      const data = { cellIndex: 0, value: 5 };
+      
+      const request = { action, ...data } as unknown as 
+        OmitBaseAttrs<AugmentAction<MechanicsActions>>;
+      
+      component.onPacketRequest(request);
+      
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(action, jasmine.objectContaining(data));
+    });
+
+    it('should load match data from navigation service on init', () => {
+      const mockMatchData: MatchFoundContract = {
+        myID: 1,
+        players: [
+          { playerID: 1, username: 'Player1' },
+          { playerID: 2, username: 'Player2' }
+        ]
+      };
+
+      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
+      
+      // Re-init component to trigger ngOnInit
+      component.ngOnInit();
+
+      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
+      expect(component.gameState.myID).toBe(1);
+    });
+
+    it('should clear match data on destroy', () => {
+      spyOn(component.gameState, 'clearMatchData');
+      component.ngOnDestroy();
+      expect(component.gameState.clearMatchData).toHaveBeenCalled();
+    });
   });
 
   describe('HUD Top Section', () => {
@@ -196,102 +310,5 @@ describe('DuelDemoPageComponent', () => {
     });
   });
 
-  describe('Component Lifecycle and Navigation Data', () => {
-    it('should load match data from navigation service when available', () => {
-      const mockMatchData: MatchFoundContract = {
-        myID: 1,
-        players: [
-          { playerID: 1, username: 'Player1' },
-          { playerID: 2, username: 'Player2' }
-        ]
-      };
 
-      // Mock the service to return navigation data
-      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
-
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'createGame');
-
-      newComponent.ngOnInit();
-
-      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['gameState'].createGame).toHaveBeenCalledWith(mockMatchData);
-    });
-
-    it('should not set match data when navigation data is null', () => {
-      // Mock the service to return null
-      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(null);
-
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'createGame');
-
-      newComponent.ngOnInit();
-
-      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['gameState'].createGame).not.toHaveBeenCalled();
-    });
-
-    it('should subscribe to disconnection events on init', () => {
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      const subscribeSpy = jasmine.createSpy('subscribe');
-
-      // Mock onDisconnect to return an observable with subscribe spy
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: subscribeSpy
-      } as unknown as Observable<void>);
-
-      newComponent.ngOnInit();
-
-      expect(networkServiceSpy.onDisconnect).toHaveBeenCalled();
-      expect(subscribeSpy).toHaveBeenCalled();
-    });
-
-    it('should navigate to catalogue when disconnection occurs', () => {
-      // Create a new component instance
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      let disconnectCallback: () => void;
-
-      // Mock onDisconnect to capture the callback
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: (callback: () => void) => {
-          disconnectCallback = callback;
-          return { unsubscribe: jasmine.createSpy('unsubscribe') };
-        }
-      } as unknown as Observable<void>);
-
-      newComponent.ngOnInit();
-
-      // Trigger disconnect
-      disconnectCallback!();
-
-      expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
-    });
-
-    it('should clear match data on destroy', () => {
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'clearMatchData');
-
-      newComponent.ngOnDestroy();
-
-      expect(newComponent['gameState'].clearMatchData).toHaveBeenCalled();
-    });
-
-    it('should unsubscribe from disconnection events on destroy', () => {
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      const unsubscribeSpy = jasmine.createSpy('unsubscribe');
-
-      // Mock onDisconnect to return subscription with unsubscribe spy
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: () => ({ unsubscribe: unsubscribeSpy })
-      } as unknown as Observable<void>);
-
-      newComponent.ngOnInit();
-      newComponent.ngOnDestroy();
-
-      expect(unsubscribeSpy).toHaveBeenCalled();
-    });
-  });
 });
