@@ -50,9 +50,12 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
         },
         { to: [session.uuid] }
       );
+
+      // TODO: Log invalid action attempt, which will decide if disconnection is necessary
+      // For now, just don't disconnect
     }
 
-    return result;
+    return true;
   }
 
   private handleDrawPUP(
