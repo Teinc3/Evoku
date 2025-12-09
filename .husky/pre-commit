@@ -1,5 +1,3 @@
 #!/usr/bin/env sh
 
-npm run comp
-npm run lint
-npm run test-ci
+concurrently "npm run comp" "npm run lint" "npm run test-ci"
