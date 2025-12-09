@@ -3,6 +3,7 @@ import { fakeAsync } from '@angular/core/testing';
 
 import '@shared/networking/packets';
 import { SessionActions } from '@shared/types/enums/actions';
+import sharedConfig from '@shared/config';
 import WebSocketService from '.';
 
 import type ClientSocket from '../../transport';
@@ -252,8 +253,13 @@ describe('WebSocketService', () => {
       await mockClientSocket.connect();
 
       await connectPromise;
+      expect(service.ready).toBe(true); // Debug: check if service is ready
       service.send(SessionActions.HEARTBEAT, {});
-      expect(service['lastPacketSentAt']).toBe(1000);
+      // Tick for the latency delay
+      const { simulatedLatencyMs } = sharedConfig.networking.ws;
+      jasmine.clock().tick(simulatedLatencyMs);
+
+      expect(service['lastPacketSentAt']).toBe(1000 + simulatedLatencyMs);
     }));
 
     it('should handle send errors gracefully', fakeAsync(async () => {
@@ -269,6 +275,7 @@ describe('WebSocketService', () => {
 
       expect(() => {
         service.send(SessionActions.HEARTBEAT, {});
+        jasmine.clock().tick(sharedConfig.networking.ws.simulatedLatencyMs);
       }).toThrowError('Send failed');
     }));
 

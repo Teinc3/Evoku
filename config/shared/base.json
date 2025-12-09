@@ -2,7 +2,8 @@
   "networking": {
     "ws": {
       "uri": "",
-      "timeoutMs": 5000
+      "timeoutMs": 5000,
+      "simulatedLatencyMs": 0
     },
     "service": {
       "autoReconnect": true,
