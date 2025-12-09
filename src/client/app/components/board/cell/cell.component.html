@@ -15,11 +15,13 @@
     @if (pendingValue !== undefined) {
       @if (pendingValue === 0) {
         <span class="pending-clear">✕</span>
+      } @else if (pendingValue === -1) {
+        <span class="v">?</span>
       } @else {
         <span class="v">{{pendingValue}}</span>
       }
     } @else {
-      <span class="v">{{ value !== 0 ? value : '' }}</span>
+      <span class="v">{{ value === -1 ? '?' : (value !== 0 ? value : '') }}</span>
     }
   }
   @if (cooldownHelper.currentAngle() > 0 || cooldownHelper.transitionDuration() !== '0s') {

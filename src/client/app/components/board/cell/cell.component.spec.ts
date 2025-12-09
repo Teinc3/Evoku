@@ -38,6 +38,7 @@ describe('SudokuCellComponent', () => {
     const m = new MockCellModel();
     m.value = 5;
     component.model = m as unknown as ClientCellModel;
+    component.isMe = true;
     fixture.detectChanges();
 
     const span = fixture.debugElement.query(By.css('.v'))!.nativeElement as HTMLElement;
@@ -48,6 +49,7 @@ describe('SudokuCellComponent', () => {
     const m = new MockCellModel();
     m.pendingCellState = { pendingValue: 7 };
     component.model = m as unknown as ClientCellModel;
+    component.isMe = true;
     fixture.detectChanges();
 
     const span = fixture.debugElement.query(By.css('.v'))!.nativeElement as HTMLElement;
@@ -70,6 +72,7 @@ describe('SudokuCellComponent', () => {
     const m = new MockCellModel();
     m.pendingCellState = { pendingValue: 3 };
     component.model = m as unknown as ClientCellModel;
+    component.isMe = true;
     fixture.detectChanges();
     expect(component.pendingValue).toBe(3);
   });
@@ -79,6 +82,7 @@ describe('SudokuCellComponent', () => {
     m.value = 0;
     m.notes = [1, 3, 9];
     component.model = m as unknown as ClientCellModel;
+    component.isMe = true;
     fixture.detectChanges();
 
     const notes = fixture.debugElement.queryAll(By.css('.note'));
@@ -182,6 +186,7 @@ describe('SudokuCellComponent', () => {
       m.notes = [1, 5, 9];
       component.model = m as unknown as ClientCellModel;
       component.selectedValue = 5;
+      component.isMe = true;
       fixture.detectChanges();
 
       const noteElements = fixture.debugElement.queryAll(By.css('.note'));

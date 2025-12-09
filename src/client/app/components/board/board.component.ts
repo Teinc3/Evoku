@@ -246,6 +246,15 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
 
     const selectedCell = this.getCellModel(selectedIndex);
     const selectedValue = selectedCell.getDisplayValue();
+    if (!this.isMe && !selectedCell.fixed && selectedValue !== 0) {
+      return false;
+    }
+    
+    // Don't highlight opponent's dynamic cells
+    const checkedCell = this.getCellModel(cellIndex);
+    if (!this.isMe && !checkedCell.fixed && checkedCell.getDisplayValue() !== 0) {
+      return false;
+    }
     
     // Don't highlight cells with value 0
     if (selectedValue === 0) {

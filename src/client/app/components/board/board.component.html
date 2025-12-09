@@ -3,6 +3,7 @@
     <app-cell-model
       [model]="getCellModel(i)"
       [index]="i"
+      [isMe]="isMe"
       (selected)="onCellSelected($event)"
       [class.selected]="selected() === i"
       [class.highlight-related]="isRelatedCell(i)"
