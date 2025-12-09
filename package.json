@@ -15,7 +15,7 @@
     "comp:client": "ngc -p tsconfig.app.json --noEmit",
     "comp:server": "tsc -p tsconfig.server.json --noEmit",
     "test": "npm run test:server && npm run test:client",
-    "test-ci": "npm run test-ci:server && npm run test-ci:client",
+    "test-ci": "concurrently \"npm run test-ci:server\" \"npm run test-ci:client\"",
     "test:client": "ng test --watch=false",
     "test:server": "jest --config jest.config.cjs",
     "test-ci:client": "cross-env CI=true ng test --watch=false --code-coverage",
