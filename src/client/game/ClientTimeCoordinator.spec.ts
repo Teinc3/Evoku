@@ -29,26 +29,26 @@ describe('ClientTimeCoordinator', () => {
   });
 
   it('should update sync when server provides timing data', () => {
-    timeCoordinator.updateSync(120, 30); // 120ms offset, 30ms RTT
+    // Scenario:
+    // Client Time: 1000
+    // Server Time (at Client 1000): 500
+    // Latency: 50 (RTT 100)
+    // Ping Server Time: 450 (sent 50ms ago)
     
-    expect(timeCoordinator['rtt']).toBe(30);
-    expect(timeCoordinator.estimateServerTime(1000)).toBe(895); // clientTime - offset + half RTT
+    // Calculated Offset passed to updateSync:
+    // 1000 - 450 - 50 = 500
+    
+    timeCoordinator.updateSync(500, 100);
+    
+    expect(timeCoordinator['rtt']).toBe(100);
+    
+    // Estimate Client Time for Server Time 500
+    // Should be 500 + 500 = 1000
+    expect(timeCoordinator.estimateClientTime(500)).toBe(1000);
   });
 
-  it('should return client time as fallback when not synced', () => {
-    expect(timeCoordinator.estimateServerTime(1000)).toBe(1000);
-  });
-
-  it('should get current server time', () => {
-    timeCoordinator.updateSync(50, 20);
-    
-    // Mock performance.now to return 1100
-    const originalNow = performance.now;
-    performance.now = jasmine.createSpy('now').and.returnValue(1100);
-
-    expect(timeCoordinator.serverTime).toBe(1060); // 1100 - 50 + 10 (half RTT)
-
-    performance.now = originalNow;
+  it('should return server time as fallback when not synced', () => {
+    expect(timeCoordinator.estimateClientTime(1000)).toBe(1000);
   });
 
   it('should reset synchronization state', () => {

@@ -41,7 +41,7 @@ export default class ClientCellModel extends BaseCellModel {
   /**
    * Confirm the pending value and make it the actual value.
    * @param value The confirmed value from the server.
-   * @param time Server time
+   * @param time Timestamp of the action (Must be converted to Client Time)
    * @returns Whether the value was confirmed.
    */
   public confirmSet(value: number, time?: number): boolean {

@@ -3,7 +3,14 @@ import type { PingContract, PongContract } from '@shared/types/contracts';
 
 /**
  * Client-side TimeCoordinator for synchronizing client and server times.
- * Provides estimated server time for accurate cooldown calculations and timing validations.
+ * 
+ * Time Synchronization Strategy:
+ * 1. Client operates in its own local time (performance.now) for smooth UI and immediate feedback.
+ * 2. Server validates actions using the Client's timestamp to prevent false rejections due to lag.
+ * 3. Server enforces a maximum allowable drift between Client and Server clocks.
+ * 4. When Server broadcasts an action, it includes the Server Time of that action.
+ *    - If we initiated the action (found in pending queue), we use our original Client Time.
+ *    - If another player initiated it, we convert Server Time -> Client Time for approximation.
  */
 export default class ClientTimeCoordinator {
 
@@ -22,11 +29,6 @@ export default class ClientTimeCoordinator {
     return performance.now();
   }
 
-  /** Returns a best-guess estimate for the current serverTime */
-  public get serverTime(): number {
-    return this.estimateServerTime(this.clientTime);
-  }
-
   /**
    * Handle incoming ping from server and respond with pong.
    * @param ping Ping packet from server
@@ -39,7 +41,10 @@ export default class ClientTimeCoordinator {
     };
     sendPong(pongPacket);
 
-    this.updateSync(this.clientTime - ping.serverTime, ping.clientPing);
+    // Calculate True Offset: Client - Server - Latency
+    // This aligns with Server's SyncProfile logic
+    const latency = ping.clientPing / 2;
+    this.updateSync(this.clientTime - ping.serverTime - latency, ping.clientPing);
   }
 
   /**
@@ -54,13 +59,12 @@ export default class ClientTimeCoordinator {
   }
 
   /**
-   * Get estimated server time for the given client time, compensating for latency.
-   * @param clientTime Client timestamp to convert
-   * @returns Estimated server time
+   * Get estimated client time for the given server time.
+   * @param serverTime Server timestamp to convert
+   * @returns Estimated client time
    */
-  public estimateServerTime(clientTime: number): number {
-    const latency = this.rtt / 2;
-    return clientTime - this.syncOffset + latency;
+  public estimateClientTime(serverTime: number): number {
+    return serverTime + this.syncOffset;
   }
 
   /**
