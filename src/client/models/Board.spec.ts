@@ -81,7 +81,7 @@ describe('ClientBoardModel', () => {
     const m = createModel();
     const now = performance.now();
     m.setPendingCell(0, 6, now);
-    m.rejectCellSet(0);
+    m.rejectCellSet(0, 6);
     expect(m.board[0].pendingCellState.pendingValue).toBeUndefined();
     expect(m.board[0].value).toBe(0);
     expect(m.hasPendingChanges()).toBeFalse();
@@ -136,8 +136,8 @@ describe('ClientBoardModel', () => {
     expect(m.confirmCellSet(-1, 5, performance.now())).toBeFalse();
     expect(m.confirmCellSet(100, 5, performance.now())).toBeFalse();
     // reject out-of-range should not throw
-    m.rejectCellSet(-1);
-    m.rejectCellSet(100);
+    m.rejectCellSet(-1, 5);
+    m.rejectCellSet(100, 5);
   });
 
   it('clearCell out-of-range and fixed no-op paths', () => {

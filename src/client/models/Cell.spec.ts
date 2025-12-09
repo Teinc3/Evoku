@@ -36,19 +36,11 @@ describe('ClientCellModel', () => {
     expect(c.confirmSet(3, performance.now())).toBeFalse();
   });
 
-  it('rejectPending clears pending without changing value', () => {
-    const c = new ClientCellModel();
-    c.setPending(7, performance.now());
-    c.rejectPending();
-    expect(c.pendingCellState.pendingValue).toBeUndefined();
-    expect(c.value).toBe(0);
-  });
-
   it('getDisplayValue prefers pending over actual', () => {
     const c = new ClientCellModel();
     c.setPending(9, performance.now());
     expect(c.getDisplayValue()).toBe(9);
-    c.rejectPending();
+    c.clearPending();
     expect(c.getDisplayValue()).toBe(0);
     c.confirmSet(5, performance.now());
     expect(c.getDisplayValue()).toBe(5);

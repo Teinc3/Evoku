@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import ActionEnum, {
-  MechanicsActions, LifecycleActions, ProtocolActions
+  MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
@@ -130,7 +130,7 @@ describe('DuelDemoPageComponent', () => {
       const data = { cellIndex: 0, value: 5 };
       
       const request = { action, ...data } as unknown as 
-        OmitBaseAttrs<AugmentAction<MechanicsActions>>;
+        OmitBaseAttrs<AugmentAction<PlayerActions>>;
       
       component.onPacketRequest(request);
       

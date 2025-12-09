@@ -39,7 +39,7 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cooldownHelper.destroy();
+    this.cooldownHelper.reset();
   }
 
   onClick(): void {

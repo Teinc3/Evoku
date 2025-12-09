@@ -1,8 +1,11 @@
-import { ProtocolActions } from '@shared/types/enums/actions';
+import { PlayerActions, ProtocolActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
 import ClientTimeCoordinator from './ClientTimeCoordinator';
 
 import type IPlayerState from '@shared/types/gamestate';
+import type {
+  ActionContractC2S
+} from '@shared/types/contracts/components/extendables/ActionContract';
 import type { MatchFoundContract, PingContract, PongContract } from '@shared/types/contracts';
 
 
@@ -18,6 +21,10 @@ export default class GameStateManager {
   private readonly gameStates: Map<number, IPlayerState<ClientBoardModel>> = new Map();
   /** Player information (username, etc.) keyed by playerID */
   public readonly playerInfo: Map<number, { username: string }> = new Map();
+  /** Pending actions keyed by actionID */
+  public readonly pendingActions: Map<number, ActionContractC2S & {
+    action: PlayerActions
+  }> = new Map();
   /** Home player's ID */
   public myID: number;
 
@@ -60,6 +67,7 @@ export default class GameStateManager {
     this.myID = 0;
     this.playerInfo.clear();
     this.gameStates.clear();
+    this.pendingActions.clear();
     this.initBlankState();
   }
 

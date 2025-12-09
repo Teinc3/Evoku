@@ -146,7 +146,7 @@ describe('SudokuCellComponent', () => {
     component.model = m as unknown as ClientCellModel;
     fixture.detectChanges();
 
-    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    const destroySpy = spyOn(component.cooldownHelper, 'reset');
     component.ngOnDestroy();
     expect(destroySpy).toHaveBeenCalled();
   });

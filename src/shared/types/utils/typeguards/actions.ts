@@ -205,4 +205,16 @@ export default class ActionGuard {
   static isWoodPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isWoodPUPActions);
   static isMetalPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isMetalPUPActions);
   static isEarthPUPActionsData = ActionGuard.createDataGuard(ActionGuard.isEarthPUPActions);
+
+  
+  // Generic Contract guard
+  public static isActionContract<GenericAction extends Actions.ActionEnum>(
+    action: GenericAction, data: unknown
+  ): data is AugmentAction<GenericAction> {
+    if (typeof data !== 'object' || data === null) {
+      return false;
+    }
+    
+    return data.hasOwnProperty('action') && (data as { action: number }).action === action;
+  }
 }

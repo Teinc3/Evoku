@@ -89,10 +89,13 @@ export default class CooldownAnimationHelper {
   }
 
   /**
-   * Clean up resources when the component is destroyed.
-   * Should be called from the component's ngOnDestroy lifecycle hook.
+   * Immediately reset the animation state and clean up resources.
+   * Useful when pending actions are rejected and animations need to be cleared,
+   * or when the component is being destroyed from ngOnDestroy
    */
-  public destroy(): void {
+  public reset(): void {
     this.clearCleanupTimer();
+    this.transitionDuration.set('0s');
+    this.currentAngle.set(0);
   }
 }

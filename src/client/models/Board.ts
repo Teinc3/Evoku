@@ -66,15 +66,24 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
   /**
    * Reject a pending cell value (server rejected the move).
    * @param cellIndex The index of the cell to reject.
+   * @param rejectedValue The value that was rejected.
+   * @returns Whether the rejection was successful (pending value matched and was cleared).
    */
-  public rejectCellSet(cellIndex: number): void {
+  public rejectCellSet(cellIndex: number, rejectedValue: number): boolean {
     if (cellIndex < 0 || cellIndex >= this.board.length) {
-      return;
+      return false;
     }
 
     const cell = this.board[cellIndex];
-    cell.rejectPending();
+    if (cell.pendingCellState.pendingValue !== rejectedValue) {
+      // Inconsistent state
+      // probably another pending action has been initiated, but not validated yet
+      // So we let that future pending clear itself out
+      return false;
+    }
+    cell.clearPending();
     this.clearPendingGlobal();
+    return true;
   }
 
   /** Clear pending global state. */
