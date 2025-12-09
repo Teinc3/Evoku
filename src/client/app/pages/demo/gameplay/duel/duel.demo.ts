@@ -78,7 +78,10 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         // Confirm the cell placement
         const board = this.gameState.getPlayerBoard(data.playerID);
         if (board) {
-          board.confirmCellSet(data.cellIndex, data.value, data.serverTime);
+          // TODO: Check if this is our own pending action confirmed
+          // If so, use our original client time instead of estimating from server time
+          const clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
+          board.confirmCellSet(data.cellIndex, data.value, clientTime);
         }
       }));
 
