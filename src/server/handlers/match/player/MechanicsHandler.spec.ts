@@ -108,7 +108,9 @@ describe('MechanicsHandler', () => {
       );
 
       // Assert
-      expect(result).toBe(false);
+      // NOTE: Could be due to race conditions with another player
+      // In this case, we still tolerate this move and don't disconnect yet.
+      expect(result).toBe(true);
       expect(mockRoom.getPlayerID).toHaveBeenCalledWith(mockSession as unknown as SessionModel);
       const { action: _, ...payload } = setCellData;
       expect(mockStateController.setCellValue).toHaveBeenCalledWith(playerID, payload);
