@@ -24,7 +24,7 @@ export default class ClientTimeCoordinator {
     this.rtt = 0;
   }
 
-  /** Accured time since local client timecoordinator service startup. */
+  /** Accrued time since local client timecoordinator service startup. */
   public get clientTime(): number {
     return performance.now();
   }
