@@ -20,6 +20,8 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
   index!: number;
   @Input()
   selectedValue: number = 0;
+  @Input()
+  isMe: boolean = false;
   @Output()
   selected = new EventEmitter<number>();
   
@@ -53,16 +55,29 @@ export default class SudokuCellComponent implements DoCheck, OnDestroy {
   get showNotes(): boolean {
     // Show notes when empty value, no pending, and notes present
     const notes = this.model.notes;
-    return this.model.value === 0 && !this.model.hasPending()
+    const baseCondition = this.model.value === 0 && !this.model.hasPending()
       && Array.isArray(notes) && notes.length > 0;
+    // For opponent's board, don't show notes for non-fixed cells
+    if (!this.isMe && !this.model.fixed) {
+      return false;
+    }
+    return baseCondition;
   }
 
   get value(): number {
-    return this.model.getDisplayValue();
+    const displayValue = this.model.getDisplayValue();
+    if (!this.isMe && !this.model.fixed && displayValue !== 0) {
+      return -1; // Special value to indicate hidden
+    }
+    return displayValue;
   }
 
   get pendingValue(): number | undefined {
-    return this.model.pendingCellState?.pendingValue;
+    const pending = this.model.pendingCellState?.pendingValue;
+    if (!this.isMe && !this.model.fixed && pending !== undefined && pending !== 0) {
+      return -1; // Special value to indicate hidden
+    }
+    return pending;
   }
 
   noteDigit(digit: number): string {
