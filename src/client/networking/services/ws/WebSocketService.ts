@@ -54,7 +54,18 @@ export default class WebSocketService {
    */
   async connect(): Promise<void> {
     await this.socket.connect();
-    this.socket.setListener(data => this.packetSubject.next(data));
+    this.socket.setListener(data => {
+      console.debug('Packet received from server:', data);
+      
+      const latency = sharedConfig.networking.ws.simulatedLatencyMs;
+      if (latency > 0) {
+        setTimeout(() => {
+          this.packetSubject.next(data);
+        }, latency);
+      } else {
+        this.packetSubject.next(data);
+      }
+    });
     this.socket.onClose(this.handleClose);
     this.socket.onError(this.handleError);
     
@@ -95,11 +106,20 @@ export default class WebSocketService {
       throw new Error('WebSocket is not connected');
     }
 
-    try {
-      this.socket.send(action, data);
-      this.lastPacketSentAt = Date.now();
-    } catch (error) {
-      throw error;
+    const latency = sharedConfig.networking.ws.simulatedLatencyMs;
+    const sendPacket = () => {
+      try {
+        this.socket.send(action, data);
+        this.lastPacketSentAt = Date.now();
+      } catch (error) {
+        throw error;
+      }
+    };
+
+    if (latency > 0) {
+      setTimeout(sendPacket, latency);
+    } else {
+      sendPacket();
     }
   }
 
