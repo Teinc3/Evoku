@@ -9,7 +9,7 @@ describe('CooldownAnimationHelper', () => {
   });
 
   afterEach(() => {
-    helper.destroy();
+    helper.reset();
   });
 
   it('should be created', () => {
@@ -181,7 +181,7 @@ describe('CooldownAnimationHelper', () => {
     helper.checkCooldownChanges(pendingEnd, undefined);
 
     // Destroy before animation completes
-    helper.destroy();
+    helper.reset();
 
     // Should not throw
     // (no errors thrown, state remains as is)

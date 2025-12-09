@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, signal, HostListener,
-  type DoCheck, type OnDestroy,
+  type DoCheck, type OnDestroy, ViewChildren, type QueryList,
 } from '@angular/core';
 
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
@@ -32,8 +32,10 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
   @Output() public selectionChanged = new EventEmitter<void>();
-  public isNoteMode = false;
+  @ViewChildren(SudokuCellComponent)
+  cells!: QueryList<SudokuCellComponent>;
 
+  public isNoteMode = false;
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
   public readonly cooldownHelper: CooldownAnimationHelper;
@@ -52,7 +54,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.cooldownHelper.destroy();
+    this.cooldownHelper.reset();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -178,6 +180,22 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
         this.isNoteMode = !this.isNoteMode;
         // We can add some visual feedback for the note button here
         break;
+    }
+  }
+
+  /**
+   * Handle rejection of a pending cell set action.
+   * Resets animations if the rejection was successful.
+   */
+  public handleCellRejection(cellIndex: number, rejectedValue: number): void {
+    if (this.model.rejectCellSet(cellIndex, rejectedValue)) {
+      // Reset global animation
+      this.cooldownHelper.reset();
+      // Reset cell animation
+      const cellComp = this.cells.get(cellIndex);
+      if (cellComp) {
+        cellComp.cooldownHelper.reset();
+      }
     }
   }
 

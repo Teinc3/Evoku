@@ -1,7 +1,10 @@
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 
-import { MechanicsActions, LifecycleActions, ProtocolActions } from '@shared/types/enums/actions/';
+import ActionGuard from '@shared/types/utils/typeguards/actions';
+import { 
+  MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
+} from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent 
@@ -81,10 +84,39 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         // Confirm the cell placement
         const board = this.gameState.getPlayerBoard(data.playerID);
         if (board) {
-          // TODO: Check if this is our own pending action confirmed
-          // If so, use our original client time instead of estimating from server time
-          const clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
+          // Check if this is our own pending action confirmed
+          let clientTime: number;
+          if (data.playerID === this.gameState.myID) {
+            const pendingAction
+              = this.gameState.pendingActions.get(data.actionID);
+            if (pendingAction) {
+              clientTime = pendingAction.clientTime;
+              this.gameState.pendingActions.delete(data.actionID);
+            } else {
+              clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
+            }
+          } else {
+            clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
+          }
           board.confirmCellSet(data.cellIndex, data.value, clientTime);
+        }
+      }));
+
+    // Subscribe to action rejections
+    this.subscriptions.add(this.networkService.onPacket(ProtocolActions.REJECT_ACTION)
+      .subscribe(data => {
+        // Reject the pending action - REJECT_ACTION is sent to the client who sent the action
+        const pendingAction = this.gameState.pendingActions.get(data.actionID);
+        if (pendingAction) {
+          this.gameState.pendingActions.delete(data.actionID);
+          const board = this.gameState.getPlayerBoard(this.gameState.myID);
+          if (board) {
+            // TODO: Handle rejection for different action types
+            // For now, just reject the cell set
+            if (ActionGuard.isActionContract(MechanicsActions.SET_CELL, pendingAction)) {
+              this.board1.handleCellRejection(pendingAction.cellIndex, pendingAction.value);
+            }
+          }
         }
       }));
 
@@ -105,13 +137,17 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   }
 
   /** Handle packet requests from board components */
-  onPacketRequest(request: OmitBaseAttrs<AugmentAction<MechanicsActions>>): void {
-    const { action, ...data } = request;
-    this.networkService.send(action, {
+  onPacketRequest(request: OmitBaseAttrs<AugmentAction<PlayerActions>>): void {
+    const actionData = {
       clientTime: this.gameState.timeCoordinator.clientTime,
       actionID: this.nextActionId++,
-      ...data
-    });
+      ...request
+    };
+    // Store the action for potential lookup on confirmation
+    this.gameState.pendingActions.set(actionData.actionID, actionData);
+    // Then send the packet to the server
+    const { action, ...data } = actionData;
+    this.networkService.send(action, data);
   }
 
   /** Handle selection changes to ensure only one board has a cursor */

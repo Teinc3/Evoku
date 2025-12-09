@@ -55,16 +55,8 @@ export default class ClientCellModel extends BaseCellModel {
     return true;
   }
 
-  /** Reject the pending value and restore the original state. */
-  public rejectPending(): void {
-    // TODO: Here we might need to be more clear about which pending state we are rejecting
-    // As it stands, it clears everything that is pending
-    // But different things can be on pending at the same time, but coming from different actionIDs
-    this.clearPending();
-  }
-
-  /** Clear all pending state. */
-  private clearPending(): void {
+  /** Removes all pending state. */
+  public clearPending(): void {
     this.pendingCellState = {};
   }
 

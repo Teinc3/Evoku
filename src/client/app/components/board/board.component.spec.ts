@@ -150,7 +150,7 @@ describe('BoardModelComponent', () => {
   });
 
   it('calls helper destroy on component destroy', () => {
-    const destroySpy = spyOn(component.cooldownHelper, 'destroy');
+    const destroySpy = spyOn(component.cooldownHelper, 'reset');
     component.ngOnDestroy();
     expect(destroySpy).toHaveBeenCalled();
   });
