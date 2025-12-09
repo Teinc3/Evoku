@@ -46,8 +46,7 @@ export default class NetworkService {
     return new Observable(observer => {
       const subscription = this.wsService.packetSubject.subscribe(packet => {
         if (packet.action === action) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { action, ...data } = packet;
+          const { action: _, ...data } = packet;
           observer.next(data as ActionMap[GenericAction]);
         }
       });

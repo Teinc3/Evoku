@@ -69,13 +69,14 @@ describe('MechanicsHandler', () => {
       // Assert
       expect(result).toBe(true);
       expect(mockRoom.getPlayerID).toHaveBeenCalledWith(mockSession as unknown as SessionModel);
-      expect(mockStateController.setCellValue).toHaveBeenCalledWith(playerID, setCellData);
+      const { action: _, ...payload } = setCellData;
+      expect(mockStateController.setCellValue).toHaveBeenCalledWith(playerID, payload);
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         MechanicsActions.CELL_SET,
         {
           serverTime,
           playerID,
-          ...setCellData,
+          ...payload,
         }
       );
       expect(mockRoom.broadcast).toHaveBeenCalledTimes(1);
@@ -109,7 +110,8 @@ describe('MechanicsHandler', () => {
       // Assert
       expect(result).toBe(false);
       expect(mockRoom.getPlayerID).toHaveBeenCalledWith(mockSession as unknown as SessionModel);
-      expect(mockStateController.setCellValue).toHaveBeenCalledWith(playerID, setCellData);
+      const { action: _, ...payload } = setCellData;
+      expect(mockStateController.setCellValue).toHaveBeenCalledWith(playerID, payload);
       expect(mockStateController.computeHash).toHaveBeenCalled();
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         ProtocolActions.REJECT_ACTION,

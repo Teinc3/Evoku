@@ -30,14 +30,16 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       return false;
     }
 
-    const { result, serverTime } = this.room.stateController.setCellValue(playerID, data);
+    // No need to extract clientTime field from payload - as CELL_SET packet won't encode it
+    const { action: _, ...payload } = data;
+    const { result, serverTime } = this.room.stateController.setCellValue(playerID, payload);
 
     // Broadcast
     if (result) {
       this.room.broadcast(MechanicsActions.CELL_SET, {
         serverTime: serverTime!,
         playerID,
-        ...data
+        ...payload
       });
     } else {
       this.room.broadcast(
