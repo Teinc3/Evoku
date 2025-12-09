@@ -26,9 +26,12 @@ import type ClientCellModel from '../../../models/Cell';
 export default class BoardModelComponent implements DoCheck, OnDestroy {
   // Public model instance, composed here. Parent can access it via template ref if needed.
   @Input() public model!: ClientBoardModel;
+  /** Whether this board belongs to the current player */
+  @Input() public isMe = false;
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
+  @Output() public selectionChanged = new EventEmitter<void>();
   public isNoteMode = false;
 
   readonly indices: number[];
@@ -93,8 +96,6 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   public moveSelection(direction: CursorDirectionEnum): void {
     const currentSelection = this.selected();
     if (currentSelection === null) {
-      // If nothing is selected, select the center cell
-      this.onCellSelected(40);
       return;
     }
 
@@ -137,6 +138,10 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   }
 
   public parseNumberKey(num: number) {
+    if (!this.isMe) {
+      return
+    }
+
     const i = this.selected();
     if (i === null) {
       return;
@@ -151,14 +156,16 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     if (this.isNoteMode) {
       this.model.toggleNote(i, num);
     } else {
-      // Emit generic packet request for parent to handle networking
-      this.sendPacket.emit({
-        action: MechanicsActions.SET_CELL,
-        cellIndex: i,
-        value: num
-      });
-      // Set pending state for optimistic UI
-      this.model.setPendingCell(i, num, performance.now());
+      // Check if pending state can be set (i.e. local checks passed)
+      const pendingSet = this.model.setPendingCell(i, num, performance.now());
+      if (pendingSet) {
+        // Send to server
+        this.sendPacket.emit({
+          action: MechanicsActions.SET_CELL,
+          cellIndex: i,
+          value: num
+        });
+      }
     }
   }
 
@@ -186,6 +193,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   /** Handler when cell is clicked */
   public onCellSelected(i: number): void {
     this.selected.set(i);
+    this.selectionChanged.emit();
   }
 
   /** Checks if a cell is in the same row, column, or 3x3 grid as the selected cell */

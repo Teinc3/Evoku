@@ -15,13 +15,17 @@
   <app-board-model
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
+    [isMe]="true"
     (sendPacket)="onPacketRequest($event)"
+    (selectionChanged)="onBoardSelectionChanged(0)"
   />
   <app-utility-buttons-holder/>
   <app-board-model
     #board2
     [model]="gameState.getPlayerBoard(1 - gameState.myID)"
+    [isMe]="false"
     (sendPacket)="onPacketRequest($event)"
+    (selectionChanged)="onBoardSelectionChanged(1)"
   />
   <app-universal-progress-bar
     [percentage]="80"

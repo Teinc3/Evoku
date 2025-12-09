@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 
 import { MechanicsActions, LifecycleActions, ProtocolActions } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
@@ -44,6 +44,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   public readonly gameState: GameStateManager;
   private subscriptions = new Subscription();
   private nextActionId = 0;
+
+  @ViewChild('board1') board1!: BoardModelComponent;
+  @ViewChild('board2') board2!: BoardModelComponent;
 
   constructor(
     private viewStateService: ViewStateService,
@@ -109,5 +112,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       actionID: this.nextActionId++,
       ...data
     });
+  }
+
+  /** Handle selection changes to ensure only one board has a cursor */
+  onBoardSelectionChanged(boardIndex: number): void {
+    if (boardIndex === 0) {
+      this.board2.selected.set(null);
+    } else if (boardIndex === 1) {
+      this.board1.selected.set(null);
+    }
   }
 }

@@ -22,6 +22,7 @@ describe('BoardModelComponent', () => {
     component = fixture.componentInstance;
     // Initialize component with a board model
     component.model = new ClientBoardModel([]);
+    component.isMe = true; // Enable input handling for tests
     fixture.detectChanges();
   });
 
@@ -68,10 +69,16 @@ describe('BoardModelComponent', () => {
     expect(component.isNoteMode).toBeFalse();
   });
 
+  it('does nothing on keyboard input when cursor is null', () => {
+    expect(component.selected()).toBeNull();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBeNull();
+  });
+
   it('moves selection with keyboard and wraps vertically and horizontally', () => {
-    // No selection initially -> pressing ArrowUp selects center (40)
+    // No selection initially -> pressing ArrowUp does nothing
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-    expect(component.selected()).toBe(40);
+    expect(component.selected()).toBeNull();
 
     // Move up repeatedly to test wrap from top to bottom
     for (let i = 0; i < 5; i++) {
@@ -92,24 +99,6 @@ describe('BoardModelComponent', () => {
     component.onCellSelected(17); // row1 col8
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(component.selected()).toBe(9); // row1 col0
-  });
-
-  it('initial ArrowDown selects center cell when nothing selected', () => {
-    expect(component.selected()).toBeNull();
-    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(component.selected()).toBe(40);
-  });
-
-  it('initial ArrowLeft selects center cell when nothing selected', () => {
-    expect(component.selected()).toBeNull();
-    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-    expect(component.selected()).toBe(40);
-  });
-
-  it('initial ArrowRight selects center cell when nothing selected', () => {
-    expect(component.selected()).toBeNull();
-    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-    expect(component.selected()).toBe(40);
   });
 
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
