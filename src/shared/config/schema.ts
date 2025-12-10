@@ -12,7 +12,7 @@ export const SharedConfigSchema = z.object({
       autoReconnect: z.boolean(),
       backoffMs: z.number().int().nonnegative(),
       backoffMaxMs: z.number().int().nonnegative(),
-      pingIntervalMs: z.number().int().nonnegative()
+      pingIntervalMs: z.number().int().nonnegative(),
     }),
   }),
   security: z.object({

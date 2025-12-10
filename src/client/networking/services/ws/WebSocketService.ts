@@ -55,7 +55,7 @@ export default class WebSocketService {
   async connect(): Promise<void> {
     await this.socket.connect();
     this.socket.setListener(data => {
-      console.debug('Packet received from server:', data);
+      // console.debug('Packet received from server:', data);
       
       const latency = sharedConfig.networking.ws.simulatedLatencyMs;
       if (latency > 0) {
