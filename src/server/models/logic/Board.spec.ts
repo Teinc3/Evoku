@@ -75,6 +75,110 @@ describe('ServerBoardModel (server-specific tests)', () => {
     });
   });
 
+  describe('progress method', () => {
+    it('should calculate progress correctly with empty board', () => {
+      const solution = new Array(standardBoardSize).fill(1);
+      expect(board.progress(solution, baseTime)).toBe(0);
+    });
+
+    it('should calculate progress with some correct cells', () => {
+      const solution = new Array(standardBoardSize).fill(5);
+
+      // Set some cells to correct values
+      board.board[0].value = 5;
+      board.board[1].value = 5;
+      board.board[2].value = 5;
+
+      const progressPercentage = board.progress(solution, baseTime);
+      expect(progressPercentage).toBeCloseTo(3.7, 0); // 3/81 * 100 ≈ 3.7%
+    });
+
+    it('should not count fixed cells in progress calculation', () => {
+      const solution = new Array(standardBoardSize).fill(7);
+
+      // Create board with some fixed cells
+      const mixedBoard = new ServerBoardModel(new Array(standardBoardSize).fill(0));
+      mixedBoard.board[0].value = 7;
+      mixedBoard.board[0].fixed = true; // Fixed - shouldn't count
+      mixedBoard.board[1].value = 7;
+      mixedBoard.board[1].fixed = false; // Not fixed - should count
+
+      const progressPercentage = mixedBoard.progress(solution, baseTime);
+      expect(progressPercentage).toBeCloseTo(1.23, 0); // 1/81 * 100 ≈ 1.23%
+    });
+
+    it('should work without time parameter', () => {
+      const solution = new Array(standardBoardSize).fill(3);
+      board.board[0].value = 3;
+
+      expect(board.progress(solution)).toBeGreaterThan(0);
+    });
+
+    it('should handle all cells correct', () => {
+      const solution = new Array(standardBoardSize).fill(9);
+
+      // Set all cells to correct value
+      board.board.forEach(cell => {
+        cell.value = 9;
+      });
+
+      expect(board.progress(solution, baseTime)).toBe(100); // Should be 100%
+    });
+
+    it('should handle all cells fixed', () => {
+      const solution = new Array(standardBoardSize).fill(4);
+
+      // Make all cells fixed
+      board.board.forEach(cell => {
+        cell.value = 4;
+        cell.fixed = true;
+      });
+
+      // Should be 100%
+      expect(board.progress(solution, baseTime)).toBe(100);
+    });
+
+    it('should handle effects blocking progress', () => {
+      const solution = new Array(standardBoardSize).fill(6);
+      const blockingEffect = createMockEffect(baseTime, baseTime + 3000);
+
+      board.board[0].value = 6;
+      board.board[0].effects = [blockingEffect];
+
+      // Progress blocked by effect (implementation depends on effect details)
+      const progressDuringEffect = board.progress(solution, baseTime + 1000);
+      const progressAfterEffect = board.progress(solution, baseTime + 4000);
+
+      expect(progressDuringEffect).toBe(0);
+      expect(progressAfterEffect).toBeCloseTo(100/81, 0);
+    });
+
+    it('should handle mismatched solution array length', () => {
+      const shortSolution = [1, 2, 3]; // Much shorter than board
+      board.board[0].value = 1;
+      board.board[1].value = 2;
+
+      // Should handle gracefully without crashing
+      expect(() => board.progress(shortSolution, baseTime)).not.toThrow();
+    });
+
+    it('should calculate denominator correctly', () => {
+      // Create board with mix of fixed and non-fixed cells
+      const mixedValues = new Array(9).fill(0);
+      mixedValues[0] = 1; // Will be fixed
+      mixedValues[4] = 5; // Will be fixed
+      const mixedBoard = new ServerBoardModel(mixedValues);
+
+      const solution = new Array(9).fill(7);
+      mixedBoard.board[1].value = 7; // Correct non-fixed cell
+      mixedBoard.board[2].value = 7; // Correct non-fixed cell
+
+      // 2 correct out of 7 non-fixed cells = ~28.57%
+      const progress = mixedBoard.progress(solution, baseTime);
+      expect(progress).toBeCloseTo(28.57, 0);
+    });
+  });
+
   describe('server integration scenarios', () => {
     it('should handle rapid move attempts correctly', () => {
       const moves = [
@@ -145,45 +249,4 @@ describe('ServerBoardModel (server-specific tests)', () => {
     });
   });
 
-  describe('checkBoardObjectives', () => {
-    it('should return 0 for any cell index (TODO implementation)', () => {
-      // Test various cell indices
-      expect(board.checkBoardObjectives(0)).toBe(0);
-      expect(board.checkBoardObjectives(40)).toBe(0);
-      expect(board.checkBoardObjectives(80)).toBe(0);
-    });
-
-    it('should handle edge cases gracefully', () => {
-      // Test with invalid indices (should not crash)
-      expect(() => board.checkBoardObjectives(-1)).not.toThrow();
-      expect(() => board.checkBoardObjectives(81)).not.toThrow();
-    });
-
-    it('should be called when setCell succeeds', () => {
-      const checkBoardObjectivesSpy = jest.spyOn(board, 'checkBoardObjectives');
-      
-      // This should succeed and call checkBoardObjectives
-      const result = board.setCell(0, 5, baseTime);
-      
-      expect(result).toBe(true);
-      expect(checkBoardObjectivesSpy).toHaveBeenCalledWith(0);
-      
-      checkBoardObjectivesSpy.mockRestore();
-    });
-
-    it('should not be called when setCell fails validation', () => {
-      const checkBoardObjectivesSpy = jest.spyOn(board, 'checkBoardObjectives');
-      
-      // This should fail validation due to invalid cell index
-      const result = board.setCell(-1, 5, baseTime); // Invalid cell index
-      
-      expect(result).toBe(false);
-      expect(checkBoardObjectivesSpy).not.toHaveBeenCalled();
-      
-      checkBoardObjectivesSpy.mockRestore();
-    });
-  });
-
-  // Note: Core functionality is tested in the base class' unit test
-  // These tests focus only on server-specific extensions like global cooldown management
 });

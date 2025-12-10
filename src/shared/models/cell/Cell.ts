@@ -17,7 +17,8 @@ export default class BaseCellModel implements ICellState {
   constructor(
     public value: number = 0,
     public fixed: boolean = false,
-    public effects: BaseEffectModel[] = []
+    public effects: BaseEffectModel[] = [],
+    public goldenObjectiveActive: boolean = false
   ) {
     this.lastCooldownEnd = 0;
   }

@@ -9,7 +9,6 @@ export default interface IPlayerState<SpecificBoardState extends IBoardState = I
 
 export interface GameState<SpecificBoardState extends IBoardState = IBoardState> {
   boardState: SpecificBoardState;
-  boardProgress: number;
   pupProgress: number;
   powerups: Array<PUPState>;
 }

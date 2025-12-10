@@ -88,7 +88,7 @@ describe('LifecycleController', () => {
       expect(mockGameState.setCallbacks).toHaveBeenCalledWith(
         expect.objectContaining({
           getMatchStatus: expect.any(Function),
-          onBoardProgressUpdate: expect.any(Function)
+          onProgressUpdate: expect.any(Function)
         })
       );
     });
@@ -322,18 +322,21 @@ describe('LifecycleController', () => {
     });
   });
 
-  describe('onBoardProgressUpdate callback', () => {
-    let progressCallback: (progressData: { playerID: number; progress: number }[]) => void;
+  describe('onProgressUpdate callback', () => {
+    let progressCallback: (
+      isBoard: boolean,
+      progressData: { playerID: number; progress: number }[]
+    ) => void;
 
     beforeEach(() => {
       const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
-      progressCallback = callbacks.onBoardProgressUpdate;
+      progressCallback = callbacks.onProgressUpdate;
     });
 
     it('should not process if status is not ONGOING', () => {
       const progressData = [{ playerID: 1, progress: 50 }];
       
-      progressCallback(progressData);
+      progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).not.toHaveBeenCalled();
     });
@@ -343,7 +346,7 @@ describe('LifecycleController', () => {
       
       const progressData = [{ playerID: 1, progress: 100 }];
       
-      progressCallback(progressData);
+      progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
@@ -359,7 +362,7 @@ describe('LifecycleController', () => {
       
       const progressData = [{ playerID: 1, progress: 99 }];
       
-      progressCallback(progressData);
+      progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
@@ -375,7 +378,7 @@ describe('LifecycleController', () => {
         { playerID: 2, progress: 75 }
       ];
       
-      progressCallback(progressData);
+      progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
@@ -391,7 +394,7 @@ describe('LifecycleController', () => {
         { playerID: 2, progress: 95 }
       ];
       
-      progressCallback(progressData);
+      progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
@@ -413,7 +416,7 @@ describe('LifecycleController', () => {
       const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
       
       // This should reach the TODO section without triggering game over
-      callbacks.onBoardProgressUpdate(progressData);
+      callbacks.onProgressUpdate(true, progressData);
       
       // Should not broadcast game over since progress < 100%
       expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
@@ -518,7 +521,7 @@ describe('LifecycleController', () => {
       const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
       
       expect(() => {
-        callbacks.onBoardProgressUpdate([]);
+        callbacks.onProgressUpdate(true, []);
       }).not.toThrow();
     });
 

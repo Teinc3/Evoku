@@ -81,11 +81,18 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     );
 
     // Subscribe to board progress updates
-    this.subscriptions.add(this.networkService.onPacket(ProtocolActions.BOARD_PROGRESS)
+    this.subscriptions.add(this.networkService.onPacket(ProtocolActions.UPDATE_PROGRESS)
       .subscribe(data => {
-        const playerState = this.gameState.getPlayerState(data.playerID);
-        if (playerState.gameState) {
-          playerState.gameState.boardProgress = data.boardProgress;
+        const playerGameState = this.gameState.getPlayerState(data.playerID).gameState;
+        if (!playerGameState) {
+          return;
+        }
+
+        if (data.isBoard) {
+          const playerBoardModel = playerGameState.boardState;
+          playerBoardModel.progress = data.progress;
+        } else {
+          playerGameState.pupProgress = data.progress;
         }
       })
     );

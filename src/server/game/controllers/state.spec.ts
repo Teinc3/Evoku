@@ -28,7 +28,13 @@ jest.mock('sudoku-gen', () => ({
 const mockServerBoardModel = {
   setCell: jest.fn((_index: number, _value: number, _serverTime: number) => true),
   progress: jest.fn(() => 45),
-  computeHash: jest.fn(() => 12345)
+  computeHash: jest.fn(() => 12345),
+  board: Array.from({ length: 81 }, (_, i) => ({
+    value: i % 9 + 1, // Mock values 1-9 repeating
+    pupProgressSet: false,
+    goldenObjectiveActive: false,
+    fixed: i < 20 // Some fixed cells
+  }))
 };
 
 jest.mock('../../models/logic/Board', () => {
@@ -54,7 +60,7 @@ describe('GameStateController', () => {
     // Create mock callbacks
     mockCallbacks = {
       getMatchStatus: jest.fn(() => MatchStatus.PREINIT),
-      onBoardProgressUpdate: jest.fn()
+      onProgressUpdate: jest.fn()
     };
 
     gameState.setCallbacks(mockCallbacks);
@@ -143,7 +149,7 @@ describe('GameStateController', () => {
     it('should set callback functions', () => {
       const newCallbacks: GameLogicCallbacks = {
         getMatchStatus: jest.fn(() => MatchStatus.ONGOING),
-        onBoardProgressUpdate: jest.fn()
+        onProgressUpdate: jest.fn()
       };
 
       gameState.setCallbacks(newCallbacks);
@@ -221,9 +227,10 @@ describe('GameStateController', () => {
 
       gameState.setCellValue(playerID, mockData);
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID, progress: 75 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [{ playerID, progress: 75 }]
+      );
     });
   });
 
@@ -341,9 +348,10 @@ describe('GameStateController', () => {
         actionID: 1002
       });
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID, progress: 33 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [{ playerID, progress: 33 }]
+      );
     });
 
     it('should handle 100% completion', () => {
@@ -359,9 +367,10 @@ describe('GameStateController', () => {
         actionID: 1003
       });
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID, progress: 100 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [{ playerID, progress: 100 }]
+      );
     });
   });
 
@@ -380,9 +389,10 @@ describe('GameStateController', () => {
       (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
         .checkBoardProgresses([1]);
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID: 1, progress: 45 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [{ playerID: 1, progress: 45 }]
+      );
     });
 
     it('should check progress for all players when no playerIDs provided', () => {
@@ -392,10 +402,13 @@ describe('GameStateController', () => {
       (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
         .checkBoardProgresses();
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID: 1, progress: 45 },
-        { playerID: 2, progress: 45 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [
+          { playerID: 1, progress: 45 },
+          { playerID: 2, progress: 45 }
+        ]
+      );
     });
 
     it('should handle player without gameState', () => {
@@ -415,7 +428,7 @@ describe('GameStateController', () => {
         .checkBoardProgresses([1]);
 
       // Should not call callback since player 1 has no gameState
-      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
 
     it('should handle player without solution', () => {
@@ -430,7 +443,7 @@ describe('GameStateController', () => {
         .checkBoardProgresses([1]);
 
       // Should not call callback since player 1 has no solution
-      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
 
     it('should not call callback when no progress data available', () => {
@@ -444,7 +457,7 @@ describe('GameStateController', () => {
       (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
         .checkBoardProgresses();
 
-      expect(mockCallbacks.onBoardProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
 
     it('should handle empty playerIDs array', () => {
@@ -454,10 +467,152 @@ describe('GameStateController', () => {
       (gameState as unknown as { checkBoardProgresses: (playerIDs?: number[]) => void })
         .checkBoardProgresses([]);
 
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalledWith([
-        { playerID: 1, progress: 45 },
-        { playerID: 2, progress: 45 }
-      ]);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        true,
+        [
+          { playerID: 1, progress: 45 },
+          { playerID: 2, progress: 45 }
+        ]
+      );
+    });
+  });
+
+  describe('checkPUPProgress', () => {
+    const playerID = 1;
+    const cellIndex = 0; // Solution value is 4
+
+    beforeEach(() => {
+      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
+      gameState.addPlayer(playerID);
+      gameState.initGameStates();
+    });
+
+    it('should increment PUP progress when value matches solution and progress not set', () => {
+      // Set cell value to match solution (4)
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = false;
+
+      // Access private method
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      // Check progress incremented
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      expect(playerState?.gameState?.pupProgress).toBe(20);
+      expect(mockServerBoardModel.board[cellIndex].pupProgressSet).toBe(true);
+
+      // Check callback called
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        false,
+        [{ playerID, progress: 20 }]
+      );
+    });
+
+    it('should not increment PUP progress when pupProgressSet is already true', () => {
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = true;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      expect(playerState?.gameState?.pupProgress).toBe(0);
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should not increment PUP progress when cell value does not match solution', () => {
+      mockServerBoardModel.board[cellIndex].value = 5; // Wrong value
+      mockServerBoardModel.board[cellIndex].pupProgressSet = false;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      expect(playerState?.gameState?.pupProgress).toBe(0);
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should increment PUP progress by 50 when golden objective is active', () => {
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = false;
+      mockServerBoardModel.board[cellIndex].goldenObjectiveActive = true;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      expect(playerState?.gameState?.pupProgress).toBe(70); // 20 + 50
+      expect(mockServerBoardModel.board[cellIndex].goldenObjectiveActive).toBe(false);
+
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        false,
+        [{ playerID, progress: 70 }]
+      );
+    });
+
+    it('should clamp PUP progress to 100%', () => {
+      // Set initial progress to 90
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (playerState?.gameState) {
+        playerState.gameState.pupProgress = 90;
+      }
+
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = false;
+      mockServerBoardModel.board[cellIndex].goldenObjectiveActive = true;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      expect(playerState?.gameState?.pupProgress).toBe(100); // 90 + 20 + 50 = 160, clamped to 100
+    });
+
+    it('should not call callback when progress does not change', () => {
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = true; // Already set
+      mockServerBoardModel.board[cellIndex].goldenObjectiveActive = false;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should handle invalid player ID gracefully', () => {
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(999, cellIndex);
+
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should handle player without gameState', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (playerState) {
+        delete playerState.gameState;
+      }
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -487,7 +642,7 @@ describe('GameStateController', () => {
       });
 
       expect(result.result).toBe(true);
-      expect(mockCallbacks.onBoardProgressUpdate).toHaveBeenCalled();
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalled();
 
       // Check solutions
       expect(gameState.getSolution(1, 0)).toBe(4); // First position in solution

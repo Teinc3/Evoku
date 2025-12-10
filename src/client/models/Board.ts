@@ -10,7 +10,10 @@ export default class ClientBoardModel extends BaseBoardModel<ClientCellModel> {
     return ClientCellModel;
   }
   
-  constructor(cellValues: number[] = []) {
+  constructor(
+    cellValues: number[] = [],
+    public progress: number = 0,
+  ) {
     super(cellValues);
   }
   

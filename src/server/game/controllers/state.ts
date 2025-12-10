@@ -89,10 +89,7 @@ export default class GameStateController {
     }
 
     // First check sync-only timing validation
-    const estServerTime = this.timeService.assessTiming(
-      playerID,
-      clientTime
-    );
+    const estServerTime = this.timeService.assessTiming(playerID, clientTime);
     if (estServerTime < 0) {
       return { result: false }; // Sync timing validation failed
     }
@@ -112,9 +109,9 @@ export default class GameStateController {
       clientTime
     );
     this.checkBoardProgresses([playerID]);
+    this.checkPUPProgress(playerID, cellIndex);
 
     return { result: true, serverTime };
-
   }
 
   /** Initialise the game state for all players, and return the initial board value */
@@ -127,7 +124,6 @@ export default class GameStateController {
       // And set the initial game state
       playerState.gameState = {
         boardState: board,
-        boardProgress: 0,
         pupProgress: 0,
         powerups: [] // Feature TODO: Add entry powerups in the future.
       };
@@ -181,16 +177,52 @@ export default class GameStateController {
         const solution = this.solutions.get(playerID);
         if (solution) {
           const progress = state.gameState.boardState.progress(solution);
-          // Add the progress data to the state
-          state.gameState.boardProgress = progress;
           progressData.push({ playerID, progress });
         }
       }
     }
 
     if (progressData.length > 0) {
-      this.callbacks.onBoardProgressUpdate(progressData);
+      this.callbacks.onProgressUpdate(true, progressData);
     }
   }
 
+  /** Checks for completed cell objectives, and increments PUP progress accordingly */
+  private checkPUPProgress(playerID: number, cellIndex: number): void {
+    // See if current cell value fits solution
+    const gameState = this.gameStates.get(playerID)?.gameState;
+    if (!gameState) {
+      return;
+    }
+    const boardState = gameState.boardState;
+    const solution = this.solutions.get(playerID);
+    if (!solution) {
+      return;
+    }
+
+    const cell = boardState.board[cellIndex];
+    if (cell.value !== solution[cellIndex]) {
+      return; // Incorrect value, no progress
+    }
+
+    const originalProgress = gameState.pupProgress;
+
+    if (!cell.pupProgressSet) {
+      cell.pupProgressSet = true;
+      gameState.pupProgress += 20;
+    }
+    if (cell.goldenObjectiveActive) {
+      gameState.pupProgress += 50;
+      cell.goldenObjectiveActive = false;
+    }
+
+    // Clamp progress to 100%
+    gameState.pupProgress = Math.min(gameState.pupProgress, 100);
+
+    if (gameState.pupProgress !== originalProgress) {
+      // Broadcast PUP progress
+      this.callbacks.onProgressUpdate(false, [{ playerID, progress: gameState.pupProgress }]);
+    }
+      
+  }
 }
