@@ -86,15 +86,13 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         if (board) {
           // Check if this is our own pending action confirmed
           let clientTime: number;
-          if (data.playerID === this.gameState.myID) {
-            const pendingAction
-              = this.gameState.pendingActions.get(data.actionID);
-            if (pendingAction) {
-              clientTime = pendingAction.clientTime;
-              this.gameState.pendingActions.delete(data.actionID);
-            } else {
-              clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
-            }
+          const pendingAction = (data.playerID === this.gameState.myID)
+            ? this.gameState.pendingActions.get(data.actionID)
+            : undefined;
+
+          if (pendingAction) {
+            clientTime = pendingAction.clientTime;
+            this.gameState.pendingActions.delete(data.actionID);
           } else {
             clientTime = this.gameState.timeCoordinator.estimateClientTime(data.serverTime);
           }

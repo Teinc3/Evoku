@@ -141,7 +141,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
 
   public parseNumberKey(num: number) {
     if (!this.isMe) {
-      return
+      return;
     }
 
     const i = this.selected();

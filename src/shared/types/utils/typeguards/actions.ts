@@ -209,12 +209,13 @@ export default class ActionGuard {
   
   // Generic Contract guard
   public static isActionContract<GenericAction extends Actions.ActionEnum>(
-    action: GenericAction, data: unknown
+    action: GenericAction, data: object
   ): data is AugmentAction<GenericAction> {
     if (typeof data !== 'object' || data === null) {
       return false;
     }
     
-    return data.hasOwnProperty('action') && (data as { action: number }).action === action;
+    return Object.prototype.hasOwnProperty.call(data, 'action')
+      && (data as { action: number }).action === action;
   }
 }
