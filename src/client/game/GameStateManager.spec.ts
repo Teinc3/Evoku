@@ -1,3 +1,4 @@
+import { MechanicsActions } from '@shared/types/enums/actions';
 import GameStateManager from './GameStateManager';
 
 
@@ -157,5 +158,45 @@ describe('GameStateManager', () => {
     expect(player1State?.gameState?.powerups).toEqual([]);
     expect(player2State?.gameState?.pupProgress).toBe(0);
     expect(player2State?.gameState?.powerups).toEqual([]);
+  });
+
+  it('should store, retrieve, and clear pending actions', () => {
+    const mockAction = {
+      action: MechanicsActions.SET_CELL,
+      actionID: 123,
+      cellIndex: 5,
+      value: 7,
+      clientTime: Date.now()
+    };
+
+    // Initially empty
+    expect(gameState.pendingActions.size).toBe(0);
+    expect(gameState.pendingActions.get(123)).toBeUndefined();
+
+    // Store action
+    gameState.pendingActions.set(123, mockAction);
+    expect(gameState.pendingActions.size).toBe(1);
+    expect(gameState.pendingActions.get(123)).toEqual(mockAction);
+
+    // Clear on match data clear
+    gameState.clearMatchData();
+    expect(gameState.pendingActions.size).toBe(0);
+    expect(gameState.pendingActions.get(123)).toBeUndefined();
+  });
+
+  it('should delete a specific pending action', () => {
+    const mockAction = {
+      action: MechanicsActions.SET_CELL,
+      actionID: 456,
+      cellIndex: 10,
+      value: 8,
+      clientTime: performance.now()
+    };
+
+    gameState.pendingActions.set(456, mockAction);
+    expect(gameState.pendingActions.has(456)).toBeTrue();
+
+    gameState.pendingActions.delete(456);
+    expect(gameState.pendingActions.has(456)).toBeFalse();
   });
 });

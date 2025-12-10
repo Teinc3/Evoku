@@ -1,6 +1,7 @@
 import { Subject, type Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 
 import ActionEnum, {
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
@@ -12,6 +13,7 @@ import DuelDemoPageComponent from './duel.demo';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { MatchFoundContract, PingContract } from '@shared/types/contracts';
+import type BoardModelComponent from '../../../../components/board/board.component';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
 
@@ -108,6 +110,55 @@ describe('DuelDemoPageComponent', () => {
       expect(mockBoard.confirmCellSet).toHaveBeenCalledWith(0, 5, 1000);
     });
 
+    it('should handle CELL_SET packet for own actions using pending time', () => {
+      // Initialize component subscriptions
+      component.ngOnInit();
+
+      // Prevent gameState.handlePacket from triggering again
+      (component.gameState as unknown as { handlePacket: jasmine.Spy }).handlePacket =
+        jasmine.createSpy('handlePacket').and.callFake(() => {});
+
+      const cellSetData = {
+        playerID: 1, // Own player
+        cellIndex: 0,
+        value: 5,
+        serverTime: 1000,
+        actionID: 123
+      };
+
+      // Mock pending action
+      const mockPendingAction = {
+        action: MechanicsActions.SET_CELL,
+        actionID: 123,
+        cellIndex: 0,
+        value: 5,
+        clientTime: 500
+      };
+
+      // Mock pendingActions Map
+      const mockMap = jasmine.createSpyObj('Map', ['set', 'get', 'has', 'delete', 'clear']);
+      mockMap.get.and.returnValue(mockPendingAction);
+      mockMap.has.and.returnValue(true);
+      Object.defineProperty(component.gameState, 'pendingActions',
+        { value: mockMap, writable: true });
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 1;
+
+      // Mock getPlayerBoard to return a spy object
+      const mockBoard = jasmine.createSpyObj('Board', ['confirmCellSet']);
+      spyOn(component.gameState, 'getPlayerBoard').and.returnValue(mockBoard);
+
+      const action = MechanicsActions.CELL_SET;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(cellSetData as unknown as ActionEnum);
+
+      expect(component.gameState.getPlayerBoard).toHaveBeenCalledWith(1);
+      expect(mockBoard.confirmCellSet).toHaveBeenCalledWith(0, 5, 500);
+      expect(mockMap.delete).toHaveBeenCalledWith(123);
+    });
+
     it('should handle PING packet', () => {
       const pingData: PingContract = {
         serverTime: 2000,
@@ -153,6 +204,61 @@ describe('DuelDemoPageComponent', () => {
 
       expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
       expect(component.gameState.myID).toBe(1);
+    });
+
+    it('should handle REJECT_ACTION packet and remove pending action', () => {
+      // Initialize component subscriptions
+      component.ngOnInit();
+
+      const rejectData = {
+        actionID: 123
+      };
+
+      // Mock pending action
+      const mockAction = {
+        action: MechanicsActions.SET_CELL,
+        actionID: 123,
+        cellIndex: 5,
+        value: 7,
+        clientTime: Date.now()
+      };
+      component.gameState.pendingActions.set(123, mockAction);
+
+      // Mock board1 component
+      const mockBoard1 = jasmine.createSpyObj('BoardModelComponent', ['handleCellRejection']);
+      component.board1 = mockBoard1 as unknown as BoardModelComponent;
+
+      const action = ProtocolActions.REJECT_ACTION;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(rejectData as unknown as ActionEnum);
+
+      expect(component.gameState.pendingActions.has(123)).toBeFalse();
+      expect(mockBoard1.handleCellRejection).toHaveBeenCalledWith(5, 7);
+    });
+
+    it('onBoardSelectionChanged clears selection on other board for mutual exclusivity', () => {
+      // Mock board components
+      const board1Spy = jasmine.createSpyObj('BoardModelComponent', [], { selected: signal(5) });
+      const board2Spy = jasmine.createSpyObj('BoardModelComponent', [], { selected: signal(null) });
+      
+      // Access private properties
+      component.board1 = board1Spy as unknown as BoardModelComponent;
+      component.board2 = board2Spy as unknown as BoardModelComponent;
+
+      // Select on board 0, should clear board 1
+      component.onBoardSelectionChanged(0);
+      expect(board2Spy.selected()).toBeNull();
+
+      // Reset
+      board1Spy.selected.set(null);
+      board2Spy.selected.set(10);
+
+      // Select on board 1, should clear board 0
+      component.onBoardSelectionChanged(1);
+      expect(board1Spy.selected()).toBeNull();
     });
 
     it('should clear match data on destroy', () => {

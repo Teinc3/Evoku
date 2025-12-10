@@ -45,6 +45,25 @@ describe('SudokuCellComponent', () => {
     expect(span.textContent!.trim()).toBe('5');
   });
 
+  it('hides value for opponent cells', () => {
+    const m = new MockCellModel();
+    m.value = 5;
+    component.model = m as unknown as ClientCellModel;
+    component.isMe = false;
+    fixture.detectChanges();
+
+    const span = fixture.debugElement.query(By.css('.v'))!.nativeElement as HTMLElement;
+    expect(span.textContent!.trim()).toBe('?'); // Hidden as ?
+  });
+
+  it('returns -1 for opponent non-fixed cells with values', () => {
+    const m = new MockCellModel();
+    m.value = 5;
+    component.model = m as unknown as ClientCellModel;
+    component.isMe = false;
+    expect(component.value).toBe(-1);
+  });
+
   it('shows pending value when pending present', () => {
     const m = new MockCellModel();
     m.pendingCellState = { pendingValue: 7 };
@@ -75,6 +94,16 @@ describe('SudokuCellComponent', () => {
     component.isMe = true;
     fixture.detectChanges();
     expect(component.pendingValue).toBe(3);
+  });
+
+  it('pendingValue getter returns -1 for opponent non-fixed cells with pending values', () => {
+    const m = new MockCellModel();
+    m.pendingCellState = { pendingValue: 7 };
+    m.fixed = false;
+    component.model = m as unknown as ClientCellModel;
+    component.isMe = false; // Opponent
+    fixture.detectChanges();
+    expect(component.pendingValue).toBe(-1);
   });
 
   it('renders notes grid when no value and notes present', () => {
