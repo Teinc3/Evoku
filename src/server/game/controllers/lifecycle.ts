@@ -24,7 +24,7 @@ export default class LifecycleController {
   ) {
     const callbacks: GameLogicCallbacks = {
       getMatchStatus: () => this.status,
-      onBoardProgressUpdate: progressData => this.onBoardProgressUpdate(progressData)
+      onProgressUpdate: this.updateProgress.bind(this),
     };
     this.stateController.setCallbacks(callbacks);
   }
@@ -100,17 +100,26 @@ export default class LifecycleController {
   }
 
   /** Handle board progress updates from GameLogic and determine phase transitions. */
-  private onBoardProgressUpdate(progressData: { playerID: number; progress: number }[]): void {
+  private updateProgress(
+    isBoard: boolean,
+    progressData: { playerID: number; progress: number }[]
+  ): void {
     if (this.status !== MatchStatus.ONGOING) {
       return;
     }
 
     // Broadcast board progress updates to all players
     for (const { playerID, progress } of progressData) {
-      this.room.broadcast(ProtocolActions.BOARD_PROGRESS, {
+      this.room.broadcast(ProtocolActions.UPDATE_PROGRESS, {
         playerID,
-        boardProgress: progress
+        isBoard,
+        progress
       });
+    }
+
+    // Following checks are for board progress only
+    if (!isBoard) {
+      return;
     }
 
     // Check for game completion (100% progress)

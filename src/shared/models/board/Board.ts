@@ -80,21 +80,4 @@ export default abstract class BaseBoardModel<
     }
     return h | 0; // Convert uint32 to int32
   }
-
-  /** @returns BoardProgress: Percentage (Rounded) of cells  */
-  public progress(solution: number[], time?: number): number {
-    const correct = this.board.reduce((count, cell, index) => {
-      return count + (cell.progress(solution[index], time) ? 1 : 0);
-    }, 0)
-
-    const total = this.board.reduce((count, cell) => {
-      return count + (cell.fixed ? 0 : 1);
-    }, 0);
-
-    if (total === 0) {
-      return 100;
-    }
-    return Math.round(correct / total * 100);
-  }
-
 }

@@ -7,7 +7,7 @@ import { ServerCellModel } from ".";
  */
 export default class ServerBoardModel extends BaseBoardModel<ServerCellModel> {
    
-  get CellModelClass(): typeof ServerCellModel {
+  get CellModelClass() {
     return ServerCellModel;
   }
 
@@ -30,25 +30,25 @@ export default class ServerBoardModel extends BaseBoardModel<ServerCellModel> {
       if (time !== undefined) {
         this.globalLastCooldownEnd = time + BaseBoardModel.GLOBAL_COOLDOWN_DURATION;
       }
-      // Check for completed objectives
-      this.checkBoardObjectives(cellIndex);
 
       return true;
     }
     return false;
   }
 
-  /**
-   * Check for completed objectives after a cell change.
-   * TODO: Implement actual objective checking logic.
-   * @param cellIndex The index of the cell that was changed.
-   * @returns The number of objectives completed (0 for now).
-   */
-  public checkBoardObjectives(_cellIndex: number): number {
-    // TODO: Implement actual objective checking logic
-    // - Compare against solution board
-    // - Check for completed rows/columns/boxes
-    // - Track already completed objectives
-    return 0;
+  /** @returns BoardProgress: Percentage (Rounded) of cells  */
+  public progress(solution: number[], time?: number): number {
+    const correct = this.board.reduce((count, cell, index) => {
+      return count + (cell.progress(solution[index], time) ? 1 : 0);
+    }, 0)
+
+    const total = this.board.reduce((count, cell) => {
+      return count + (cell.fixed ? 0 : 1);
+    }, 0);
+
+    if (total === 0) {
+      return 100;
+    }
+    return Math.round(correct / total * 100);
   }
 }

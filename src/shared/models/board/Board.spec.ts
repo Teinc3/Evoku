@@ -203,110 +203,6 @@ describe('BaseBoardModel', () => {
     });
   });
 
-  describe('progress method', () => {
-    it('should calculate progress correctly with empty board', () => {
-      const solution = new Array(standardBoardSize).fill(1);
-      expect(board.progress(solution, baseTime)).toBe(0);
-    });
-
-    it('should calculate progress with some correct cells', () => {
-      const solution = new Array(standardBoardSize).fill(5);
-
-      // Set some cells to correct values
-      board.board[0].value = 5;
-      board.board[1].value = 5;
-      board.board[2].value = 5;
-
-      const progressPercentage = board.progress(solution, baseTime);
-      expect(progressPercentage).toBeCloseTo(3.7, 0); // 3/81 * 100 ≈ 3.7%
-    });
-
-    it('should not count fixed cells in progress calculation', () => {
-      const solution = new Array(standardBoardSize).fill(7);
-
-      // Create board with some fixed cells
-      const mixedBoard = new TestBoardModel(new Array(standardBoardSize).fill(0));
-      mixedBoard.board[0].value = 7;
-      mixedBoard.board[0].fixed = true; // Fixed - shouldn't count
-      mixedBoard.board[1].value = 7;
-      mixedBoard.board[1].fixed = false; // Not fixed - should count
-
-      const progressPercentage = mixedBoard.progress(solution, baseTime);
-      expect(progressPercentage).toBeCloseTo(1.23, 0); // 1/81 * 100 ≈ 1.23%
-    });
-
-    it('should work without time parameter', () => {
-      const solution = new Array(standardBoardSize).fill(3);
-      board.board[0].value = 3;
-
-      expect(board.progress(solution)).toBeGreaterThan(0);
-    });
-
-    it('should handle all cells correct', () => {
-      const solution = new Array(standardBoardSize).fill(9);
-
-      // Set all cells to correct value
-      board.board.forEach(cell => {
-        cell.value = 9;
-      });
-
-      expect(board.progress(solution, baseTime)).toBe(100); // Should be 100%
-    });
-
-    it('should handle all cells fixed', () => {
-      const solution = new Array(standardBoardSize).fill(4);
-
-      // Make all cells fixed
-      board.board.forEach(cell => {
-        cell.value = 4;
-        cell.fixed = true;
-      });
-
-      // Should be 100%
-      expect(board.progress(solution, baseTime)).toBe(100);
-    });
-
-    it('should handle effects blocking progress', () => {
-      const solution = new Array(standardBoardSize).fill(6);
-      const blockingEffect = createMockEffect(baseTime, baseTime + 3000);
-
-      board.board[0].value = 6;
-      board.board[0].effects = [blockingEffect];
-
-      // Progress blocked by effect (implementation depends on effect details)
-      const progressDuringEffect = board.progress(solution, baseTime + 1000);
-      const progressAfterEffect = board.progress(solution, baseTime + 4000);
-
-      expect(progressDuringEffect).toBe(0);
-      expect(progressAfterEffect).toBeCloseTo(100/81, 0);
-    });
-
-    it('should handle mismatched solution array length', () => {
-      const shortSolution = [1, 2, 3]; // Much shorter than board
-      board.board[0].value = 1;
-      board.board[1].value = 2;
-
-      // Should handle gracefully without crashing
-      expect(() => board.progress(shortSolution, baseTime)).not.toThrow();
-    });
-
-    it('should calculate denominator correctly', () => {
-      // Create board with mix of fixed and non-fixed cells
-      const mixedValues = new Array(9).fill(0);
-      mixedValues[0] = 1; // Will be fixed
-      mixedValues[4] = 5; // Will be fixed
-      const mixedBoard = new TestBoardModel(mixedValues);
-
-      const solution = new Array(9).fill(7);
-      mixedBoard.board[1].value = 7; // Correct non-fixed cell
-      mixedBoard.board[2].value = 7; // Correct non-fixed cell
-
-      // 2 correct out of 7 non-fixed cells = ~28.57%
-      const progress = mixedBoard.progress(solution, baseTime);
-      expect(progress).toBeCloseTo(28.57, 0);
-    });
-  });
-
   describe('global cooldown behavior', () => {
     it('should initialize with no cooldown', () => {
       expect(board.globalLastCooldownEnd).toBe(0);
@@ -367,14 +263,6 @@ describe('BaseBoardModel', () => {
       // Validation should respect fixed status
       expect(board.validate(0, 9, baseTime)).toBe(false); // Fixed cell
       expect(board.validate(1, 9, baseTime)).toBe(true);  // Regular cell
-
-      // Progress calculation
-      const solution = new Array(standardBoardSize).fill(1);
-      solution[0] = 1; // Matches fixed cell
-      solution[1] = 1; // Different from regular cell
-
-      const progress = board.progress(solution, baseTime);
-      expect(progress).toBe(0); // Only fixed cell matches, which doesn't count
     });
 
     it('should handle effects across multiple cells', () => {
@@ -418,7 +306,6 @@ describe('BaseBoardModel', () => {
       expect(emptyBoard.validate(0, 5, baseTime)).toBe(false);
       expect(() => emptyBoard.update(0, 5, baseTime)).toThrow();
       expect(emptyBoard.computeHash()).toEqual(expect.any(Number));
-      expect(emptyBoard.progress([], baseTime)).toEqual(expect.any(Number));
     });
 
     it('should handle extreme time values', () => {
@@ -481,7 +368,6 @@ describe('BaseBoardModel', () => {
       board.update(0, 5, baseTime);
       board.validate(1, 3, baseTime);
       board.computeHash();
-      board.progress([1, 2, 3], baseTime);
 
       expect(board.board.length).toBe(initialCount);
     });

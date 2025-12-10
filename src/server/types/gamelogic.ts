@@ -6,5 +6,8 @@ import type { MatchStatus } from "./enums";
  */
 export interface GameLogicCallbacks {
   getMatchStatus: () => MatchStatus;
-  onBoardProgressUpdate: (progressData: { playerID: number; progress: number }[]) => void;
+  onProgressUpdate: (
+    isBoard: boolean,
+    progressData: { playerID: number; progress: number }[]
+  ) => void;
 }

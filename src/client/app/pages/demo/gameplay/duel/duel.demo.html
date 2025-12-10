@@ -1,7 +1,7 @@
 <!--Hud at the top-->
 <app-duel-hud-top
-	[boardProgress1]="gameState.getPlayerState(gameState.myID).gameState?.boardProgress ?? 0"
-	[boardProgress2]="gameState.getPlayerState(1 - gameState.myID).gameState?.boardProgress ?? 0"
+	[boardProgress1]="gameState.getPlayerBoard(gameState.myID).progress"
+	[boardProgress2]="gameState.getPlayerBoard(1 - gameState.myID).progress"
 	[phaseTimeMs]="gameState.timeCoordinator.timeElapsed"
 	[gameState]="gameState"
 ></app-duel-hud-top>

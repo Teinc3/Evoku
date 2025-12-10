@@ -6,18 +6,16 @@ import type BaseEffectModel from "../../shared/models/effect";
 
 /** Client-side implementation of CellModel with pending state for optimistic updates. */
 export default class ClientCellModel extends BaseCellModel {
-  public pendingCellState: Partial<IPendingCellState>;
-  public notes: number[];
 
   constructor(
     value: number = 0,
     fixed: boolean = false,
-    effects: BaseEffectModel[] = []
+    effects: BaseEffectModel[] = [],
+    goldenObjectiveActive: boolean = false,
+    public pendingCellState: Partial<IPendingCellState> = {},
+    public notes: number[] = []
   ) {
-    super(value, fixed, effects);
-
-    this.pendingCellState = {}; // Initialise with no pending properties
-    this.notes = [];
+    super(value, fixed, effects, goldenObjectiveActive);
   }
 
   /**

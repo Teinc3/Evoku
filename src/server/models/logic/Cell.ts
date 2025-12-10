@@ -1,10 +1,22 @@
 import BaseCellModel from "../../../shared/models/cell";
 
+import type BaseEffectModel from "@shared/models/effect";
+
 
 /**
  * Server-side implementation of CellModel with authoritative validation and setting.
  */
 export default class ServerCellModel extends BaseCellModel {
+
+  constructor(
+    value: number = 0,
+    fixed: boolean = false,
+    effects: BaseEffectModel[] = [],
+    goldenObjectiveActive: boolean = false,
+    public pupProgressSet: boolean = false
+  ) {
+    super(value, fixed, effects, goldenObjectiveActive);
+  }
 
   /**
    * Authoritative method to validate and set a cell value on the server.
