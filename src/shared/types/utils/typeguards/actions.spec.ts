@@ -255,4 +255,36 @@ describe('Action Type Guards', () => {
       expect(duration).toBeLessThan(50); // Conservative threshold
     });
   });
+
+  describe('isActionContract', () => {
+    it('should return true for valid action contract with matching action', () => {
+      const action = 20; // USE_INFERNO
+      const data = { action: 20, payload: {} };
+      
+      expect(ActionGuard.isActionContract(action, data)).toBe(true);
+    });
+
+    it('should return false for data without action property', () => {
+      const action = 20;
+      const data = { payload: {} };
+      
+      expect(ActionGuard.isActionContract(action, data)).toBe(false);
+    });
+
+    it('should return false for data with non-matching action', () => {
+      const action = 20;
+      const data = { action: 30, payload: {} };
+      
+      expect(ActionGuard.isActionContract(action, data)).toBe(false);
+    });
+
+    it('should return false for non-object data', () => {
+      const action = 20;
+      
+      expect(ActionGuard.isActionContract(action, null as unknown as object)).toBe(false);
+      expect(ActionGuard.isActionContract(action, undefined as unknown as object)).toBe(false);
+      expect(ActionGuard.isActionContract(action, 'string' as unknown as object)).toBe(false);
+      expect(ActionGuard.isActionContract(action, 42 as unknown as object)).toBe(false);
+    });
+  });
 });

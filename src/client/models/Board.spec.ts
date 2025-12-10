@@ -77,6 +77,21 @@ describe('ClientBoardModel', () => {
     expect(m.globalLastCooldownEnd).toBeGreaterThan(now);
   });
 
+  it('confirmCellSet returns false for out-of-range index', () => {
+    const m = createModel();
+    expect(m.confirmCellSet(-1, 5)).toBeFalse();
+    expect(m.confirmCellSet(81, 5)).toBeFalse();
+  });
+
+  it('confirmCellSet returns false when no pending value or mismatched value', () => {
+    const m = createModel();
+    // No pending, confirm with current value (0) - should fail validation
+    expect(m.confirmCellSet(0, 0)).toBeFalse();
+    // Set pending but confirm with same as current value
+    m.setPendingCell(0, 6, performance.now());
+    expect(m.confirmCellSet(0, 0)).toBeFalse();
+  });
+
   it('rejectCellSet clears pending without updating value', () => {
     const m = createModel();
     const now = performance.now();
@@ -85,6 +100,16 @@ describe('ClientBoardModel', () => {
     expect(m.board[0].pendingCellState.pendingValue).toBeUndefined();
     expect(m.board[0].value).toBe(0);
     expect(m.hasPendingChanges()).toBeFalse();
+  });
+
+  it('rejectCellSet returns false for mismatched value or out-of-range', () => {
+    const m = createModel();
+    m.setPendingCell(0, 6, performance.now());
+    // Mismatched value
+    expect(m.rejectCellSet(0, 7)).toBeFalse();
+    // Out-of-range
+    expect(m.rejectCellSet(-1, 6)).toBeFalse();
+    expect(m.rejectCellSet(81, 6)).toBeFalse();
   });
 
   it('toggleNote obeys constraints (no toggle if fixed/value/pending)', () => {

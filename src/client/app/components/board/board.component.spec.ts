@@ -73,6 +73,9 @@ describe('BoardModelComponent', () => {
     expect(component.selected()).toBeNull();
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     expect(component.selected()).toBeNull();
+    // Also test number key
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '1' }));
+    expect(component.selected()).toBeNull();
   });
 
   it('moves selection with keyboard and wraps vertically and horizontally', () => {
@@ -99,6 +102,11 @@ describe('BoardModelComponent', () => {
     component.onCellSelected(17); // row1 col8
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(component.selected()).toBe(9); // row1 col0
+
+    // Vertical wrap down: from bottom row pressing ArrowDown wraps to top
+    component.onCellSelected(72); // Bottom-left
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(component.selected()).toBe(0); // Wrapped to top row same column
   });
 
   it('number key sets pending and backspace/0 triggers wipeNotes path', () => {
@@ -119,6 +127,60 @@ describe('BoardModelComponent', () => {
     component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '0' }));
     expect(wipeSpy).toHaveBeenCalled();
     expect(component.getCellModel(0).notes.length).toBe(0);
+  });
+
+  it('number key sets pending when not in note mode and num != 0', () => {
+    component.model.initBoard([]);
+    component.onCellSelected(0);
+    // Ensure not in note mode
+    expect(component.isNoteMode).toBeFalse();
+    // Spy on setPendingCell
+    const setPendingSpy = spyOn(component.model, 'setPendingCell').and.callThrough();
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '5' }));
+    expect(setPendingSpy).toHaveBeenCalledWith(0, 5, jasmine.any(Number));
+  });
+
+  it('onUtilityAction CLEAR calls parseNumberKey with 0', () => {
+    component.onCellSelected(0);
+    const parseSpy = spyOn(component, 'parseNumberKey');
+    component.onUtilityAction(UtilityAction.CLEAR);
+    expect(parseSpy).toHaveBeenCalledWith(0);
+  });
+
+  it('parseNumberKey does nothing when not isMe', () => {
+    component.isMe = false;
+    component.onCellSelected(0);
+    spyOn(component.sendPacket, 'emit');
+    component.parseNumberKey(5);
+    expect(component.sendPacket.emit).not.toHaveBeenCalled();
+  });
+
+  it('parseNumberKey does nothing when no cell selected', () => {
+    spyOn(component.sendPacket, 'emit');
+    component.parseNumberKey(5);
+    expect(component.sendPacket.emit).not.toHaveBeenCalled();
+  });
+
+  it('handleCellRejection resets cooldowns when rejection succeeds', () => {
+    component.model.initBoard([]);
+    component.onCellSelected(0);
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '5' })); // Set pending
+    const resetSpy = spyOn(component.cooldownHelper, 'reset');
+    const cellResetSpy = spyOn(component.cells.get(0)!.cooldownHelper, 'reset');
+    component.handleCellRejection(0, 5);
+    expect(resetSpy).toHaveBeenCalled();
+    expect(cellResetSpy).toHaveBeenCalled();
+  });
+
+  it('handleCellRejection does not reset cooldowns when rejection fails', () => {
+    component.model.initBoard([]);
+    component.onCellSelected(0);
+    component.handleKeyboardEvent(new KeyboardEvent('keydown', { key: '5' })); // Set pending
+    const resetSpy = spyOn(component.cooldownHelper, 'reset');
+    const cellResetSpy = spyOn(component.cells.get(0)!.cooldownHelper, 'reset');
+    component.handleCellRejection(0, 6); // Wrong value
+    expect(resetSpy).not.toHaveBeenCalled();
+    expect(cellResetSpy).not.toHaveBeenCalled();
   });
 
   it('ignores number key when no selection', () => {
@@ -233,6 +295,17 @@ describe('BoardModelComponent', () => {
       
       // Even though cell 2 also has value 0, it shouldn't be highlighted
       expect(component.isSameNumberCell(2)).toBeFalse();
+    });
+
+    it('does not highlight opponent dynamic cells with same number', () => {
+      component.isMe = false; // Opponent board
+      component.onCellSelected(0); // Selected cell has value 1, fixed
+      // Make cell 9 have value 1 but not fixed (dynamic)
+      const cell9 = component.getCellModel(9);
+      (cell9 as unknown as { fixed: boolean }).fixed = false;
+      (cell9 as unknown as { value: number }).value = 1;
+      // Since cell 9 is dynamic and has value, should not be highlighted
+      expect(component.isSameNumberCell(9)).toBeFalse();
     });
 
     it('returns false for same number check when no cell selected', () => {
