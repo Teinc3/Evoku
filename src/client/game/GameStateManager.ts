@@ -87,6 +87,7 @@ export default class GameStateManager {
       playerID,
       gameState: {
         boardState: new ClientBoardModel(),
+        boardProgress: 0,
         pupProgress: 0,
         powerups: []
       }

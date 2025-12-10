@@ -5,7 +5,7 @@
 
 <app-phase-timer
   [timeMs]="phaseTimeMs"
-  [percentage]="43"
+  [percentage]="Math.max(boardProgress1, boardProgress2)"
 />
 
 <app-universal-progress-bar

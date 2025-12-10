@@ -127,6 +127,7 @@ export default class GameStateController {
       // And set the initial game state
       playerState.gameState = {
         boardState: board,
+        boardProgress: 0,
         pupProgress: 0,
         powerups: [] // Feature TODO: Add entry powerups in the future.
       };
@@ -180,6 +181,8 @@ export default class GameStateController {
         const solution = this.solutions.get(playerID);
         if (solution) {
           const progress = state.gameState.boardState.progress(solution);
+          // Add the progress data to the state
+          state.gameState.boardProgress = progress;
           progressData.push({ playerID, progress });
         }
       }
