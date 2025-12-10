@@ -1,15 +1,15 @@
 <!--Hud at the top-->
 <app-duel-hud-top
-	[boardProgress1]="60"
-	[boardProgress2]="45"
-	[phaseTimeMs]="97000"
+	[boardProgress1]="gameState.getPlayerState(gameState.myID).gameState?.boardProgress ?? 0"
+	[boardProgress2]="gameState.getPlayerState(1 - gameState.myID).gameState?.boardProgress ?? 0"
+	[phaseTimeMs]="gameState.timeCoordinator.timeElapsed"
 	[gameState]="gameState"
 ></app-duel-hud-top>
 
 <!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->
 <div class="hud-centre">
   <app-universal-progress-bar
-    [percentage]="60"
+    [percentage]="gameState.getPlayerState(gameState.myID).gameState?.pupProgress ?? 0"
     [isVertical]="true"
   />
   <app-board-model
@@ -28,7 +28,7 @@
     (selectionChanged)="onBoardSelectionChanged(1)"
   />
   <app-universal-progress-bar
-    [percentage]="80"
+    [percentage]="gameState.getPlayerState(1 - gameState.myID).gameState?.pupProgress ?? 0"
     [isVertical]="true"
   />
 </div>

@@ -76,7 +76,19 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       .subscribe(data => {
         // Initialize game states with the board data from server
         this.gameState.initGameStates(data.cellValues);
-      }));
+        this.gameState.timeCoordinator.onGameInit();
+      })
+    );
+
+    // Subscribe to board progress updates
+    this.subscriptions.add(this.networkService.onPacket(ProtocolActions.BOARD_PROGRESS)
+      .subscribe(data => {
+        const playerState = this.gameState.getPlayerState(data.playerID);
+        if (playerState.gameState) {
+          playerState.gameState.boardProgress = data.boardProgress;
+        }
+      })
+    );
 
     // Subscribe to cell set confirmations
     this.subscriptions.add(this.networkService.onPacket(MechanicsActions.CELL_SET)
@@ -98,7 +110,8 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
           }
           board.confirmCellSet(data.cellIndex, data.value, clientTime);
         }
-      }));
+      })
+    );
 
     // Subscribe to action rejections
     this.subscriptions.add(this.networkService.onPacket(ProtocolActions.REJECT_ACTION)
@@ -116,7 +129,8 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
             }
           }
         }
-      }));
+      })
+    );
 
     // Subscribe to ping packets for time synchronization
     this.subscriptions.add(this.networkService.onPacket(ProtocolActions.PING)
@@ -125,7 +139,8 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         this.gameState.handlePing(data, (action, pongData) => {
           this.networkService.send(action, pongData);
         });
-      }));
+      })
+    );
   }
 
   ngOnDestroy(): void {

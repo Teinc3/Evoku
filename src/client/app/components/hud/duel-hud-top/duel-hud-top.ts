@@ -23,6 +23,8 @@ export default class DuelHudTopComponent {
   @Input()
   gameState!: GameStateManager;
 
+  public Math = Math;
+
   /**
    * Get the current player's display information
    */
