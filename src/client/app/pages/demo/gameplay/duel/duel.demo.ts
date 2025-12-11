@@ -2,6 +2,7 @@ import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 
 import ActionGuard from '@shared/types/utils/typeguards/actions';
+import MatchStatus from '@shared/types/enums/matchstatus';
 import { 
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
@@ -77,6 +78,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         // Initialize game states with the board data from server
         this.gameState.initGameStates(data.cellValues);
         this.gameState.timeCoordinator.onGameInit();
+        this.gameState.matchState.status = MatchStatus.ONGOING
+      })
+    );
+
+    // Subscribe to phase transition events
+    this.subscriptions.add(this.networkService.onPacket(LifecycleActions.PHASE_TRANSITION)
+      .subscribe(data => {
+        this.gameState.matchState.phase = data.newPhase;
       })
     );
 

@@ -4,6 +4,7 @@
 	[boardProgress2]="gameState.getPlayerBoard(1 - gameState.myID).progress"
 	[phaseTimeMs]="gameState.timeCoordinator.timeElapsed"
 	[gameState]="gameState"
+	[phase]="gameState.matchState.phase"
 ></app-duel-hud-top>
 
 <!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->

@@ -34,7 +34,8 @@ export default class GameStateController {
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy",
   ) {
     this.matchState = {
-      status: MatchStatus.PREINIT
+      status: MatchStatus.PREINIT,
+      phase: 0
     }
     this.gameStates = new Map();
 

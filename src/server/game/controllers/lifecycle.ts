@@ -125,15 +125,14 @@ export default class LifecycleController {
     }
 
     // Future phase transitions
-    // Check for phase 2 completion (66% progress) 
-    const phase2Players = progressData.filter(p => p.progress >= 66);
-    if (phase2Players.length > 0) {
-      // Handle phase 2 completion logic
-    }
-    // Check for phase 1 completion (33% progress)
-    const phase1Players = progressData.filter(p => p.progress >= 33);
-    if (phase1Players.length > 0) {
-      // Handle phase 1 completion logic
+    const nextPhasePlayers
+      = progressData.filter(p => p.progress >= (this.stateController.matchState.phase + 1) * 33.4);
+    if (nextPhasePlayers.length > 0) {
+      this.stateController.matchState.phase += 1;
+      // Handle phase transition logic (e.g., notify players)
+      this.room.broadcast(LifecycleActions.PHASE_TRANSITION, {
+        newPhase: this.stateController.matchState.phase
+      })
     }
   }
 

@@ -28,12 +28,25 @@ export default class PhaseTimerComponent {
     this._percentage.set(v);
   }
 
+  /** Phase index (0, 1, 2) to determine hue shift. */
+  @Input()
+  set phase(value: number) {
+    this._phase.set(value);
+  }
+
   // Internal reactive state
   protected _timeMs = signal(0);
   protected _percentage = signal(0);
+  protected _phase = signal(0);
 
   // Derived: stroke dashoffset (arc pathLength is normalized to 100)
   protected dashOffset = computed(() => 100 - this._percentage());
+
+  // Derived: hue rotation filter for the time gradient
+  protected hueRotateFilter = computed(() => {
+    const shifts = [0, 200, 170]; // Blue, Yellow, Orange-Red
+    return `hue-rotate(${shifts[this._phase()]}deg)`;
+  });
 
   // Derived: mm:ss string
   protected timeText = computed(() => {

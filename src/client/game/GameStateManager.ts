@@ -1,8 +1,9 @@
+import MatchStatus from '@shared/types/enums/matchstatus';
 import { PlayerActions, ProtocolActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
 import ClientTimeCoordinator from './ClientTimeCoordinator';
 
-import type { IPlayerState } from '@shared/types/gamestate';
+import type { IMatchState, IPlayerState } from '@shared/types/gamestate';
 import type {
   ActionContractC2S
 } from '@shared/types/contracts/components/extendables/ActionContract';
@@ -16,30 +17,38 @@ import type { MatchFoundContract, PingContract, PongContract } from '@shared/typ
  */
 export default class GameStateManager {
   /** Time Coordinator Class */
-  public readonly timeCoordinator: ClientTimeCoordinator;
+  public timeCoordinator!: ClientTimeCoordinator;
+  /** Match state */
+  public matchState!: IMatchState;
   /** Game state for each player in this game session */
-  private readonly gameStates: Map<number, IPlayerState<ClientBoardModel>> = new Map();
+  private gameStates!: Map<number, IPlayerState<ClientBoardModel>>;
   /** Player information (username, etc.) keyed by playerID */
-  public readonly playerInfo: Map<number, { username: string }> = new Map();
+  public playerInfo!: Map<number, { username: string }>;
   /** Pending actions keyed by actionID */
-  public readonly pendingActions: Map<number, ActionContractC2S & {
+  public pendingActions!: Map<number, ActionContractC2S & {
     action: PlayerActions
-  }> = new Map();
+  }>;
   /** Home player's ID */
-  public myID: number;
+  public myID!: number;
 
   constructor(private expectedPlayerCount: number) {
-    this.timeCoordinator = new ClientTimeCoordinator();
-    this.myID = 0; // Default to player 0, will be overridden by createGame
-    this.initBlankState();
+    this.resetBlankState();
   }
 
   /**
    * Initialize blank state with empty/default data for duel games
    * This ensures components always have valid data to bind to
    */
-  private initBlankState(): void {
-    // Initialize blank game states with empty boards
+  private resetBlankState(): void {
+    this.timeCoordinator = new ClientTimeCoordinator();
+    this.matchState = {
+      status: MatchStatus.PREINIT,
+      phase: 0
+    }
+    this.gameStates = new Map();
+    this.playerInfo = new Map();
+    this.pendingActions = new Map();
+    this.myID = 0;
     for (let i = 0; i < this.expectedPlayerCount; i++) {
       this.addPlayer(i, '');
     }
@@ -63,12 +72,7 @@ export default class GameStateManager {
   
   /** Clear all game state and player information, resetting to clean state */
   public clearMatchData(): void {
-    // Reset to clean state
-    this.myID = 0;
-    this.playerInfo.clear();
-    this.gameStates.clear();
-    this.pendingActions.clear();
-    this.initBlankState();
+    this.resetBlankState();
   }
 
   /**
