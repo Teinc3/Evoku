@@ -1,6 +1,6 @@
+import MatchStatus from "@shared/types/enums/matchstatus";
 import GameOverReason from "@shared/types/enums/GameOverReason";
 import { ProtocolActions, LifecycleActions } from "@shared/types/enums/actions";
-import { MatchStatus } from "../../types/enums";
 
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 import type { RoomModel } from "../../models/networking";
@@ -15,7 +15,6 @@ import type GameStateController from "./state";
  * - Broadcasts lifecycle packets (GAME_INIT, GAME_OVER)
  */
 export default class LifecycleController {
-  private status: MatchStatus = MatchStatus.PREINIT;
   private startTimer: NodeJS.Timeout | null = null;
 
   constructor(
@@ -23,19 +22,15 @@ export default class LifecycleController {
     private readonly stateController: GameStateController
   ) {
     const callbacks: GameLogicCallbacks = {
-      getMatchStatus: () => this.status,
       onProgressUpdate: this.updateProgress.bind(this),
     };
     this.stateController.setCallbacks(callbacks);
   }
 
-  public get matchStatus(): MatchStatus {
-    return this.status;
-  }
-
   /** Schedule game start 5s after 2 players joined (idempotent). */
   public onPlayerJoined(): void {
-    if (this.status !== MatchStatus.PREINIT || this.room.participants.size < 2 || this.startTimer) {
+    if (this.stateController.matchState.status !== MatchStatus.PREINIT
+      || this.room.participants.size < 2 || this.startTimer) {
       return;
     }
     this.startTimer = setTimeout(() => {
@@ -44,7 +39,7 @@ export default class LifecycleController {
         this.initGame();
       } catch (error) {
         console.error('Game initialization failed:', error);
-        this.status = MatchStatus.ENDED;
+        this.stateController.matchState.status = MatchStatus.ENDED;
         // Optionally notify participants of initialization failure
       }
     }, 5000);
@@ -52,7 +47,8 @@ export default class LifecycleController {
 
   /** Declare victory for the remaining player if one leaves. */
   public onPlayerLeft(): void {
-    if (this.status === MatchStatus.ENDED || this.room.participants.size === 2) {
+    if (this.stateController.matchState.status === MatchStatus.ENDED
+      || this.room.participants.size === 2) {
       return;
     }
 
@@ -73,12 +69,11 @@ export default class LifecycleController {
 
   /** Initialises the game, setting up player states and timers */
   public initGame(): void {
-    if (this.status !== MatchStatus.PREINIT) {
+    if (this.stateController.matchState.status !== MatchStatus.PREINIT) {
       return;
     }
 
-    this.status = MatchStatus.ONGOING;
-
+    this.stateController.matchState.status = MatchStatus.ONGOING;
     // Initialise the timeservice
     this.room.timeService.start();
 
@@ -91,11 +86,11 @@ export default class LifecycleController {
 
   /** Handle game over callbacks from GameLogic and broadcast to room. */
   private onGameOver(winnerID: number, reason: GameOverReason): void {
-    if (this.status === MatchStatus.ENDED) {
+    if (this.stateController.matchState.status === MatchStatus.ENDED) {
       return;
     }
 
-    this.status = MatchStatus.ENDED;
+    this.stateController.matchState.status = MatchStatus.ENDED;
     this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason });
   }
 
@@ -104,7 +99,7 @@ export default class LifecycleController {
     isBoard: boolean,
     progressData: { playerID: number; progress: number }[]
   ): void {
-    if (this.status !== MatchStatus.ONGOING) {
+    if (this.stateController.matchState.status !== MatchStatus.ONGOING) {
       return;
     }
 
@@ -129,17 +124,17 @@ export default class LifecycleController {
       return;
     }
 
-    // TODO: Future phase transitions
+    // Future phase transitions
     // Check for phase 2 completion (66% progress) 
-    // const phase2Players = progressData.filter(p => p.progress >= 66);
-    // if (phase2Players.length > 0) {
-    //   // Handle phase 2 completion logic
-    // }
+    const phase2Players = progressData.filter(p => p.progress >= 66);
+    if (phase2Players.length > 0) {
+      // Handle phase 2 completion logic
+    }
     // Check for phase 1 completion (33% progress)
-    // const phase1Players = progressData.filter(p => p.progress >= 33);
-    // if (phase1Players.length > 0) {
-    //   // Handle phase 1 completion logic
-    // }
+    const phase1Players = progressData.filter(p => p.progress >= 33);
+    if (phase1Players.length > 0) {
+      // Handle phase 1 completion logic
+    }
   }
 
   /** Reset state when closing room. */
@@ -148,6 +143,6 @@ export default class LifecycleController {
       clearTimeout(this.startTimer);
       this.startTimer = null;
     }
-    this.status = MatchStatus.ENDED;
+    this.stateController.matchState.status = MatchStatus.ENDED;
   }
 }

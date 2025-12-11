@@ -2,7 +2,7 @@ import { PlayerActions, ProtocolActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
 import ClientTimeCoordinator from './ClientTimeCoordinator';
 
-import type IPlayerState from '@shared/types/gamestate';
+import type { IPlayerState } from '@shared/types/gamestate';
 import type {
   ActionContractC2S
 } from '@shared/types/contracts/components/extendables/ActionContract';

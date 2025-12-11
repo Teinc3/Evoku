@@ -1,8 +1,14 @@
+import type MatchStatus from "../enums/matchstatus";
 import type PUPState from "./powerups";
 import type { IBoardState } from "./board";
 
 
-export default interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
+export interface IMatchState {
+  status: MatchStatus;
+  startTime?: Date;
+}
+
+export interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
   playerID: number;
   gameState?: GameState<SpecificBoardState>;
 }

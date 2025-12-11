@@ -1,7 +1,7 @@
-import { MatchStatus } from '../../types/enums';
+import MatchStatus from '@shared/types/enums/matchstatus';
 import GameStateController from '.';
 
-import type IPlayerState from '@shared/types/gamestate';
+import type { IPlayerState } from '@shared/types/gamestate';
 import type { SetCellContract } from '@shared/types/contracts';
 import type TimeCoordinator from '../time';
 import type { GameLogicCallbacks } from '../../types/gamelogic';
@@ -59,7 +59,6 @@ describe('GameStateController', () => {
 
     // Create mock callbacks
     mockCallbacks = {
-      getMatchStatus: jest.fn(() => MatchStatus.PREINIT),
       onProgressUpdate: jest.fn()
     };
 
@@ -87,15 +86,13 @@ describe('GameStateController', () => {
 
   describe('addPlayer', () => {
     it('should add player during PREINIT phase', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
-
       const result = gameState.addPlayer(1);
 
       expect(result).toBe(true);
     });
 
     it('should reject player addition during ONGOING phase', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.ONGOING);
+      gameState.matchState.status = MatchStatus.ONGOING;
 
       const result = gameState.addPlayer(1);
 
@@ -103,7 +100,7 @@ describe('GameStateController', () => {
     });
 
     it('should reject player addition during ENDED phase', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.ENDED);
+      gameState.matchState.status = MatchStatus.ENDED;
 
       const result = gameState.addPlayer(1);
 
@@ -111,8 +108,6 @@ describe('GameStateController', () => {
     });
 
     it('should handle multiple players', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
-
       const result1 = gameState.addPlayer(1);
       const result2 = gameState.addPlayer(2);
 
@@ -123,7 +118,6 @@ describe('GameStateController', () => {
 
   describe('removePlayer', () => {
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
     });
 
@@ -138,7 +132,7 @@ describe('GameStateController', () => {
     });
 
     it('should reject removal during ONGOING phase', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.ONGOING);
+      gameState.matchState.status = MatchStatus.ONGOING;
 
       const result = gameState.removePlayer(1);
       expect(result).toBe(false);
@@ -148,7 +142,6 @@ describe('GameStateController', () => {
   describe('setCallbacks', () => {
     it('should set callback functions', () => {
       const newCallbacks: GameLogicCallbacks = {
-        getMatchStatus: jest.fn(() => MatchStatus.ONGOING),
         onProgressUpdate: jest.fn()
       };
 
@@ -170,7 +163,6 @@ describe('GameStateController', () => {
 
     beforeEach(() => {
       // Add player and initialize game state
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(playerID);
       gameState.initGameStates();
     });
@@ -236,7 +228,6 @@ describe('GameStateController', () => {
 
   describe('initGameStates', () => {
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
       gameState.addPlayer(2);
     });
@@ -260,7 +251,6 @@ describe('GameStateController', () => {
     const playerID = 1;
 
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(playerID);
       gameState.initGameStates();
     });
@@ -294,7 +284,6 @@ describe('GameStateController', () => {
     });
 
     it('should return non-zero hash after adding players', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
       gameState.initGameStates(); // Initialize game states
 
@@ -303,7 +292,6 @@ describe('GameStateController', () => {
     });
 
     it('should return different hashes for different states', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
       gameState.initGameStates();
       const hash1 = gameState.computeHash();
@@ -316,7 +304,6 @@ describe('GameStateController', () => {
     });
 
     it('should return consistent hash for same state', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
 
       const hash1 = gameState.computeHash();
@@ -330,7 +317,6 @@ describe('GameStateController', () => {
     const playerID = 1;
 
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(playerID);
       gameState.initGameStates();
     });
@@ -376,7 +362,6 @@ describe('GameStateController', () => {
 
   describe('checkBoardProgresses (private method)', () => {
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
       gameState.addPlayer(2);
       gameState.initGameStates();
@@ -482,7 +467,6 @@ describe('GameStateController', () => {
     const cellIndex = 0; // Solution value is 4
 
     beforeEach(() => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(playerID);
       gameState.initGameStates();
     });
@@ -618,8 +602,6 @@ describe('GameStateController', () => {
 
   describe('integration scenarios', () => {
     it('should handle complete game flow', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
-
       // Add players
       expect(gameState.addPlayer(1)).toBe(true);
       expect(gameState.addPlayer(2)).toBe(true);
@@ -652,7 +634,6 @@ describe('GameStateController', () => {
     });
 
     it('should handle error recovery', () => {
-      mockCallbacks.getMatchStatus.mockReturnValue(MatchStatus.PREINIT);
       gameState.addPlayer(1);
       gameState.initGameStates();
 
