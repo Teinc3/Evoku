@@ -39,6 +39,6 @@
     <app-pup-orb-spinner/>
     <app-pup-slots-holder/>
   </div>
-  <app-numeric-buttons-holder/>
+  <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>
   <app-pup-slots-holder/>
 </div>
