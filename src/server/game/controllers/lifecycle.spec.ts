@@ -1,6 +1,6 @@
+import MatchStatus from '@shared/types/enums/matchstatus';
 import GameOverReason from '@shared/types/enums/GameOverReason';
 import { LifecycleActions } from '@shared/types/enums/actions';
-import { MatchStatus } from '../../types/enums';
 import LifecycleController from './lifecycle';
 
 import type { RoomModel } from '../../models/networking';
@@ -64,7 +64,8 @@ describe('LifecycleController', () => {
       removePlayer: jest.fn(),
       setCellValue: jest.fn(),
       getSolution: jest.fn(),
-      computeHash: jest.fn()
+      computeHash: jest.fn(),
+      matchState: { status: MatchStatus.PREINIT }
     } as unknown as jest.Mocked<GameStateController>;
     
     lifecycleController = new LifecycleController(mockRoom, mockGameState);
@@ -81,22 +82,15 @@ describe('LifecycleController', () => {
     });
 
     it('should initialize with PREINIT status', () => {
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
     });
 
     it('should set callbacks on game state controller', () => {
       expect(mockGameState.setCallbacks).toHaveBeenCalledWith(
         expect.objectContaining({
-          getMatchStatus: expect.any(Function),
           onProgressUpdate: expect.any(Function)
         })
       );
-    });
-
-    it('should provide match status through callback', () => {
-      const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
-      
-      expect(callbacks.getMatchStatus()).toBe(MatchStatus.PREINIT);
     });
   });
 
@@ -159,7 +153,7 @@ describe('LifecycleController', () => {
       
       // Should log error and set status to ENDED
       expect(consoleSpy).toHaveBeenCalledWith('Game initialization failed:', expect.any(Error));
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ENDED);
       
       consoleSpy.mockRestore();
     });
@@ -182,7 +176,7 @@ describe('LifecycleController', () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
       
       // Ensure we have exactly 2 players and status is not ENDED
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
       expect(mockRoom.participants.size).toBe(2);
       
       lifecycleController.onPlayerLeft();
@@ -197,7 +191,7 @@ describe('LifecycleController', () => {
       lifecycleController.onPlayerJoined();
       
       // Set up scenario where status is not ENDED and participants.size != 2
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
       
       // Reduce to 1 player so participants.size !== 2
       Object.defineProperty(mockRoom, 'participants', {
@@ -287,7 +281,7 @@ describe('LifecycleController', () => {
     it('should update status to ONGOING', () => {
       lifecycleController.initGame();
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ONGOING);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ONGOING);
     });
 
     it('should start time service', () => {
@@ -439,7 +433,7 @@ describe('LifecycleController', () => {
     it('should set status to ENDED', () => {
       lifecycleController.close();
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ENDED);
     });
 
     it('should handle close when no timer is active', () => {
@@ -477,7 +471,7 @@ describe('LifecycleController', () => {
       // Fast-forward timer
       jest.advanceTimersByTime(5000);
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ONGOING);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ONGOING);
     });
 
     it('should handle timer interruption correctly', () => {
@@ -496,7 +490,7 @@ describe('LifecycleController', () => {
       // Timer should be cleared and game should be over (ENDED = 2)
       jest.advanceTimersByTime(5000);
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ENDED);
     });
   });
 
@@ -512,7 +506,7 @@ describe('LifecycleController', () => {
       lifecycleController.onPlayerJoined();
       lifecycleController.onPlayerLeft();
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
     });
 
     it('should handle progress updates with invalid data', () => {
@@ -538,20 +532,20 @@ describe('LifecycleController', () => {
 
   describe('status transitions', () => {
     it('should follow correct status progression', () => {
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.PREINIT);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
       
       lifecycleController.initGame();
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ONGOING);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ONGOING);
       
       lifecycleController.close();
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ENDED);
     });
 
     it('should prevent invalid status transitions', () => {
       lifecycleController.close();
       
       lifecycleController.initGame();
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ENDED);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ENDED);
     });
 
     it('should maintain status consistency', () => {
@@ -561,7 +555,7 @@ describe('LifecycleController', () => {
       lifecycleController.initGame();
       lifecycleController.initGame();
       
-      expect(lifecycleController.matchStatus).toBe(MatchStatus.ONGOING);
+      expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ONGOING);
     });
   });
 });

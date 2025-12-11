@@ -1,2 +1,2 @@
-export { default as MatchStatus } from "./matchstatus";
+// eslint-disable-next-line import/prefer-default-export
 export { default as TimeValidationReason } from "./timevalidation";

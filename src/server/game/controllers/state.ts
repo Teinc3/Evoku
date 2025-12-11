@@ -1,12 +1,12 @@
 import { getSudoku } from "sudoku-gen";
 
+import MatchStatus from "@shared/types/enums/matchstatus";
 import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
-import { MatchStatus } from "../../types/enums";
 import ServerBoardModel from "../../models/logic/Board";
 
 
-import type IPlayerState from "@shared/types/gamestate";
+import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
 import type TimeCoordinator from "../time";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
@@ -16,6 +16,9 @@ import type { GameLogicCallbacks } from "../../types/gamelogic";
 export default class GameStateController {
   /** Base board and solution tuple */
   private readonly baseBoard: [number[], number[]];
+
+  /** Room state */
+  public readonly matchState: IMatchState;
 
   /** Game state for each player */
   private readonly gameStates: Map<number, IPlayerState<ServerBoardModel>>;
@@ -30,6 +33,9 @@ export default class GameStateController {
     private readonly timeService: TimeCoordinator,
     difficulty: "easy" | "medium" | "hard" | "expert" | "impossible" = "easy",
   ) {
+    this.matchState = {
+      status: MatchStatus.PREINIT
+    }
     this.gameStates = new Map();
 
     // Initialise a board
@@ -45,7 +51,7 @@ export default class GameStateController {
    * @returns Whether the player was successfully added.
    */
   public addPlayer(playerID: number): boolean {
-    if (this.callbacks.getMatchStatus() !== MatchStatus.PREINIT) {
+    if (this.matchState.status !== MatchStatus.PREINIT) {
       return false; // Cannot add players after game has started
     }
 
@@ -60,7 +66,7 @@ export default class GameStateController {
    */
   public removePlayer(playerID: number): boolean {
     const playerState = this.gameStates.get(playerID);
-    if (!playerState || this.callbacks.getMatchStatus() !== MatchStatus.PREINIT) {
+    if (!playerState || this.matchState.status !== MatchStatus.PREINIT) {
       return false; // Player not found or already dead
     }
 
