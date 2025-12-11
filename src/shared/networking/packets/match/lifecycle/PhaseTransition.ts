@@ -1,0 +1,8 @@
+import createPacket from "../../factory/createPacket";
+import { ByteCodec } from "../../../codecs/primitive";
+import LifecycleActions from "../../../../types/enums/actions/match/lifecycle";
+
+
+export default createPacket(LifecycleActions.PHASE_TRANSITION, {
+  newPhase: ByteCodec
+})

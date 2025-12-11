@@ -21,6 +21,8 @@ export default class DuelHudTopComponent {
   @Input()
   phaseTimeMs: number = 0;
   @Input()
+  phase: number = 0;
+  @Input()
   gameState!: GameStateManager;
 
   public Math = Math;

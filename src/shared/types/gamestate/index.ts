@@ -6,6 +6,7 @@ import type { IBoardState } from "./board";
 export interface IMatchState {
   status: MatchStatus;
   startTime?: Date;
+  phase: number;
 }
 
 export interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
