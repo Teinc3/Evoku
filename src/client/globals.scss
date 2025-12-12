@@ -1,3 +1,5 @@
+@use './themes';
+
 /* Register --angle as an animatable custom property */
 @property --angle {
   syntax: '<angle>';
@@ -16,40 +18,52 @@ app-root > * {
 }
 
 body {
-	margin: 0;
-	font-family: 'Exo 2', sans-serif;
+  margin: 0;
+  font-family: 'Exo 2', sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-
-  /* Landing background */
-  background-image: url('/assets/background/landing.webp');
+  color: var(--text-primary);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   background-size: cover;
-  background-position: 50% 30%;
   background-repeat: no-repeat;
 }
 
 h1 {
   text-align: center;
   flex-shrink: 0; /* Prevent h1 from shrinking */
+  color: var(--text-primary);
+  text-shadow: var(--glow-yin);
 }
 
 /* Shared button styles */
 .btn {
-	display: inline-block;
-	padding: 1rem 1.4rem;
-	font-size: 1.05rem;
-	border: 3px solid #333333;
-  border-radius: 8px;
-	text-decoration: none;
-	color: #222;
-	background: #fff;
+  display: inline-block;
+  padding: 1rem 1.4rem;
+  font-size: 1.05rem;
+  border: 2px solid var(--yang-primary);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--yin-surface) 0%, var(--yin-surface-2) 100%);
+  box-shadow: var(--glow-soft), 0 12px 32px rgba(0, 0, 0, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 110ms ease;
 }
 
 .btn:hover {
-	border-color: #1976d2;
-	color: #1976d2;
+  border-color: var(--yang-secondary);
+  color: var(--yang-amber);
+  box-shadow: var(--glow-strong), 0 18px 38px rgba(0, 0, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+a {
+  color: var(--yang-amber);
+  text-shadow: var(--glow-yin);
 }
 
 /* Shared cooldown overlay styles */

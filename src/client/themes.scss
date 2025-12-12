@@ -1,0 +1,22 @@
+:root {
+  --yin-bg: #050710;
+  --yin-bg-alt: #0b1024;
+  --yin-surface: #0f1a32;
+  --yin-surface-2: #0c152b;
+  --yin-border: #1f2f54;
+  --yin-faint: #16203c;
+  --text-primary: #e7ecff;
+  --text-muted: #9cb5e1;
+  --yang-primary: #ff4d6d;
+  --yang-secondary: #ff9f1c;
+  --yang-amber: #ffd166;
+  --bg-gradient:
+    radial-gradient(circle at 20% 20%, rgba(36, 84, 163, 0.16), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(255, 77, 109, 0.12), transparent 35%),
+    linear-gradient(135deg, #050710, #0c1226 55%, #070b17);
+  --panel-gradient: linear-gradient(135deg, rgba(16, 26, 50, 0.95), rgba(9, 14, 32, 0.95));
+  --glow-strong: 0 0 22px rgba(255, 77, 109, 0.55);
+  --glow-soft: 0 0 18px rgba(255, 159, 28, 0.38);
+  --glow-yin: 0 0 20px rgba(91, 137, 255, 0.24);
+  --grid-glow-color: rgba(255, 159, 28, 0.35);
+}
