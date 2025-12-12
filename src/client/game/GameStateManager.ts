@@ -44,7 +44,7 @@ export default class GameStateManager {
     this.matchState = {
       status: MatchStatus.PREINIT,
       phase: 0
-    }
+    };
     this.gameStates = new Map();
     this.playerInfo = new Map();
     this.pendingActions = new Map();

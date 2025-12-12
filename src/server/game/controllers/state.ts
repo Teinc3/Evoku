@@ -36,7 +36,7 @@ export default class GameStateController {
     this.matchState = {
       status: MatchStatus.PREINIT,
       phase: 0
-    }
+    };
     this.gameStates = new Map();
 
     // Initialise a board

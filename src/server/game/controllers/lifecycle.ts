@@ -132,7 +132,7 @@ export default class LifecycleController {
       // Handle phase transition logic (e.g., notify players)
       this.room.broadcast(LifecycleActions.PHASE_TRANSITION, {
         newPhase: this.stateController.matchState.phase
-      })
+      });
     }
   }
 

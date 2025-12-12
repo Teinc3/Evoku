@@ -5,4 +5,4 @@ import LifecycleActions from "../../../../types/enums/actions/match/lifecycle";
 
 export default createPacket(LifecycleActions.PHASE_TRANSITION, {
   newPhase: ByteCodec
-})
+});
