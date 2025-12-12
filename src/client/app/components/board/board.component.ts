@@ -2,6 +2,7 @@ import {
   Component, Input, Output, EventEmitter, signal, HostListener,
   type DoCheck, type OnDestroy, ViewChildren, type QueryList,
 } from '@angular/core';
+import { NgIf } from '@angular/common';
 
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
@@ -9,6 +10,7 @@ import UtilityAction from '../../../types/utility';
 import { CursorDirectionEnum } from '../../../types/enums';
 import ClientBoardModel from '../../../models/Board';
 import SudokuCellComponent from './cell/cell.component';
+import FloatingTextComponent, { type FloatingTextData } from '../combat/floating-text/floating-text.component';
 
 import type { WritableSignal } from '@angular/core';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -19,7 +21,7 @@ import type ClientCellModel from '../../../models/Cell';
 @Component({
   selector: 'app-board-model',
   standalone: true,
-  imports: [SudokuCellComponent],
+  imports: [SudokuCellComponent, FloatingTextComponent, NgIf],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -28,6 +30,16 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   @Input() public model!: ClientBoardModel;
   /** Whether this board belongs to the current player */
   @Input() public isMe = false;
+  /** Combat layer: defuse type for grid line pulsing */
+  @Input() public defuseType: 'row' | 'col' | 'box' | null = null;
+  /** Combat layer: targeted cell index for threat border */
+  @Input() public threatCell: number | null = null;
+  /** Combat layer: global threat (entire board) */
+  @Input() public globalThreat = false;
+  /** Combat layer: ghost target cells */
+  @Input() public ghostCells: number[] = [];
+  /** Combat layer: floating text data */
+  @Input() public floatingText: FloatingTextData | null = null;
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();

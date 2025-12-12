@@ -1,0 +1,13 @@
+<div class="combat-badge" *ngIf="data" [class.flash]="shouldFlash">
+  <div class="badge-icon">
+    <img [src]="data.pupIcon" alt="PUP" />
+  </div>
+  <div class="badge-defuse">
+    <span class="defuse-icon" [attr.data-type]="data.defuseType">
+      {{ data.defuseType === 'row' ? '→' : data.defuseType === 'col' ? '↓' : '⊞' }}
+    </span>
+  </div>
+  <div class="badge-timer">
+    {{ formattedTime }}
+  </div>
+</div>

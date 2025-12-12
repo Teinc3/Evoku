@@ -1,7 +1,7 @@
-export enum PUPOrbState {
-  IDLE,
-  READY,
-  SPINNING
+enum PupOrbState {
+  IDLE = 'idle',
+  SPINNING = 'spinning',
+  READY = 'ready'
 }
 
-export default PUPOrbState;
+export default PupOrbState;

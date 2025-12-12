@@ -20,8 +20,10 @@ import UtilityButtonsHolderComponent
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
+import CombatBadgeComponent, { type CombatBadgeData } from '../../../../components/combat/combat-badge/combat-badge.component';
 import { AppView } from '../../../../../types/enums';
 import GameStateManager from '../../../../../game/GameStateManager';
+import type { FloatingTextData } from '../../../../components/combat/floating-text/floating-text.component';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { MatchFoundContract } from '@shared/types/contracts';
@@ -38,7 +40,8 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
     UtilityButtonsHolderComponent, 
     NumericButtonsHolderComponent,
     PupSlotsHolderComponent,
-    PupOrbSpinnerComponent
+    PupOrbSpinnerComponent,
+    CombatBadgeComponent
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'
@@ -51,6 +54,20 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
   @ViewChild('board1') board1!: BoardModelComponent;
   @ViewChild('board2') board2!: BoardModelComponent;
+
+  // Combat layer state
+  combatBadge1: CombatBadgeData | null = null;
+  combatBadge2: CombatBadgeData | null = null;
+  board1DefuseType: 'row' | 'col' | 'box' | null = null;
+  board1ThreatCell: number | null = null;
+  board1GlobalThreat = false;
+  board1GhostCells: number[] = [];
+  board1FloatingText: FloatingTextData | null = null;
+  board2DefuseType: 'row' | 'col' | 'box' | null = null;
+  board2ThreatCell: number | null = null;
+  board2GlobalThreat = false;
+  board2GhostCells: number[] = [];
+  board2FloatingText: FloatingTextData | null = null;
 
   constructor(
     private viewStateService: ViewStateService,

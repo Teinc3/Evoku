@@ -1,4 +1,8 @@
-<div class="board">
+<div class="board" 
+  [class.pulse-row]="defuseType === 'row'"
+  [class.pulse-col]="defuseType === 'col'"
+  [class.pulse-box]="defuseType === 'box'"
+  [class.threat-border]="globalThreat">
   @for (i of indices; track i) {
     <app-cell-model
       [model]="getCellModel(i)"
@@ -8,6 +12,8 @@
       [class.selected]="selected() === i"
       [class.highlight-related]="isRelatedCell(i)"
       [class.highlight-same-number]="isSameNumberCell(i)"
+      [class.threat-cell]="threatCell === i"
+      [class.ghost-target]="ghostCells.includes(i)"
       [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
     ></app-cell-model>
   }
@@ -18,4 +24,5 @@
       [style.transition-duration]="cooldownHelper.transitionDuration()"
     ></div>
   }
+  <app-floating-text *ngIf="floatingText" [data]="floatingText"></app-floating-text>
 </div>

@@ -1,0 +1,32 @@
+.floating-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  font-weight: bold;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 1000;
+  animation: float-up 2s ease-out forwards;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+
+  &[data-type="reflected"] {
+    color: #4caf50;
+  }
+
+  &[data-type="hit"] {
+    color: #f44336;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -150%);
+  }
+}
