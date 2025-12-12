@@ -1,4 +1,4 @@
-<div class="board">
+<div class="board" [class.threat-border]="hasThreatBorder">
   @for (i of indices; track i) {
     <app-cell-model
       [model]="getCellModel(i)"
@@ -17,5 +17,28 @@
       [style.--angle]="cooldownHelper.currentAngle() + 'deg'"
       [style.transition-duration]="cooldownHelper.transitionDuration()"
     ></div>
+  }
+  @if (shouldPulseRow) {
+    <div class="pulse-row-overlay"></div>
+  }
+  @if (shouldPulseCol) {
+    <div class="pulse-col-overlay"></div>
+  }
+  @if (shouldPulseBox) {
+    <div class="pulse-box-overlay"></div>
+  }
+  @if (threatData?.targetIndices) {
+    @for (targetIdx of threatData.targetIndices; track targetIdx) {
+      <div 
+        class="ghost-target" 
+        [style]="getGhostTargetStyle(targetIdx)"
+      ></div>
+    }
+  }
+  @for (floatingText of floatingTexts; track floatingText.id) {
+    <app-floating-text
+      [data]="floatingText"
+      [onComplete]="removeFloatingText.bind(this)"
+    ></app-floating-text>
   }
 </div>

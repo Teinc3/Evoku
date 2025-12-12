@@ -1,0 +1,44 @@
+:host {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.floating-text {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: float-up 2s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  
+  &.success {
+    color: #4af;
+    text-shadow: 
+      0 0 10px rgba(68, 170, 255, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.8);
+  }
+  
+  &.danger {
+    color: #f44;
+    text-shadow: 
+      0 0 10px rgba(255, 68, 68, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.8);
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+}
