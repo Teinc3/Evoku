@@ -1,0 +1,17 @@
+src/client/app/components/combat/
+├── combat-badge/
+│   ├── combat-badge.component.ts
+│   ├── combat-badge.component.html
+│   └── combat-badge.component.scss
+└── floating-text/
+    ├── floating-text.component.ts
+    ├── floating-text.component.html
+    └── floating-text.component.scss
+
+
+Files Modified
+src/client/app/components/board/board.component.ts - Added combat layer inputs
+src/client/app/components/board/board.component.html - Added CSS classes and floating text
+src/client/app/components/board/board.component.scss - Added all animations
+src/client/app/pages/demo/gameplay/duel/duel.demo.ts - Added combat state properties
+src/client/app/pages/demo/gameplay/duel/duel.demo.html - Integrated combat badges and board inputs
