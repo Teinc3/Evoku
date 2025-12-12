@@ -1,0 +1,13 @@
+<div class="floating-text-layer">
+  @for (msg of messages; track msg.id) {
+    <div
+      class="floating-text"
+      [class.reflect]="msg.tone === 'reflect'"
+      [class.hit]="msg.tone === 'hit'"
+      [style.left]="leftPercent(msg)"
+      [style.top]="topPercent(msg)"
+    >
+      {{ msg.text }}
+    </div>
+  }
+</div>

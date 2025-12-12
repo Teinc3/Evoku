@@ -22,8 +22,28 @@
   max-height: 100%;
 }
 
+.board.threat-global {
+  animation: board-alert 1.1s ease-in-out infinite;
+  border-color: #c62828;
+  box-shadow: 0 0 18px rgba(198, 40, 40, 0.55);
+}
+
 .global-cooldown-overlay {
   @extend %cooldown-overlay-base;
   background: conic-gradient(from 0deg, rgba(172, 172, 172, 0.2) 0deg var(--angle), transparent var(--angle) 360deg);
   z-index: 2; /* Above cells */
+}
+
+@keyframes board-alert {
+  0% {
+    box-shadow: 0 0 10px rgba(198, 40, 40, 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgba(198, 40, 40, 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 10px rgba(198, 40, 40, 0.35);
+  }
 }

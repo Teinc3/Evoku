@@ -22,8 +22,10 @@ export default class OnlineSampler {
 
     // Calculate milliseconds until next hour
     const now = new Date();
-    const msUntilNextHour = 
-      (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
+    const msUntilNextHour =
+      (60 - now.getUTCMinutes()) * 60 * 1000
+      - now.getUTCSeconds() * 1000
+      - now.getUTCMilliseconds();
 
     // Wait until next :00:00, then start the interval
     this.initialTimeout = setTimeout(() => {

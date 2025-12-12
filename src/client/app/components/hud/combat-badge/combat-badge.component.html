@@ -1,0 +1,14 @@
+<div class="combat-badge" [class.critical]="isCritical()">
+  <div class="badge-header">
+    <span class="label">Incoming</span>
+    <span class="timer">{{ countdownText() }}</span>
+  </div>
+
+  <div class="badge-body">
+    <div class="icon incoming">{{ state().incomingIcon }}</div>
+    <div class="defuse">
+      <span class="defuse-label">DEFUSE</span>
+      <span class="defuse-type">{{ defuseLabel() }}</span>
+    </div>
+  </div>
+</div>

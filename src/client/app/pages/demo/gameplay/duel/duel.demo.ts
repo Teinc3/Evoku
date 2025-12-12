@@ -15,6 +15,7 @@ import PupOrbSpinnerComponent
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import DuelHudTopComponent from '../../../../components/hud/duel-hud-top/duel-hud-top';
+import CombatBadgeComponent from '../../../../components/hud/combat-badge/combat-badge.component';
 import UtilityButtonsHolderComponent 
   from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
 import NumericButtonsHolderComponent 
@@ -26,6 +27,7 @@ import GameStateManager from '../../../../../game/GameStateManager';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { MatchFoundContract } from '@shared/types/contracts';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
+import type { CombatBadgeState } from '../../../../../types/combat';
 
 
 @Component({
@@ -33,6 +35,7 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
   standalone: true,
   imports: [
     DuelHudTopComponent, 
+    CombatBadgeComponent,
     BoardModelComponent, 
     UniversalProgressBarComponent, 
     UtilityButtonsHolderComponent, 
@@ -48,6 +51,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   public readonly gameState: GameStateManager;
   private subscriptions = new Subscription();
   private nextActionId = 0;
+  public combatBadge!: CombatBadgeState;
 
   @ViewChild('board1') board1!: BoardModelComponent;
   @ViewChild('board2') board2!: BoardModelComponent;
@@ -57,6 +61,12 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     private networkService: NetworkService
   ) {
     this.gameState = new GameStateManager(DuelDemoPageComponent.MAX_PLAYER_COUNT);
+    this.combatBadge = {
+      incomingIcon: 'PUP',
+      defuseType: 'row',
+      countdownMs: 9000,
+      criticalThresholdMs: 3000
+    };
   }
 
   ngOnInit(): void {
