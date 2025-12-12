@@ -7,6 +7,18 @@
   height: 100%;
 }
 
+@mixin pulse-grid-lines($direction, $divisions, $thickness, $opacity) {
+  background-image: 
+    repeating-linear-gradient(
+      to $direction,
+      transparent 0,
+      transparent calc(100% / $divisions - $thickness),
+      rgba(255, 165, 0, $opacity) calc(100% / $divisions - $thickness),
+      rgba(255, 165, 0, $opacity) calc(100% / $divisions)
+    );
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
 .board {
   /* Parent now controls outer width; board enforces square shape */
   aspect-ratio: 1 / 1;
@@ -26,27 +38,11 @@
   }
 
   &.pulse-row {
-    background-image: 
-      repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent calc(100% / 9 - 1px),
-        rgba(255, 165, 0, 0.6) calc(100% / 9 - 1px),
-        rgba(255, 165, 0, 0.6) calc(100% / 9)
-      );
-    animation: pulse-glow 1s ease-in-out infinite;
+    @include pulse-grid-lines(bottom, 9, 1px, 0.6);
   }
 
   &.pulse-col {
-    background-image: 
-      repeating-linear-gradient(
-        to right,
-        transparent 0,
-        transparent calc(100% / 9 - 1px),
-        rgba(255, 165, 0, 0.6) calc(100% / 9 - 1px),
-        rgba(255, 165, 0, 0.6) calc(100% / 9)
-      );
-    animation: pulse-glow 1s ease-in-out infinite;
+    @include pulse-grid-lines(right, 9, 1px, 0.6);
   }
 
   &.pulse-box {

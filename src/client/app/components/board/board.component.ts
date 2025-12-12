@@ -296,4 +296,9 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
 
     return noteDigit === selectedValue;
   }
+
+  /** Clear floating text after animation completes */
+  public onFloatingTextComplete(): void {
+    this.floatingText = null;
+  }
 }

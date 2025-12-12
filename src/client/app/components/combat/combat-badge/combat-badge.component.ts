@@ -16,10 +16,22 @@ export interface CombatBadgeData {
   styleUrl: './combat-badge.component.scss'
 })
 export default class CombatBadgeComponent {
+  static readonly FLASH_THRESHOLD_MS = 3000;
+
   @Input() data: CombatBadgeData | null = null;
 
   get shouldFlash(): boolean {
-    return !!this.data && this.data.timeRemaining < 3000;
+    return !!this.data && this.data.timeRemaining < CombatBadgeComponent.FLASH_THRESHOLD_MS;
+  }
+
+  get defuseIcon(): string {
+    if (!this.data) return '';
+    switch (this.data.defuseType) {
+      case 'row': return '→';
+      case 'col': return '↓';
+      case 'box': return '⊞';
+      default: return '';
+    }
   }
 
   get formattedTime(): string {

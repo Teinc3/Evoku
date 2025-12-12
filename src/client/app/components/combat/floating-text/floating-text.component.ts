@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common';
 
 
@@ -15,15 +15,16 @@ export interface FloatingTextData {
   styleUrl: './floating-text.component.scss'
 })
 export default class FloatingTextComponent implements OnInit {
+  static readonly ANIMATION_DURATION_MS = 2000;
+
   @Input() data: FloatingTextData | null = null;
-  visible = false;
+  @Output() animationComplete = new EventEmitter<void>();
 
   ngOnInit(): void {
     if (this.data) {
-      this.visible = true;
       setTimeout(() => {
-        this.visible = false;
-      }, 2000);
+        this.animationComplete.emit();
+      }, FloatingTextComponent.ANIMATION_DURATION_MS);
     }
   }
 }

@@ -362,5 +362,59 @@ describe('BoardModelComponent', () => {
       expect(cellElements[9].nativeElement.classList.contains('highlight-related')).toBeTrue();
     });
   });
+
+  describe('Combat Layer', () => {
+    it('should clear floatingText when onFloatingTextComplete is called', () => {
+      component.floatingText = { text: 'REFLECTED!', type: 'reflected' };
+      component.onFloatingTextComplete();
+      expect(component.floatingText).toBeNull();
+    });
+
+    it('should apply threat-border class when globalThreat is true', () => {
+      component.globalThreat = true;
+      fixture.detectChanges();
+      const board = fixture.debugElement.query(By.css('.board'));
+      expect(board.nativeElement.classList.contains('threat-border')).toBeTrue();
+    });
+
+    it('should apply pulse-row class when defuseType is row', () => {
+      component.defuseType = 'row';
+      fixture.detectChanges();
+      const board = fixture.debugElement.query(By.css('.board'));
+      expect(board.nativeElement.classList.contains('pulse-row')).toBeTrue();
+    });
+
+    it('should apply pulse-col class when defuseType is col', () => {
+      component.defuseType = 'col';
+      fixture.detectChanges();
+      const board = fixture.debugElement.query(By.css('.board'));
+      expect(board.nativeElement.classList.contains('pulse-col')).toBeTrue();
+    });
+
+    it('should apply pulse-box class when defuseType is box', () => {
+      component.defuseType = 'box';
+      fixture.detectChanges();
+      const board = fixture.debugElement.query(By.css('.board'));
+      expect(board.nativeElement.classList.contains('pulse-box')).toBeTrue();
+    });
+
+    it('should apply threat-cell class to targeted cell', () => {
+      component.threatCell = 10;
+      fixture.detectChanges();
+      const cells = fixture.debugElement.queryAll(By.css('app-cell-model'));
+      expect(cells[10].nativeElement.classList.contains('threat-cell')).toBeTrue();
+      expect(cells[11].nativeElement.classList.contains('threat-cell')).toBeFalse();
+    });
+
+    it('should apply ghost-target class to ghost cells', () => {
+      component.ghostCells = [5, 10, 15];
+      fixture.detectChanges();
+      const cells = fixture.debugElement.queryAll(By.css('app-cell-model'));
+      expect(cells[5].nativeElement.classList.contains('ghost-target')).toBeTrue();
+      expect(cells[10].nativeElement.classList.contains('ghost-target')).toBeTrue();
+      expect(cells[15].nativeElement.classList.contains('ghost-target')).toBeTrue();
+      expect(cells[20].nativeElement.classList.contains('ghost-target')).toBeFalse();
+    });
+  });
 });
 

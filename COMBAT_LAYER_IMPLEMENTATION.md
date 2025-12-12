@@ -12,9 +12,9 @@
 
 **Features:**
 - Displays incoming PUP icon
-- Shows defuse type (→ for row, ↓ for col, ⊞ for box)
-- Countdown timer in MM:CS format (e.g., "08:73")
-- Flash/pulse animation when timeRemaining < 3000ms
+- Shows defuse type (→ for row, ↓ for col, ⊞ for box) via defuseIcon getter
+- Countdown timer in SS:cs format (seconds:centiseconds, e.g., "08:73")
+- Flash/pulse animation when timeRemaining < FLASH_THRESHOLD_MS (3000ms)
 
 ### 2. FloatingTextComponent
 **Location:** `src/client/app/components/combat/floating-text/`
@@ -25,10 +25,12 @@
 - `floating-text.component.scss` - Float-up animation with color variants
 
 **Features:**
-- Displays outcome text ("REFLECTED!", "SHATTERED!", "FROZEN!", "LOCKED!")
-- Type-based coloring (green for reflected, red for hit)
-- Floats upward from board center with fade-out
-- Auto-removes after 2 seconds
+- Displays outcome text with two types:
+  - Type 'reflected': Green styling for successful defenses (e.g., "REFLECTED!", "SHATTERED!")
+  - Type 'hit': Red styling for successful attacks (e.g., "FROZEN!", "LOCKED!")
+- Floats upward from board center with fade-out animation
+- Emits animationComplete event after ANIMATION_DURATION_MS (2000ms)
+- Parent component clears floatingText data on completion to prevent memory leaks
 
 ## Files Modified
 
@@ -43,6 +45,7 @@
   - `globalThreat: boolean`
   - `ghostCells: number[]`
   - `floatingText: FloatingTextData | null`
+- Added onFloatingTextComplete() method to clear floatingText after animation
 
 **Changes in `board.component.html`:**
 - Added CSS classes to board div: `pulse-row`, `pulse-col`, `pulse-box`, `threat-border`
@@ -50,9 +53,10 @@
 - Added FloatingTextComponent at end of board
 
 **Changes in `board.component.scss`:**
+- Added SCSS mixin `pulse-grid-lines` to reduce duplication
 - Added `threat-border` animation (red pulsing border)
-- Added `pulse-row` (horizontal orange grid lines)
-- Added `pulse-col` (vertical orange grid lines)
+- Added `pulse-row` (horizontal orange grid lines) using mixin
+- Added `pulse-col` (vertical orange grid lines) using mixin
 - Added `pulse-box` (thick 3×3 division lines)
 - Added `threat-cell` animation (red pulsing cell border)
 - Added `ghost-target` pseudo-element (semi-transparent red overlay)
