@@ -4,22 +4,25 @@ import {
 } from '@angular/core';
 
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
+import DefuseType from '../../../types/enums/defuse-type';
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import { CursorDirectionEnum } from '../../../types/enums';
 import ClientBoardModel from '../../../models/Board';
 import SudokuCellComponent from './cell/cell.component';
+import FloatingTextComponent from './floating-text/floating-text.component';
 
 import type { WritableSignal } from '@angular/core';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
 import type ClientCellModel from '../../../models/Cell';
+import type { ThreatData, FloatingTextData } from '../../../types/combat';
 
 
 @Component({
   selector: 'app-board-model',
   standalone: true,
-  imports: [SudokuCellComponent],
+  imports: [SudokuCellComponent, FloatingTextComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -28,6 +31,8 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   @Input() public model!: ClientBoardModel;
   /** Whether this board belongs to the current player */
   @Input() public isMe = false;
+  /** Combat threat data for visual feedback */
+  @Input() public threatData: ThreatData | null = null;
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
@@ -39,6 +44,13 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
   public readonly cooldownHelper: CooldownAnimationHelper;
+
+  /** Floating text notifications */
+  public floatingTexts: FloatingTextData[] = [];
+  private nextFloatingTextId = 0;
+
+  /** Expose DefuseType for template */
+  public readonly DefuseType = DefuseType;
 
   constructor() {
     this.indices = Array.from({ length: 81 }, (_, i) => i);
@@ -283,5 +295,61 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     }
 
     return noteDigit === selectedValue;
+  }
+
+  /**
+   * Add a floating text notification
+   * @param data The floating text data
+   */
+  public addFloatingText(data: Omit<FloatingTextData, 'id'>): void {
+    const floatingText: FloatingTextData = {
+      ...data,
+      id: this.nextFloatingTextId++
+    };
+    this.floatingTexts.push(floatingText);
+  }
+
+  /**
+   * Remove floating text after animation completes
+   * @param id The floating text ID
+   */
+  public removeFloatingText(id: number): void {
+    const index = this.floatingTexts.findIndex(ft => ft.id === id);
+    if (index !== -1) {
+      this.floatingTexts.splice(index, 1);
+    }
+  }
+
+  /**
+   * Check if grid line pulse should be active
+   */
+  get shouldPulseRow(): boolean {
+    return this.threatData?.defuseType === DefuseType.ROW;
+  }
+
+  get shouldPulseCol(): boolean {
+    return this.threatData?.defuseType === DefuseType.COL;
+  }
+
+  get shouldPulseBox(): boolean {
+    return this.threatData?.defuseType === DefuseType.BOX;
+  }
+
+  get hasThreatBorder(): boolean {
+    return this.threatData !== null;
+  }
+
+  /**
+   * Get ghost target styles for positioning
+   * @param cellIndex The cell index to target
+   */
+  public getGhostTargetStyle(cellIndex: number): Record<string, string> {
+    const row = Math.floor(cellIndex / 9);
+    const col = cellIndex % 9;
+    
+    return {
+      'grid-row': `${row + 1}`,
+      'grid-column': `${col + 1}`
+    };
   }
 }

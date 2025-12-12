@@ -3,13 +3,16 @@ import { Input, Component } from '@angular/core';
 import UniversalProgressBarComponent
   from '../universal-progress-bar/universal-progress-bar.component';
 import PhaseTimerComponent from '../phase-timer/phase-timer.component';
+import CombatBadgeComponent from '../combat-badge/combat-badge.component';
 import GameStateManager from '../../../../game/GameStateManager';
+
+import type { ThreatData } from '../../../types/combat';
 
 
 @Component({
   selector: 'app-duel-hud-top',
   standalone: true,
-  imports: [UniversalProgressBarComponent, PhaseTimerComponent],
+  imports: [UniversalProgressBarComponent, PhaseTimerComponent, CombatBadgeComponent],
   templateUrl: './duel-hud-top.html',
   styleUrl: './duel-hud-top.scss'
 })
@@ -24,6 +27,10 @@ export default class DuelHudTopComponent {
   phase: number = 0;
   @Input()
   gameState!: GameStateManager;
+  @Input()
+  myThreat: ThreatData | null = null;
+  @Input()
+  opponentThreat: ThreatData | null = null;
 
   public Math = Math;
 
