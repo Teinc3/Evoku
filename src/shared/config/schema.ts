@@ -2,6 +2,16 @@ import { z } from 'zod';
 
 
 export const SharedConfigSchema = z.object({
+  game: z.object({
+    cooldown: z.object({
+      board: z.array(z.number().int().nonnegative()).length(3),
+      cell: z.number().int().nonnegative(),
+    }),
+    objectives: z.object({
+      normalGain: z.array(z.number().int().nonnegative()).length(3),
+      goldenGain: z.array(z.number().int().nonnegative()).length(3),
+    }),
+  }),
   networking: z.object({
     ws: z.object({
       uri: z.string().url().nonempty(),

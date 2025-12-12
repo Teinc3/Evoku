@@ -1,3 +1,5 @@
+import sharedConfig from "../../config";
+
 import type { default as BaseCellModel, CellModelConstructor } from "../cell";
 import type { IBoardState } from "../../types/gamestate/board";
 
@@ -9,7 +11,8 @@ export default abstract class BaseBoardModel<
   PlatformSpecificCellModel extends BaseCellModel
 > implements IBoardState {
 
-  static readonly GLOBAL_COOLDOWN_DURATION = 5000; // 5 seconds
+  // TODO: Make global board cooldown depend on phase
+  static readonly GLOBAL_COOLDOWN_DURATION = sharedConfig.game.cooldown.board[0]; // 5 seconds
    
   abstract get CellModelClass(): CellModelConstructor<PlatformSpecificCellModel>;
 
