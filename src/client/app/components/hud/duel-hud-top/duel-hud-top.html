@@ -1,7 +1,10 @@
-<app-universal-progress-bar
-  [percentage]="boardProgress1"
-  [isVertical]="false"
->{{ myDisplayInfo }}</app-universal-progress-bar>
+<div class="player-header player-1">
+  <app-universal-progress-bar
+    [percentage]="boardProgress1"
+    [isVertical]="false"
+  >{{ myDisplayInfo }}</app-universal-progress-bar>
+  <app-combat-badge [threatData]="myThreat"></app-combat-badge>
+</div>
 
 <app-phase-timer
   [timeMs]="phaseTimeMs"
@@ -9,8 +12,11 @@
   [phase]="phase"
 />
 
-<app-universal-progress-bar
-  [percentage]="boardProgress2"
-  [isVertical]="false"
-  [flipDirection]="true"
->{{ opponentDisplayInfo }}</app-universal-progress-bar>
+<div class="player-header player-2">
+  <app-universal-progress-bar
+    [percentage]="boardProgress2"
+    [isVertical]="false"
+    [flipDirection]="true"
+  >{{ opponentDisplayInfo }}</app-universal-progress-bar>
+  <app-combat-badge [threatData]="opponentThreat"></app-combat-badge>
+</div>
