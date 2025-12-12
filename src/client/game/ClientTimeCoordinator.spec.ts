@@ -62,4 +62,21 @@ describe('ClientTimeCoordinator', () => {
     // Not reset
     expect(timeCoordinator.clientTime).not.toBe(0);
   });
+
+  it('should calculate time elapsed correctly', () => {
+    // Default is 0
+    expect(timeCoordinator.timeElapsed).toBe(0);
+
+    // Initialize game
+    timeCoordinator.onGameInit();
+    
+    // Should be close to 0 immediately
+    expect(timeCoordinator.timeElapsed).toBeGreaterThanOrEqual(0);
+    
+    // Mock clientTime to simulate time passing
+    spyOnProperty(timeCoordinator, 'clientTime', 'get')
+      .and.returnValue(timeCoordinator['startTime']! + 1000);
+    
+    expect(timeCoordinator.timeElapsed).toBe(1000);
+  });
 });

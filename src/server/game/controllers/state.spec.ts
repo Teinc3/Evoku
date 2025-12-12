@@ -224,6 +224,47 @@ describe('GameStateController', () => {
         [{ playerID, progress: 75 }]
       );
     });
+
+    it('should increment PUP progress when cell is set correctly for the first time', () => {
+      mockTimeService.assessTiming.mockReturnValue(1001);
+      mockTimeService.updateLastActionTime.mockReturnValue(1001);
+      mockServerBoardModel.setCell.mockReturnValue(true);
+      
+      // Mock solution to match the value (7)
+      const mockSolution = new Array(81).fill(0);
+      mockSolution[mockData.cellIndex] = 7;
+      gameState['solutions'].set(playerID, mockSolution);
+
+      // Mock cell state
+      const mockCell = {
+        value: 7,
+        pupProgressSet: false,
+        goldenObjectiveActive: false,
+        fixed: false
+      };
+      
+      // Use the existing mockServerBoardModel but update the cell
+      mockServerBoardModel.board[mockData.cellIndex] = mockCell;
+      
+      const mockGameState = {
+        boardState: mockServerBoardModel,
+        pupProgress: 0,
+        powerups: []
+      };
+      gameState['gameStates'].set(
+        playerID,
+        { playerID, gameState: mockGameState } as unknown as IPlayerState<ServerBoardModel>
+      );
+
+      // Set phase to 0
+      gameState.matchState.phase = 0;
+
+      gameState.setCellValue(playerID, mockData);
+
+      // Check if pupProgress increased
+      expect(mockGameState.pupProgress).toBeGreaterThan(0);
+      expect(mockCell.pupProgressSet).toBe(true);
+    });
   });
 
   describe('initGameStates', () => {
@@ -564,6 +605,11 @@ describe('GameStateController', () => {
         .checkPUPProgress(playerID, cellIndex);
 
       expect(playerState?.gameState?.pupProgress).toBe(100); // 90 + 20 + 50 = 160, clamped to 100
+
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
+        false,
+        [{ playerID, progress: 100 }]
+      );
     });
 
     it('should not call callback when progress does not change', () => {

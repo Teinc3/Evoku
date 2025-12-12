@@ -12,9 +12,11 @@ import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
+import type { IPlayerState } from '@shared/types/gamestate';
 import type { MatchFoundContract, PingContract } from '@shared/types/contracts';
 import type BoardModelComponent from '../../../../components/board/board.component';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
+import type ClientBoardModel from '../../../../../models/Board';
 
 
 describe('DuelDemoPageComponent', () => {
@@ -84,6 +86,71 @@ describe('DuelDemoPageComponent', () => {
       packetSubjects.get(action)!.next(mockInitData as unknown as ActionEnum);
 
       expect(component.gameState.initGameStates).toHaveBeenCalledWith(mockInitData.cellValues);
+    });
+
+    it('should handle PHASE_TRANSITION packet', () => {
+      const mockData = { newPhase: 1 };
+      const action = LifecycleActions.PHASE_TRANSITION;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      expect(component.gameState.matchState.phase).toBe(1);
+    });
+
+    it('should handle UPDATE_PROGRESS packet for board progress', () => {
+      const mockData = { playerID: 0, isBoard: true, progress: 50 };
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      // Mock player state
+      const mockBoardState = { progress: 0 };
+      const mockPlayerState = { gameState: { boardState: mockBoardState } };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue(
+        mockPlayerState as unknown as IPlayerState<ClientBoardModel>
+      );
+
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      expect(mockBoardState.progress).toBe(50);
+    });
+
+    it('should handle UPDATE_PROGRESS packet for PUP progress', () => {
+      const mockData = { playerID: 0, isBoard: false, progress: 75 };
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      // Mock player state
+      const mockPlayerState = { gameState: { pupProgress: 0 } };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue(
+        mockPlayerState as unknown as IPlayerState<ClientBoardModel>
+      );
+
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      expect(mockPlayerState.gameState.pupProgress).toBe(75);
+    });
+
+    it('should ignore UPDATE_PROGRESS if player state not found', () => {
+      const mockData = { playerID: 99, isBoard: true, progress: 50 };
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      // Mock getPlayerState to return undefined (or mock object with no gameState)
+      spyOn(component.gameState, 'getPlayerState').and.returnValue(
+        { gameState: undefined } as unknown as IPlayerState<ClientBoardModel>
+      );
+
+      // Should not throw error
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
     });
 
     it('should handle CELL_SET packet', () => {
@@ -157,6 +224,66 @@ describe('DuelDemoPageComponent', () => {
       expect(component.gameState.getPlayerBoard).toHaveBeenCalledWith(1);
       expect(mockBoard.confirmCellSet).toHaveBeenCalledWith(0, 5, 500);
       expect(mockMap.delete).toHaveBeenCalledWith(123);
+    });
+
+    it('should handle PHASE_TRANSITION packet', () => {
+      const phaseData = { newPhase: 1 };
+      const action = LifecycleActions.PHASE_TRANSITION;
+      
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      
+      packetSubjects.get(action)!.next(phaseData as unknown as ActionEnum);
+      
+      expect(component.gameState.matchState.phase).toBe(1);
+    });
+
+    it('should handle UPDATE_PROGRESS packet for board', () => {
+      const progressData = {
+        playerID: 0,
+        isBoard: true,
+        progress: 50
+      };
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      
+      // Mock getPlayerState
+      const mockBoardState = { progress: 0 };
+      const mockGameState = { boardState: mockBoardState };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({ 
+        gameState: mockGameState 
+      } as unknown as IPlayerState<ClientBoardModel>);
+      
+      packetSubjects.get(action)!.next(progressData as unknown as ActionEnum);
+      
+      expect(mockBoardState.progress).toBe(50);
+    });
+
+    it('should handle UPDATE_PROGRESS packet for PUP', () => {
+      const progressData = {
+        playerID: 0,
+        isBoard: false,
+        progress: 75
+      };
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+      
+      // Mock getPlayerState
+      const mockGameState = { pupProgress: 0 };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({ 
+        gameState: mockGameState 
+      } as unknown as IPlayerState<ClientBoardModel>);
+      
+      packetSubjects.get(action)!.next(progressData as unknown as ActionEnum);
+      
+      expect(mockGameState.pupProgress).toBe(75);
     });
 
     it('should handle PING packet', () => {
