@@ -8,21 +8,24 @@
   aspect-ratio: 1;
   /* Borders are controlled by parent board via nth-child selectors; default to none here */
   border: 0;
-  background: transparent;
+  background: linear-gradient(145deg, var(--yin-surface), var(--yin-surface-2));
   padding: 0;
   cursor: pointer;
-  border-right: 1px solid #9a9a9a;
-  border-bottom: 1px solid #9a9a9a;
+  border-right: 1px solid var(--yin-border);
+  border-bottom: 1px solid var(--yin-border);
   container-type: inline-size;
   container-name: cell;
   font-family: inherit;
+  color: var(--text-primary);
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease, border-color 140ms ease,
+    transform 110ms ease;
 }
 
 /* Ordering adjusted to satisfy no-descending-specificity */
 /* 1) Thick vertical separators */
 :host:nth-child(9n + 4) .cell,
 :host:nth-child(9n + 7) .cell {
-  border-left: 4px solid #000000;
+  border-left: 3px solid var(--yang-secondary);
 }
 
 /* 2) Right-border suppression (must precede horizontal thick lines per linter) */
@@ -34,23 +37,29 @@
 
 /* 3) Selection state (before horizontal thick lines) */
 :host(.selected) .cell {
-  background: #9ed2ff;
+  background: linear-gradient(160deg, rgba(255, 77, 109, 0.14), rgba(255, 159, 28, 0.12));
+  border-color: var(--yang-secondary);
+  box-shadow: var(--glow-strong), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 /* 3.1) Highlight related cells (same row/column/grid) */
 :host(.highlight-related) .cell {
-  background: #c4e3ff;
+  background: rgba(255, 159, 28, 0.1);
+  border-color: rgba(255, 159, 28, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 159, 28, 0.25);
 }
 
 /* 3.2) Highlight same number cells (takes precedence) */
 :host(.highlight-same-number) .cell {
-  background: #7db8e8;
+  background: rgba(255, 77, 109, 0.18);
+  border-color: rgba(255, 77, 109, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(255, 77, 109, 0.3), var(--glow-soft);
 }
 
 /* 4) Thick horizontal separators */
 :host:nth-child(n + 28):nth-child(-n + 36) .cell,
 :host:nth-child(n + 55):nth-child(-n + 63) .cell {
-  border-top: 4px solid #000000;
+  border-top: 3px solid var(--yang-secondary);
 }
 
 /* 5) Bottom-border suppression */
@@ -68,27 +77,31 @@
   place-items: center;
   font-size: 50cqw;
   user-select: none;
-  color: #1976d2;
+  color: var(--yang-amber);
   font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 159, 28, 0.55);
 }
 
 /* Value coloring for fixed cells */
 .cell.fixed .v {
-  color: #000000;
+  color: var(--text-primary);
   font-weight: 700;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
 /* Value coloring for pending cells */
 .cell.pending .v {
-  color: #909090;
+  color: var(--text-muted);
   font-weight: 600;
+  text-shadow: none;
 }
 
 .pending-clear {
-  color: #909090;
+  color: var(--yang-primary);
   font-size: 2rem;
   font-weight: 600;
   user-select: none;
+  text-shadow: var(--glow-strong);
 }
 
 .notes {
@@ -99,7 +112,7 @@
   height: 100%;
   padding: 2px;
   gap: 1px;
-  color: #b0b0b0;
+  color: var(--text-muted);
 }
 
 .note {
@@ -112,25 +125,32 @@
 
 /* Highlight individual notes matching selected value */
 .note.highlight-note {
-  background: #7db8e8;
+  background: rgba(255, 77, 109, 0.24);
   border-radius: 2px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 77, 109, 0.4);
 }
 
 /* Ensure content is readable on selected background */
 :host(.selected) .notes,
 :host(.selected) .note {
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 159, 28, 0.12);
+  border-color: rgba(255, 159, 28, 0.45);
+  box-shadow: var(--glow-soft);
 }
 
 .cooldown-overlay {
   @extend %cooldown-overlay-base;
-  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.3) 0deg var(--angle), transparent var(--angle) 360deg);
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 77, 109, 0.32) 0deg var(--angle),
+    transparent var(--angle) 360deg
+  );
   z-index: 1;
 }
