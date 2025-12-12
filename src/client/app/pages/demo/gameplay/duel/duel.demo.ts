@@ -78,7 +78,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         // Initialize game states with the board data from server
         this.gameState.initGameStates(data.cellValues);
         this.gameState.timeCoordinator.onGameInit();
-        this.gameState.matchState.status = MatchStatus.ONGOING
+        this.gameState.matchState.status = MatchStatus.ONGOING;
       })
     );
 

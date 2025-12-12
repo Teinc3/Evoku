@@ -7,5 +7,5 @@ import type {
 export default interface LifecycleActionMap {
   [LifecycleActions.GAME_INIT]: GameInitContract;
   [LifecycleActions.GAME_OVER]: GameOverContract;
-  [LifecycleActions.PHASE_TRANSITION]: PhaseTransitionContract
+  [LifecycleActions.PHASE_TRANSITION]: PhaseTransitionContract;
 }
