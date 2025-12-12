@@ -1,8 +1,10 @@
 import MatchStatus from '@shared/types/enums/matchstatus';
 import GameOverReason from '@shared/types/enums/GameOverReason';
+import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import { LifecycleActions } from '@shared/types/enums/actions';
 import LifecycleController from './lifecycle';
 
+import type { IMatchState } from '@shared/types/gamestate';
 import type { RoomModel } from '../../models/networking';
 import type GameStateController from './state';
 
@@ -65,7 +67,7 @@ describe('LifecycleController', () => {
       setCellValue: jest.fn(),
       getSolution: jest.fn(),
       computeHash: jest.fn(),
-      matchState: { status: MatchStatus.PREINIT }
+      matchState: { status: MatchStatus.PREINIT, phase: 0 }
     } as unknown as jest.Mocked<GameStateController>;
     
     lifecycleController = new LifecycleController(mockRoom, mockGameState);
@@ -418,6 +420,21 @@ describe('LifecycleController', () => {
         expect.anything()
       );
     });
+
+    it('should trigger phase transition when progress threshold is met', () => {
+      lifecycleController.initGame();
+      
+      // Phase 0 -> 1 threshold is > 33.4%
+      const progressData = [{ playerID: 1, progress: 35 }];
+      
+      progressCallback(true, progressData);
+      
+      expect(lifecycleController['stateController'].matchState.phase).toBe(1);
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        LifecycleActions.PHASE_TRANSITION,
+        { newPhase: 1 }
+      );
+    });
   });
 
   describe('close', () => {
@@ -556,6 +573,38 @@ describe('LifecycleController', () => {
       lifecycleController.initGame();
       
       expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.ONGOING);
+    });
+  });
+
+  describe('Coverage Tests', () => {
+    it('should not broadcast GAME_OVER if match is already ended', () => {
+      // Set match status to ENDED
+      (lifecycleController['stateController'].matchState as IMatchState).status = MatchStatus.ENDED;
+  
+      // Call onGameOver
+      lifecycleController['onGameOver'](1, GameOverReason.SCORE);
+  
+      // Expect broadcast to NOT have been called
+      expect(mockRoom.broadcast).not.toHaveBeenCalled();
+    });
+  
+    it('should broadcast UPDATE_PROGRESS but not check for completion if isBoard is false', () => {
+      // Set match status to ONGOING
+      (
+        lifecycleController['stateController'].matchState as IMatchState
+      ).status = MatchStatus.ONGOING;
+  
+      const progressData = [{ playerID: 1, progress: 50 }];
+      
+      // Call updateProgress with isBoard = false
+      lifecycleController['updateProgress'](false, progressData);
+  
+      // Expect broadcast to have been called
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(ProtocolActions.UPDATE_PROGRESS, {
+        playerID: 1,
+        isBoard: false,
+        progress: 50
+      });
     });
   });
 });
