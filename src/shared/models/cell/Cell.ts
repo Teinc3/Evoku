@@ -1,3 +1,5 @@
+import sharedConfig from "../../config";
+
 import type BaseEffectModel from "../effect";
 import type { ICellState } from "../../types/gamestate/board";
 
@@ -10,7 +12,7 @@ export type CellModelConstructor<PlatformSpecificCellModel extends BaseCellModel
  * Model representing a cell in the game board.
  */
 export default class BaseCellModel implements ICellState {
-  static readonly CELL_COOLDOWN_DURATION = 10000; // 10 seconds
+  static readonly CELL_COOLDOWN_DURATION = sharedConfig.game.cooldown.cell; // 10 seconds
 
   public lastCooldownEnd: number;
 

@@ -3,8 +3,8 @@ import { getSudoku } from "sudoku-gen";
 import MatchStatus from "@shared/types/enums/matchstatus";
 import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
+import sharedConfig from "@shared/config";
 import ServerBoardModel from "../../models/logic/Board";
-
 
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
@@ -216,10 +216,10 @@ export default class GameStateController {
 
     if (!cell.pupProgressSet) {
       cell.pupProgressSet = true;
-      gameState.pupProgress += 20;
+      gameState.pupProgress += sharedConfig.game.objectives.normalGain[this.matchState.phase];
     }
     if (cell.goldenObjectiveActive) {
-      gameState.pupProgress += 50;
+      gameState.pupProgress += sharedConfig.game.objectives.goldenGain[this.matchState.phase];
       cell.goldenObjectiveActive = false;
     }
 

@@ -1,4 +1,14 @@
 {
+  "game": {
+    "cooldown": {
+      "board": [5000, 5000, 5000],
+      "cell": 10000
+    },
+    "objectives": {
+      "normalGain": [20, 15, 10],
+      "goldenGain": [50, 40, 30]
+    }
+  },
   "networking": {
     "ws": {
       "uri": "",
