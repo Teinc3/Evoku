@@ -7,6 +7,15 @@
 	[phase]="gameState.matchState.phase"
 ></app-duel-hud-top>
 
+<div class="combat-badge-row">
+  <app-combat-badge
+    [incomingIcon]="combatBadge.incomingIcon"
+    [defuseType]="combatBadge.defuseType"
+    [countdownMs]="combatBadge.countdownMs"
+    [criticalThresholdMs]="combatBadge.criticalThresholdMs"
+  />
+</div>
+
 <!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->
 <div class="hud-centre">
   <app-universal-progress-bar

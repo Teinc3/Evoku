@@ -1,4 +1,4 @@
-<div class="board">
+<div class="board" [class.threat-global]="threatGlobal">
   @for (i of indices; track i) {
     <app-cell-model
       [model]="getCellModel(i)"
@@ -9,6 +9,11 @@
       [class.highlight-related]="isRelatedCell(i)"
       [class.highlight-same-number]="isSameNumberCell(i)"
       [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
+      [class.threat-row]="isThreatRow(i)"
+      [class.threat-col]="isThreatCol(i)"
+      [class.threat-box]="isThreatBox(i)"
+      [class.threat-cell]="isThreatCell(i)"
+      [class.ghost-target]="isGhostTarget(i)"
     ></app-cell-model>
   }
   @if (cooldownHelper.currentAngle() > 0 || cooldownHelper.transitionDuration() !== '0s') {
@@ -18,4 +23,5 @@
       [style.transition-duration]="cooldownHelper.transitionDuration()"
     ></div>
   }
+  <app-floating-text [messages]="floatingTexts"></app-floating-text>
 </div>

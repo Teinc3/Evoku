@@ -8,18 +8,20 @@ import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import { CursorDirectionEnum } from '../../../types/enums';
 import ClientBoardModel from '../../../models/Board';
+import FloatingTextComponent from './floating-text/floating-text.component';
 import SudokuCellComponent from './cell/cell.component';
 
 import type { WritableSignal } from '@angular/core';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
+import type { FloatingTextMessage } from '../../../types/combat';
 import type ClientCellModel from '../../../models/Cell';
 
 
 @Component({
   selector: 'app-board-model',
   standalone: true,
-  imports: [SudokuCellComponent],
+  imports: [SudokuCellComponent, FloatingTextComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -28,6 +30,8 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   @Input() public model!: ClientBoardModel;
   /** Whether this board belongs to the current player */
   @Input() public isMe = false;
+  @Input() public threatGlobal = false;
+  @Input() public floatingTexts: FloatingTextMessage[] = [];
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
@@ -39,6 +43,11 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
   public readonly cooldownHelper: CooldownAnimationHelper;
+  private threatRowsSet: Set<number> = new Set<number>();
+  private threatColsSet: Set<number> = new Set<number>();
+  private threatBoxesSet: Set<number> = new Set<number>();
+  private threatCellsSet: Set<number> = new Set<number>();
+  private ghostTargetsSet: Set<number> = new Set<number>();
 
   constructor() {
     this.indices = Array.from({ length: 81 }, (_, i) => i);
@@ -55,6 +64,31 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
 
   ngOnDestroy(): void {
     this.cooldownHelper.reset();
+  }
+
+  @Input()
+  set threatRows(rows: number[]) {
+    this.threatRowsSet = new Set<number>(rows ?? []);
+  }
+
+  @Input()
+  set threatCols(cols: number[]) {
+    this.threatColsSet = new Set<number>(cols ?? []);
+  }
+
+  @Input()
+  set threatBoxes(boxes: number[]) {
+    this.threatBoxesSet = new Set<number>(boxes ?? []);
+  }
+
+  @Input()
+  set threatCells(cells: number[]) {
+    this.threatCellsSet = new Set<number>(cells ?? []);
+  }
+
+  @Input()
+  set ghostTargets(cells: number[]) {
+    this.ghostTargetsSet = new Set<number>(cells ?? []);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -212,6 +246,32 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   public onCellSelected(i: number): void {
     this.selected.set(i);
     this.selectionChanged.emit();
+  }
+
+  /** Threat helpers for Combat Layer visuals */
+  public isThreatRow(cellIndex: number): boolean {
+    const row = Math.floor(cellIndex / 9);
+    return this.threatRowsSet.has(row);
+  }
+
+  public isThreatCol(cellIndex: number): boolean {
+    const col = cellIndex % 9;
+    return this.threatColsSet.has(col);
+  }
+
+  public isThreatBox(cellIndex: number): boolean {
+    const boxRow = Math.floor(cellIndex / 27);
+    const boxCol = Math.floor((cellIndex % 9) / 3);
+    const boxIndex = boxRow * 3 + boxCol;
+    return this.threatBoxesSet.has(boxIndex);
+  }
+
+  public isThreatCell(cellIndex: number): boolean {
+    return this.threatCellsSet.has(cellIndex);
+  }
+
+  public isGhostTarget(cellIndex: number): boolean {
+    return this.ghostTargetsSet.has(cellIndex);
   }
 
   /** Checks if a cell is in the same row, column, or 3x3 grid as the selected cell */

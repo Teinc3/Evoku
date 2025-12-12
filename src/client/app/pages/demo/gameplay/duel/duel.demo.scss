@@ -11,6 +11,13 @@ app-duel-hud-top {
   margin-bottom: 3%;
 }
 
+.combat-badge-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
 .hud-centre {
   flex: 1 1 auto;
   /* Ratios used to derive widths from height (no deformation) */
