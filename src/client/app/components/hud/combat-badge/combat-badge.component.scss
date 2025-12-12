@@ -1,0 +1,60 @@
+@use '../../../../globals' as *;
+
+.combat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 100, 50, 0.15), rgba(255, 50, 100, 0.15));
+  border: 2px solid rgba(255, 100, 50, 0.5);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(4px);
+  animation: pulse-normal 1s ease-in-out infinite;
+  
+  &.critical {
+    border-color: rgba(255, 50, 50, 0.9);
+    background: linear-gradient(135deg, rgba(255, 50, 50, 0.3), rgba(255, 0, 0, 0.3));
+    animation: pulse-critical 0.5s ease-in-out infinite;
+  }
+  
+  .pup-icon,
+  .defuse-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+  }
+  
+  .timer {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 4px rgba(255, 100, 50, 0.8);
+    min-width: 3ch;
+    text-align: right;
+  }
+}
+
+@keyframes pulse-normal {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: 0 0 16px rgba(255, 50, 50, 0.9);
+  }
+}

@@ -1,0 +1,20 @@
+@if (threatData) {
+  <div 
+    class="combat-badge" 
+    [class.critical]="isCritical()"
+    role="alert"
+    [attr.aria-label]="'Incoming threat: ' + defuseLabel"
+  >
+    <img 
+      class="pup-icon" 
+      [src]="threatData.pupIcon" 
+      alt="Incoming powerup"
+    />
+    <img 
+      class="defuse-icon" 
+      [src]="defuseIcon" 
+      [alt]="defuseLabel"
+    />
+    <span class="timer">{{ timerDisplay() }}</span>
+  </div>
+}
