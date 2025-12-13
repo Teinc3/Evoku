@@ -1,0 +1,22 @@
+<div class="combat-badge" [class.active]="isActive" [class.critical]="isCritical">
+  <div class="badge-core">
+    <div class="pup-icon" aria-hidden="true">
+      @if (incoming) {
+        <img [src]="incoming.icon" [alt]="incoming.pupName + ' icon'" />
+      } @else {
+        <div class="placeholder">--</div>
+      }
+    </div>
+    <div class="badge-text">
+      <div class="title">@if (incoming) { Incoming PUP } @else { Safe }</div>
+      <div class="subtitle">{{ defuseLabel }}</div>
+    </div>
+  </div>
+
+  <div class="timer" aria-label="combat countdown">
+    <div class="count">{{ countdownText }}</div>
+    <div class="bar">
+      <div class="fill" [style.width.%]="progressPercent"></div>
+    </div>
+  </div>
+</div>

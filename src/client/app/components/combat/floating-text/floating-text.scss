@@ -1,0 +1,59 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: block;
+  overflow: hidden;
+}
+
+.floating-text-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-text {
+  position: relative;
+  min-width: 120px;
+  margin-top: 20%;
+  padding: 0.35rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  animation: float-up 1.2s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.floating-text.hit {
+  color: #d61f45;
+  border: 1px solid rgba(214, 31, 69, 0.2);
+  background: rgba(255, 237, 240, 0.92);
+  box-shadow: 0 12px 28px rgba(214, 31, 69, 0.2);
+}
+
+.floating-text.reflected {
+  color: #0f6ad6;
+  border: 1px solid rgba(15, 106, 214, 0.25);
+  background: rgba(230, 240, 255, 0.92);
+  box-shadow: 0 12px 28px rgba(15, 106, 214, 0.2);
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0.05;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-60px);
+    opacity: 0;
+  }
+}
