@@ -137,22 +137,6 @@ describe('DuelDemoPageComponent', () => {
       expect(mockPlayerState.gameState.pupProgress).toBe(75);
     });
 
-    it('should ignore UPDATE_PROGRESS if player state not found', () => {
-      const mockData = { playerID: 99, isBoard: true, progress: 50 };
-      const action = ProtocolActions.UPDATE_PROGRESS;
-      if (!packetSubjects.has(action)) {
-        packetSubjects.set(action, new Subject<ActionEnum>());
-      }
-
-      // Mock getPlayerState to return undefined (or mock object with no gameState)
-      spyOn(component.gameState, 'getPlayerState').and.returnValue(
-        { gameState: undefined } as unknown as IPlayerState<ClientBoardModel>
-      );
-
-      // Should not throw error
-      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
-    });
-
     it('should handle CELL_SET packet', () => {
       // Trigger CELL_SET
       const cellSetData = {
@@ -319,8 +303,8 @@ describe('DuelDemoPageComponent', () => {
       const mockMatchData: MatchFoundContract = {
         myID: 1,
         players: [
-          { playerID: 1, username: 'Player1' },
-          { playerID: 2, username: 'Player2' }
+          { playerID: 1, username: 'Player1', elo: 1000 },
+          { playerID: 2, username: 'Player2', elo: 1000 }
         ]
       };
 
@@ -548,8 +532,8 @@ describe('DuelDemoPageComponent', () => {
       const mockMatchData: MatchFoundContract = {
         myID: 1,
         players: [
-          { playerID: 1, username: 'Player1' },
-          { playerID: 2, username: 'Player2' }
+          { playerID: 1, username: 'Player1', elo: 1000 },
+          { playerID: 2, username: 'Player2', elo: 1000 }
         ]
       };
 

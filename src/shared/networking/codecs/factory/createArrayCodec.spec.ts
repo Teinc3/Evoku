@@ -33,8 +33,8 @@ describe('createArrayCodec Factory', () => {
     const ArrayOfPlayerInfoCodec = createArrayCodec(PlayerInfoCodec);
     const codec = new ArrayOfPlayerInfoCodec();
     const data: PlayerInfoContract[] = [
-      { playerID: 1, username: 'PlayerOne' },
-      { playerID: 2, username: 'PlayerTwo' },
+      { playerID: 1, username: 'PlayerOne', elo: 0 },
+      { playerID: 2, username: 'PlayerTwo', elo: 0 },
     ];
 
     codec.encode(buffer, data);

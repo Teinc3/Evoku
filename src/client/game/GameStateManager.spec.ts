@@ -23,8 +23,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 
@@ -36,8 +36,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 
@@ -58,8 +58,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 
@@ -75,8 +75,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 
@@ -98,8 +98,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 
@@ -139,8 +139,8 @@ describe('GameStateManager', () => {
     const mockMatchData = {
       myID: 1,
       players: [
-        { playerID: 1, username: 'Player1' },
-        { playerID: 2, username: 'Player2' }
+        { playerID: 1, username: 'Player1', elo: 1000 },
+        { playerID: 2, username: 'Player2', elo: 1000 }
       ]
     };
 

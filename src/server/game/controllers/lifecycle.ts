@@ -100,8 +100,7 @@ export default class LifecycleController {
 
     // Get winner and loser UUIDs
     const winnerUUID = this.room.playerMap.getKey(winnerID) as UUID;
-    const loserID = winnerID === 0 ? 1 : 0;
-    const loserUUID = this.room.playerMap.getKey(loserID) as UUID;
+    const loserUUID = this.room.playerMap.getKey(1 - winnerID) as UUID;
 
     if (!winnerUUID || !loserUUID) {
       // Fallback if UUIDs not found
@@ -132,14 +131,14 @@ export default class LifecycleController {
     // Update Redis
     try {
       await Promise.all([
-        async () => {
-          guestAuthService.updateElo(winnerUUID, newWinnerElo);
+        (async () => {
+          await guestAuthService.updateElo(winnerUUID, newWinnerElo);
           winnerSession.setElo(newWinnerElo);
-        },
-        async () => {
-          guestAuthService.updateElo(loserUUID, newLoserElo);
+        })(),
+        (async () => {
+          await guestAuthService.updateElo(loserUUID, newLoserElo);
           loserSession.setElo(newLoserElo);
-        }
+        })()
       ]);
     } catch (error) {
       console.error('Failed to update ELO in Redis:', error);

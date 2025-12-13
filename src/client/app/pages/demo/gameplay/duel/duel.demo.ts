@@ -82,6 +82,12 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subscriptions.add(this.networkService.onPacket(LifecycleActions.GAME_OVER)
+      .subscribe(async _data => {
+        this.gameState.matchState.status = MatchStatus.ENDED;
+      })
+    );
+
     // Subscribe to phase transition events
     this.subscriptions.add(this.networkService.onPacket(LifecycleActions.PHASE_TRANSITION)
       .subscribe(data => {

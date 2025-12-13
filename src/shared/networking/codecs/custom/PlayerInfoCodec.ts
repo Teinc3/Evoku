@@ -1,4 +1,4 @@
-import { ByteCodec, StringCodec } from "../primitive";
+import { ByteCodec, StringCodec, ShortCodec } from "../primitive";
 import CustomCodec from "../CustomCodec";
 
 import type { ICustomCodec } from "../../../types/networking/ICodec";
@@ -10,7 +10,8 @@ export default class PlayerInfoCodec extends CustomCodec<PlayerInfoContract>
 
   readonly codecMap = {
     playerID: ByteCodec,
-    username: StringCodec
+    username: StringCodec,
+    elo: ShortCodec
   }
   
 }
