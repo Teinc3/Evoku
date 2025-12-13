@@ -1,0 +1,7 @@
+<div class="floating-text-layer" aria-live="polite">
+  @for (msg of activeMessages; track msg.id) {
+    <div class="floating-text" [class.hit]="msg.tone === 'hit'" [class.reflected]="msg.tone === 'reflected'">
+      {{ msg.text }}
+    </div>
+  }
+</div>
