@@ -1,7 +1,10 @@
 import MatchStatus from "@shared/types/enums/matchstatus";
 import GameOverReason from "@shared/types/enums/GameOverReason";
 import { ProtocolActions, LifecycleActions } from "@shared/types/enums/actions";
+import RatingManager from "../../utils/rating";
+import guestAuthService from "../../services/auth";
 
+import type { UUID } from "crypto";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 import type { RoomModel } from "../../models/networking";
 import type GameStateController from "./state";
@@ -46,9 +49,8 @@ export default class LifecycleController {
   }
 
   /** Declare victory for the remaining player if one leaves. */
-  public onPlayerLeft(): void {
-    if (this.stateController.matchState.status === MatchStatus.ENDED
-      || this.room.participants.size === 2) {
+  public async onPlayerLeft(session: UUID): Promise<void> {
+    if (this.stateController.matchState.status === MatchStatus.ENDED) {
       return;
     }
 
@@ -57,12 +59,16 @@ export default class LifecycleController {
       this.startTimer = null;
     }
 
-    // If only one player remains, declare them the winner
-    if (this.room.participants.size === 1) {
-      const [remainingSession] = this.room.participants.values();
-      const winnerID = this.room.playerMap.get(remainingSession.uuid);
+    // If only one player remains after this leaves, they win
+    if (this.room.participants.size === 2) {
+      const remainingUUID = this.room.participants.values()
+        .find(s => s.uuid !== session)?.uuid;
+      if (!remainingUUID) {
+        return;
+      }
+      const winnerID = this.room.playerMap.get(remainingUUID);
       if (winnerID !== undefined) {
-        this.onGameOver(winnerID, GameOverReason.FORFEIT);
+        await this.onGameOver(winnerID, GameOverReason.FORFEIT);
       }
     }
   }
@@ -85,20 +91,59 @@ export default class LifecycleController {
   }
 
   /** Handle game over callbacks from GameLogic and broadcast to room. */
-  private onGameOver(winnerID: number, reason: GameOverReason): void {
+  private async onGameOver(winnerID: number, reason: GameOverReason): Promise<void> {
     if (this.stateController.matchState.status === MatchStatus.ENDED) {
       return;
     }
 
     this.stateController.matchState.status = MatchStatus.ENDED;
-    this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason });
+
+    // Get winner and loser UUIDs
+    const winnerUUID = this.room.playerMap.getKey(winnerID) as UUID;
+    const loserID = winnerID === 0 ? 1 : 0;
+    const loserUUID = this.room.playerMap.getKey(loserID) as UUID;
+
+    if (!winnerUUID || !loserUUID) {
+      // Fallback if UUIDs not found
+      this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason, eloChange: 0 });
+      return;
+    }
+
+    // Get sessions
+    const winnerSession = this.room.participants.get(winnerUUID);
+    const loserSession = this.room.participants.get(loserUUID);
+
+    if (!winnerSession || !loserSession) {
+      this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason, eloChange: 0 });
+      return;
+    }
+
+    // Get current ELOs
+    const winnerElo = winnerSession.getElo();
+    const loserElo = loserSession.getElo();
+
+    // Calculate ELO changes
+    const eloChange = RatingManager.calculateEloChange(winnerElo, loserElo);
+    const newWinnerElo = RatingManager.getNewWinnerElo(winnerElo, loserElo);
+    const newLoserElo = RatingManager.getNewLoserElo(loserElo, winnerElo);
+
+    // Update Redis
+    try {
+      await guestAuthService.updateElo(winnerUUID, newWinnerElo);
+      await guestAuthService.updateElo(loserUUID, newLoserElo);
+    } catch (error) {
+      console.error('Failed to update ELO in Redis:', error);
+    }
+
+    // Broadcast with ELO change
+    this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason, eloChange });
   }
 
   /** Handle board progress updates from GameLogic and determine phase transitions. */
-  private updateProgress(
+  private async updateProgress(
     isBoard: boolean,
     progressData: { playerID: number; progress: number }[]
-  ): void {
+  ): Promise<void> {
     if (this.stateController.matchState.status !== MatchStatus.ONGOING) {
       return;
     }
@@ -120,7 +165,7 @@ export default class LifecycleController {
     // Check for game completion (100% progress)
     const completedPlayer = progressData.find(p => p.progress >= 100);
     if (completedPlayer) {
-      this.onGameOver(completedPlayer.playerID, GameOverReason.SCORE);
+      await this.onGameOver(completedPlayer.playerID, GameOverReason.SCORE);
       return;
     }
 

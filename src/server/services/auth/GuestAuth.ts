@@ -24,9 +24,7 @@ export class GuestAuthService {
     return JSON.parse(data) as { elo: number };
   }
 
-  /**
-   * Store player data in Redis
-   */
+  /**  Store player data in Redis */
   private async setPlayerData(
     playerId: string, 
     elo: number, 
@@ -41,6 +39,11 @@ export class GuestAuthService {
       // Update without changing expiration
       await redisService.set(key, data);
     }
+  }
+
+  /** Update the ELO rating for an existing player */
+  async updateElo(playerId: string, newElo: number): Promise<void> {
+    await this.setPlayerData(playerId, newElo);
   }
 
   /**

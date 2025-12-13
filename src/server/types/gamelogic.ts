@@ -3,5 +3,5 @@ export interface GameLogicCallbacks {
   onProgressUpdate: (
     isBoard: boolean,
     progressData: { playerID: number; progress: number }[]
-  ) => void;
+  ) => Promise<void>;
 }

@@ -9,12 +9,21 @@ import { RoomManager } from '../managers';
 import type { SessionModel } from '../models/networking';
 
 
+jest.mock('../services/auth', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: {
+    updateElo: jest.fn().mockImplementation(() => Promise.resolve())
+  }
+}));
+
 // Create a minimal mock of the SessionModel for this test's purposes.
 // We need a UUID, a mutable `room` property, and a mockable `forward` method.
 class MockSession {
   public room: RoomModel | null = null;
   public forward = jest.fn();
   constructor(public readonly uuid: string) {}
+  public getElo() { return 1000; }
 }
 
 const generateUUIDs = (): [UUID, UUID, UUID] => {
