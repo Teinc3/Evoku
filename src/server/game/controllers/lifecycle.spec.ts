@@ -2,7 +2,7 @@ import MatchStatus from '@shared/types/enums/matchstatus';
 import GameOverReason from '@shared/types/enums/GameOverReason';
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import { LifecycleActions } from '@shared/types/enums/actions';
-import RatingManager from '../../utils/rating';
+import RatingCalculator from '../../utils/rating';
 import LifecycleController from './lifecycle';
 
 import type { IMatchState } from '@shared/types/gamestate';
@@ -50,10 +50,13 @@ describe('LifecycleController', () => {
       getTime: jest.fn().mockReturnValue(0)
     };
     
-    // Mock RatingManager static methods
-    jest.spyOn(RatingManager, 'calculateEloChange').mockReturnValue(40);
-    jest.spyOn(RatingManager, 'getNewWinnerElo').mockReturnValue(1040);
-    jest.spyOn(RatingManager, 'getNewLoserElo').mockReturnValue(960);
+    // Mock RatingCalculator static methods
+    jest.spyOn(RatingCalculator, 'calculateEloChange').mockReturnValue(40);
+    jest.spyOn(RatingCalculator, 'calculateEloUpdate').mockReturnValue({
+      newWinnerElo: 1040,
+      newLoserElo: 960,
+      eloChange: 40
+    });
     
     // Setup room mock
     mockRoom = {

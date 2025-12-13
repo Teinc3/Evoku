@@ -6,5 +6,5 @@ import LifecycleActions from "../../../../types/enums/actions/match/lifecycle";
 export default createPacket(LifecycleActions.GAME_OVER, {
   winnerID: ByteCodec,
   reason: ByteCodec,
-  eloChange: ShortCodec // encode 300.4 as 3004
+  eloChange: ShortCodec
 })

@@ -1,6 +1,9 @@
 /**
  * RatingCalculator handles ELO rating calculations for players after matches.
- * Implements the standard ELO rating system formula.
+ * 
+ * Implements the standard ELO rating system formula,
+ * using a K-factor of 80 for high rating volatility.
+ * Ratings are floored at 0 and cannot become negative.
  */
 export default class RatingCalculator {
   private static readonly K = 80; // ELO constant, determines rating volatility
@@ -18,23 +21,19 @@ export default class RatingCalculator {
   }
 
   /**
-   * Calculates the new ELO rating for the winner.
+   * Calculates the new ELO ratings for both winner and loser, and the change amount.
    * @param winnerElo Current ELO of the winner
    * @param loserElo Current ELO of the loser
-   * @returns New ELO rating for the winner
+   * @returns An object with new ELOs for winner and loser, and the ELO change.
    */
-  static getNewWinnerElo(winnerElo: number, loserElo: number): number {
-    return winnerElo + this.calculateEloChange(winnerElo, loserElo);
-  }
-
-  /**
-   * Calculates the new ELO rating for the loser.
-   * @param loserElo Current ELO of the loser
-   * @param winnerElo Current ELO of the winner
-   * @returns New ELO rating for the loser (minimum 0)
-   */
-  static getNewLoserElo(loserElo: number, winnerElo: number): number {
-    const change = this.calculateEloChange(winnerElo, loserElo);
-    return Math.max(0, loserElo - change);
+  static calculateEloUpdate(winnerElo: number, loserElo: number): {
+    newWinnerElo: number;
+    newLoserElo: number;
+    eloChange: number;
+  } {
+    const eloChange = this.calculateEloChange(winnerElo, loserElo);
+    const newWinnerElo = winnerElo + eloChange;
+    const newLoserElo = Math.max(0, loserElo - eloChange);
+    return { newWinnerElo, newLoserElo, eloChange };
   }
 }

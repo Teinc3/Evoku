@@ -1,7 +1,7 @@
 import MatchStatus from "@shared/types/enums/matchstatus";
 import GameOverReason from "@shared/types/enums/GameOverReason";
 import { ProtocolActions, LifecycleActions } from "@shared/types/enums/actions";
-import RatingManager from "../../utils/rating";
+import RatingCalculator from "../../utils/rating";
 import guestAuthService from "../../services/auth";
 
 import type { UUID } from "crypto";
@@ -123,21 +123,27 @@ export default class LifecycleController {
     const loserElo = loserSession.getElo();
 
     // Calculate ELO changes
-    const eloChange = RatingManager.calculateEloChange(winnerElo, loserElo);
-    const newWinnerElo = RatingManager.getNewWinnerElo(winnerElo, loserElo);
-    const newLoserElo = RatingManager.getNewLoserElo(loserElo, winnerElo);
+    const {
+      newWinnerElo,
+      newLoserElo,
+      eloChange
+    } = RatingCalculator.calculateEloUpdate(winnerElo, loserElo);
 
     // Update Redis
     try {
-      await guestAuthService.updateElo(winnerUUID, newWinnerElo);
-      await guestAuthService.updateElo(loserUUID, newLoserElo);
+      await Promise.all([
+        async () => {
+          guestAuthService.updateElo(winnerUUID, newWinnerElo);
+          winnerSession.setElo(newWinnerElo);
+        },
+        async () => {
+          guestAuthService.updateElo(loserUUID, newLoserElo);
+          loserSession.setElo(newLoserElo);
+        }
+      ]);
     } catch (error) {
       console.error('Failed to update ELO in Redis:', error);
     }
-
-    // Update session ELO values
-    winnerSession.setElo(newWinnerElo);
-    loserSession.setElo(newLoserElo);
 
     // Broadcast with ELO change
     this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason, eloChange });
