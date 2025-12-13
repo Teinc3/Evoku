@@ -28,22 +28,29 @@ describe('RatingCalculator', () => {
     });
   });
 
-  describe('getNewWinnerElo', () => {
-    it('should return correct new ELO for winner', () => {
-      const newElo = RatingCalculator.getNewWinnerElo(1000, 1000);
-      expect(newElo).toBe(1040); // 1000 + 40
-    });
-  });
-
-  describe('getNewLoserElo', () => {
-    it('should return correct new ELO for loser', () => {
-      const newElo = RatingCalculator.getNewLoserElo(1000, 1000);
-      expect(newElo).toBe(960); // 1000 - 40
+  describe('calculateEloUpdate', () => {
+    it('should return correct ELO update for equal rated players', () => {
+      const update = RatingCalculator.calculateEloUpdate(1000, 1000);
+      expect(update).toEqual({
+        newWinnerElo: 1040,
+        newLoserElo: 960,
+        eloChange: 40
+      });
     });
 
-    it('should not decrease ELO below 0', () => {
-      const newElo = RatingCalculator.getNewLoserElo(5, 0);
-      expect(newElo).toBe(0); // 5 - 41 = -36, floored to 0
+    it('should return correct ELO update when winner has higher rating', () => {
+      const update = RatingCalculator.calculateEloUpdate(1200, 1000);
+      expect(update).toEqual({
+        newWinnerElo: 1219,
+        newLoserElo: 981,
+        eloChange: 19
+      });
+    });
+
+    it('should not decrease loser ELO below 0', () => {
+      const update = RatingCalculator.calculateEloUpdate(0, 5);
+      expect(update.newLoserElo).toBe(0);
+      expect(update.newWinnerElo).toBe(0 + update.eloChange);
     });
   });
 });

@@ -43,6 +43,7 @@ export class GuestAuthService {
 
   /** Update the ELO rating for an existing player */
   async updateElo(playerId: string, newElo: number): Promise<void> {
+    // Extend expiration ONLY allowed when reauthenticating
     await this.setPlayerData(playerId, newElo);
   }
 
