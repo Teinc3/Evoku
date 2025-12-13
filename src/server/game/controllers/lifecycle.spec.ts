@@ -2,6 +2,7 @@ import MatchStatus from '@shared/types/enums/matchstatus';
 import GameOverReason from '@shared/types/enums/GameOverReason';
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import { LifecycleActions } from '@shared/types/enums/actions';
+import RatingManager from '../../utils/rating';
 import LifecycleController from './lifecycle';
 
 import type { IMatchState } from '@shared/types/gamestate';
@@ -12,6 +13,13 @@ import type GameStateController from './state';
 // Mock dependencies
 jest.mock('../../models/networking/room');
 jest.mock('./state');
+jest.mock('../../services/auth', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: {
+    updateElo: jest.fn().mockResolvedValue(undefined)
+  }
+}));
 
 describe('LifecycleController', () => {
   let lifecycleController: LifecycleController;
@@ -34,14 +42,33 @@ describe('LifecycleController', () => {
       getTime: jest.fn().mockReturnValue(0)
     };
     
+    // Mock RatingManager static methods
+    jest.spyOn(RatingManager, 'calculateEloChange').mockReturnValue(40);
+    jest.spyOn(RatingManager, 'getNewWinnerElo').mockReturnValue(1040);
+    jest.spyOn(RatingManager, 'getNewLoserElo').mockReturnValue(960);
+    
     // Setup room mock
     mockRoom = {
       participants: new Map([
-        ['12345-67890-abcde-fghij-klmno', { uuid: '12345-67890-abcde-fghij-klmno', socket: {} }],
-        ['54321-09876-edcba-jihgf-onmlk', { uuid: '54321-09876-edcba-jihgf-onmlk', socket: {} }]
+        ['12345-67890-abcde-fghij-klmno', {
+          uuid: '12345-67890-abcde-fghij-klmno',
+          socket: {},
+          getElo: jest.fn().mockReturnValue(1000)
+        }],
+        ['54321-09876-edcba-jihgf-onmlk', {
+          uuid: '54321-09876-edcba-jihgf-onmlk',
+          socket: {},
+          getElo: jest.fn().mockReturnValue(1000)
+        }],
+        ['09876-54321-fedcb-abcde-onmlk', {
+          uuid: '09876-54321-fedcb-abcde-onmlk',
+          socket: {},
+          getElo: jest.fn().mockReturnValue(1000)
+        }]
       ]),
       playerMap: {
         get: jest.fn().mockImplementation((uuid: string) => {
+          if (uuid === '09876-54321-fedcb-abcde-onmlk') return 0;
           if (uuid === '12345-67890-abcde-fghij-klmno') return 1;
           if (uuid === '54321-09876-edcba-jihgf-onmlk') return 2;
           return undefined;
@@ -49,7 +76,12 @@ describe('LifecycleController', () => {
         set: jest.fn(),
         delete: jest.fn(),
         has: jest.fn(),
-        getKey: jest.fn(),
+        getKey: jest.fn().mockImplementation((id: number) => {
+          if (id === 0) return '09876-54321-fedcb-abcde-onmlk';
+          if (id === 1) return '12345-67890-abcde-fghij-klmno';
+          if (id === 2) return '54321-09876-edcba-jihgf-onmlk';
+          return undefined;
+        }),
         deleteValue: jest.fn(),
         hasValue: jest.fn()
       },
@@ -169,19 +201,34 @@ describe('LifecycleController', () => {
       lifecycleController.initGame();
       lifecycleController.close();
       
-      lifecycleController.onPlayerLeft();
+      lifecycleController.onPlayerLeft('12345-67890-abcde-fghij-klmno');
       
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('should not process if exactly 2 players remain (branch coverage)', () => {
+    it('should not process if exactly 2 players remain (branch coverage)', async () => {
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
       
+      // Set participants to 2
+      Object.defineProperty(mockRoom, 'participants', {
+        value: new Map([
+          ['12345-67890-abcde-fghij-klmno', {
+            uuid: '12345-67890-abcde-fghij-klmno',
+            getElo: jest.fn().mockReturnValue(1000)
+          }],
+          ['54321-09876-edcba-jihgf-onmlk', {
+            uuid: '54321-09876-edcba-jihgf-onmlk',
+            getElo: jest.fn().mockReturnValue(1000)
+          }]
+        ]),
+        writable: true
+      });
+
       // Ensure we have exactly 2 players and status is not ENDED
       expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
       expect(mockRoom.participants.size).toBe(2);
       
-      lifecycleController.onPlayerLeft();
+      await lifecycleController.onPlayerLeft('12345-67890-abcde-fghij-klmno');
       
       expect(clearTimeoutSpy).not.toHaveBeenCalled();
     });
@@ -204,7 +251,7 @@ describe('LifecycleController', () => {
         writable: true
       });
       
-      lifecycleController.onPlayerLeft();
+      lifecycleController.onPlayerLeft('12345-67890-abcde-fghij-klmno');
       
       // Should process and clear timeout
       expect(clearTimeoutSpy).toHaveBeenCalled();
@@ -225,28 +272,35 @@ describe('LifecycleController', () => {
         writable: true
       });
       
-      lifecycleController.onPlayerLeft();
+      lifecycleController.onPlayerLeft('12345-67890-abcde-fghij-klmno');
       
       expect(clearTimeoutSpy).toHaveBeenCalled();
     });
 
-    it('should declare winner when one player remains', () => {
-      // Reduce to one player
+    it('should declare winner when one player remains', async () => {
+      // Reduce to two players (one leaving, one remaining)
       Object.defineProperty(mockRoom, 'participants', {
-        value: new Map([[
-          '12345-67890-abcde-fghij-klmno',
-          { uuid: '12345-67890-abcde-fghij-klmno' }
-        ]]),
+        value: new Map([
+          ['12345-67890-abcde-fghij-klmno', {
+            uuid: '12345-67890-abcde-fghij-klmno',
+            getElo: jest.fn().mockReturnValue(1000)
+          }],
+          ['09876-54321-fedcb-abcde-onmlk', {
+            uuid: '09876-54321-fedcb-abcde-onmlk',
+            getElo: jest.fn().mockReturnValue(1000)
+          }]
+        ]),
         writable: true
       });
       
-      lifecycleController.onPlayerLeft();
+      await lifecycleController.onPlayerLeft('09876-54321-fedcb-abcde-onmlk');
       
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
         {
           winnerID: 1,
-          reason: GameOverReason.FORFEIT
+          reason: GameOverReason.FORFEIT,
+          eloChange: 40
         }
       );
     });
@@ -265,7 +319,7 @@ describe('LifecycleController', () => {
       });
       
       expect(() => {
-        lifecycleController.onPlayerLeft();
+        lifecycleController.onPlayerLeft('99999-88888-77777-66666-55555');
       }).not.toThrow();
     });
   });
@@ -322,7 +376,7 @@ describe('LifecycleController', () => {
     let progressCallback: (
       isBoard: boolean,
       progressData: { playerID: number; progress: number }[]
-    ) => void;
+    ) => Promise<void>;
 
     beforeEach(() => {
       const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
@@ -337,18 +391,19 @@ describe('LifecycleController', () => {
       expect(mockRoom.broadcast).not.toHaveBeenCalled();
     });
 
-    it('should trigger game over when player reaches 100% progress', () => {
+    it('should trigger game over when player reaches 100% progress', async () => {
       lifecycleController.initGame(); // Set status to ONGOING
       
       const progressData = [{ playerID: 1, progress: 100 }];
       
-      progressCallback(true, progressData);
+      await progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
         {
           winnerID: 1,
-          reason: GameOverReason.SCORE
+          reason: GameOverReason.SCORE,
+          eloChange: 40
         }
       );
     });
@@ -382,21 +437,22 @@ describe('LifecycleController', () => {
       );
     });
 
-    it('should trigger game over for first player reaching 100%', () => {
+    it('should trigger game over for first player reaching 100%', async () => {
       lifecycleController.initGame();
       
       const progressData = [
-        { playerID: 1, progress: 100 },
-        { playerID: 2, progress: 95 }
+        { playerID: 0, progress: 95 },
+        { playerID: 1, progress: 100 }
       ];
       
-      progressCallback(true, progressData);
+      await progressCallback(true, progressData);
       
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         LifecycleActions.GAME_OVER,
         {
           winnerID: 1,
-          reason: GameOverReason.SCORE
+          reason: GameOverReason.SCORE,
+          eloChange: 40
         }
       );
     });
@@ -494,15 +550,21 @@ describe('LifecycleController', () => {
     it('should handle timer interruption correctly', () => {
       lifecycleController.onPlayerJoined();
       
-      // Interrupt timer by reducing to 1 player (which should clear timer and trigger game over)
+      // Interrupt timer by reducing to 2 players (one leaving)
       Object.defineProperty(mockRoom, 'participants', {
-        value: new Map([[
-          '12345-67890-abcde-fghij-klmno',
-          { uuid: '12345-67890-abcde-fghij-klmno' }
-        ]]),
+        value: new Map([
+          ['12345-67890-abcde-fghij-klmno', {
+            uuid: '12345-67890-abcde-fghij-klmno',
+            getElo: jest.fn().mockReturnValue(1000)
+          }],
+          ['09876-54321-fedcb-abcde-onmlk', {
+            uuid: '09876-54321-fedcb-abcde-onmlk',
+            getElo: jest.fn().mockReturnValue(1000)
+          }]
+        ]),
         writable: true
       });
-      lifecycleController.onPlayerLeft();
+      lifecycleController.onPlayerLeft('09876-54321-fedcb-abcde-onmlk');
       
       // Timer should be cleared and game should be over (ENDED = 2)
       jest.advanceTimersByTime(5000);
@@ -521,7 +583,7 @@ describe('LifecycleController', () => {
     it('should handle concurrent operations', () => {
       lifecycleController.onPlayerJoined();
       lifecycleController.onPlayerJoined();
-      lifecycleController.onPlayerLeft();
+      lifecycleController.onPlayerLeft('12345-67890-abcde-fghij-klmno');
       
       expect(lifecycleController['stateController'].matchState.status).toBe(MatchStatus.PREINIT);
     });

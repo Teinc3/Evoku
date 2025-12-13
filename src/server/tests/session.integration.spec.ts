@@ -107,7 +107,7 @@ describe('SessionManager and Session Integration Test', () => {
 
     it('should reset the inactivity timer when a packet is received', async () => {
       const session = sessionManager.createSession(mockSocket);
-      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440010');
+      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440010', 1000);
       const mockSocketInstance = mockSocket as unknown as MockWebSocket;
       // Get the message handler that was registered with ws.on('message', handler)
       const messageCalls = mockSocketInstance.on.mock.calls.filter(call => call[0] === 'message');
@@ -136,7 +136,8 @@ describe('SessionManager and Session Integration Test', () => {
   describe('Piping Data to Handlers', () => {
     it('should forward data to the system handler after authentication', async () => {
       const session = sessionManager.createSession(mockSocket);
-      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440011'); // Authenticate first
+      // Authenticate first
+      await session.setAuthenticated('550e8400-e29b-41d4-a716-446655440011', 1000);
       const mockSocketInstance = mockSocket as unknown as MockWebSocket;
       // Get the message handler that was registered with ws.on('message', handler)
       const messageCalls = mockSocketInstance.on.mock.calls.filter(call => call[0] === 'message');

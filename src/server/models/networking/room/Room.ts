@@ -66,6 +66,9 @@ export default class RoomModel {
    * @param session The session to remove from the room.
    */
   public removeSession(session: SessionModel): void {
+    // Notify lifecycle controller that a player left
+    this.lifecycle.onPlayerLeft(session.uuid);
+
     this.participants.delete(session.uuid);
     const playerID = this.playerMap.get(session.uuid);
     if (playerID !== undefined) {
@@ -75,9 +78,6 @@ export default class RoomModel {
     }
     
     session.room = null; // Dereference the room from the session
-
-    // Notify lifecycle controller that a player left
-    this.lifecycle.onPlayerLeft();
   }
 
   /**

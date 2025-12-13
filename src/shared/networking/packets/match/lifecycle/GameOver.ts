@@ -1,9 +1,10 @@
 import createPacket from "../../factory/createPacket";
-import { ByteCodec } from "../../../codecs/primitive";
+import { ByteCodec, ShortCodec } from "../../../codecs/primitive";
 import LifecycleActions from "../../../../types/enums/actions/match/lifecycle";
 
 
 export default createPacket(LifecycleActions.GAME_OVER, {
   winnerID: ByteCodec,
-  reason: ByteCodec
+  reason: ByteCodec,
+  eloChange: ShortCodec // encode 300.4 as 3004
 })

@@ -58,7 +58,7 @@ export default class SessionHandler extends EnumHandler<SessionActions> {
     // Validate token using GuestAuthService
     try {
       const res = await guestAuthService.authenticate(token);
-      await session.setAuthenticated(res.userID);
+      await session.setAuthenticated(res.userID, res.elo);
       return true;
     } catch {
       return false;

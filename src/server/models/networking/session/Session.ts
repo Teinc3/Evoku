@@ -27,6 +27,7 @@ export default class SessionModel {
   public uuid: UUID;
   private disconnected: boolean;
   private authenticated: boolean;
+  private elo: number;
   private authTimeout: NodeJS.Timeout | null;
   private preAuthPacketQueue: AugmentAction<ActionEnum>[];
 
@@ -41,6 +42,7 @@ export default class SessionModel {
   ) {
     this.disconnected = false;
     this.authenticated = false;
+    this.elo = 0;
     this.authTimeout = null;
     this.uuid = randomUUID();
     this.room = room;
@@ -142,8 +144,9 @@ export default class SessionModel {
   /**
    * Marks the session as authenticated, clearing the authentication timeout.
    */
-  public async setAuthenticated(id: UUID): Promise<void> {
+  public async setAuthenticated(id: UUID, elo: number): Promise<void> {
     this.authenticated = true;
+    this.elo = elo;
     this.clearAuthTimeout();
 
     // Call sessionmanager to associate the new userID (and swap sockets for existing sessions)
@@ -153,9 +156,12 @@ export default class SessionModel {
     await this.processQueuedPackets();
   }
 
-  /**
-   * Process any packets that were received before authentication completed.
-   */
+  /** Gets the current ELO rating of the authenticated user */
+  public getElo(): number {
+    return this.elo;
+  }
+
+  /** Process any packets that were received before authentication completed */
   private async processQueuedPackets(): Promise<void> {
     // Process queued packets in order
     while (this.preAuthPacketQueue.length > 0) {
