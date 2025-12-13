@@ -32,7 +32,12 @@ export class GuestAuthService {
   ): Promise<void> {
     const key = `${this.redisKeyPrefix}${playerId}`;
     const data = JSON.stringify({ elo });
-    await redisService.set(key, data, { EX: extend ? 604800 : await redisService.ttl(key) } );
+    
+    // Get current TTL
+    const currentTtl = await redisService.ttl(key);
+    // Determine expiration time
+    const expiration = extend || currentTtl <= 0 ? 604800 : currentTtl; 
+    await redisService.set(key, data, { EX: expiration });
   }
 
   /** Update the ELO rating for an existing player */

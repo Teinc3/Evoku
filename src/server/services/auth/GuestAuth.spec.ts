@@ -10,6 +10,7 @@ describe('GuestAuthService', () => {
   let service: GuestAuthService;
   const mockRedisGet = jest.mocked(redisService.get);
   const mockRedisSet = jest.mocked(redisService.set);
+  const mockRedisTtl = jest.mocked(redisService.ttl);
   const mockGeneratePlayerId = jest.mocked(jwt.generatePlayerId);
   const mockSignGuestToken = jest.mocked(jwt.signGuestToken);
   const mockVerifyGuestToken = jest.mocked(jwt.verifyGuestToken);
@@ -121,6 +122,56 @@ describe('GuestAuthService', () => {
           userID: '550e8400-e29b-41d4-a716-446655440004'
         });
       });
+    });
+  });
+
+  describe('updateElo', () => {
+    it('should update ELO and preserve existing TTL', async () => {
+      const playerId = '550e8400-e29b-41d4-a716-446655440000';
+      const newElo = 1040;
+
+      mockRedisTtl.mockResolvedValue(3600); // 1 hour TTL
+
+      await service.updateElo(playerId, newElo);
+
+      expect(mockRedisTtl).toHaveBeenCalledWith(`guest:player:${playerId}`);
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        `guest:player:${playerId}`,
+        JSON.stringify({ elo: newElo }),
+        { EX: 3600 }
+      );
+    });
+
+    it('should update ELO with default expiration if key has no TTL', async () => {
+      const playerId = '550e8400-e29b-41d4-a716-446655440001';
+      const newElo = 960;
+
+      mockRedisTtl.mockResolvedValue(-1); // No expiration
+
+      await service.updateElo(playerId, newElo);
+
+      expect(mockRedisTtl).toHaveBeenCalledWith(`guest:player:${playerId}`);
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        `guest:player:${playerId}`,
+        JSON.stringify({ elo: newElo }),
+        { EX: 604800 }
+      );
+    });
+
+    it('should update ELO with default expiration if key does not exist', async () => {
+      const playerId = '550e8400-e29b-41d4-a716-446655440002';
+      const newElo = 1000;
+
+      mockRedisTtl.mockResolvedValue(-2); // Key does not exist
+
+      await service.updateElo(playerId, newElo);
+
+      expect(mockRedisTtl).toHaveBeenCalledWith(`guest:player:${playerId}`);
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        `guest:player:${playerId}`,
+        JSON.stringify({ elo: newElo }),
+        { EX: 604800 }
+      );
     });
   });
 });

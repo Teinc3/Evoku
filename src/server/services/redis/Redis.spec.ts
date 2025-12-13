@@ -40,6 +40,7 @@ describe('RedisService', () => {
       get: jest.fn().mockResolvedValue('value'),
       del: jest.fn().mockResolvedValue(1),
       keys: jest.fn().mockResolvedValue([]),
+      ttl: jest.fn().mockResolvedValue(3600),
       on: jest.fn(),
     } as unknown as RedisClientType;
     (createClient as jest.Mock).mockReturnValue(mockClient);
@@ -366,6 +367,50 @@ describe('RedisService', () => {
         const result = await service.keys('pattern');
 
         expect(result).toEqual([]);
+      });
+    });
+
+    describe('ttl', () => {
+      describe('when connected', () => {
+        beforeEach(async () => {
+          await service.connect('redis://localhost:6379');
+        });
+
+        it('should call client.ttl and return TTL when connected', async () => {
+          (mockClient.ttl as jest.Mock).mockResolvedValueOnce(3600);
+
+          const result = await service.ttl('testKey');
+
+          expect(mockClient.ttl).toHaveBeenCalledWith('testKey');
+          expect(result).toBe(3600);
+        });
+      });
+
+      describe('when not connected', () => {
+        describe('in production', () => {
+          beforeEach(() => {
+            process.env['NODE_ENV'] = 'production';
+            service = new RedisService();
+          });
+
+          it('should throw if not connected', async () => {
+            await expect(service.ttl('key')).rejects.toThrow('Redis client is not connected');
+          });
+        });
+
+        describe('in development', () => {
+          beforeEach(() => {
+            process.env['NODE_ENV'] = 'development';
+            service = new RedisService();
+          });
+
+          it('should return -2 if not connected', async () => {
+            const result = await service.ttl('key');
+
+            expect(mockClient.ttl).not.toHaveBeenCalled();
+            expect(result).toBe(-2);
+          });
+        });
       });
     });
   });
