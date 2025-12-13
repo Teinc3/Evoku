@@ -32,13 +32,7 @@ export class GuestAuthService {
   ): Promise<void> {
     const key = `${this.redisKeyPrefix}${playerId}`;
     const data = JSON.stringify({ elo });
-    if (extend) {
-      // Set with 7 days expiration (7 * 24 * 60 * 60 = 604800 seconds)
-      await redisService.set(key, data, { EX: 604800 });
-    } else {
-      // Update without changing expiration
-      await redisService.set(key, data);
-    }
+    await redisService.set(key, data, { EX: extend ? 604800 : await redisService.ttl(key) } );
   }
 
   /** Update the ELO rating for an existing player */

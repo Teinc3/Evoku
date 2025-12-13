@@ -19,6 +19,8 @@ class MockSession implements Partial<SessionModel> {
   constructor(uuid: string) {
     this.uuid = uuid as UUID;
   }
+
+  getElo = () => 1000;
 }
 
 class MockSessionManager implements Partial<SessionManager> {
@@ -313,8 +315,8 @@ describe('MatchmakingManager', () => {
         {
           myID: 0,
           players: [
-            { playerID: 0, username: 'Player1' },
-            { playerID: 1, username: 'Player2' }
+            { playerID: 0, username: 'Player1', elo: 1000 },
+            { playerID: 1, username: 'Player2', elo: 1000 }
           ]
         }
       );
@@ -324,8 +326,8 @@ describe('MatchmakingManager', () => {
         {
           myID: 1,
           players: [
-            { playerID: 0, username: 'Player1' },
-            { playerID: 1, username: 'Player2' }
+            { playerID: 0, username: 'Player1', elo: 1000 },
+            { playerID: 1, username: 'Player2', elo: 1000 }
           ]
         }
       );

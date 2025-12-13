@@ -104,9 +104,9 @@ describe('createPacket Factory', () => {
       action: LobbyActions.MATCH_FOUND,
       myID: 0,
       players: [
-        { playerID: 0, username: 'Player1' },
-        { playerID: 1, username: 'Unicode is göofy as fucķ \x00 and i told you so' },
-        { playerID: 2, username: '[🥀] 你是傻逼' }
+        { playerID: 0, username: 'Player1', elo: 0 },
+        { playerID: 1, username: 'Unicode is göofy as fucķ \x00 and i told you so', elo: 0 },
+        { playerID: 2, username: '[🥀] 你是傻逼', elo: 0 }
       ]
     });
 

@@ -79,6 +79,11 @@ export class RedisService {
   async keys(pattern: string): Promise<string[]> {
     return await this.client?.keys(pattern) ?? [];
   }
+
+  /** Retrieve the TTL/Expiration time left of existing key */
+  async ttl(key: string): Promise<number> {
+    return await this.client?.ttl(key) ?? -2;
+  }
 }
 
 const redisService = new RedisService();

@@ -7,4 +7,5 @@ import type IDataContract from "../base/IDataContract";
 export default interface PlayerInfoContract extends IDataContract {
   playerID: number;
   username: string;
+  elo: number;
 }

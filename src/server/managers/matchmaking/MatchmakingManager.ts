@@ -112,8 +112,8 @@ export default class MatchmakingManager {
 
     // Send MATCH_FOUND packets
     const playersInfo = [
-      { playerID: 0, username: username1 },
-      { playerID: 1, username: username2 }
+      { playerID: 0, username: username1, elo: session1.getElo() },
+      { playerID: 1, username: username2, elo: session2.getElo() }
     ];
 
     session1.forward(LobbyActions.MATCH_FOUND, {
