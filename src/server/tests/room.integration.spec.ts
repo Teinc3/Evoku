@@ -24,6 +24,7 @@ class MockSession {
   public forward = jest.fn();
   constructor(public readonly uuid: string) {}
   public getElo() { return 1000; }
+  public setElo(_elo: number) { /* mock */ }
 }
 
 const generateUUIDs = (): [UUID, UUID, UUID] => {

@@ -135,6 +135,10 @@ export default class LifecycleController {
       console.error('Failed to update ELO in Redis:', error);
     }
 
+    // Update session ELO values
+    winnerSession.setElo(newWinnerElo);
+    loserSession.setElo(newLoserElo);
+
     // Broadcast with ELO change
     this.room.broadcast(LifecycleActions.GAME_OVER, { winnerID, reason, eloChange });
   }
