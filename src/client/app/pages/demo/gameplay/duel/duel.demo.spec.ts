@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
+import MatchStatus from '@shared/types/enums/matchstatus';
 import ActionEnum, {
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
@@ -370,6 +371,21 @@ describe('DuelDemoPageComponent', () => {
       // Select on board 1, should clear board 0
       component.onBoardSelectionChanged(1);
       expect(board1Spy.selected()).toBeNull();
+    });
+
+    it('should handle GAME_OVER packet and set match status to ENDED', () => {
+      const mockData = { winnerID: 0, reason: 0, eloChange: 40 };
+      const action = LifecycleActions.GAME_OVER;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      // Set initial status to ONGOING
+      component.gameState.matchState.status = MatchStatus.ONGOING;
+
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      expect(component.gameState.matchState.status as MatchStatus).toBe(MatchStatus.ENDED);
     });
 
     it('should clear match data on destroy', () => {

@@ -791,4 +791,23 @@ describe('SessionModel', () => {
       expect(onDisconnectSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('ELO management', () => {
+    it('should initialize with ELO 0', () => {
+      expect(session.getElo()).toBe(0);
+    });
+
+    it('should set and get ELO correctly', () => {
+      session.setElo(1500);
+      expect(session.getElo()).toBe(1500);
+
+      session.setElo(1200);
+      expect(session.getElo()).toBe(1200);
+    });
+
+    it('should allow zero ELO', () => {
+      session.setElo(0);
+      expect(session.getElo()).toBe(0);
+    });
+  });
 });
