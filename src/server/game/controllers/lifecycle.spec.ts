@@ -10,6 +10,14 @@ import type { RoomModel } from '../../models/networking';
 import type GameStateController from './state';
 
 
+// Mock Session for tests
+class MockSession {
+  public elo = 1000;
+  constructor(public uuid: string) {}
+  getElo = () => this.elo;
+  setElo = (elo: number) => { this.elo = elo; };
+}
+
 // Mock dependencies
 jest.mock('../../models/networking/room');
 jest.mock('./state');
@@ -50,21 +58,9 @@ describe('LifecycleController', () => {
     // Setup room mock
     mockRoom = {
       participants: new Map([
-        ['12345-67890-abcde-fghij-klmno', {
-          uuid: '12345-67890-abcde-fghij-klmno',
-          socket: {},
-          getElo: jest.fn().mockReturnValue(1000)
-        }],
-        ['54321-09876-edcba-jihgf-onmlk', {
-          uuid: '54321-09876-edcba-jihgf-onmlk',
-          socket: {},
-          getElo: jest.fn().mockReturnValue(1000)
-        }],
-        ['09876-54321-fedcb-abcde-onmlk', {
-          uuid: '09876-54321-fedcb-abcde-onmlk',
-          socket: {},
-          getElo: jest.fn().mockReturnValue(1000)
-        }]
+        ['12345-67890-abcde-fghij-klmno', new MockSession('12345-67890-abcde-fghij-klmno')],
+        ['54321-09876-edcba-jihgf-onmlk', new MockSession('54321-09876-edcba-jihgf-onmlk')],
+        ['09876-54321-fedcb-abcde-onmlk', new MockSession('09876-54321-fedcb-abcde-onmlk')]
       ]),
       playerMap: {
         get: jest.fn().mockImplementation((uuid: string) => {
@@ -212,14 +208,8 @@ describe('LifecycleController', () => {
       // Set participants to 2
       Object.defineProperty(mockRoom, 'participants', {
         value: new Map([
-          ['12345-67890-abcde-fghij-klmno', {
-            uuid: '12345-67890-abcde-fghij-klmno',
-            getElo: jest.fn().mockReturnValue(1000)
-          }],
-          ['54321-09876-edcba-jihgf-onmlk', {
-            uuid: '54321-09876-edcba-jihgf-onmlk',
-            getElo: jest.fn().mockReturnValue(1000)
-          }]
+          ['12345-67890-abcde-fghij-klmno', new MockSession('12345-67890-abcde-fghij-klmno')],
+          ['54321-09876-edcba-jihgf-onmlk', new MockSession('54321-09876-edcba-jihgf-onmlk')]
         ]),
         writable: true
       });
@@ -281,14 +271,8 @@ describe('LifecycleController', () => {
       // Reduce to two players (one leaving, one remaining)
       Object.defineProperty(mockRoom, 'participants', {
         value: new Map([
-          ['12345-67890-abcde-fghij-klmno', {
-            uuid: '12345-67890-abcde-fghij-klmno',
-            getElo: jest.fn().mockReturnValue(1000)
-          }],
-          ['09876-54321-fedcb-abcde-onmlk', {
-            uuid: '09876-54321-fedcb-abcde-onmlk',
-            getElo: jest.fn().mockReturnValue(1000)
-          }]
+          ['12345-67890-abcde-fghij-klmno', new MockSession('12345-67890-abcde-fghij-klmno')],
+          ['09876-54321-fedcb-abcde-onmlk', new MockSession('09876-54321-fedcb-abcde-onmlk')]
         ]),
         writable: true
       });
@@ -555,11 +539,13 @@ describe('LifecycleController', () => {
         value: new Map([
           ['12345-67890-abcde-fghij-klmno', {
             uuid: '12345-67890-abcde-fghij-klmno',
-            getElo: jest.fn().mockReturnValue(1000)
+            getElo: jest.fn().mockReturnValue(1000),
+            setElo: jest.fn()
           }],
           ['09876-54321-fedcb-abcde-onmlk', {
             uuid: '09876-54321-fedcb-abcde-onmlk',
-            getElo: jest.fn().mockReturnValue(1000)
+            getElo: jest.fn().mockReturnValue(1000),
+            setElo: jest.fn()
           }]
         ]),
         writable: true

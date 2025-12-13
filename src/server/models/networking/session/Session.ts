@@ -161,6 +161,11 @@ export default class SessionModel {
     return this.elo;
   }
 
+  /** Sets the ELO rating of the authenticated user */
+  public setElo(elo: number): void {
+    this.elo = elo;
+  }
+
   /** Process any packets that were received before authentication completed */
   private async processQueuedPackets(): Promise<void> {
     // Process queued packets in order
