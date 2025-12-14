@@ -209,11 +209,8 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
   }
 
   private nowMs(): number {
-    if (this.currentTimeMs !== null) {
-      return this.currentTimeMs;
-    }
-
-    return Date.now();
+    const current = this.currentTimeMs;
+    return current ?? Date.now();
   }
 
   /**

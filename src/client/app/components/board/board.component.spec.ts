@@ -491,6 +491,17 @@ describe('BoardModelComponent', () => {
       expect(dateSpy).toHaveBeenCalled();
     });
 
+    it('uses provided currentTimeMs when available', () => {
+      const pendingSpy = spyOn(component.model, 'setPendingCell').and.returnValue(true);
+      component.currentTimeMs = 999;
+      component.onCellSelected(0);
+
+      component.parseNumberKey(4);
+
+      expect(pendingSpy).toHaveBeenCalledWith(0, 4, 999);
+      expect(component['nowMs']()).toBe(999);
+    });
+
     it('does not highlight opponent dynamic numbers when not fixed', () => {
       component.isMe = false;
       component.onCellSelected(0);
