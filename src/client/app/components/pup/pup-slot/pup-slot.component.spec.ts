@@ -94,6 +94,19 @@ describe('PupSlotComponent', () => {
     expect(name.textContent?.trim()).toBe('Purity');
   });
 
+  it('should ignore clicks when no pup is set', () => {
+    const useSpy = jasmine.createSpy('use');
+    component.use.subscribe(useSpy);
+    component.pup = null;
+
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.slot');
+    button.click();
+
+    expect(useSpy).not.toHaveBeenCalled();
+  });
+
   it('should show cooldown badge when cooling down', () => {
     component.pup = {
       pupID: 3,

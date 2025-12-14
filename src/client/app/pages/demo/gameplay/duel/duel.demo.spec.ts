@@ -17,7 +17,7 @@ import ActionEnum, {
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
-import { AppView } from '../../../../../types/enums';
+import { AppView, PUPOrbState } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -779,6 +779,9 @@ describe('DuelDemoPageComponent', () => {
 
       component.myPupSlots = slots;
 
+      const refreshSpy = spyOn(component as unknown as { refreshOrbState: () => void },
+        'refreshOrbState').and.callThrough();
+
       component.onUsePup(0);
 
       const [actionSent, rawPayload] = networkServiceSpy.send.calls.mostRecent().args;
@@ -795,8 +798,94 @@ describe('DuelDemoPageComponent', () => {
       jasmine.clock().tick(250);
 
       expect(component.myPupSlots[0].status).toBe('empty');
+      expect(refreshSpy).toHaveBeenCalled();
 
       component['clearCooldownIntervals']();
+    });
+
+    it('should roll only when orb is ready', () => {
+      component.orbState = PUPOrbState.READY;
+      component.orbDisabled = false;
+      networkServiceSpy.send.calls.reset();
+
+      component.onPupRoll();
+
+      const rollingOrbState = component.orbState as number;
+      expect(rollingOrbState).toBe(PUPOrbState.SPINNING);
+      expect(component.orbDisabled).toBeTrue();
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        MechanicsActions.DRAW_PUP,
+        jasmine.objectContaining({})
+      );
+
+      const callCount = networkServiceSpy.send.calls.count();
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = true;
+      component.onPupRoll();
+      expect(networkServiceSpy.send.calls.count()).toBe(callCount);
+    });
+
+    it('should refresh orb state based on PUP progress and slots', () => {
+      const playerState = { gameState: { pupProgress: 120 } };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue(
+        playerState as unknown as IPlayerState<ClientBoardModel>
+      );
+
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = true;
+      component.myPupSlots = [
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component['refreshOrbState']();
+
+      const refreshedState = component.orbState as number;
+      expect(refreshedState).toBe(PUPOrbState.READY);
+      expect(component.orbDisabled).toBeFalse();
+    });
+
+    it('should handle missing player game state by disabling orb', () => {
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = false;
+
+      component['refreshOrbState']();
+
+      expect(component.orbDisabled).toBeTrue();
+      expect(component.orbState).toBe(PUPOrbState.IDLE); // reset when no game state
+    });
+
+    it('should handle pup draw into empty slot with mapped config', () => {
+      component.myPupSlots = [
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component['handlePupDrawn'](component['gameState'].myID, 0);
+
+      const slot = component.myPupSlots[0];
+      expect(slot.status).toBe('ready');
+      expect(slot.name).toBe('Cryo');
+      expect(slot.icon).toContain('cryo.svg');
+    });
+
+    it('should ignore use requests when slot is not ready', () => {
+      networkServiceSpy.send.calls.reset();
+      component.myPupSlots = [
+        { pupID: 1, name: 'Cryo', icon: '', status: 'cooldown' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component.onUsePup(0);
+
+      expect(networkServiceSpy.send).not.toHaveBeenCalled();
     });
   });
 });
