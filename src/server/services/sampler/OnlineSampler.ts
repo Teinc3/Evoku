@@ -15,15 +15,14 @@ export default class OnlineSampler {
    * Start the sampler. It will align to the next hour boundary (:00:00)
    * and then sample every 60 minutes.
    */
-  public start(): void {
+  public start(referenceDate?: Date): void {
     if (this.timer || this.initialTimeout) {
       return; // Already running
     }
 
     // Calculate milliseconds until next hour
-    const now = new Date();
-    const msUntilNextHour = 
-      (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
+    const now = referenceDate ?? new Date();
+    const msUntilNextHour = this.getDelayUntilNextHour(now);
 
     // Wait until next :00:00, then start the interval
     this.initialTimeout = setTimeout(() => {
@@ -47,5 +46,13 @@ export default class OnlineSampler {
   /** Take a sample and persist to Redis */
   private async sample(): Promise<void> {
     await this.statsService.sampleStats();
+  }
+
+  /** Compute delay to align next sample to the upcoming hour boundary */
+  public getDelayUntilNextHour(reference: Date = new Date()): number {
+    const minutesRemaining = 60 - reference.getMinutes();
+    const seconds = reference.getSeconds();
+    const milliseconds = reference.getMilliseconds();
+    return minutesRemaining * 60 * 1000 - seconds * 1000 - milliseconds;
   }
 }

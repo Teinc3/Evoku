@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, signal } from '@angular/core';
 
 import ActionGuard from '@shared/types/utils/typeguards/actions';
 import MatchStatus from '@shared/types/enums/matchstatus';
@@ -15,12 +15,18 @@ import PupOrbSpinnerComponent
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import DuelHudTopComponent from '../../../../components/hud/duel-hud-top/duel-hud-top';
+import CombatBadgeComponent from '../../../../components/hud/combat-badge/combat-badge';
 import UtilityButtonsHolderComponent 
   from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
+import {
+  CombatDefuseType,
+  type CombatIncomingThreat,
+  type CombatOutcomeText
+} from '../../../../../types/combat';
 import GameStateManager from '../../../../../game/GameStateManager';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -38,7 +44,8 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
     UtilityButtonsHolderComponent, 
     NumericButtonsHolderComponent,
     PupSlotsHolderComponent,
-    PupOrbSpinnerComponent
+    PupOrbSpinnerComponent,
+    CombatBadgeComponent
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'
@@ -46,8 +53,15 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
+  public readonly nowTick = signal(performance.now());
+  public readonly myCombatThreat = signal<CombatIncomingThreat | null>(null);
+  public readonly opponentCombatThreat = signal<CombatIncomingThreat | null>(null);
+  public readonly myCombatMessages = signal<CombatOutcomeText[]>([]);
+  public readonly opponentCombatMessages = signal<CombatOutcomeText[]>([]);
   private subscriptions = new Subscription();
   private nextActionId = 0;
+  private uiTickInterval?: number;
+  private combatTimers: number[] = [];
 
   @ViewChild('board1') board1!: BoardModelComponent;
   @ViewChild('board2') board2!: BoardModelComponent;
@@ -60,6 +74,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.startUiTicker();
     // Load match data from navigation and transfer to our owned model
     const matchData = this.viewStateService.getNavigationData<MatchFoundContract>();
     if (matchData) {
@@ -163,12 +178,16 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         });
       })
     );
+
+    this.initCombatShowcase();
   }
 
   ngOnDestroy(): void {
     // Clear our local match state
     this.gameState.clearMatchData();
     this.subscriptions.unsubscribe();
+    this.stopUiTicker();
+    this.clearCombatTimers();
   }
 
   /** Handle packet requests from board components */
@@ -191,6 +210,85 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       this.board2.selected.set(null);
     } else if (boardIndex === 1) {
       this.board1.selected.set(null);
+    }
+  }
+
+  private startUiTicker(): void {
+    this.stopUiTicker();
+    this.uiTickInterval = window.setInterval(() => {
+      this.nowTick.set(performance.now());
+    }, 120);
+  }
+
+  private stopUiTicker(): void {
+    if (this.uiTickInterval !== undefined) {
+      window.clearInterval(this.uiTickInterval);
+      this.uiTickInterval = undefined;
+    }
+  }
+
+  private clearCombatTimers(): void {
+    for (const timer of this.combatTimers) {
+      window.clearTimeout(timer);
+    }
+    this.combatTimers = [];
+  }
+
+  /**
+   * Temporary showcase for combat broadcast UI until real network events are wired.
+   */
+  private initCombatShowcase(): void {
+    this.clearCombatTimers();
+    const now = performance.now();
+
+    this.myCombatThreat.set({
+      id: 'demo-row-threat',
+      pupName: 'Cryo',
+      icon: '/assets/pup/icons/cryo.svg',
+      defuseType: CombatDefuseType.ROW,
+      targetIndex: 2,
+      createdAtMs: now,
+      expiresAtMs: now + 9000
+    });
+
+    this.opponentCombatThreat.set({
+      id: 'demo-box-threat',
+      pupName: 'Lock',
+      icon: '/assets/pup/icons/lock.svg',
+      defuseType: CombatDefuseType.BOX,
+      targetIndex: 4,
+      createdAtMs: now,
+      expiresAtMs: now + 9000
+    });
+
+    this.combatTimers.push(window.setTimeout(() => {
+      this.pushOutcome(true, 'REFLECTED!', 'reflected');
+    }, 5200));
+
+    this.combatTimers.push(window.setTimeout(() => {
+      this.pushOutcome(false, 'HIT!', 'hit');
+    }, 7200));
+
+    this.combatTimers.push(window.setTimeout(() => {
+      this.myCombatThreat.set(null);
+      this.opponentCombatThreat.set(null);
+    }, 9200));
+  }
+
+  private pushOutcome(isMe: boolean, text: string, tone: CombatOutcomeText['tone']): void {
+    const now = performance.now();
+    const message: CombatOutcomeText = {
+      id: `${text}-${now}`,
+      text,
+      tone,
+      createdAtMs: now,
+      expiresAtMs: now + 1200
+    };
+
+    if (isMe) {
+      this.myCombatMessages.update(prev => [...prev, message]);
+    } else {
+      this.opponentCombatMessages.update(prev => [...prev, message]);
     }
   }
 }

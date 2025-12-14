@@ -1,7 +1,10 @@
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SimpleChange } from '@angular/core';
 
 import UtilityAction from '../../../types/utility';
+import { CursorDirectionEnum } from '../../../types/enums';
+import { CombatDefuseType, type CombatIncomingThreat } from '../../../types/combat';
 import ClientBoardModel from '../../../models/Board';
 import BoardModelComponent from './board.component';
 
@@ -24,6 +27,102 @@ describe('BoardModelComponent', () => {
     component.model = new ClientBoardModel([]);
     component.isMe = true; // Enable input handling for tests
     fixture.detectChanges();
+  });
+
+  describe('Combat threat overlay', () => {
+    let threat: CombatIncomingThreat;
+
+    beforeEach(() => {
+      threat = {
+        id: 't1',
+        pupName: 'Cryo',
+        icon: '/assets/pup/icons/cryo.svg',
+        defuseType: CombatDefuseType.ROW,
+        targetIndex: 1,
+        createdAtMs: 1_000,
+        expiresAtMs: 6_000
+      };
+      component.combatThreat = threat;
+      component.currentTimeMs = 2_000;
+      component.ngOnChanges({ combatThreat: new SimpleChange(null, threat, true) });
+    });
+
+    it('marks row cells as threatened when row defuse', () => {
+      for (let i = 9; i < 18; i++) {
+        expect(component.isThreatCell(i)).toBeTrue();
+      }
+      expect(component.isThreatCell(0)).toBeFalse();
+    });
+
+    it('computes ghost targets when targetCells supplied', () => {
+      const customThreat: CombatIncomingThreat = {
+        ...threat,
+        targetCells: [0, 10, 20]
+      };
+      component.combatThreat = customThreat;
+      component.ngOnChanges({ combatThreat: new SimpleChange(threat, customThreat, false) });
+      expect(component.ghostTargets()).toEqual([0, 10, 20]);
+    });
+
+    it('flags critical state when less than 3 seconds remaining', () => {
+      component.currentTimeMs = 5_500;
+      expect(component.isThreatCritical()).toBeTrue();
+    });
+
+    it('builds column and box geometry and global threat flags all', () => {
+      // Column threat
+      const colThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.COL,
+        targetIndex: 3,
+      };
+      component.combatThreat = colThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(threat, colThreat, false)
+      });
+      expect(component.isThreatCell(3)).toBeTrue();
+      const colStyle = component.colLinePosition();
+      expect(colStyle?.left).toBeDefined();
+      expect(parseFloat(colStyle!.left)).toBeCloseTo(33.333, 3);
+
+      // Box threat
+      const boxThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.BOX,
+        targetIndex: 4,
+      };
+      component.combatThreat = boxThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(colThreat, boxThreat, false)
+      });
+      expect(component.isThreatCell(40)).toBeTrue();
+      const boxStyle = component.boxOutlinePosition();
+      expect(boxStyle?.top).toBeDefined();
+      expect(parseFloat(boxStyle!.top)).toBeCloseTo(33.333, 3);
+
+      // Global threat
+      const globalThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.GLOBAL,
+      };
+      component.combatThreat = globalThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(boxThreat, globalThreat, false)
+      });
+      expect(component.isThreatCell(0)).toBeTrue();
+      expect(component.isGlobalThreat()).toBeTrue();
+    });
+
+    it('returns 0 remaining when current time is null', () => {
+      component.currentTimeMs = null;
+      expect(component.threatRemainingMs()).toBe(0);
+    });
+
+    it('computes ghost style at cell center', () => {
+      const style = component.ghostStyle(10);
+      expect(style.top).toBeDefined();
+      expect(style.left).toBeDefined();
+    });
   });
 
   it('renders 81 cells', () => {
@@ -360,6 +459,63 @@ describe('BoardModelComponent', () => {
       
       // Cell 9 should be highlight-related (same column)
       expect(cellElements[9].nativeElement.classList.contains('highlight-related')).toBeTrue();
+    });
+
+    it('wraps selection correctly for direct calls', () => {
+      component.onCellSelected(10);
+      component.moveSelection(CursorDirectionEnum.UP);
+      expect(component.selected()).toBe(1);
+
+      component.onCellSelected(10);
+      component.moveSelection(CursorDirectionEnum.DOWN);
+      expect(component.selected()).toBe(19);
+
+      component.onCellSelected(10);
+      component.moveSelection(CursorDirectionEnum.LEFT);
+      expect(component.selected()).toBe(9);
+
+      component.onCellSelected(10);
+      component.moveSelection(CursorDirectionEnum.RIGHT);
+      expect(component.selected()).toBe(11);
+    });
+
+    it('uses Date.now when currentTimeMs is missing', () => {
+      const dateSpy = spyOn(Date, 'now').and.returnValue(12_345);
+      const pendingSpy = spyOn(component.model, 'setPendingCell').and.returnValue(true);
+      component.currentTimeMs = null;
+      component.onCellSelected(0);
+
+      component.parseNumberKey(3);
+
+      expect(pendingSpy).toHaveBeenCalledWith(0, 3, 12_345);
+      expect(dateSpy).toHaveBeenCalled();
+    });
+
+    it('uses provided currentTimeMs when available', () => {
+      const pendingSpy = spyOn(component.model, 'setPendingCell').and.returnValue(true);
+      component.currentTimeMs = 999;
+      component.onCellSelected(0);
+
+      component.parseNumberKey(4);
+
+      expect(pendingSpy).toHaveBeenCalledWith(0, 4, 999);
+      expect(component['nowMs']()).toBe(999);
+    });
+
+    it('does not highlight opponent dynamic numbers when not fixed', () => {
+      component.isMe = false;
+      component.onCellSelected(0);
+      component.model.board[0] = new component.model.CellModelClass(5, false);
+      component.model.board[1] = new component.model.CellModelClass(5, false);
+
+      expect(component.isSameNumberCell(1)).toBeFalse();
+    });
+
+    it('returns empty ghost targets and exits rebuild when no threat', () => {
+      component.combatThreat = null;
+      component.ngOnChanges({ combatThreat: new SimpleChange(undefined, null, false) });
+      expect(component.ghostTargets()).toEqual([]);
+      component['rebuildThreatGeometry']();
     });
   });
 });

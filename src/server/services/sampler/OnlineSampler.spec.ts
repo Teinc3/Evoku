@@ -11,7 +11,7 @@ describe('OnlineSampler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: false });
 
     mockStatsService = {
       sampleStats: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
@@ -32,10 +32,10 @@ describe('OnlineSampler', () => {
       jest.setSystemTime(mockDate);
 
       // Act
-      sampler.start();
+      const expectedDelay = sampler.getDelayUntilNextHour(mockDate);
+      sampler.start(mockDate);
 
       // Expected delay: (60 - 34) * 60 * 1000 - 45 * 1000 - 500 = 1514500ms
-      const expectedDelay = (60 - 34) * 60 * 1000 - 45 * 1000 - 500;
       jest.advanceTimersByTime(expectedDelay - 1);
       expect(mockStatsService.sampleStats).not.toHaveBeenCalled();
 
@@ -49,7 +49,7 @@ describe('OnlineSampler', () => {
       jest.setSystemTime(mockDate);
 
       // Act
-      sampler.start();
+      sampler.start(mockDate);
 
       // Advance to first sample (at next hour)
       jest.advanceTimersByTime(3600_000);
@@ -69,7 +69,7 @@ describe('OnlineSampler', () => {
       const mockDate = new Date('2024-01-01T12:00:00.000Z');
       jest.setSystemTime(mockDate);
       
-      sampler.start();
+      sampler.start(mockDate);
       // Advance time to ensure timer is set
       jest.advanceTimersByTime(3600_000);
       
@@ -77,7 +77,7 @@ describe('OnlineSampler', () => {
       expect(firstTimer).not.toBeNull();
 
       // Act - try to start again while running
-      sampler.start();
+      sampler.start(mockDate);
 
       // Assert - timer should be the same (not recreated)
       expect(sampler['timer']).toBe(firstTimer);
@@ -89,7 +89,7 @@ describe('OnlineSampler', () => {
       // Arrange
       const mockDate = new Date('2024-01-01T12:00:00.000Z');
       jest.setSystemTime(mockDate);
-      sampler.start();
+      sampler.start(mockDate);
       
       // Advance to when timer is set (after alignment)
       jest.advanceTimersByTime(3600_000);
@@ -106,7 +106,7 @@ describe('OnlineSampler', () => {
       // Arrange
       const mockDate = new Date('2024-01-01T12:00:00.000Z');
       jest.setSystemTime(mockDate);
-      sampler.start();
+      sampler.start(mockDate);
 
       // Act - Advance to first sample
       jest.advanceTimersByTime(3600_000);

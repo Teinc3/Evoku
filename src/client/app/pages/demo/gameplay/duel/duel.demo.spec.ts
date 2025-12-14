@@ -1,6 +1,6 @@
 import { Subject, type Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import MatchStatus from '@shared/types/enums/matchstatus';
@@ -161,6 +161,24 @@ describe('DuelDemoPageComponent', () => {
       expect(component.gameState.getPlayerBoard).toHaveBeenCalledWith(0);
       expect(mockBoard.confirmCellSet).toHaveBeenCalledWith(0, 5, 1000);
     });
+
+    it('runs combat showcase timers and clears threats/messages', fakeAsync(() => {
+      spyOn(performance, 'now').and.returnValue(1_000);
+      component['stopUiTicker']();
+      component['initCombatShowcase']();
+
+      tick(5_300);
+      expect(component.myCombatMessages().length).toBe(1);
+
+      tick(2_000);
+      expect(component.opponentCombatMessages().length).toBe(1);
+
+      tick(2_000);
+      expect(component.myCombatThreat()).toBeNull();
+      expect(component.opponentCombatThreat()).toBeNull();
+
+      component.ngOnDestroy();
+    }));
 
     it('should handle CELL_SET packet for own actions using pending time', () => {
       // Initialize component subscriptions
