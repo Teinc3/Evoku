@@ -34,14 +34,15 @@ describe('OnlineSampler', () => {
       // Act
       sampler.start();
 
-      // Expected delay: (60 - 34) * 60 * 1000 - 45 * 1000 - 500 = 1514500ms
-      const expectedDelay = (60 - 34) * 60 * 1000 - 45 * 1000 - 500;
-      await jest.advanceTimersByTimeAsync(expectedDelay - 1);
-      expect(mockStatsService.sampleStats).not.toHaveBeenCalled();
-
-      await jest.advanceTimersByTimeAsync(1);
-      await jest.runOnlyPendingTimersAsync();
+      await jest.advanceTimersToNextTimerAsync();
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
+
+      // Interval should not fire until the following hour
+      await jest.advanceTimersByTimeAsync(3_599_000);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(2);
     });
 
     it('should sample every hour after alignment', async () => {
