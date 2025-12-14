@@ -47,6 +47,18 @@
   background: #7db8e8;
 }
 
+/* 3.3) Combat threat indicators (before grid separators for specificity) */
+:host(.combat-threat) .cell {
+  outline: 2px solid rgba(214, 31, 69, 0.6);
+  outline-offset: -2px;
+  animation: cell-threat 1s ease-in-out infinite;
+}
+
+:host(.combat-threat-critical) .cell {
+  animation-duration: 0.7s;
+  background: rgba(214, 31, 69, 0.12);
+}
+
 /* 4) Thick horizontal separators */
 :host:nth-child(n + 28):nth-child(-n + 36) .cell,
 :host:nth-child(n + 55):nth-child(-n + 63) .cell {
@@ -127,17 +139,6 @@
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
   background: rgba(0, 0, 0, 0.1);
-}
-
-:host(.combat-threat) .cell {
-  outline: 2px solid rgba(214, 31, 69, 0.6);
-  outline-offset: -2px;
-  animation: cell-threat 1s ease-in-out infinite;
-}
-
-:host(.combat-threat-critical) .cell {
-  animation-duration: 0.7s;
-  background: rgba(214, 31, 69, 0.12);
 }
 
 @keyframes cell-threat {

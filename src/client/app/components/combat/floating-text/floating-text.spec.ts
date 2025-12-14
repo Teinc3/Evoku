@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import CombatFloatingTextComponent from './floating-text';
+
 import type { CombatOutcomeText } from '../../../../types/combat';
 
 
@@ -47,6 +48,12 @@ describe('CombatFloatingTextComponent', () => {
     const active = component.activeMessages;
     expect(active.length).toBe(1);
     expect(active[0].id).toBe('m2');
+  });
+
+  it('returns empty list when current time is null', () => {
+    component.currentTimeMs = null;
+    fixture.detectChanges();
+    expect(component.activeMessages.length).toBe(0);
   });
 
   it('sorts messages by creation time', () => {

@@ -7,6 +7,20 @@
 	[phase]="gameState.matchState.phase"
 ></app-duel-hud-top>
 
+<div class="combat-badge-row">
+  <app-combat-badge
+    class="badge-left"
+    [incoming]="myCombatThreat()"
+    [currentTimeMs]="nowTick()"
+  />
+  <div class="badge-spacer"></div>
+  <app-combat-badge
+    class="badge-right"
+    [incoming]="opponentCombatThreat()"
+    [currentTimeMs]="nowTick()"
+  />
+</div>
+
 <!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->
 <div class="hud-centre">
   <app-universal-progress-bar
@@ -17,6 +31,9 @@
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
     [isMe]="true"
+    [combatThreat]="myCombatThreat()"
+    [combatMessages]="myCombatMessages()"
+    [currentTimeMs]="nowTick()"
     (sendPacket)="onPacketRequest($event)"
     (selectionChanged)="onBoardSelectionChanged(0)"
   />
@@ -25,6 +42,9 @@
     #board2
     [model]="gameState.getPlayerBoard(1 - gameState.myID)"
     [isMe]="false"
+    [combatThreat]="opponentCombatThreat()"
+    [combatMessages]="opponentCombatMessages()"
+    [currentTimeMs]="nowTick()"
     (sendPacket)="onPacketRequest($event)"
     (selectionChanged)="onBoardSelectionChanged(1)"
   />

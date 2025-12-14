@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import CombatBadgeComponent from './combat-badge';
 import { CombatDefuseType, type CombatIncomingThreat } from '../../../../types/combat';
+import CombatBadgeComponent from './combat-badge';
 
 
 describe('CombatBadgeComponent', () => {
@@ -37,6 +37,13 @@ describe('CombatBadgeComponent', () => {
   it('formats countdown text with seconds and hundredths', () => {
     // Remaining = 6.5s -> 06:50
     expect(component.countdownText).toBe('06:50');
+  });
+
+  it('returns 0 remaining when time not provided', () => {
+    component.currentTimeMs = null;
+    fixture.detectChanges();
+    expect(component.remainingMs).toBe(0);
+    expect(component.progressPercent).toBe(0);
   });
 
   it('computes progress percent based on duration', () => {

@@ -1,7 +1,9 @@
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SimpleChange } from '@angular/core';
 
 import UtilityAction from '../../../types/utility';
+import { CombatDefuseType, type CombatIncomingThreat } from '../../../types/combat';
 import ClientBoardModel from '../../../models/Board';
 import BoardModelComponent from './board.component';
 
@@ -24,6 +26,102 @@ describe('BoardModelComponent', () => {
     component.model = new ClientBoardModel([]);
     component.isMe = true; // Enable input handling for tests
     fixture.detectChanges();
+  });
+
+  describe('Combat threat overlay', () => {
+    let threat: CombatIncomingThreat;
+
+    beforeEach(() => {
+      threat = {
+        id: 't1',
+        pupName: 'Cryo',
+        icon: '/assets/pup/icons/cryo.svg',
+        defuseType: CombatDefuseType.ROW,
+        targetIndex: 1,
+        createdAtMs: 1_000,
+        expiresAtMs: 6_000
+      };
+      component.combatThreat = threat;
+      component.currentTimeMs = 2_000;
+      component.ngOnChanges({ combatThreat: new SimpleChange(null, threat, true) });
+    });
+
+    it('marks row cells as threatened when row defuse', () => {
+      for (let i = 9; i < 18; i++) {
+        expect(component.isThreatCell(i)).toBeTrue();
+      }
+      expect(component.isThreatCell(0)).toBeFalse();
+    });
+
+    it('computes ghost targets when targetCells supplied', () => {
+      const customThreat: CombatIncomingThreat = {
+        ...threat,
+        targetCells: [0, 10, 20]
+      };
+      component.combatThreat = customThreat;
+      component.ngOnChanges({ combatThreat: new SimpleChange(threat, customThreat, false) });
+      expect(component.ghostTargets()).toEqual([0, 10, 20]);
+    });
+
+    it('flags critical state when less than 3 seconds remaining', () => {
+      component.currentTimeMs = 5_500;
+      expect(component.isThreatCritical()).toBeTrue();
+    });
+
+    it('builds column and box geometry and global threat flags all', () => {
+      // Column threat
+      const colThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.COL,
+        targetIndex: 3,
+      };
+      component.combatThreat = colThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(threat, colThreat, false)
+      });
+      expect(component.isThreatCell(3)).toBeTrue();
+      const colStyle = component.colLinePosition();
+      expect(colStyle?.left).toBeDefined();
+      expect(parseFloat(colStyle!.left)).toBeCloseTo(33.333, 3);
+
+      // Box threat
+      const boxThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.BOX,
+        targetIndex: 4,
+      };
+      component.combatThreat = boxThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(colThreat, boxThreat, false)
+      });
+      expect(component.isThreatCell(40)).toBeTrue();
+      const boxStyle = component.boxOutlinePosition();
+      expect(boxStyle?.top).toBeDefined();
+      expect(parseFloat(boxStyle!.top)).toBeCloseTo(33.333, 3);
+
+      // Global threat
+      const globalThreat: CombatIncomingThreat = {
+        ...threat,
+        defuseType: CombatDefuseType.GLOBAL,
+      };
+      component.combatThreat = globalThreat;
+      component.ngOnChanges({
+        combatThreat: new SimpleChange(boxThreat, globalThreat, false)
+      });
+      expect(component.isThreatCell(0)).toBeTrue();
+      expect(component.isGlobalThreat()).toBeTrue();
+    });
+
+    it('returns 0 remaining when current time is null', () => {
+      component.currentTimeMs = null;
+      expect(component.threatRemainingMs()).toBe(0);
+    });
+
+    it('computes ghost style at cell center', () => {
+      const style = component.ghostStyle(10);
+      expect(style.top).toBeDefined();
+      expect(style.left).toBeDefined();
+    });
   });
 
   it('renders 81 cells', () => {

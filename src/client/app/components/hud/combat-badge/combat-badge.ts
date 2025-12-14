@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { CombatDefuseType, type CombatIncomingThreat } from '../../../../types/combat';
 
@@ -9,19 +9,28 @@ import { CombatDefuseType, type CombatIncomingThreat } from '../../../../types/c
   templateUrl: './combat-badge.html',
   styleUrl: './combat-badge.scss'
 })
-export default class CombatBadgeComponent implements OnChanges {
-  @Input()
-  public incoming: CombatIncomingThreat | null = null;
-
-  @Input()
-  public currentTimeMs: number | null = null;
-
+export default class CombatBadgeComponent {
+  private _incoming: CombatIncomingThreat | null = null;
+  private _currentTimeMs: number | null = null;
   private durationMs: number = 0;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['incoming']) {
-      this.durationMs = this.computeDurationMs();
-    }
+  @Input()
+  set incoming(value: CombatIncomingThreat | null) {
+    this._incoming = value;
+    this.durationMs = this.computeDurationMs();
+  }
+
+  get incoming(): CombatIncomingThreat | null {
+    return this._incoming;
+  }
+
+  @Input()
+  set currentTimeMs(value: number | null) {
+    this._currentTimeMs = value;
+  }
+
+  get currentTimeMs(): number | null {
+    return this._currentTimeMs;
   }
 
   get isActive(): boolean {
@@ -33,11 +42,10 @@ export default class CombatBadgeComponent implements OnChanges {
   }
 
   get remainingMs(): number {
-    if (!this.incoming) {
+    if (!this.incoming || this.currentTimeMs === null) {
       return 0;
     }
-    const now = this.currentTimeMs ?? performance.now();
-    return Math.max(0, this.incoming.expiresAtMs - now);
+    return Math.max(0, this.incoming.expiresAtMs - this.currentTimeMs);
   }
 
   get progressPercent(): number {

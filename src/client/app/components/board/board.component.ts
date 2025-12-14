@@ -5,14 +5,17 @@ import {
 } from '@angular/core';
 
 import MechanicsActions from '@shared/types/enums/actions/match/player/mechanics';
+import CombatFloatingTextComponent from '../combat/floating-text/floating-text';
 import CooldownAnimationHelper from '../../utils/cooldown-animation-helper';
 import UtilityAction from '../../../types/utility';
 import { CursorDirectionEnum } from '../../../types/enums';
+import {
+  CombatDefuseType,
+  type CombatIncomingThreat,
+  type CombatOutcomeText
+} from '../../../types/combat';
 import ClientBoardModel from '../../../models/Board';
 import SudokuCellComponent from './cell/cell.component';
-import CombatFloatingTextComponent from '../combat/floating-text/floating-text';
-import { CombatDefuseType, type CombatIncomingThreat, type CombatOutcomeText }
-  from '../../../types/combat';
 
 import type { WritableSignal } from '@angular/core';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -50,9 +53,9 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
   readonly selected: WritableSignal<number | null>;
   public readonly cooldownHelper: CooldownAnimationHelper;
   private threatTargets: number[] = [];
-  private rowLineStyle: Record<string, string> | null = null;
-  private colLineStyle: Record<string, string> | null = null;
-  private boxStyle: Record<string, string> | null = null;
+  private rowLineStyle: { top: string; height: string } | null = null;
+  private colLineStyle: { left: string; width: string } | null = null;
+  private boxStyle: { top: string; left: string; width: string; height: string } | null = null;
   private readonly segmentPercent: number;
 
   constructor() {
@@ -173,7 +176,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
 
     // See if we have notes to clear
     if (num === 0 && this.getCellModel(i).wipeNotes()) {
-      return;      
+      return;
     }
 
     // Otherwise, treat as normal
@@ -181,7 +184,7 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
       this.model.toggleNote(i, num);
     } else {
       // Check if pending state can be set (i.e. local checks passed)
-      const pendingSet = this.model.setPendingCell(i, num, performance.now());
+      const pendingSet = this.model.setPendingCell(i, num, this.nowMs());
       if (pendingSet) {
         // Send to server
         this.sendPacket.emit({
@@ -203,6 +206,14 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
         // We can add some visual feedback for the note button here
         break;
     }
+  }
+
+  private nowMs(): number {
+    if (this.currentTimeMs !== null) {
+      return this.currentTimeMs;
+    }
+
+    return Date.now();
   }
 
   /**
@@ -339,27 +350,31 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
   }
 
   public threatRemainingMs(): number {
-    if (!this.combatThreat) {
+    if (!this.combatThreat || this.currentTimeMs === null) {
       return 0;
     }
 
-    const now = this.currentTimeMs ?? performance.now();
-    return Math.max(0, this.combatThreat.expiresAtMs - now);
+    return Math.max(0, this.combatThreat.expiresAtMs - this.currentTimeMs);
   }
 
-  public rowLinePosition(): Record<string, string> | null {
+  public rowLinePosition(): { top: string; height: string } | null {
     return this.rowLineStyle;
   }
 
-  public colLinePosition(): Record<string, string> | null {
+  public colLinePosition(): { left: string; width: string } | null {
     return this.colLineStyle;
   }
 
-  public boxOutlinePosition(): Record<string, string> | null {
+  public boxOutlinePosition(): {
+    top: string;
+    left: string;
+    width: string;
+    height: string;
+  } | null {
     return this.boxStyle;
   }
 
-  public ghostStyle(cellIndex: number): Record<string, string> {
+  public ghostStyle(cellIndex: number): { top: string; left: string } {
     const row = Math.floor(cellIndex / 9);
     const col = cellIndex % 9;
     const top = (row + 0.5) * this.segmentPercent;
@@ -426,21 +441,26 @@ export default class BoardModelComponent implements DoCheck, OnDestroy, OnChange
     return targets;
   }
 
-  private buildRowStyle(rowIndex: number): Record<string, string> {
+  private buildRowStyle(rowIndex: number): { top: string; height: string } {
     return {
       top: `${rowIndex * this.segmentPercent}%`,
       height: `${this.segmentPercent}%`
     };
   }
 
-  private buildColStyle(colIndex: number): Record<string, string> {
+  private buildColStyle(colIndex: number): { left: string; width: string } {
     return {
       left: `${colIndex * this.segmentPercent}%`,
       width: `${this.segmentPercent}%`
     };
   }
 
-  private buildBoxStyle(boxIndex: number): Record<string, string> {
+  private buildBoxStyle(boxIndex: number): {
+    top: string;
+    left: string;
+    width: string;
+    height: string;
+  } {
     const startRow = Math.floor(boxIndex / 3) * 3;
     const startCol = (boxIndex % 3) * 3;
     return {
