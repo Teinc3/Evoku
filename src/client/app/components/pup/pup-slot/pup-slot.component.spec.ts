@@ -57,6 +57,26 @@ describe('PupSlotComponent', () => {
     expect(useSpy).not.toHaveBeenCalled();
   });
 
+  it('should not emit when pup is not ready', () => {
+    const useSpy = jasmine.createSpy('use');
+    component.use.subscribe(useSpy);
+    component.disabled = false;
+    component.pup = {
+      pupID: 4,
+      name: 'OnCooldown',
+      icon: '/assets/pup/icons/lock.svg',
+      status: 'cooldown',
+      cooldownRemainingMs: 2000
+    };
+
+    fixture.detectChanges();
+
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.slot');
+    button.click();
+
+    expect(useSpy).not.toHaveBeenCalled();
+  });
+
   it('should render icon and name when provided', () => {
     component.pup = {
       pupID: 2,

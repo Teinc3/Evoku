@@ -55,6 +55,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   static readonly MAX_PLAYER_COUNT = 2;
   private static readonly MAX_PUP_SLOTS = 3;
   private static readonly PUP_COOLDOWN_MS = 5000;
+  private static readonly PUP_EQUIPPED_DISPLAY_MS = 350;
   public readonly gameState: GameStateManager;
   private subscriptions = new Subscription();
   private nextActionId = 0;
@@ -148,7 +149,10 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         if (data.playerID === this.gameState.myID) {
           this.rollingActionId = null;
           this.refreshOrbState(PUPOrbState.EQUIPPED);
-          setTimeout(() => this.refreshOrbState(), 350);
+          setTimeout(
+            () => this.refreshOrbState(),
+            DuelDemoPageComponent.PUP_EQUIPPED_DISPLAY_MS
+          );
         }
       })
     );

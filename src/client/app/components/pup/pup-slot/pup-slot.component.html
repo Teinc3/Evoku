@@ -7,17 +7,17 @@
     (click)="onUse()"
   ></button>
 
-  @if (pup?.icon && pup.status !== 'empty') {
+  @if (pup && pup.icon && pup.status !== 'empty') {
     <img [src]="pup.icon" [alt]="pup.name ?? 'Powerup'" class="pup-icon">
   }
 
-  @if (pup?.status === 'cooldown') {
+  @if (pup && pup.status === 'cooldown') {
     <div class="cooldown-badge">
       {{ ((pup.cooldownRemainingMs ?? 0) / 1000) | number:'1.0-0' }}s
     </div>
   }
 
-  @if (pup?.name && showName) {
+  @if (pup && pup.name && showName) {
     <div class="pup-name" [attr.title]="pup.name">{{ pup.name }}</div>
   }
 </div>

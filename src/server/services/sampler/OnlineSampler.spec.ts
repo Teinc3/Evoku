@@ -26,7 +26,7 @@ describe('OnlineSampler', () => {
   });
 
   describe('start', () => {
-    it('should align to next hour boundary before first sample', () => {
+    it('should align to next hour boundary before first sample', async () => {
       // Arrange - Set time to 12:34:45.500
       const mockDate = new Date('2024-01-01T12:34:45.500Z');
       jest.setSystemTime(mockDate);
@@ -36,14 +36,15 @@ describe('OnlineSampler', () => {
 
       // Expected delay: (60 - 34) * 60 * 1000 - 45 * 1000 - 500 = 1514500ms
       const expectedDelay = (60 - 34) * 60 * 1000 - 45 * 1000 - 500;
-      jest.advanceTimersByTime(expectedDelay - 1);
+      await jest.advanceTimersByTimeAsync(expectedDelay - 1);
       expect(mockStatsService.sampleStats).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await jest.runOnlyPendingTimersAsync();
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
     });
 
-    it('should sample every hour after alignment', () => {
+    it('should sample every hour after alignment', async () => {
       // Arrange
       const mockDate = new Date('2024-01-01T12:00:00.000Z');
       jest.setSystemTime(mockDate);
@@ -52,15 +53,15 @@ describe('OnlineSampler', () => {
       sampler.start();
 
       // Advance to first sample (at next hour)
-      jest.advanceTimersByTime(3600_000);
+      await jest.advanceTimersByTimeAsync(3600_000);
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
 
       // Advance another hour
-      jest.advanceTimersByTime(3600_000);
+      await jest.advanceTimersByTimeAsync(3600_000);
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(2);
 
       // Advance another hour
-      jest.advanceTimersByTime(3600_000);
+      await jest.advanceTimersByTimeAsync(3600_000);
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(3);
     });
 
