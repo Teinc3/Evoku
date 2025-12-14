@@ -16,6 +16,11 @@
   height: auto;
 }
 
+.slots.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .slots > app-pup-slot {
   /* Responsive sizing: use vmin so slots shrink with the smaller viewport axis.
      Allow some grow so slots can expand when HUD has space. Use a slightly larger

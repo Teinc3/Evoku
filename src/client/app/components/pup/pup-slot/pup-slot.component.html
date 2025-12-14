@@ -1,10 +1,23 @@
-<div class="slot-wrapper">
-  <div class="slot" [class.occupied]="!!pupIcon">
-  </div>
-  @if (pupIcon) {
-    <img [src]="pupIcon" alt="Pup" class="pup-icon">
+<div class="slot-wrapper" [class.disabled]="disabled" [class.cooldown]="pup?.status === 'cooldown'">
+  <button
+    class="slot"
+    type="button"
+    [disabled]="disabled || !pup || pup.status !== 'ready'"
+    [class.occupied]="(pup?.status ?? 'empty') !== 'empty'"
+    (click)="onUse()"
+  ></button>
+
+  @if (pup && pup.icon && pup.status !== 'empty') {
+    <img [src]="pup.icon" [alt]="pup.name ?? 'Powerup'" class="pup-icon">
   }
-  @if (level !== null) {
-    <div class="level">{{ level }}</div>
+
+  @if (pup && pup.status === 'cooldown') {
+    <div class="cooldown-badge">
+      {{ ((pup.cooldownRemainingMs ?? 0) / 1000) | number:'1.0-0' }}s
+    </div>
+  }
+
+  @if (pup && pup.name && showName) {
+    <div class="pup-name" [attr.title]="pup.name">{{ pup.name }}</div>
   }
 </div>

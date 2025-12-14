@@ -5,17 +5,26 @@ import { signal } from '@angular/core';
 
 import MatchStatus from '@shared/types/enums/matchstatus';
 import ActionEnum, {
-  MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
+  MechanicsActions,
+  LifecycleActions,
+  ProtocolActions,
+  type PlayerActions,
+  WaterPUPActions,
+  FirePUPActions,
+  WoodPUPActions,
+  MetalPUPActions,
+  EarthPUPActions
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
-import { AppView } from '../../../../../types/enums';
+import { AppView, PUPOrbState } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { IPlayerState } from '@shared/types/gamestate';
 import type { MatchFoundContract, PingContract } from '@shared/types/contracts';
 import type BoardModelComponent from '../../../../components/board/board.component';
+import type { PupSlotState } from '../../../../../types/pup';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 import type ClientBoardModel from '../../../../../models/Board';
 
@@ -639,6 +648,244 @@ describe('DuelDemoPageComponent', () => {
       newComponent.ngOnDestroy();
 
       expect(unsubscribeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('PUP logic', () => {
+    afterEach(() => {
+      try {
+        jasmine.clock().uninstall();
+      } catch {
+        // clock not installed for some tests
+      }
+    });
+
+    it('should resolve PUP names to actions', () => {
+      const resolve = component['resolveUseAction'].bind(component);
+
+      expect(resolve('Cryo')).toBe(WaterPUPActions.USE_CRYO);
+      expect(resolve('Forge')).toBe(MetalPUPActions.USE_FORGE);
+      expect(resolve(null)).toBeNull();
+      expect(resolve('Unknown')).toBeNull();
+    });
+
+    it('should build use payloads for each PUP action type', () => {
+      const build = component['buildUsePayload'].bind(component);
+      component['gameState']['myID'] = 0;
+
+      type PayloadCase = {
+        action: PlayerActions;
+        verify: (payload: Record<string, unknown>) => void;
+      };
+
+      const cases: PayloadCase[] = [
+        {
+          action: WaterPUPActions.USE_CRYO,
+          verify: payload => {
+            expect(payload['targetID'] as number).toBe(1);
+            expect(payload['cellIndex'] as number).toBe(0);
+          }
+        },
+        {
+          action: FirePUPActions.USE_INFERNO,
+          verify: payload => {
+            expect(payload['targetID'] as number).toBe(1);
+            expect(payload['cellIndex'] as number).toBe(0);
+          }
+        },
+        {
+          action: MetalPUPActions.USE_LOCK,
+          verify: payload => {
+            expect(payload['targetID'] as number).toBe(1);
+            expect(payload['value'] as number).toBe(0);
+          }
+        },
+        {
+          action: WoodPUPActions.USE_ENTANGLE,
+          verify: payload => {
+            expect(payload['targetID'] as number).toBe(1);
+            expect(payload['cellIndex']).toBeUndefined();
+          }
+        },
+        {
+          action: EarthPUPActions.USE_LANDSLIDE,
+          verify: payload => {
+            expect(payload['targetID'] as number).toBe(1);
+          }
+        },
+        {
+          action: EarthPUPActions.USE_EXCAVATE,
+          verify: payload => {
+            expect(payload['cellIndex'] as number).toBe(0);
+            expect(payload['targetID']).toBeUndefined();
+          }
+        },
+        {
+          action: WoodPUPActions.USE_WISDOM,
+          verify: payload => {
+            expect(payload['targetID']).toBeUndefined();
+            expect(payload['cellIndex']).toBeUndefined();
+          }
+        },
+        {
+          action: FirePUPActions.USE_METABOLIC,
+          verify: payload => {
+            expect(payload['targetID']).toBeUndefined();
+          }
+        },
+        {
+          action: MetalPUPActions.USE_FORGE,
+          verify: payload => {
+            expect(payload['value']).toBeUndefined();
+          }
+        },
+        {
+          action: WaterPUPActions.USE_PURITY,
+          verify: payload => {
+            expect(payload['targetID']).toBeUndefined();
+          }
+        }
+      ];
+
+      cases.forEach(({ action, verify }) => {
+        const payload = build(action, 7);
+        expect(payload).toBeTruthy();
+        if (!payload) {
+          fail('Expected payload to be built');
+          return;
+        }
+
+        const typedPayload = payload as Record<string, unknown>;
+        expect(typedPayload['action']).toBe(action);
+        expect(typedPayload['pupID']).toBe(7);
+        verify(typedPayload);
+      });
+    });
+
+    it('should send use action and clear cooldown lifecycle for a ready slot', () => {
+      jasmine.clock().install();
+      networkServiceSpy.send.calls.reset();
+      component['gameState']['myID'] = 0;
+
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: { pupProgress: 0, boardState: null }
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const slots: PupSlotState[] = [
+        { pupID: 1, name: 'Cryo', icon: '/assets/pup/icons/cryo.svg', status: 'ready' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component.myPupSlots = slots;
+
+      const refreshSpy = spyOn(component as unknown as { refreshOrbState: () => void },
+        'refreshOrbState').and.callThrough();
+
+      component.onUsePup(0);
+
+      const [actionSent, rawPayload] = networkServiceSpy.send.calls.mostRecent().args;
+      const payload = rawPayload as Record<string, unknown>;
+      expect(actionSent).toBe(WaterPUPActions.USE_CRYO);
+      expect(payload['pupID']).toBe(1);
+      expect(payload['targetID']).toBe(1);
+
+      expect(component.myPupSlots[0].status).toBe('cooldown');
+      component['clearCooldownIntervals']();
+      component.myPupSlots[0].cooldownExpiresAt = Date.now();
+      component['scheduleCooldownTick'](0);
+
+      jasmine.clock().tick(250);
+
+      expect(component.myPupSlots[0].status).toBe('empty');
+      expect(refreshSpy).toHaveBeenCalled();
+
+      component['clearCooldownIntervals']();
+    });
+
+    it('should roll only when orb is ready', () => {
+      component.orbState = PUPOrbState.READY;
+      component.orbDisabled = false;
+      networkServiceSpy.send.calls.reset();
+
+      component.onPupRoll();
+
+      const rollingOrbState = component.orbState as number;
+      expect(rollingOrbState).toBe(PUPOrbState.SPINNING);
+      expect(component.orbDisabled).toBeTrue();
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        MechanicsActions.DRAW_PUP,
+        jasmine.objectContaining({})
+      );
+
+      const callCount = networkServiceSpy.send.calls.count();
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = true;
+      component.onPupRoll();
+      expect(networkServiceSpy.send.calls.count()).toBe(callCount);
+    });
+
+    it('should refresh orb state based on PUP progress and slots', () => {
+      const playerState = { gameState: { pupProgress: 120 } };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue(
+        playerState as unknown as IPlayerState<ClientBoardModel>
+      );
+
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = true;
+      component.myPupSlots = [
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component['refreshOrbState']();
+
+      const refreshedState = component.orbState as number;
+      expect(refreshedState).toBe(PUPOrbState.READY);
+      expect(component.orbDisabled).toBeFalse();
+    });
+
+    it('should handle missing player game state by disabling orb', () => {
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.orbState = PUPOrbState.IDLE;
+      component.orbDisabled = false;
+
+      component['refreshOrbState']();
+
+      expect(component.orbDisabled).toBeTrue();
+      expect(component.orbState).toBe(PUPOrbState.IDLE); // reset when no game state
+    });
+
+    it('should handle pup draw into empty slot with mapped config', () => {
+      component.myPupSlots = [
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component['handlePupDrawn'](component['gameState'].myID, 0);
+
+      const slot = component.myPupSlots[0];
+      expect(slot.status).toBe('ready');
+      expect(slot.name).toBe('Cryo');
+      expect(slot.icon).toContain('cryo.svg');
+    });
+
+    it('should ignore use requests when slot is not ready', () => {
+      networkServiceSpy.send.calls.reset();
+      component.myPupSlots = [
+        { pupID: 1, name: 'Cryo', icon: '', status: 'cooldown' },
+        { pupID: null, name: null, icon: null, status: 'empty' },
+        { pupID: null, name: null, icon: null, status: 'empty' }
+      ];
+
+      component.onUsePup(0);
+
+      expect(networkServiceSpy.send).not.toHaveBeenCalled();
     });
   });
 });
