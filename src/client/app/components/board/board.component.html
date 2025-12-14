@@ -1,4 +1,9 @@
-<div class="board">
+<div
+  class="board"
+  [class.combat-active]="combatThreat !== null"
+  [class.combat-critical]="isThreatCritical()"
+  [class.combat-global]="isGlobalThreat()"
+>
   @for (i of indices; track i) {
     <app-cell-model
       [model]="getCellModel(i)"
@@ -8,9 +13,55 @@
       [class.selected]="selected() === i"
       [class.highlight-related]="isRelatedCell(i)"
       [class.highlight-same-number]="isSameNumberCell(i)"
+      [class.combat-threat]="isThreatCell(i)"
+      [class.combat-threat-critical]="isThreatCritical()"
       [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
     ></app-cell-model>
   }
+
+  @if (combatThreat) {
+    <div class="combat-overlay">
+      @if (rowLinePosition(); as rowStyle) {
+        <div
+          class="threat-line row"
+          [style.top]="rowStyle.top"
+          [style.height]="rowStyle.height"
+        ></div>
+      }
+
+      @if (colLinePosition(); as colStyle) {
+        <div
+          class="threat-line col"
+          [style.left]="colStyle.left"
+          [style.width]="colStyle.width"
+        ></div>
+      }
+
+      @if (boxOutlinePosition(); as boxStyle) {
+        <div
+          class="box-outline"
+          [style.top]="boxStyle.top"
+          [style.left]="boxStyle.left"
+          [style.width]="boxStyle.width"
+          [style.height]="boxStyle.height"
+        ></div>
+      }
+
+      <div class="threat-border"></div>
+
+      @for (cellIndex of ghostTargets(); track cellIndex) {
+        <div class="ghost-icon" [style.top]="ghostStyle(cellIndex).top" [style.left]="ghostStyle(cellIndex).left">
+          <img [src]="combatThreat.icon" alt="Ghost target icon">
+        </div>
+      }
+    </div>
+  }
+
+  <app-combat-floating-text
+    [messages]="combatMessages"
+    [currentTimeMs]="currentTimeMs"
+  />
+
   @if (cooldownHelper.currentAngle() > 0 || cooldownHelper.transitionDuration() !== '0s') {
     <div
       class="global-cooldown-overlay"

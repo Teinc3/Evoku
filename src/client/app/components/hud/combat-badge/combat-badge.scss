@@ -1,0 +1,136 @@
+.combat-badge {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, rgba(255, 119, 77, 0.18), rgba(255, 233, 210, 0.18));
+  color: #1a1a1a;
+  border: 1px solid rgba(255, 133, 94, 0.55);
+  box-shadow: 0 6px 18px rgba(255, 133, 94, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.combat-badge.active {
+  transform: translateY(-2px);
+  border-color: rgba(255, 133, 94, 0.9);
+  box-shadow: 0 10px 28px rgba(255, 133, 94, 0.35);
+}
+
+.combat-badge.critical {
+  animation: badge-pulse 1s ease-in-out infinite;
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.2), 0 8px 22px rgba(255, 77, 79, 0.25);
+}
+
+@keyframes badge-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 77, 79, 0.05);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+  }
+}
+
+.badge-core {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pup-icon {
+  height: 42px;
+  width: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.65), rgba(255, 188, 160, 0.45));
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.pup-icon img {
+  width: 28px;
+  height: 28px;
+}
+
+.pup-icon .placeholder {
+  font-size: 0.75rem;
+  color: #b4b4b4;
+}
+
+.badge-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.badge-text .title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.badge-text .subtitle {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: #0f6ad6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.timer {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
+.timer .count {
+  font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #d61f45;
+  text-shadow: 0 1px 4px rgba(255, 77, 79, 0.35);
+}
+
+.timer .bar {
+  position: relative;
+  width: 140px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.timer .fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #ff7849, #ff3b30);
+  box-shadow: 0 0 10px rgba(255, 59, 48, 0.35);
+  transition: width 0.2s ease;
+}
+
+.combat-badge:not(.active) .timer {
+  opacity: 0.4;
+}
+
+@media (max-width: 900px) {
+  .combat-badge {
+    width: 100%;
+    max-width: none;
+  }
+
+  .timer .bar {
+    width: 110px;
+  }
+}
