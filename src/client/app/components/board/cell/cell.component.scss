@@ -16,6 +16,7 @@
   container-type: inline-size;
   container-name: cell;
   font-family: inherit;
+  transition: background 0.1s ease;
 }
 
 /* Ordering adjusted to satisfy no-descending-specificity */
@@ -35,7 +36,7 @@
 /* 3) Selection state (before horizontal thick lines) */
 :host(.selected) .cell {
   background: var(--cursor-fill);
-  box-shadow: inset 0 0 10px var(--cursor-border);
+  box-shadow: 0 0 7px var(--cursor-border), inset 0 0 10px var(--cursor-border);
   border: 1px solid var(--cursor-border);
 }
 
@@ -78,7 +79,7 @@
 /* Value coloring for fixed cells */
 .cell.fixed .v {
   color: var(--num-fixed);
-  text-shadow: 0 0 5px var(--num-fixed);
+  text-shadow: none;
   font-weight: 700;
 }
 
@@ -86,13 +87,6 @@
 .cell.pending .v {
   color: var(--num-note);
   font-weight: 600;
-}
-
-.pending-clear {
-  color: var(--num-note);
-  font-size: 2rem;
-  font-weight: 600;
-  user-select: none;
 }
 
 .notes {
@@ -116,16 +110,10 @@
 
 /* Highlight individual notes matching selected value */
 .note.highlight-note {
-  background: var(--highlight-note-bg);
+  background: var(--highlight-bg-num);
   border-radius: 2px;
-  color: var(--highlight-note-color);
+  color: var(--num-note);
   font-weight: 600;
-}
-
-/* Ensure content is readable on selected background */
-:host(.selected) .notes,
-:host(.selected) .note {
-  color: #ffffff;
 }
 
 /* Simple hover feedback (only when not selected) */
