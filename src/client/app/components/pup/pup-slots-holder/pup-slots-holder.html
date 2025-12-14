@@ -1,5 +1,10 @@
-<div class="slots">
-	<app-pup-slot></app-pup-slot>
-	<app-pup-slot></app-pup-slot>
-	<app-pup-slot></app-pup-slot>
+<div class="slots" [class.disabled]="disabled">
+	@for (slot of slots; track $index) {
+		<app-pup-slot
+		  [pup]="slot"
+		  [disabled]="disabled"
+		  [showName]="showNames"
+		  (use)="onUse($index)"
+		></app-pup-slot>
+	}
 </div>
