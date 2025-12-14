@@ -16,7 +16,9 @@
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
   position: relative; /* for overlay lines */
-  border: 6px solid #000;
+  border: 2px solid var(--board-border);
+  box-shadow: 0 0 15px var(--board-border), inset 0 0 20px rgba(0,0,0,0.8);
+  background-color: var(--bg-surface);
   box-sizing: border-box;
   max-width: 100%;
   max-height: 100%;
@@ -24,6 +26,6 @@
 
 .global-cooldown-overlay {
   @extend %cooldown-overlay-base;
-  background: conic-gradient(from 0deg, rgba(172, 172, 172, 0.2) 0deg var(--angle), transparent var(--angle) 360deg);
+  background: conic-gradient(from 0deg, var(--cd-global) 0deg var(--angle), transparent var(--angle) 360deg);
   z-index: 2; /* Above cells */
 }

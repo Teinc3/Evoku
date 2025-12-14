@@ -1,0 +1,36 @@
+:root {
+  /* --- 1. The Canvas (Atmosphere) --- */
+  --bg-void: #0a0a12;          /* Deepest Black-Blue */
+  --bg-surface: #14141e;       /* Slightly lighter panel background */
+  --text-body: #e0e0e0;        /* Holographic White */
+
+  /* --- 2. The Frame (Structure) --- */
+  /* The "Yang" Container */
+  --board-border: #ff00aa;     /* Neon Pink (Main Brand Color) */
+  --grid-outer: #ff00aa;       /* Neon Pink (Matches Border for 3x3 boxes) */
+  
+  /* The "Yin" Internal Mesh */
+  --grid-inner: #9d46ff;       /* Neon Amethyst (Violet) - Contrast against Cyan cursor */
+
+  /* --- 3. The Data (Numbers) --- */
+  --num-fixed: #ffffff;        /* Chrome Silver (The Puzzle) */
+  --num-user: #ffbf00;         /* Solar Amber (The Player) */
+  --num-note: #5e9ba3;         /* Blueprint Blue (The Draft) - Non-glowing */
+
+  /* --- 4. The Cursor & Focus (Yin) --- */
+  --cursor-border: #00ffff;                /* Electric Cyan (Sharp Focus) */
+  --cursor-fill: rgba(0, 255, 255, 0.35);   /* Glassy Cyan (Active Cell) */
+  --hover-bg: rgba(0, 255, 255, 0.35);     /* Hover Highlight */
+  --highlight-bg-num: rgba(0, 255, 255, 0.25); /* Faint Scanline (Same Number) */
+  --highlight-bg-related: rgba(0, 255, 255, 0.08); /* Faint Scanline (Related Row/Col) */
+
+  /* --- 5. System Feedback --- */
+  --cd-global: rgba(0, 229, 255, 0.08); /* Cyan Radial Timer (Rhythm) */
+  --cd-cell: rgba(128, 128, 128, 0.4);   /* Molten Bronze Overlay (Input Locking) */
+  --state-success: #39ff14;            /* Acid Green (Valid/XP) */
+  --state-danger: #ff003c;             /* Cyber Crimson (Attacks/Errors) */
+
+  /* --- 6. Notes --- */
+  --highlight-note-bg: #7db8e8;         /* Highlight Note Background */
+  --highlight-note-color: #ffffff;     /* Highlight Note Text Color */
+}

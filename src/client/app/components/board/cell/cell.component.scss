@@ -11,8 +11,8 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  border-right: 1px solid #9a9a9a;
-  border-bottom: 1px solid #9a9a9a;
+  border-right: 1px solid var(--grid-inner);
+  border-bottom: 1px solid var(--grid-inner);
   container-type: inline-size;
   container-name: cell;
   font-family: inherit;
@@ -22,7 +22,7 @@
 /* 1) Thick vertical separators */
 :host:nth-child(9n + 4) .cell,
 :host:nth-child(9n + 7) .cell {
-  border-left: 4px solid #000000;
+  border-left: 2px solid var(--grid-outer);
 }
 
 /* 2) Right-border suppression (must precede horizontal thick lines per linter) */
@@ -34,23 +34,25 @@
 
 /* 3) Selection state (before horizontal thick lines) */
 :host(.selected) .cell {
-  background: #9ed2ff;
+  background: var(--cursor-fill);
+  box-shadow: inset 0 0 10px var(--cursor-border);
+  border: 1px solid var(--cursor-border);
 }
 
 /* 3.1) Highlight related cells (same row/column/grid) */
 :host(.highlight-related) .cell {
-  background: #c4e3ff;
+  background: var(--highlight-bg-related);
 }
 
 /* 3.2) Highlight same number cells (takes precedence) */
 :host(.highlight-same-number) .cell {
-  background: #7db8e8;
+  background: var(--highlight-bg-num);
 }
 
 /* 4) Thick horizontal separators */
 :host:nth-child(n + 28):nth-child(-n + 36) .cell,
 :host:nth-child(n + 55):nth-child(-n + 63) .cell {
-  border-top: 4px solid #000000;
+  border-top: 2px solid var(--grid-outer);
 }
 
 /* 5) Bottom-border suppression */
@@ -68,24 +70,26 @@
   place-items: center;
   font-size: 50cqw;
   user-select: none;
-  color: #1976d2;
+  color: var(--num-user);
+  text-shadow: 0 0 5px var(--num-user);
   font-weight: 600;
 }
 
 /* Value coloring for fixed cells */
 .cell.fixed .v {
-  color: #000000;
+  color: var(--num-fixed);
+  text-shadow: 0 0 5px var(--num-fixed);
   font-weight: 700;
 }
 
 /* Value coloring for pending cells */
 .cell.pending .v {
-  color: #909090;
+  color: var(--num-note);
   font-weight: 600;
 }
 
 .pending-clear {
-  color: #909090;
+  color: var(--num-note);
   font-size: 2rem;
   font-weight: 600;
   user-select: none;
@@ -98,8 +102,8 @@
   width: 100%;
   height: 100%;
   padding: 2px;
+  color: var(--num-note);
   gap: 1px;
-  color: #b0b0b0;
 }
 
 .note {
@@ -112,9 +116,9 @@
 
 /* Highlight individual notes matching selected value */
 .note.highlight-note {
-  background: #7db8e8;
+  background: var(--highlight-note-bg);
   border-radius: 2px;
-  color: #ffffff;
+  color: var(--highlight-note-color);
   font-weight: 600;
 }
 
@@ -126,11 +130,11 @@
 
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--hover-bg);
 }
 
 .cooldown-overlay {
   @extend %cooldown-overlay-base;
-  background: conic-gradient(from 0deg, rgba(128, 128, 128, 0.3) 0deg var(--angle), transparent var(--angle) 360deg);
+  background: conic-gradient(from 0deg, var(--cd-cell) 0deg var(--angle), transparent var(--angle) 360deg);
   z-index: 1;
 }
