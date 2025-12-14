@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, computed, signal, OnInit, OnDestroy, NgZone } from '@angular/core';
 
 
 @Component({
@@ -15,8 +15,8 @@ export default class PhaseTimerComponent implements OnInit, OnDestroy {
   private static readonly MARKER_RIGHT_ANGLE = 210;
   private static readonly UPDATE_INTERVAL_MS = 100;
 
-  private _startTime: number | null = null;
-  private intervalId: number | null = null;
+  private _startTime: number | null;
+  private intervalId: number | null;
 
   /** Start time in milliseconds (performance.now() basis). */
   @Input()
@@ -43,13 +43,21 @@ export default class PhaseTimerComponent implements OnInit, OnDestroy {
   protected _percentage = signal(0);
   protected _phase = signal(0);
 
+  constructor(private ngZone: NgZone) {
+    this._startTime = null;
+    this.intervalId = null;
+  }
+
   ngOnInit() {
-    this.intervalId = setInterval(() => this.updateTime(), PhaseTimerComponent.UPDATE_INTERVAL_MS);
+    this.ngZone.runOutsideAngular(() => {
+      this.intervalId
+        = window.setInterval(() => this.updateTime(), PhaseTimerComponent.UPDATE_INTERVAL_MS);
+    });
   }
 
   ngOnDestroy() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
+    if (this.intervalId !== null) {
+      window.clearInterval(this.intervalId);
     }
   }
 
