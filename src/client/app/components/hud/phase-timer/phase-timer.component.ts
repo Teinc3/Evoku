@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal } from '@angular/core';
+import { Component, Input, computed, signal, OnInit, OnDestroy, NgZone } from '@angular/core';
 
 
 @Component({
@@ -8,17 +8,21 @@ import { Component, Input, computed, signal } from '@angular/core';
   templateUrl: './phase-timer.component.html',
   styleUrl: './phase-timer.component.scss'
 })
-export default class PhaseTimerComponent {
+export default class PhaseTimerComponent implements OnInit, OnDestroy {
   // Geometry constants (SVG units, must match template)
   private static readonly OUTER_RADIUS = 50;
   private static readonly MARKER_LEFT_ANGLE = 150;
   private static readonly MARKER_RIGHT_ANGLE = 210;
+  private static readonly UPDATE_INTERVAL_MS = 100;
 
-  /** Time in milliseconds to display as mm:ss (floored). */
+  private _startTime: number | null;
+  private intervalId: number | null;
+
+  /** Start time in milliseconds (performance.now() basis). */
   @Input()
-  set timeMs(value: number) {
-    const v = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
-    this._timeMs.set(v);
+  set startTime(value: number | null) {
+    this._startTime = value;
+    this.updateTime();
   }
 
   /** Percentage (0-100) of the phase progress along the bottom arc. */
@@ -38,6 +42,34 @@ export default class PhaseTimerComponent {
   protected _timeMs = signal(0);
   protected _percentage = signal(0);
   protected _phase = signal(0);
+
+  constructor(private ngZone: NgZone) {
+    this._startTime = null;
+    this.intervalId = null;
+  }
+
+  ngOnInit() {
+    this.ngZone.runOutsideAngular(() => {
+      this.intervalId
+        = window.setInterval(() => this.updateTime(), PhaseTimerComponent.UPDATE_INTERVAL_MS);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId !== null) {
+      window.clearInterval(this.intervalId);
+    }
+  }
+
+  private updateTime() {
+    if (this._startTime === null) {
+      this._timeMs.set(0);
+      return;
+    }
+    const now = performance.now();
+    const elapsed = Math.max(0, Math.floor(now - this._startTime));
+    this._timeMs.set(elapsed);
+  }
 
   // Derived: stroke dashoffset (arc pathLength is normalized to 100)
   protected dashOffset = computed(() => 100 - this._percentage());

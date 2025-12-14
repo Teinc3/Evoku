@@ -21,12 +21,17 @@ describe('PhaseTimerComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should compute timeText as mm:ss for given timeMs', () => {
-    component.timeMs = 120000; // 2 minutes
+  it('should compute timeText as mm:ss for given startTime', () => {
+    const now = 200000;
+    spyOn(performance, 'now').and.returnValue(now);
+
+    // Elapsed = 200000 - 80000 = 120000 (2 mins)
+    component.startTime = 80000;
     fixture.detectChanges();
     expect(component['timeText']()).toBe('02:00');
 
-    component.timeMs = 61500; // 1:01 (floored)
+    // Elapsed = 200000 - 138500 = 61500 (1:01)
+    component.startTime = 138500;
     fixture.detectChanges();
     expect(component['timeText']()).toBe('01:01');
   });
@@ -54,7 +59,11 @@ describe('PhaseTimerComponent', () => {
   });
 
   it('should render time text and arc attributes in the template', () => {
-    component.timeMs = 90000; // 1:30
+    const now = 200000;
+    spyOn(performance, 'now').and.returnValue(now);
+
+    // Elapsed = 90000 (1:30) -> startTime = 200000 - 90000 = 110000
+    component.startTime = 110000;
     component.percentage = 25;
     fixture.detectChanges();
 
@@ -71,8 +80,8 @@ describe('PhaseTimerComponent', () => {
   });
 
   it('should clamp non-finite inputs to fallbacks (increase branch coverage)', () => {
-    // timeMs non-finite -> fallback 0 => 00:00
-    component.timeMs = NaN as unknown as number;
+    // startTime null -> fallback 0 => 00:00
+    component.startTime = null;
     fixture.detectChanges();
     expect(component['timeText']()).toBe('00:00');
 

@@ -37,6 +37,7 @@ export default class TimeAttackDemoPageComponent implements OnInit {
   board!: BoardModelComponent;
   private puzzle!: number[];
   protected AppView = AppView;
+  protected startTime = performance.now();
 
   constructor(protected viewStateService: ViewStateService) {}
 

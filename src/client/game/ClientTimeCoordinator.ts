@@ -19,12 +19,16 @@ export default class ClientTimeCoordinator {
   /** Latest RTT measurement */
   private rtt: number;
   /** Relative time of game initialisation */
-  private startTime: number | null;
+  private _startTime: number | null;
 
   constructor() {
     this.syncOffset = 0;
     this.rtt = 0;
-    this.startTime = null;
+    this._startTime = null;
+  }
+
+  public get startTime(): number | null {
+    return this._startTime;
   }
 
   /** Accrued time since local client timecoordinator service startup. */
@@ -32,17 +36,8 @@ export default class ClientTimeCoordinator {
     return performance.now();
   }
 
-  /** Elapsed time since game start, or 0 if not started yet. */
-  public get timeElapsed(): number {
-    if (this.startTime === null) {
-      return 0;
-    }
-
-    return this.clientTime - this.startTime;
-  }
-
   public onGameInit(): void {
-    this.startTime = this.clientTime;
+    this._startTime = this.clientTime;
   }
 
   /**
@@ -93,5 +88,6 @@ export default class ClientTimeCoordinator {
   public reset(): void {
     this.syncOffset = 0;
     this.rtt = 0;
+    this._startTime = null;
   }
 }

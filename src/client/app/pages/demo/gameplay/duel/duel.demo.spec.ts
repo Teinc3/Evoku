@@ -403,7 +403,7 @@ describe('DuelDemoPageComponent', () => {
 
     it('should have phase timer with correct inputs', () => {
       const hudTop = fixture.debugElement.query(By.css('app-duel-hud-top'));
-      expect(hudTop.componentInstance.phaseTimeMs).toBeDefined();
+      expect(hudTop.componentInstance.startTime).toBeDefined();
     });
   });
 

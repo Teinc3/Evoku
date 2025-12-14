@@ -32,7 +32,16 @@ describe('TimeAttackDemoPageComponent', () => {
       const phaseTimer = fixture.debugElement.query(By.css('app-phase-timer'));
       expect(phaseTimer.componentInstance).toBeTruthy();
 
-      // Verify computed values from inputs [timeMs]="120000" and [percentage]="50"
+      // Mock performance.now to return a fixed value
+      const now = 200000;
+      spyOn(performance, 'now').and.returnValue(now);
+
+      // Set startTime such that elapsed is 120000 (2 mins)
+      // elapsed = now - startTime => startTime = now - elapsed
+      component['startTime'] = now - 120000;
+      fixture.detectChanges();
+
+      // Verify computed values from inputs [startTime] and [percentage]="50"
       // Access protected members in tests via bracket indexing
       const timeText = phaseTimer.componentInstance['timeText']();
       const dashOffset = phaseTimer.componentInstance['dashOffset']();
