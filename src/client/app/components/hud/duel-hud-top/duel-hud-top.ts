@@ -19,7 +19,7 @@ export default class DuelHudTopComponent {
   @Input()
   boardProgress2: number = 0;
   @Input()
-  phaseTimeMs: number = 0;
+  startTime: number | null = null;
   @Input()
   phase: number = 0;
   @Input()

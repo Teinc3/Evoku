@@ -19,7 +19,7 @@ export default class ClientTimeCoordinator {
   /** Latest RTT measurement */
   private rtt: number;
   /** Relative time of game initialisation */
-  private startTime: number | null;
+  public startTime: number | null;
 
   constructor() {
     this.syncOffset = 0;
