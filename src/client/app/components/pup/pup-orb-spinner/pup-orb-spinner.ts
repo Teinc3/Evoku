@@ -10,8 +10,9 @@ import { PUPOrbState } from '../../../../types/enums';
   styleUrl: './pup-orb-spinner.scss'
 })
 export default class PupOrbSpinnerComponent {
-  // Change to input in the future when wiring everything up
+  @Input()
   state: PUPOrbState = PUPOrbState.IDLE;
+
   @Input() 
   disabled = false;
 
@@ -36,25 +37,18 @@ export default class PupOrbSpinnerComponent {
   get isSpinning(): boolean {
     return this.state === PUPOrbState.SPINNING;
   }
+  @HostBinding('class.equipped')
+  get isEquipped(): boolean {
+    return this.state === PUPOrbState.EQUIPPED;
+  }
 
   @HostListener('click') 
   onClick(): void {
-    if (this.disabled) { 
+    if (this.disabled || this.state !== PUPOrbState.READY) { 
       return;
     }
-    // Testing cycle: IDLE -> READY -> SPINNING -> IDLE
-    switch (this.state) {
-      case PUPOrbState.IDLE:
-        this.state = PUPOrbState.READY;
-        break;
-      case PUPOrbState.READY:
-        this.state = PUPOrbState.SPINNING;
-        this.roll.emit();
-        break;
-      case PUPOrbState.SPINNING:
-        this.state = PUPOrbState.IDLE;
-        break;
-    }
+    this.state = PUPOrbState.SPINNING;
+    this.roll.emit();
   }
 }
 

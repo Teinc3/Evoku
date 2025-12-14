@@ -37,9 +37,20 @@
 <!-- Bottom HUD -->
 <div class="hud-bottom">
   <div class="my-pup">
-    <app-pup-orb-spinner/>
-    <app-pup-slots-holder/>
+    <app-pup-orb-spinner
+      [state]="orbState"
+      [disabled]="orbDisabled"
+      (roll)="onPupRoll()"
+    />
+    <app-pup-slots-holder
+      [slots]="myPupSlots"
+      (usePup)="onUsePup($event)"
+    />
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>
-  <app-pup-slots-holder/>
+  <app-pup-slots-holder
+    [slots]="opponentPupSlots"
+    [disabled]="true"
+    [showNames]="false"
+  />
 </div>

@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import PupSlotComponent from '../pup-slot/pup-slot.component';
+
+
+import type { PupSlotState } from '../../../../types/pup';
 
 
 @Component({
@@ -11,4 +14,19 @@ import PupSlotComponent from '../pup-slot/pup-slot.component';
   styleUrl: './pup-slots-holder.scss'
 })
 export default class PupSlotsHolderComponent {
+  @Input()
+  slots: PupSlotState[] = [];
+
+  @Input()
+  disabled = false;
+
+  @Input()
+  showNames = true;
+
+  @Output()
+  usePup = new EventEmitter<number>();
+
+  onUse(index: number): void {
+    this.usePup.emit(index);
+  }
 }

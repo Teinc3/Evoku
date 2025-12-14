@@ -36,6 +36,7 @@ describe('PupOrbSpinnerComponent', () => {
     fixture.detectChanges();
     expect(hostEl.classList.contains('ready')).toBeFalse();
     expect(hostEl.classList.contains('spinning')).toBeFalse();
+    expect(hostEl.classList.contains('equipped')).toBeFalse();
     expect(hostEl.getAttribute('aria-busy')).toBe('false');
 
     // READY
@@ -50,7 +51,12 @@ describe('PupOrbSpinnerComponent', () => {
     fixture.detectChanges();
     expect(hostEl.classList.contains('ready')).toBeFalse();
     expect(hostEl.classList.contains('spinning')).toBeTrue();
+    expect(hostEl.classList.contains('equipped')).toBeFalse();
     expect(hostEl.getAttribute('aria-busy')).toBe('true');
+
+    component.state = PUPOrbState.EQUIPPED;
+    fixture.detectChanges();
+    expect(hostEl.classList.contains('equipped')).toBeTrue();
   });
 
   it('should emit roll when transitioning from READY to SPINNING via click', () => {
@@ -69,23 +75,6 @@ describe('PupOrbSpinnerComponent', () => {
     expect(rollSpy).toHaveBeenCalled();
   });
 
-  it('should cycle through states on click when not disabled: IDLE->READY->SPINNING->IDLE', () => {
-    const hostDe = fixture.debugElement;
-
-    component.disabled = false;
-    component.state = PUPOrbState.IDLE;
-    fixture.detectChanges();
-
-    hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.READY);
-
-    hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.SPINNING);
-
-    hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
-  });
-
   it('should not change state or emit when disabled', () => {
     const hostDe = fixture.debugElement;
     const rollSpy = jasmine.createSpy('roll');
@@ -98,6 +87,19 @@ describe('PupOrbSpinnerComponent', () => {
     hostDe.triggerEventHandler('click', {});
 
     expect(component.state).toBe(PUPOrbState.READY);
+    expect(rollSpy).not.toHaveBeenCalled();
+  });
+
+  it('should ignore clicks when not ready', () => {
+    const hostDe = fixture.debugElement;
+    const rollSpy = jasmine.createSpy('roll');
+    component.roll.subscribe(rollSpy);
+
+    component.state = PUPOrbState.IDLE;
+    fixture.detectChanges();
+
+    hostDe.triggerEventHandler('click', {});
+    expect(component.state).toBe(PUPOrbState.IDLE);
     expect(rollSpy).not.toHaveBeenCalled();
   });
 });
