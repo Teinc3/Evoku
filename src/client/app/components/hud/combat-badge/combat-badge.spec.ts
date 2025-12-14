@@ -66,6 +66,10 @@ describe('CombatBadgeComponent', () => {
     fixture.detectChanges();
     expect(component.defuseLabel).toBe('Box Defuse');
 
+    component.incoming = { ...baseThreat, defuseType: CombatDefuseType.GLOBAL };
+    fixture.detectChanges();
+    expect(component.defuseLabel).toBe('Global');
+
     component.incoming = null;
     fixture.detectChanges();
     expect(component.defuseLabel).toBe('Idle');

@@ -56,6 +56,11 @@ describe('CombatFloatingTextComponent', () => {
     expect(component.activeMessages.length).toBe(0);
   });
 
+  it('exposes getters for messages and current time', () => {
+    expect(component.messages.length).toBe(baseMessages.length);
+    expect(component.currentTimeMs).toBe(1_500);
+  });
+
   it('sorts messages by creation time', () => {
     const active = component.activeMessages;
     expect(active[0].id).toBe('m1');
