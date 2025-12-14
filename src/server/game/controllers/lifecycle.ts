@@ -61,7 +61,7 @@ export default class LifecycleController {
 
     // If only one player remains after this leaves, they win
     if (this.room.participants.size === 2) {
-      const remainingUUID = this.room.participants.values()
+      const remainingUUID = Array.from(this.room.participants.values())
         .find(s => s.uuid !== session)?.uuid;
       if (!remainingUUID) {
         return;

@@ -1,28 +1,33 @@
-import { Component, type OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import pupConfig from '@config/shared/pup.json';
+import type { PupSlotState } from '../../../../types/pup';
 
 
 @Component({
   selector: 'app-pup-slot',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './pup-slot.component.html',
   styleUrl: './pup-slot.component.scss'
 })
-export default class PupSlotComponent implements OnInit {
-  // TODO: Accept a PUPClass input instead in the future
+export default class PupSlotComponent {
+  @Input()
+  pup: PupSlotState | null = null;
 
-  protected pupIcon: string | null = null;
-  protected level: number | null = null;
+  @Input()
+  disabled = false;
 
-  ngOnInit(): void {
-    // 70% chance to load a random pup
-    if (Math.random() < 0.7 && pupConfig.length > 0) {
-      const randomPup = pupConfig[Math.floor(Math.random() * pupConfig.length)];
-      this.pupIcon = randomPup.asset.icon;
-      
-      // Set random level between 1-5 if there's a pup
-      this.level = Math.floor(Math.random() * 5) + 1;
+  @Input()
+  showName = true;
+
+  @Output()
+  use = new EventEmitter<void>();
+
+  onUse(): void {
+    if (this.disabled || !this.pup || this.pup.status !== 'ready') {
+      return;
     }
+    this.use.emit();
   }
 }
