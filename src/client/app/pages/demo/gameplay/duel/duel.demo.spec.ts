@@ -395,6 +395,112 @@ describe('DuelDemoPageComponent', () => {
       component.ngOnDestroy();
       expect(component.gameState.clearMatchData).toHaveBeenCalled();
     });
+
+    it('should handle PUP_DRAWN packet for own player', () => {
+      const mockData = {
+        playerID: 0,
+        actionID: 1,
+        pupID: 5
+      };
+
+      // Set up own player ID
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      // Start a roll first to set pending action
+      component.pupStateService.setReady();
+      component.pupStateService.startRoll(1);
+
+      const action = MechanicsActions.PUP_DRAWN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      // Should have added PUP to first slot
+      expect(component.pupStateService.slots()[0].pupID).toBe(5);
+    });
+
+    it('should ignore PUP_DRAWN packet for other player', () => {
+      const mockData = {
+        playerID: 1, // Different from myID
+        actionID: 1,
+        pupID: 5
+      };
+
+      // Set up own player ID
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      // Start a roll
+      component.pupStateService.setReady();
+      component.pupStateService.startRoll(1);
+
+      const action = MechanicsActions.PUP_DRAWN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      spyOn(component.pupStateService, 'onPupDrawn');
+      packetSubjects.get(action)!.next(mockData as unknown as ActionEnum);
+
+      // Should NOT call onPupDrawn since it's for another player
+      expect(component.pupStateService.onPupDrawn).not.toHaveBeenCalled();
+    });
+
+    it('should handle REJECT_ACTION packet and call onDrawRejected', () => {
+      const rejectData = { actionID: 42 };
+
+      // Start a roll
+      component.pupStateService.setReady();
+      component.pupStateService.startRoll(42);
+
+      spyOn(component.pupStateService, 'onDrawRejected').and.callThrough();
+
+      const action = ProtocolActions.REJECT_ACTION;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(rejectData as unknown as ActionEnum);
+
+      expect(component.pupStateService.onDrawRejected).toHaveBeenCalledWith(42);
+    });
+  });
+
+  describe('PUP System', () => {
+    it('onPupRoll should start roll and send DRAW_PUP packet', () => {
+      component.pupStateService.setReady();
+
+      component.onPupRoll();
+
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        MechanicsActions.DRAW_PUP,
+        jasmine.objectContaining({ actionID: jasmine.any(Number) })
+      );
+    });
+
+    it('onPupUse should return early if slot is empty', () => {
+      spyOn(component.pupStateService, 'usePup').and.returnValue(null);
+      spyOn(console, 'log');
+
+      component.onPupUse({ slotIndex: 0, pupID: 5 });
+
+      expect(component.pupStateService.usePup).toHaveBeenCalledWith(0);
+      expect(console.log).not.toHaveBeenCalled();
+    });
+
+    it('onPupUse should log when PUP is used', () => {
+      // Set up a PUP in slot 0
+      component.pupStateService.setReady();
+      component.pupStateService.startRoll(1);
+      component.pupStateService.onPupDrawn(1, 5);
+
+      spyOn(console, 'log');
+
+      component.onPupUse({ slotIndex: 0, pupID: 5 });
+
+      expect(console.log).toHaveBeenCalledWith('Using PUP 5 from slot 0');
+    });
   });
 
   describe('HUD Top Section', () => {

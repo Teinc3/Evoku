@@ -396,4 +396,64 @@ describe('PupStateService', () => {
       expect(service.canRoll()).toBeFalse();
     });
   });
+
+  describe('getPupConfig', () => {
+    it('should return config for valid pupID', () => {
+      const config = service.getPupConfig(0);
+      expect(config).toBeTruthy();
+      expect(config!.name).toBeDefined();
+    });
+
+    it('should return null for negative pupID', () => {
+      const config = service.getPupConfig(-1);
+      expect(config).toBeNull();
+    });
+
+    it('should return null for pupID out of range', () => {
+      const config = service.getPupConfig(9999);
+      expect(config).toBeNull();
+    });
+  });
+
+  describe('getPupIcon', () => {
+    it('should return icon path for valid pupID', () => {
+      const icon = service.getPupIcon(0);
+      expect(icon).toBeTruthy();
+      expect(typeof icon).toBe('string');
+    });
+
+    it('should return null for invalid pupID', () => {
+      const icon = service.getPupIcon(-1);
+      expect(icon).toBeNull();
+    });
+
+    it('should return null for out of range pupID', () => {
+      const icon = service.getPupIcon(9999);
+      expect(icon).toBeNull();
+    });
+  });
+
+  describe('onPupDrawn edge cases', () => {
+    it('should handle no empty slots gracefully', () => {
+      // Fill all slots manually by directly manipulating the signal
+      service.slots.set([
+        { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null },
+        { pupID: 1, level: 1, onCooldown: false, cooldownEnd: null },
+        { pupID: 2, level: 1, onCooldown: false, cooldownEnd: null }
+      ]);
+
+      // Force SPINNING state with a pending action
+      service.orbState.set(PUPOrbState.SPINNING);
+      service['pendingDrawActionID'] = 999;
+
+      // Try to draw when no slots available
+      service.onPupDrawn(999, 5);
+
+      // Should return to IDLE state without changing slots
+      expect(service.orbState()).toBe(PUPOrbState.IDLE);
+      expect(service.slots()[0].pupID).toBe(0);
+      expect(service.slots()[1].pupID).toBe(1);
+      expect(service.slots()[2].pupID).toBe(2);
+    });
+  });
 });
