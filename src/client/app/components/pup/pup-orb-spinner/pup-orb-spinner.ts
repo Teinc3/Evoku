@@ -1,5 +1,8 @@
-import { Component, EventEmitter, HostBinding, HostListener, Input, Output } from '@angular/core';
+import {
+  Component, EventEmitter, HostBinding, HostListener, Input, Output, inject
+} from '@angular/core';
 
+import PupStateService from '../../../services/pup-state';
 import { PUPOrbState } from '../../../../types/enums';
 
 
@@ -10,8 +13,8 @@ import { PUPOrbState } from '../../../../types/enums';
   styleUrl: './pup-orb-spinner.scss'
 })
 export default class PupOrbSpinnerComponent {
-  // Change to input in the future when wiring everything up
-  state: PUPOrbState = PUPOrbState.IDLE;
+  private readonly pupStateService = inject(PupStateService);
+
   @Input() 
   disabled = false;
 
@@ -19,6 +22,11 @@ export default class PupOrbSpinnerComponent {
   roll = new EventEmitter<void>();
 
   public PUPOrbState = PUPOrbState;
+
+  /** Gets current orb state from service */
+  get state(): PUPOrbState {
+    return this.pupStateService.orbState();
+  }
 
   @HostBinding('attr.role') 
   role = 'button';
@@ -28,6 +36,10 @@ export default class PupOrbSpinnerComponent {
   get ariaBusy(): string {
     return String(this.state === PUPOrbState.SPINNING);
   }
+  @HostBinding('class.idle')
+  get isIdle(): boolean {
+    return this.state === PUPOrbState.IDLE;
+  }
   @HostBinding('class.ready') 
   get isReady(): boolean {
     return this.state === PUPOrbState.READY;
@@ -36,24 +48,20 @@ export default class PupOrbSpinnerComponent {
   get isSpinning(): boolean {
     return this.state === PUPOrbState.SPINNING;
   }
+  @HostBinding('class.disabled')
+  get isDisabled(): boolean {
+    return this.disabled || this.pupStateService.allSlotsOccupied();
+  }
 
   @HostListener('click') 
   onClick(): void {
-    if (this.disabled) { 
+    if (this.disabled || this.pupStateService.allSlotsOccupied()) { 
       return;
     }
-    // Testing cycle: IDLE -> READY -> SPINNING -> IDLE
-    switch (this.state) {
-      case PUPOrbState.IDLE:
-        this.state = PUPOrbState.READY;
-        break;
-      case PUPOrbState.READY:
-        this.state = PUPOrbState.SPINNING;
-        this.roll.emit();
-        break;
-      case PUPOrbState.SPINNING:
-        this.state = PUPOrbState.IDLE;
-        break;
+
+    // Only emit roll when in READY state
+    if (this.state === PUPOrbState.READY) {
+      this.roll.emit();
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Subject, type Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
@@ -8,6 +8,7 @@ import ActionEnum, {
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
+import PupStateService from '../../../../services/pup-state';
 import NetworkService from '../../../../services/network';
 import { AppView } from '../../../../../types/enums';
 import DuelDemoPageComponent from './duel.demo';
@@ -50,6 +51,7 @@ describe('DuelDemoPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DuelDemoPageComponent],
       providers: [
+        PupStateService,
         { provide: ViewStateService, useValue: viewStateSpy },
         { provide: NetworkService, useValue: networkSpy }
       ]
@@ -544,6 +546,46 @@ describe('DuelDemoPageComponent', () => {
   });
 
   describe('Component Lifecycle and Navigation Data', () => {
+    let testFixture: ComponentFixture<DuelDemoPageComponent>;
+    let testComponent: DuelDemoPageComponent;
+    let testDisconnectSubject: Subject<void>;
+    let testViewStateService: jasmine.SpyObj<ViewStateService>;
+    let testNetworkService: jasmine.SpyObj<NetworkService>;
+
+    beforeEach(async () => {
+      // Reset TestBed to allow reconfiguration
+      TestBed.resetTestingModule();
+
+      testDisconnectSubject = new Subject<void>();
+
+      const viewStateSpy = jasmine.createSpyObj('ViewStateService', ['navigateToView'], {
+        getNavigationData: jasmine.createSpy('getNavigationData')
+      });
+
+      const networkSpy = jasmine.createSpyObj(
+        'NetworkService',
+        ['send', 'onDisconnect', 'onPacket']
+      );
+      networkSpy.onDisconnect.and.returnValue(testDisconnectSubject.asObservable());
+      networkSpy.onPacket.and.callFake((_action: ActionEnum) => {
+        return new Subject<ActionEnum>().asObservable();
+      });
+
+      await TestBed.configureTestingModule({
+        imports: [DuelDemoPageComponent],
+        providers: [
+          PupStateService,
+          { provide: ViewStateService, useValue: viewStateSpy },
+          { provide: NetworkService, useValue: networkSpy }
+        ]
+      }).compileComponents();
+
+      testFixture = TestBed.createComponent(DuelDemoPageComponent);
+      testComponent = testFixture.componentInstance;
+      testViewStateService = TestBed.inject(ViewStateService) as jasmine.SpyObj<ViewStateService>;
+      testNetworkService = TestBed.inject(NetworkService) as jasmine.SpyObj<NetworkService>;
+    });
+
     it('should load match data from navigation service when available', () => {
       const mockMatchData: MatchFoundContract = {
         myID: 1,
@@ -554,91 +596,59 @@ describe('DuelDemoPageComponent', () => {
       };
 
       // Mock the service to return navigation data
-      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
+      (testViewStateService.getNavigationData as jasmine.Spy).and.returnValue(mockMatchData);
+      spyOn(testComponent['gameState'], 'createGame');
 
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'createGame');
+      testComponent.ngOnInit();
 
-      newComponent.ngOnInit();
-
-      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['gameState'].createGame).toHaveBeenCalledWith(mockMatchData);
+      expect(testViewStateService.getNavigationData).toHaveBeenCalled();
+      expect(testComponent['gameState'].createGame).toHaveBeenCalledWith(mockMatchData);
     });
 
     it('should not set match data when navigation data is null', () => {
       // Mock the service to return null
-      (viewStateServiceSpy.getNavigationData as jasmine.Spy).and.returnValue(null);
+      (testViewStateService.getNavigationData as jasmine.Spy).and.returnValue(null);
+      spyOn(testComponent['gameState'], 'createGame');
 
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'createGame');
+      testComponent.ngOnInit();
 
-      newComponent.ngOnInit();
-
-      expect(viewStateServiceSpy.getNavigationData).toHaveBeenCalled();
-      expect(newComponent['gameState'].createGame).not.toHaveBeenCalled();
+      expect(testViewStateService.getNavigationData).toHaveBeenCalled();
+      expect(testComponent['gameState'].createGame).not.toHaveBeenCalled();
     });
 
     it('should subscribe to disconnection events on init', () => {
-      // Create a new component instance to test ngOnInit
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      const subscribeSpy = jasmine.createSpy('subscribe');
+      testComponent.ngOnInit();
 
-      // Mock onDisconnect to return an observable with subscribe spy
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: subscribeSpy
-      } as unknown as Observable<void>);
-
-      newComponent.ngOnInit();
-
-      expect(networkServiceSpy.onDisconnect).toHaveBeenCalled();
-      expect(subscribeSpy).toHaveBeenCalled();
+      expect(testNetworkService.onDisconnect).toHaveBeenCalled();
     });
 
     it('should navigate to catalogue when disconnection occurs', () => {
-      // Create a new component instance
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      let disconnectCallback: () => void;
-
-      // Mock onDisconnect to capture the callback
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: (callback: () => void) => {
-          disconnectCallback = callback;
-          return { unsubscribe: jasmine.createSpy('unsubscribe') };
-        }
-      } as unknown as Observable<void>);
-
-      newComponent.ngOnInit();
+      testComponent.ngOnInit();
 
       // Trigger disconnect
-      disconnectCallback!();
+      testDisconnectSubject.next();
 
-      expect(viewStateServiceSpy.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
+      expect(testViewStateService.navigateToView).toHaveBeenCalledWith(AppView.CATALOGUE);
     });
 
     it('should clear match data on destroy', () => {
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      spyOn(newComponent['gameState'], 'clearMatchData');
+      spyOn(testComponent['gameState'], 'clearMatchData');
 
-      newComponent.ngOnDestroy();
+      testComponent.ngOnDestroy();
 
-      expect(newComponent['gameState'].clearMatchData).toHaveBeenCalled();
+      expect(testComponent['gameState'].clearMatchData).toHaveBeenCalled();
     });
 
     it('should unsubscribe from disconnection events on destroy', () => {
-      const newComponent = new DuelDemoPageComponent(viewStateServiceSpy, networkServiceSpy);
-      const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+      testComponent.ngOnInit();
 
-      // Mock onDisconnect to return subscription with unsubscribe spy
-      networkServiceSpy.onDisconnect.and.returnValue({
-        subscribe: () => ({ unsubscribe: unsubscribeSpy })
-      } as unknown as Observable<void>);
+      // The subscriptions should be active
+      const subscription = testComponent['subscriptions'];
+      expect(subscription.closed).toBeFalse();
 
-      newComponent.ngOnInit();
-      newComponent.ngOnDestroy();
+      testComponent.ngOnDestroy();
 
-      expect(unsubscribeSpy).toHaveBeenCalled();
+      expect(subscription.closed).toBeTrue();
     });
   });
 });
