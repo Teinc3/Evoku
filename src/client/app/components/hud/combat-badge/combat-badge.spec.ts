@@ -154,6 +154,16 @@ describe('CombatBadgeComponent', () => {
       };
       expect(component.getDefuseTypeLabel()).toBe('Box');
     });
+
+    it('should return empty string for unknown defuse type', () => {
+      component.combatState = {
+        pupType: 1,
+        defuseType: 999 as unknown as DefuseType, // Unknown type
+        defuseIndex: 0,
+        endTime: Date.now() + 10000
+      };
+      expect(component.getDefuseTypeLabel()).toBe('');
+    });
   });
 
   describe('getDefuseTypeIcon', () => {
@@ -190,6 +200,16 @@ describe('CombatBadgeComponent', () => {
         endTime: Date.now() + 10000
       };
       expect(component.getDefuseTypeIcon()).toBe('/assets/icons/box-icon.svg');
+    });
+
+    it('should return empty string for unknown defuse type', () => {
+      component.combatState = {
+        pupType: 1,
+        defuseType: 999 as unknown as DefuseType, // Unknown type
+        defuseIndex: 0,
+        endTime: Date.now() + 10000
+      };
+      expect(component.getDefuseTypeIcon()).toBe('');
     });
   });
 

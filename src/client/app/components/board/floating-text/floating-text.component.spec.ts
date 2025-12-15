@@ -105,6 +105,10 @@ describe('FloatingTextComponent', () => {
     it('should return "outcome-hit" for HIT outcome', () => {
       expect(component.getOutcomeClass(CombatOutcome.HIT)).toBe('outcome-hit');
     });
+
+    it('should return empty string for unknown outcome', () => {
+      expect(component.getOutcomeClass(999 as unknown as CombatOutcome)).toBe('');
+    });
   });
 
   describe('cleanup', () => {
