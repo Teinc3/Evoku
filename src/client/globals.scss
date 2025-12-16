@@ -47,14 +47,24 @@ h1 {
 	border: 3px solid var(--surface-frame);
   border-radius: 8px;
 	text-decoration: none;
-	color: var(--frame-txt);
+	color: var(--text-body);
   text-shadow: 0 0 1px var(--frame-txt);
 	background: var(--bg-surface);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .btn:hover {
-	border-color: #1976d2;
-	color: #1976d2;
+	border-color: var(--ui-frame);
+	color: var(--frame-txt);
+  background: rgba(var(--cursor-border), 0.9); /* Slight cyan tint */
+  box-shadow: 0 0 15px rgba(var(--cursor-border), 0.4);
+  transform: scale(1.05);
+}
+
+.btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 5px rgba(var(--cursor-border), 0.6);
 }
 
 /* Shared cooldown overlay styles */

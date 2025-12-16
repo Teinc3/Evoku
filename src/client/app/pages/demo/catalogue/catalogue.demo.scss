@@ -1,3 +1,7 @@
+:host h1 {
+  color: #fff;
+}
+
 .catalog {
   width: 100%;
   display: grid;
@@ -9,15 +13,20 @@
 
 .category {
   background: var(--bg-surface);
-  border: 2px solid var(--surface-frame);
-  border-radius: 10px;
+  backdrop-filter: blur(5px);
+  border: 3px solid var(--board-border);
+  border-radius: 16px;
   padding: 1rem;
 }
 
 .category h2 {
   margin: 0 0 0.75rem 0;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   text-align: center;
+  background: linear-gradient(to bottom, #ffffff 0%, #00ffff 100%);
+  background-clip: text;
+  color: transparent; 
+  filter: drop-shadow(0 0 5px var(--cursor-fill));
 }
 
 .items {

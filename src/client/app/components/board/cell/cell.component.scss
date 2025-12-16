@@ -118,7 +118,7 @@
 
 /* Simple hover feedback (only when not selected) */
 :host(:not(.selected)) .cell:hover {
-  background: var(--hover-bg);
+  background: var(--cursor-fill);
 }
 
 .cooldown-overlay {
