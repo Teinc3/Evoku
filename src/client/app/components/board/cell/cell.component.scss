@@ -8,7 +8,7 @@
   aspect-ratio: 1;
   /* Borders are controlled by parent board via nth-child selectors; default to none here */
   border: 0;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.3);
   padding: 0;
   cursor: pointer;
   border-right: 1px solid var(--grid-inner);
@@ -85,7 +85,7 @@
 
 /* Value coloring for pending cells */
 .cell.pending .v {
-  color: var(--num-note);
+  color: var(--num-pending);
   font-weight: 600;
 }
 

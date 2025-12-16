@@ -20,8 +20,8 @@ app-root > * {
 body {
 	margin: 0;
 	font-family: 'Exo 2', sans-serif;
-    background-color: var(--bg-void);
-    color: var(--text-body);
+  background: var(--bg-void);
+  color: var(--text-body);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,11 +44,12 @@ h1 {
 	display: inline-block;
 	padding: 1rem 1.4rem;
 	font-size: 1.05rem;
-	border: 3px solid #333333;
+	border: 3px solid var(--surface-frame);
   border-radius: 8px;
 	text-decoration: none;
-	color: #222;
-	background: #fff;
+	color: var(--frame-txt);
+  text-shadow: 0 0 1px var(--frame-txt);
+	background: var(--bg-surface);
 }
 
 .btn:hover {
@@ -63,13 +64,4 @@ h1 {
   transition: --angle linear;
   pointer-events: none;
   border-radius: inherit;
-}
-
-/* Override class to disable background and particles */
-.no-bg {
-  background-image: none;
-
-  app-root > ngx-particles > #tsparticles > canvas {
-    display: none;
-  }
 }

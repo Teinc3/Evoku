@@ -1,3 +1,5 @@
+@use '../../../../themes';
+
 .progress-container {
   display: grid;
   grid-template-areas: 'text' 'bar';
@@ -11,8 +13,11 @@
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    background: rgba(230, 230, 230, 1);
-    border: 3px solid black;
+    
+    /* Glass Tube Aesthetic */
+    background: var(--bg-surface);
+    border: 3px solid var(--surface-frame);
+    box-shadow: var(--surface-glow);
 
     /* Compute clamped percentage for clipping (0-100%) */
     --pct-raw: calc(var(--pct, 0) * 1%);
@@ -38,7 +43,7 @@
     .text-content {
       margin-bottom: 0.5rem;
       width: 100%;
-      color: #333;
+      color: var(--text-body);
       font-weight: bold;
       text-align: center;
     }
@@ -71,7 +76,7 @@
       grid-area: bar;
       align-self: center;
       justify-self: center;
-      color: black;
+      color: var(--text-body);
       font-weight: bold;
       z-index: 1;
       pointer-events: none;
@@ -120,7 +125,7 @@
       z-index: 2; /* Above fill and border */
       pointer-events: none; /* purely informational overlay */
       padding: 0.06rem 0.25rem;
-      color: black;
+      color: var(--text-body);
       font-weight: 600;
       font-size: 1.2rem;
       user-select: none;
