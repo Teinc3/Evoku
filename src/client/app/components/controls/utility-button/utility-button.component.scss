@@ -5,8 +5,9 @@
   align-items: center;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #f7f8fa; /* base neutral background */
-  border: 2px solid #c4c7cb; /* light neutral border */
+  background: var(--bg-surface);
+  backdrop-filter: blur(4px);
+  border: 3px solid var(--surface-frame);
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
@@ -14,27 +15,31 @@
   box-sizing: border-box;
   position: relative;
   user-select: none;
-  color: #4a4d52; /* muted foreground */
+  color: var(--text-body);
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 110ms ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 
   &:focus-visible {
-    outline: 2px solid #216fd2;
+    outline: 2px solid var(--ui-frame);
     outline-offset: 2px;
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.45;
+    filter: grayscale(1);
   }
 
   &:hover:not(:disabled) {
-    background: #eef4fb; /* faint yin accent wash */
-    border-color: #216fd2;
-    color: #216fd2;
+    color: var(--ui-frame);
+    background: rgba(255, 255, 255, 0.1) brightness(110%);
+    border-color: var(--cursor-border);
+    box-shadow: 0 0 12px var(--cursor-fill);
+    transform: scale(1.05);
   }
 
   &:active:not(:disabled) {
-    transform: translateY(1px);
+    transform: scale(0.96);
   }
 
   &.active {
@@ -67,25 +72,21 @@
 
 /* Note mode specific styling via host classes */
 :host(.note-inactive) .utility-button {
-  background: #fff5f5;
-  border-color: #e4b5b5;
-  color: #a84848;
+  border-color: #f25555;
+  color: #ce2b2b;
 }
 
 :host(.note-active) .utility-button {
-  background: #e4f9ec;
-  border-color: #2f8f46;
-  color: #2f8f46;
+  border-color: #0fd13c;
+  color: #04a62a;
 }
 
 :host(.note-active) .utility-button:hover:not(:disabled) {
-  background: #d1f2de;
-  border-color: #287a3b;
-  color: #287a3b;
+  border-color: #34ff63;
+  color: #02dd35;
 }
 
 :host(.note-inactive) .utility-button:hover:not(:disabled) {
-  background: #ffeaea;
-  border-color: #d46363;
-  color: #c23b3b;
+  border-color: #f74c4c;
+  color: #ff1e1e;
 }

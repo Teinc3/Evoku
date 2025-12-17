@@ -8,7 +8,7 @@
 	/* Base styling for the arc border */
 	.arc-border {
 		fill: none;
-		stroke: black;
+		stroke: var(--bg-void);
 		stroke-width: 4;
 		stroke-linecap: round;
 	}
