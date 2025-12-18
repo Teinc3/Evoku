@@ -107,11 +107,11 @@ describe('TimeAttackDemoPageComponent', () => {
     it('should render PUP orb spinner with orb class', () => {
       const orb = fixture.debugElement.query(By.css('.bottom-hud .orb'));
       expect(orb).toBeTruthy();
-      expect(orb.nativeElement.tagName.toLowerCase()).toBe('app-pup-orb-spinner');
+      expect(orb.nativeElement.tagName.toLowerCase()).toBe('app-pup-spinner');
     });
 
     it('should have orb with button role and keyboard accessibility', () => {
-      const orb = fixture.debugElement.query(By.css('app-pup-orb-spinner'));
+      const orb = fixture.debugElement.query(By.css('app-pup-spinner'));
       const orbElement = orb.nativeElement;
       // Check for role="button" or tabindex for accessibility
       const hasRole = orbElement.getAttribute('role') === 'button'
@@ -126,7 +126,7 @@ describe('TimeAttackDemoPageComponent', () => {
       const children = Array.from(bottom.nativeElement.children) as Element[];
       const tagNames = children.map(el => el.tagName.toLowerCase());
 
-      expect(tagNames[0]).toBe('app-pup-orb-spinner'); // orb
+      expect(tagNames[0]).toBe('app-pup-spinner'); // orb
       expect(tagNames[1]).toBe('app-pup-slots-holder'); // slots
       expect(tagNames[2]).toBe('app-numeric-buttons-holder'); // numeric buttons
     });

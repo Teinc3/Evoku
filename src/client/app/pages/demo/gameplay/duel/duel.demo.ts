@@ -8,10 +8,10 @@ import {
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
+import PupSpinnerComponent 
+  from '../../../../components/pup/pup-spinner/pup-spinner';
 import PupSlotsHolderComponent 
   from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
-import PupOrbSpinnerComponent 
-  from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent 
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import DuelHudTopComponent from '../../../../components/hud/duel-hud-top/duel-hud-top';
@@ -38,7 +38,7 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
     UtilityButtonsHolderComponent, 
     NumericButtonsHolderComponent,
     PupSlotsHolderComponent,
-    PupOrbSpinnerComponent
+    PupSpinnerComponent,
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'

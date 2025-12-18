@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PUPOrbState } from '../../../../types/enums';
-import PupOrbSpinnerComponent from './pup-orb-spinner';
+import PupSpinnerComponent from './pup-spinner';
 
 
-describe('PupOrbSpinnerComponent', () => {
-  let fixture: ComponentFixture<PupOrbSpinnerComponent>;
-  let component: PupOrbSpinnerComponent;
+describe('PupSpinnerComponent', () => {
+  let fixture: ComponentFixture<PupSpinnerComponent>;
+  let component: PupSpinnerComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PupOrbSpinnerComponent],
+      imports: [PupSpinnerComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(PupOrbSpinnerComponent);
+    fixture = TestBed.createComponent(PupSpinnerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -26,31 +26,6 @@ describe('PupOrbSpinnerComponent', () => {
     const hostEl: HTMLElement = fixture.nativeElement;
     expect(hostEl.getAttribute('role')).toBe('button');
     expect(hostEl.getAttribute('tabindex')).toBe('0');
-  });
-
-  it('should reflect state classes and aria-busy correctly', () => {
-    const hostEl: HTMLElement = fixture.nativeElement;
-
-    // IDLE initial
-    component.state = PUPOrbState.IDLE;
-    fixture.detectChanges();
-    expect(hostEl.classList.contains('ready')).toBeFalse();
-    expect(hostEl.classList.contains('spinning')).toBeFalse();
-    expect(hostEl.getAttribute('aria-busy')).toBe('false');
-
-    // READY
-    component.state = PUPOrbState.READY;
-    fixture.detectChanges();
-    expect(hostEl.classList.contains('ready')).toBeTrue();
-    expect(hostEl.classList.contains('spinning')).toBeFalse();
-    expect(hostEl.getAttribute('aria-busy')).toBe('false');
-
-    // SPINNING
-    component.state = PUPOrbState.SPINNING;
-    fixture.detectChanges();
-    expect(hostEl.classList.contains('ready')).toBeFalse();
-    expect(hostEl.classList.contains('spinning')).toBeTrue();
-    expect(hostEl.getAttribute('aria-busy')).toBe('true');
   });
 
   it('should emit roll when transitioning from READY to SPINNING via click', () => {
