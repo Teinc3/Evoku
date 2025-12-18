@@ -3,8 +3,8 @@ import { Component, ViewChild, type OnInit } from '@angular/core';
 
 import BoardConverter from '@shared/mechanics/utils/BoardConverter';
 import ViewStateService from '../../../../services/view-state';
+import PupSpinnerComponent from '../../../../components/pup/pup-spinner/pup-spinner';
 import PupSlotsHolderComponent from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
-import PupOrbSpinnerComponent from '../../../../components/pup/pup-orb-spinner/pup-orb-spinner';
 import UniversalProgressBarComponent
   from '../../../../components/hud/universal-progress-bar/universal-progress-bar.component';
 import PhaseTimerComponent from '../../../../components/hud/phase-timer/phase-timer.component';
@@ -26,7 +26,7 @@ import ClientBoardModel from '../../../../../models/Board';
     UtilityButtonsHolderComponent,
     PhaseTimerComponent,
     UniversalProgressBarComponent,
-    PupOrbSpinnerComponent,
+    PupSpinnerComponent,
     PupSlotsHolderComponent,
   ],
   templateUrl: './time-attack.demo.html',

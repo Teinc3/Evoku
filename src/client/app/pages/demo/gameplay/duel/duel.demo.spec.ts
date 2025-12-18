@@ -449,14 +449,14 @@ describe('DuelDemoPageComponent', () => {
     });
 
     it('should render PUP orb spinner with orb class', () => {
-      const orb = fixture.debugElement.query(By.css('.hud-bottom app-pup-orb-spinner'));
+      const orb = fixture.debugElement.query(By.css('.hud-bottom app-pup-spinner'));
       expect(orb).toBeTruthy();
       // The orb is wrapped in a div.my-pup in the HTML, so check component exists
       expect(orb.componentInstance).toBeTruthy();
     });
 
     it('should have orb with button role and keyboard accessibility', () => {
-      const orb = fixture.debugElement.query(By.css('app-pup-orb-spinner'));
+      const orb = fixture.debugElement.query(By.css('app-pup-spinner'));
       const orbElement = orb.nativeElement;
       // Check for role="button" or tabindex for accessibility
       const hasRole = orbElement.getAttribute('role') === 'button'
@@ -500,7 +500,7 @@ describe('DuelDemoPageComponent', () => {
 
       // essential children are present
       expect(compiled.querySelectorAll('app-board-model').length).toBeGreaterThanOrEqual(2);
-      expect(compiled.querySelector('app-pup-orb-spinner')).toBeTruthy();
+      expect(compiled.querySelector('app-pup-spinner')).toBeTruthy();
       expect(compiled.querySelector('app-numeric-buttons-holder')).toBeTruthy();
     });
   });
