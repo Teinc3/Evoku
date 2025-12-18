@@ -15,9 +15,9 @@
   --grid-inner: #6418ba;       /* Neon Amethyst (Violet) - Contrast against Cyan cursor */
 
   --num-fixed: var(--text-body);        /* Chrome Silver (The Puzzle) */
-  --num-user: var(--frame-txt);        
+  --num-user: var(--frame-txt);
   --num-note: var(--frame-txt);
-  --num-pending:  rgba(255, 255, 255, 0.65);         
+  --num-pending:  rgba(255, 255, 255, 0.65);
 
   --cursor-border: #00ffff;                /* Electric Cyan (Sharp Focus) */
   --cursor-fill: rgba(0, 255, 255, 0.35);   /* Glassy Cyan (Active Cell) */
@@ -25,7 +25,7 @@
   --highlight-bg-related: rgba(0, 255, 255, 0.08); /* Faint Scanline (Related Row/Col) */
 
   --cd-global: rgba(0, 229, 255, 0.08); /* Cyan Radial Timer (Rhythm) */
-  --cd-cell: rgba(128, 128, 128, 0.4);   /* Molten Bronze Overlay (Input Locking) */
+  --cd-cell: rgba(128, 128, 128, 0.4);   /* Grey Overlay (Input Locking) */
   --state-success: #39ff14;            /* Acid Green (Valid/XP) */
   --state-danger: #ff003c;             /* Cyber Crimson (Attacks/Errors) */
 }

@@ -32,7 +32,8 @@
 
   &:hover:not(:disabled) {
     color: var(--ui-frame);
-    background: rgba(255, 255, 255, 0.1) brightness(110%);
+    background: rgba(255, 255, 255, 0.1);
+    filter: brightness(105%);
     border-color: var(--cursor-border);
     box-shadow: 0 0 12px var(--cursor-fill);
     transform: scale(1.05);
