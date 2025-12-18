@@ -1,0 +1,31 @@
+:root {
+  /* --- 1. The Canvas (Atmosphere) --- */
+  --bg-theme: radial-gradient(circle at 50% 100%, rgba(36, 84, 163, 0.16), transparent 50%),
+    radial-gradient(circle at 50% 0%, rgba(255, 77, 109, 0.12), transparent 50%), var(--bg-void);
+  --bg-void: #0a0a12;          /* Deepest Black-Blue */
+  --bg-surface: rgba(10, 10, 18, 0.6);       /* Slightly lighter panel background */
+  --surface-frame: rgba(255, 255, 255, 0.9);
+  --surface-glow: 0 0 10px rgba(255, 255, 255, 0.25);
+  --text-body: #e0e0e0;        /* Holographic White */
+  --frame-txt: #ffbf00;
+  --ui-frame: #7DF9FF;
+
+  --board-border: #ff00aa;     /* Neon Pink (Main Brand Color) */
+  --grid-outer: #ff00aa;       /* Neon Pink (Matches Border for 3x3 boxes) */
+  --grid-inner: #6418ba;       /* Neon Amethyst (Violet) - Contrast against Cyan cursor */
+
+  --num-fixed: var(--text-body);        /* Chrome Silver (The Puzzle) */
+  --num-user: var(--frame-txt);
+  --num-note: var(--frame-txt);
+  --num-pending:  rgba(255, 255, 255, 0.65);
+
+  --cursor-border: #00ffff;                /* Electric Cyan (Sharp Focus) */
+  --cursor-fill: rgba(0, 255, 255, 0.35);   /* Glassy Cyan (Active Cell) */
+  --highlight-bg-num: rgba(0, 255, 255, 0.25); /* Faint Scanline (Same Number) */
+  --highlight-bg-related: rgba(0, 255, 255, 0.08); /* Faint Scanline (Related Row/Col) */
+
+  --cd-global: rgba(0, 229, 255, 0.08); /* Cyan Radial Timer (Rhythm) */
+  --cd-cell: rgba(128, 128, 128, 0.4);   /* Grey Overlay (Input Locking) */
+  --state-success: #39ff14;            /* Acid Green (Valid/XP) */
+  --state-danger: #ff003c;             /* Cyber Crimson (Attacks/Errors) */
+}

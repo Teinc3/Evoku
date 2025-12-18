@@ -6,15 +6,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-family: inherit;
   font-weight: 600;
-  background: #f7f8fa; /* base neutral background */
-  border: 2px solid #c4c7cb;
+  background: var(--bg-surface);
+  backdrop-filter: blur(4px);
+  box-shadow: var(--surface-glow);
+  border: 2px solid var(--surface-frame);
+  color: var(--frame-txt);
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 110ms ease;
   user-select: none;
-  color: #353535;
 
   &:focus-visible {
     outline: 2px solid #d9481f;
@@ -22,9 +24,10 @@
   }
 
   &:hover:not(:disabled) {
-    background: rgba(217, 72, 31, 0.10); /* yang accent wash */
-    border-color: #d9481f;
-    color: #d9481f;
+    background: rgba(255, 191, 0, 0.15);
+    border-color: #ffbf00;
+    box-shadow: 0 0 12px rgba(255, 191, 0, 0.4);
+    transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {

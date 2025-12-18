@@ -1,3 +1,5 @@
+@use 'themes';
+
 /* Register --angle as an animatable custom property */
 @property --angle {
   syntax: '<angle>';
@@ -18,6 +20,8 @@ app-root > * {
 body {
 	margin: 0;
 	font-family: 'Exo 2', sans-serif;
+  background: var(--bg-void);
+  color: var(--text-body);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,16 +44,27 @@ h1 {
 	display: inline-block;
 	padding: 1rem 1.4rem;
 	font-size: 1.05rem;
-	border: 3px solid #333333;
+	border: 3px solid var(--surface-frame);
   border-radius: 8px;
 	text-decoration: none;
-	color: #222;
-	background: #fff;
+	color: var(--text-body);
+  text-shadow: 0 0 1px var(--frame-txt);
+	background: var(--bg-surface);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .btn:hover {
-	border-color: #1976d2;
-	color: #1976d2;
+	border-color: var(--ui-frame);
+	color: var(--frame-txt);
+  background: color-mix(in srgb, var(--cursor-border) 90%, transparent); /* Slight cyan tint */
+  box-shadow: 0 0 15px color-mix(in srgb, var(--cursor-border) 40%, transparent);
+  transform: scale(1.05);
+}
+
+.btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--cursor-border) 60%, transparent);
 }
 
 /* Shared cooldown overlay styles */
@@ -59,13 +74,4 @@ h1 {
   transition: --angle linear;
   pointer-events: none;
   border-radius: inherit;
-}
-
-/* Override class to disable background and particles */
-.no-bg {
-  background-image: none;
-
-  app-root > ngx-particles > #tsparticles > canvas {
-    display: none;
-  }
 }

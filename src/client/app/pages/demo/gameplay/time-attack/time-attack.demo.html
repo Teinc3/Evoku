@@ -8,7 +8,10 @@
     [isVertical]="true"
     class="pup-bar"
   />
-  <app-board-model #board></app-board-model>
+  <app-board-model
+    #board
+    [isMe]="true"
+  />
   <app-universal-progress-bar
     [percentage]="45"
     [isVertical]="true"
