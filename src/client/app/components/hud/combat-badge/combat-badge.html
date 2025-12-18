@@ -1,0 +1,19 @@
+@if (isVisible()) {
+  <div class="combat-badge" [class.critical]="isCritical()">
+    <div class="badge-content">
+      @if (pupIconPath) {
+        <img
+          class="pup-icon"
+          [src]="pupIconPath"
+          alt="Incoming attack"
+        />
+      }
+      <div class="defuse-info">
+        <span class="defuse-label">{{ getDefuseTypeLabel() }}</span>
+      </div>
+      <div class="countdown">
+        {{ countdownDisplay() }}
+      </div>
+    </div>
+  </div>
+}

@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 
+import { createEmptySlotState } from '../../../../types/pup';
 import PupSlotComponent from './pup-slot.component';
+
+import type { PupSlotState } from '../../../../types/pup';
 
 
 describe('PupSlotComponent', () => {
@@ -17,33 +20,25 @@ describe('PupSlotComponent', () => {
     fixture = TestBed.createComponent(PupSlotComponent);
     component = fixture.componentInstance;
     debugElement = fixture.debugElement;
-
-    // Reset component state after automatic ngOnInit call
-    component['pupIcon'] = null;
-    component['level'] = null;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('ngOnInit', () => {
-    it('should generate a pup when Math.random returns < 0.7', () => {
-      // < 0.7 for generation, then values for selection and level
-      spyOn(Math, 'random').and.returnValues(0.5, 0.1, 0.2);
-      component.ngOnInit();
+  describe('empty slot state', () => {
+    it('should render without pup when slotState is null', () => {
+      component.slotState = null;
       fixture.detectChanges();
 
       const icon = debugElement.nativeElement.querySelector('.pup-icon');
       const level = debugElement.nativeElement.querySelector('.level');
-      expect(icon).toBeTruthy();
-      expect(level).toBeTruthy();
-      expect(level.textContent.trim()).toMatch(/^[1-5]$/);
+      expect(icon).toBeFalsy();
+      expect(level).toBeFalsy();
     });
 
-    it('should not generate a pup when Math.random returns >= 0.7', () => {
-      spyOn(Math, 'random').and.returnValue(0.8);
-      component.ngOnInit();
+    it('should render without pup when slotState has null pupID', () => {
+      component.slotState = createEmptySlotState();
       fixture.detectChanges();
 
       const icon = debugElement.nativeElement.querySelector('.pup-icon');
@@ -53,8 +48,42 @@ describe('PupSlotComponent', () => {
     });
   });
 
-  describe('template rendering', () => {
+  describe('slot with PUP', () => {
+    const occupiedSlotState: PupSlotState = {
+      pupID: 0, // Cryo Freeze
+      level: 2,
+      onCooldown: false,
+      cooldownEnd: null
+    };
 
+    it('should render pup icon when slot has a pup', () => {
+      component.slotState = occupiedSlotState;
+      fixture.detectChanges();
+
+      const icon = debugElement.nativeElement.querySelector('.pup-icon') as HTMLImageElement;
+      expect(icon).toBeTruthy();
+      expect(icon.src).toContain('cryo.svg');
+    });
+
+    it('should render level when slot has a pup', () => {
+      component.slotState = occupiedSlotState;
+      fixture.detectChanges();
+
+      const level = debugElement.nativeElement.querySelector('.level');
+      expect(level).toBeTruthy();
+      expect(level.textContent.trim()).toBe('2');
+    });
+
+    it('should apply occupied class when slot has a pup', () => {
+      component.slotState = occupiedSlotState;
+      fixture.detectChanges();
+
+      const slot = debugElement.nativeElement.querySelector('.slot');
+      expect(slot.classList.contains('occupied')).toBe(true);
+    });
+  });
+
+  describe('template rendering', () => {
     it('should render slot wrapper', () => {
       fixture.detectChanges();
       const wrapper = debugElement.nativeElement.querySelector('.slot-wrapper');
@@ -67,129 +96,160 @@ describe('PupSlotComponent', () => {
       expect(slot).toBeTruthy();
     });
 
-    it('should apply occupied class when pupIcon is present', () => {
-      // Create a fresh component instance that generates a pup
-      spyOn(Math, 'random').and.returnValues(0.5, 0.1, 0.2);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
+    it('should not apply occupied class when empty', () => {
+      component.slotState = createEmptySlotState();
+      fixture.detectChanges();
 
-      const slot = freshFixture.nativeElement.querySelector('.slot');
-      expect(slot.classList.contains('occupied')).toBe(true);
-    });
-
-    it('should not apply occupied class when pupIcon is null', () => {
-      // Create a fresh component instance that doesn't generate a pup
-      spyOn(Math, 'random').and.returnValue(0.8);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
-
-      const slot = freshFixture.nativeElement.querySelector('.slot');
+      const slot = debugElement.nativeElement.querySelector('.slot');
       expect(slot.classList.contains('occupied')).toBe(false);
-    });
-
-    it('should render pup icon when present', () => {
-      // Create a fresh component instance that generates a pup
-      spyOn(Math, 'random').and.returnValues(0.5, 0.1, 0.2);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
-
-      const icon = freshFixture.nativeElement.querySelector('.pup-icon') as HTMLImageElement;
-      expect(icon).toBeTruthy();
-      expect(icon.src).toMatch(/\.svg$/);
-    });
-
-    it('should not render pup icon when null', () => {
-      // Create a fresh component instance that doesn't generate a pup
-      spyOn(Math, 'random').and.returnValue(0.8);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
-
-      const icon = freshFixture.nativeElement.querySelector('.pup-icon');
-      expect(icon).toBeFalsy();
-    });
-
-    it('should render level when present', () => {
-      // Create a fresh component instance that generates a pup
-      spyOn(Math, 'random').and.returnValues(0.5, 0.1, 0.2);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
-
-      const level = freshFixture.nativeElement.querySelector('.level');
-      expect(level).toBeTruthy();
-      expect(level.textContent.trim()).toMatch(/^[1-5]$/);
-    });
-
-    it('should not render level when null', () => {
-      // Create a fresh component instance that doesn't generate a pup
-      spyOn(Math, 'random').and.returnValue(0.8);
-      const freshFixture = TestBed.createComponent(PupSlotComponent);
-      freshFixture.componentInstance.ngOnInit();
-      freshFixture.detectChanges();
-
-      const level = freshFixture.nativeElement.querySelector('.level');
-      expect(level).toBeFalsy();
     });
   });
 
-  describe('random pup generation integration', () => {
-    it('should generate different pups on multiple instantiations', () => {
-      const instances: ComponentFixture<PupSlotComponent>[] = [];
-
-      // Test with controlled random values to ensure some generate pups, some don't
-      spyOn(Math, 'random').and.returnValues(
-        0.5,  // Instance 1: < 0.7 -> generates pup
-        0.8   // Instance 2: >= 0.7 -> no pup
-      );
-
-      // Create 2 instances with controlled randomness
-      for (let i = 0; i < 2; i++) {
-        const newFixture = TestBed.createComponent(PupSlotComponent);
-        const newComponent = newFixture.componentInstance;
-        newComponent.ngOnInit();
-        newFixture.detectChanges();
-        instances.push(newFixture);
-      }
-
-      // Check that we have one with pup and one without
-      const withPups = instances.filter(fixture =>
-        fixture.nativeElement.querySelector('.pup-icon') !== null
-      );
-      const withoutPups = instances.filter(fixture =>
-        fixture.nativeElement.querySelector('.pup-icon') === null
-      );
-
-      expect(withPups.length).toBe(1);
-      expect(withoutPups.length).toBe(1);
+  describe('computed properties', () => {
+    it('should return null for pupIcon when no pup', () => {
+      component.slotState = createEmptySlotState();
+      expect(component.pupIcon).toBeNull();
     });
 
-    it('should generate valid pup icons from config', () => {
-      // Force pup generation: < 0.7 for generation, then values for pup selection and level
-      spyOn(Math, 'random').and.returnValues(0.5, 0.1, 0.2);
-      component.ngOnInit();
+    it('should return icon path from config when pup exists', () => {
+      component.slotState = { pupID: 2, level: 1, onCooldown: false, cooldownEnd: null };
+      expect(component.pupIcon).toContain('inferno.svg');
+    });
+
+    it('should return null for level when no pup', () => {
+      component.slotState = createEmptySlotState();
+      expect(component.level).toBeNull();
+    });
+
+    it('should return level from state when pup exists', () => {
+      component.slotState = { pupID: 0, level: 3, onCooldown: false, cooldownEnd: null };
+      expect(component.level).toBe(3);
+    });
+
+    it('should return isOccupied as false when no pup', () => {
+      component.slotState = createEmptySlotState();
+      expect(component.isOccupied).toBeFalse();
+    });
+
+    it('should return isOccupied as true when pup exists', () => {
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      expect(component.isOccupied).toBeTrue();
+    });
+
+    it('should return isOnCooldown from state', () => {
+      component.slotState = {
+        pupID: 0, level: 1, onCooldown: true, cooldownEnd: Date.now() + 5000
+      };
+      expect(component.isOnCooldown).toBeTrue();
+    });
+
+    it('should return canUse as false when on cooldown', () => {
+      component.slotState = {
+        pupID: 0, level: 1, onCooldown: true, cooldownEnd: Date.now() + 5000
+      };
+      expect(component.canUse).toBeFalse();
+    });
+
+    it('should return canUse as true when occupied and not on cooldown', () => {
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      expect(component.canUse).toBeTrue();
+    });
+
+    it('should return pupName from config', () => {
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      expect(component.pupName).toBe('Cryo');
+    });
+
+    it('should return null for pupName when no pup', () => {
+      component.slotState = createEmptySlotState();
+      expect(component.pupName).toBeNull();
+    });
+  });
+
+  describe('host bindings', () => {
+    it('should have occupied class when occupied', () => {
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      fixture.detectChanges();
+      expect(fixture.nativeElement.classList.contains('occupied')).toBeTrue();
+    });
+
+    it('should have cooldown class when on cooldown', () => {
+      component.slotState = {
+        pupID: 0, level: 1, onCooldown: true, cooldownEnd: Date.now() + 5000
+      };
+      fixture.detectChanges();
+      expect(fixture.nativeElement.classList.contains('cooldown')).toBeTrue();
+    });
+
+    it('should have usable class when can use', () => {
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      fixture.detectChanges();
+      expect(fixture.nativeElement.classList.contains('usable')).toBeTrue();
+    });
+  });
+
+  describe('click behavior', () => {
+    it('should emit usePup with slotIndex when clicked and can use', () => {
+      const usePupSpy = jasmine.createSpy('usePup');
+      component.usePup.subscribe(usePupSpy);
+      component.slotState = { pupID: 0, level: 1, onCooldown: false, cooldownEnd: null };
+      component.slotIndex = 1;
       fixture.detectChanges();
 
-      const icon = debugElement.nativeElement.querySelector('.pup-icon') as HTMLImageElement;
-      expect(icon).toBeTruthy();
-      expect(icon.src).toMatch(/\.svg$/);
-      // Check that it's one of the expected icons from config
-      const expectedIcons = [
-        '/assets/pup/icons/cryo.svg',
-        '/assets/pup/icons/purity.svg',
-        '/assets/pup/icons/inferno.svg',
-        '/assets/pup/icons/metabolic.svg',
-        '/assets/pup/icons/entangle.svg',
-        '/assets/pup/icons/wisdom.svg',
-        '/assets/pup/icons/landslide.svg',
-        '/assets/pup/icons/excavate.svg',
-        '/assets/pup/icons/lock.svg',
-        '/assets/pup/icons/forge.svg'
+      debugElement.triggerEventHandler('click', {});
+
+      expect(usePupSpy).toHaveBeenCalledWith(1);
+    });
+
+    it('should not emit usePup when cannot use (empty)', () => {
+      const usePupSpy = jasmine.createSpy('usePup');
+      component.usePup.subscribe(usePupSpy);
+      component.slotState = createEmptySlotState();
+      fixture.detectChanges();
+
+      debugElement.triggerEventHandler('click', {});
+
+      expect(usePupSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not emit usePup when cannot use (on cooldown)', () => {
+      const usePupSpy = jasmine.createSpy('usePup');
+      component.usePup.subscribe(usePupSpy);
+      component.slotState = {
+        pupID: 0, level: 1, onCooldown: true, cooldownEnd: Date.now() + 5000
+      };
+      fixture.detectChanges();
+
+      debugElement.triggerEventHandler('click', {});
+
+      expect(usePupSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('different PUP types', () => {
+    it('should display correct icons for different PUPs', () => {
+      const pupTestCases = [
+        { pupID: 0, expectedIcon: 'cryo' },
+        { pupID: 1, expectedIcon: 'purity' },
+        { pupID: 2, expectedIcon: 'inferno' },
+        { pupID: 3, expectedIcon: 'metabolic' },
+        { pupID: 4, expectedIcon: 'entangle' },
+        { pupID: 5, expectedIcon: 'wisdom' },
+        { pupID: 6, expectedIcon: 'landslide' },
+        { pupID: 7, expectedIcon: 'excavate' },
+        { pupID: 8, expectedIcon: 'lock' },
+        { pupID: 9, expectedIcon: 'forge' }
       ];
-      expect(expectedIcons.some(expectedIcon => icon.src.includes(expectedIcon))).toBe(true);
+
+      for (const testCase of pupTestCases) {
+        component.slotState = {
+          pupID: testCase.pupID,
+          level: 1,
+          onCooldown: false,
+          cooldownEnd: null
+        };
+        expect(component.pupIcon).toContain(testCase.expectedIcon);
+      }
     });
   });
 });

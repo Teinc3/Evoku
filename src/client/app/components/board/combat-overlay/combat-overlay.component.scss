@@ -1,0 +1,97 @@
+@keyframes pulse-orange {
+  0%, 100% {
+    background-color: rgba(255, 165, 0, 0);
+  }
+  50% {
+    background-color: rgba(255, 165, 0, 0.3);
+  }
+}
+
+@keyframes pulse-threat {
+  0%, 100% {
+    box-shadow: inset 0 0 0 3px rgba(255, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow: inset 0 0 0 5px rgba(255, 0, 0, 0.9);
+  }
+}
+
+@keyframes ghost-fade {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.combat-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  border-radius: inherit;
+}
+
+.cell-overlay {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-row,
+.pulse-col,
+.pulse-box {
+  animation: pulse-orange 1s ease-in-out infinite;
+}
+
+.ghost-target {
+  .ghost-icon {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+    opacity: 0.4;
+    animation: ghost-fade 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.5));
+  }
+}
+
+.threat-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  animation: pulse-threat 0.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Enhance pulse effects based on defuse type */
+.pulse-row {
+  border-top: 2px solid rgba(255, 165, 0, 0.6);
+  border-bottom: 2px solid rgba(255, 165, 0, 0.6);
+}
+
+.pulse-col {
+  border-left: 2px solid rgba(255, 165, 0, 0.6);
+  border-right: 2px solid rgba(255, 165, 0, 0.6);
+}
+
+.pulse-box {
+  outline: 2px solid rgba(255, 165, 0, 0.6);
+  outline-offset: -1px;
+}

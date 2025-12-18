@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 
 import ActionGuard from '@shared/types/utils/typeguards/actions';
 import MatchStatus from '@shared/types/enums/matchstatus';
@@ -7,6 +7,7 @@ import {
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
+import PupStateService from '../../../../services/pup-state';
 import NetworkService from '../../../../services/network';
 import PupSlotsHolderComponent 
   from '../../../../components/pup/pup-slots-holder/pup-slots-holder';
@@ -46,6 +47,7 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
+  public readonly pupStateService = inject(PupStateService);
   private subscriptions = new Subscription();
   private nextActionId = 0;
 
@@ -151,6 +153,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
             }
           }
         }
+
+        // Also check if it was a DRAW_PUP rejection
+        this.pupStateService.onDrawRejected(data.actionID);
       })
     );
 
@@ -161,6 +166,16 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         this.gameState.handlePing(data, (action, pongData) => {
           this.networkService.send(action, pongData);
         });
+      })
+    );
+
+    // Subscribe to PUP drawn events (for own player and opponent)
+    this.subscriptions.add(this.networkService.onPacket(MechanicsActions.PUP_DRAWN)
+      .subscribe(data => {
+        // Only update our own PUP state service
+        if (data.playerID === this.gameState.myID) {
+          this.pupStateService.onPupDrawn(data.actionID, data.pupID);
+        }
       })
     );
   }
@@ -192,5 +207,30 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     } else if (boardIndex === 1) {
       this.board1.selected.set(null);
     }
+  }
+
+  /** Handle PUP orb roll request */
+  onPupRoll(): void {
+    const actionID = this.nextActionId++;
+    const clientTime = this.gameState.timeCoordinator.clientTime;
+
+    // Start the roll animation (optimistic)
+    this.pupStateService.startRoll(actionID);
+
+    // Send DRAW_PUP packet
+    this.networkService.send(MechanicsActions.DRAW_PUP, { clientTime, actionID });
+  }
+
+  /** Handle PUP use request from slots */
+  onPupUse(event: { slotIndex: number; pupID: number }): void {
+    // Mark the PUP as used in state service
+    const pupID = this.pupStateService.usePup(event.slotIndex);
+    if (pupID === null) {
+      return;
+    }
+
+    // TODO: Send the appropriate USE_* packet based on the pupID
+    // For now, just log that we're using the PUP
+    console.log(`Using PUP ${pupID} from slot ${event.slotIndex}`);
   }
 }

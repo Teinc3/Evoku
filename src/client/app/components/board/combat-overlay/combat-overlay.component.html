@@ -1,0 +1,24 @@
+<div class="combat-overlay" [class.threat-active]="hasThreat">
+  <!-- Grid cell overlays for pulse effects -->
+  <div class="grid-overlay">
+    @for (i of cellIndices; track i) {
+      <div
+        class="cell-overlay"
+        [class]="getCellClasses(i)"
+      >
+        @if (isGhostTarget(i) && pupIconPath) {
+          <img
+            class="ghost-icon"
+            [src]="pupIconPath"
+            alt="Target"
+          />
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Threat border overlay -->
+  @if (hasThreat) {
+    <div class="threat-border"></div>
+  }
+</div>

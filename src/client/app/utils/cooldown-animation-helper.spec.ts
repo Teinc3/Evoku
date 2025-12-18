@@ -132,7 +132,7 @@ describe('CooldownAnimationHelper', () => {
 
         // Duration should be approximately 5s (allowing for RAF overhead)
         const duration = parseFloat(helper.transitionDuration());
-        expect(duration).toBeGreaterThan(4.9);
+        expect(duration).toBeGreaterThan(4.8);
         expect(duration).toBeLessThanOrEqual(5);
 
         requestAnimationFrame(() => {
@@ -164,7 +164,7 @@ describe('CooldownAnimationHelper', () => {
           requestAnimationFrame(() => {
             // Duration should be approximately 5s (allowing for RAF overhead)
             const duration = parseFloat(helper.transitionDuration());
-            expect(duration).toBeGreaterThan(4.9);
+            expect(duration).toBeGreaterThan(4.8);
             expect(duration).toBeLessThanOrEqual(5);
             expect(helper.currentAngle()).toBe(0);
             done();

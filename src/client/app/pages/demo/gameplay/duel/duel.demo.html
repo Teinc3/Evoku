@@ -37,9 +37,11 @@
 <!-- Bottom HUD -->
 <div class="hud-bottom">
   <div class="my-pup">
-    <app-pup-orb-spinner/>
-    <app-pup-slots-holder/>
+    <app-pup-orb-spinner (roll)="onPupRoll()"/>
+    <app-pup-slots-holder (usePup)="onPupUse($event)"/>
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>
-  <app-pup-slots-holder/>
+  <app-pup-slots-holder
+    [externalSlots]="[]"
+  />
 </div>
