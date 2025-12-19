@@ -57,7 +57,7 @@ h1 {
 .btn:hover {
 	border-color: var(--ui-frame);
 	color: var(--frame-txt);
-  background: color-mix(in srgb, var(--cursor-border) 90%, transparent); /* Slight cyan tint */
+  background: color-mix(in srgb, var(--cursor-border) 10%, transparent); /* Slight cyan tint */
   box-shadow: 0 0 15px color-mix(in srgb, var(--cursor-border) 40%, transparent);
   transform: scale(1.05);
 }
