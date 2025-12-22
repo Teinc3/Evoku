@@ -44,7 +44,7 @@ describe('PupSpinnerComponent', () => {
     expect(rollSpy).toHaveBeenCalled();
   });
 
-  it('should cycle through states on click when not disabled: IDLE->READY->SPINNING->IDLE', () => {
+  it('should cycle through states on click when not disabled', () => {
     const hostDe = fixture.debugElement;
 
     component.disabled = false;
@@ -58,7 +58,7 @@ describe('PupSpinnerComponent', () => {
     expect(component.state as PUPOrbState).toBe(PUPOrbState.SPINNING);
 
     hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
+    expect(component.state as PUPOrbState).toBe(PUPOrbState.SETTLING);
   });
 
   it('should not change state or emit when disabled', () => {

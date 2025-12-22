@@ -1,7 +1,8 @@
 export enum PUPOrbState {
   IDLE,
   READY,
-  SPINNING
+  SPINNING,
+  SETTLING
 }
 
 export default PUPOrbState;
