@@ -1,0 +1,10 @@
+<div class="floating-text-container">
+  @for (floatingText of floatingTexts(); track floatingText.id) {
+    <div
+      class="floating-text"
+      [class]="getOutcomeClass(floatingText.outcome)"
+    >
+      {{ floatingText.text }}
+    </div>
+  }
+</div>

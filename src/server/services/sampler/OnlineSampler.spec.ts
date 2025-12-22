@@ -39,7 +39,8 @@ describe('OnlineSampler', () => {
       jest.advanceTimersByTime(expectedDelay - 1);
       expect(mockStatsService.sampleStats).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(1);
+      // Use runOnlyPendingTimers to ensure the setTimeout fires
+      jest.runOnlyPendingTimers();
       expect(mockStatsService.sampleStats).toHaveBeenCalledTimes(1);
     });
 
