@@ -10,8 +10,7 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export default class DynamicFaviconService {
   private static readonly FRAME_INTERVAL_MS = 400;
-  private static readonly SEQUENCE = [0, 1, 2, 4, 7, 6, 5, 3];
-  private static readonly OPPOSITE_MAX_INDEX = 7;
+  private static readonly FRAME_COUNT = 4;
   private static readonly IOS_VERSION_REGEX = /os\s+(\d+)[._](\d+)/;
   private initialSvg: string | null;
   private cachedSvg: string | null;
@@ -49,7 +48,7 @@ export default class DynamicFaviconService {
         if (document.hidden) {
           return;
         }
-        this.frameIndex = (this.frameIndex + 1) % DynamicFaviconService.SEQUENCE.length;
+        this.frameIndex = (this.frameIndex + 1) % DynamicFaviconService.FRAME_COUNT;
         this.updateIcon();
       }, DynamicFaviconService.FRAME_INTERVAL_MS);
     }).catch(err => {
@@ -90,9 +89,9 @@ export default class DynamicFaviconService {
     const svgRoot = svgDoc.documentElement;
 
     // Get the ID of the element to flip for the current frame
-    const elementToFlip = DynamicFaviconService.SEQUENCE[this.frameIndex];
+    const index = this.frameIndex;
 
-    [elementToFlip, DynamicFaviconService.OPPOSITE_MAX_INDEX - elementToFlip].forEach(elementId => {
+    [index, index + 4].forEach(elementId => {
       const element = svgRoot.querySelector(`[id="p${elementId}"]`);
       if (element) {
         // Invert the fill and stroke colors
