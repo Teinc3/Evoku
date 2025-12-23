@@ -37,7 +37,7 @@
 <!-- Bottom HUD -->
 <div class="hud-bottom">
   <div class="my-pup">
-    <app-pup-spinner/>
+    <app-pup-spinner [pupProgress]="gameState.getPlayerState(gameState.myID).gameState?.pupProgress ?? 0"/>
     <app-pup-slots-holder/>
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>
