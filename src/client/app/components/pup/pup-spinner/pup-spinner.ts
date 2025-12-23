@@ -111,14 +111,14 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
     this.settlingType = PupSpinnerComponent.ELEMENT_TYPES[typeIndex];
 
     if (this.settlingTimeoutId !== null) {
-      window.clearTimeout(this.settlingTimeoutId);
+      clearTimeout(this.settlingTimeoutId);
     }
-    this.settlingTimeoutId = window.setTimeout(() => {
+    this.settlingTimeoutId = setTimeout(() => {
       this.state = PUPOrbState.IDLE;
       this.settlingType = null;
       this.settlingTimeoutId = null;
       // Once back to idle, we can make the contrast back to progress
-      // This should hae been reset to 0
+      // This should have been reset to 0
       // Earlier we prevented contrast update during spinning/settling as it would have been at 0
       this.updateIdleContrast();
     }, PupSpinnerComponent.SETTLING_TOTAL_MS);
@@ -157,9 +157,6 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
       // Remove hardcoded dimensions so CSS 100% takes over
       svg.removeAttribute('width');
       svg.removeAttribute('height');
-
-      svg.style.width = '100%';
-      svg.style.height = '100%';
       
       this.updateIdleContrast();
     }
@@ -177,9 +174,9 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
     const step = () => {
       this.flipIcon();
       const interval = this.pickFlipInterval();
-      this.animationTimeoutId = window.setTimeout(step, interval);
+      this.animationTimeoutId = setTimeout(step, interval);
     };
-    this.animationTimeoutId = window.setTimeout(step, this.pickFlipInterval());
+    this.animationTimeoutId = setTimeout(step, this.pickFlipInterval());
   }
 
   private flipIcon(): void {
@@ -248,6 +245,7 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
         if (this.settlingTimeoutId !== null) {
           clearTimeout(this.settlingTimeoutId);
           this.settlingTimeoutId = null;
+          this.settlingType = null;
         }
         break;
     }
