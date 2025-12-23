@@ -1,6 +1,7 @@
 [
   {
     "name": "Cryo",
+    "type": 0,
     "theme": true,
     "element": "water",
     "description": "Freezes an area of enemy cells for a short duration.",
@@ -11,6 +12,7 @@
   },
   {
     "name": "Purity",
+    "type": 1,
     "theme": false,
     "element": "water",
     "description": "Reduces all negative effects from your board.",
@@ -21,6 +23,7 @@
   },
   {
     "name": "Inferno",
+    "type": 2,
     "theme": true,
     "element": "fire",
     "description": "Burns an area of filled enemy cells into empty ashes.",
@@ -31,6 +34,7 @@
   },
   {
     "name": "Metabolic",
+    "type": 3,
     "theme": false,
     "element": "fire",
     "description": "Speeds up board cooldown time for a short duration.",
@@ -41,6 +45,7 @@
   },
   {
     "name": "Entangle",
+    "type": 4,
     "theme": true,
     "element": "wood",
     "description": "Leeches powerup progress from enemy players over time.",
@@ -51,6 +56,7 @@
   },
   {
     "name": "Wisdom",
+    "type": 5,
     "theme": false,
     "element": "wood",
     "description": "Fills in a random number of empty cells on your board.",
@@ -61,6 +67,7 @@
   },
   {
     "name": "Landslide",
+    "type": 6,
     "theme": true,
     "element": "earth",
     "description": "Covers mud onto enemy cells, which must first be cleared.",
@@ -71,6 +78,7 @@
   },
   {
     "name": "Excavate",
+    "type": 7,
     "theme": false,
     "element": "earth",
     "description": "Reveals all possible number combinations for a selected area of cells.",
@@ -81,6 +89,7 @@
   },
   {
     "name": "Lock",
+    "type": 8,
     "theme": true,
     "element": "metal",
     "description": "Locks a selected number from being placed on enemy boards for a short duration.",
@@ -91,6 +100,7 @@
   },
   {
     "name": "Forge",
+    "type": 9,
     "theme": false,
     "element": "metal",
     "description": "Increases powerup progress gain for a short duration.",
