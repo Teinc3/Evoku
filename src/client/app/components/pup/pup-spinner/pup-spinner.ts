@@ -16,7 +16,13 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   @Input()
   set pupProgress(value: number) {
     this._pupProgress = value;
-    this.updateIdleContrast();
+    // Only update idle contrast if not spinning/settling
+    if (this.state !== PUPOrbState.SPINNING && this.state !== PUPOrbState.SETTLING) {
+      this.updateIdleContrast();
+    }
+    if (this.state === PUPOrbState.IDLE && this._pupProgress >= 100) {
+      this.state = PUPOrbState.READY;
+    }
   }
   get pupProgress(): number {
     return this._pupProgress;
@@ -105,12 +111,16 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
     this.settlingType = PupSpinnerComponent.ELEMENT_TYPES[typeIndex];
 
     if (this.settlingTimeoutId !== null) {
-      clearTimeout(this.settlingTimeoutId);
+      window.clearTimeout(this.settlingTimeoutId);
     }
     this.settlingTimeoutId = window.setTimeout(() => {
       this.state = PUPOrbState.IDLE;
       this.settlingType = null;
       this.settlingTimeoutId = null;
+      // Once back to idle, we can make the contrast back to progress
+      // This should hae been reset to 0
+      // Earlier we prevented contrast update during spinning/settling as it would have been at 0
+      this.updateIdleContrast();
     }, PupSpinnerComponent.SETTLING_TOTAL_MS);
   }
 
@@ -160,7 +170,7 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
       return;
     }
     const idleContrast = this.contrastFromProgress(this.pupProgress);
-    this.iconContainer.nativeElement.style.setProperty('--idle-contrast', String(idleContrast));
+    this.iconContainer.nativeElement.style.setProperty('--yy-contrast', String(idleContrast));
   }
 
   private startAnimation(): void {
