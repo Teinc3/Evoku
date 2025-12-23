@@ -6,5 +6,9 @@ import type IDataContract from "../../../components/base/IDataContract";
 
 
 export interface DrawPupContract extends ActionContractC2S, IDataContract {}
-// Add level info in the future
-export interface PupDrawnContract extends PUPContract, ActionContractS2C, IDataContract {}
+export interface PupDrawnContract
+  extends PUPContract, ActionContractS2C, IDataContract {
+  type: number;  
+  level: number;
+  slotIndex: number;
+}

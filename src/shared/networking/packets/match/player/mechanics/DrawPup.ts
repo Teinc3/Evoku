@@ -1,4 +1,5 @@
 import createActionPacket from "../../../factory/createActionPacket";
+import { ByteCodec } from "../../../../codecs/primitive";
 import MechanicsActions from "../../../../../types/enums/actions/match/player/mechanics";
 
 
@@ -11,5 +12,9 @@ export const DrawPup = createActionPacket(
 export const PupDrawn = createActionPacket(
   MechanicsActions.PUP_DRAWN,
   ['serverTime', 'playerID', 'actionID', 'pupID'],
-  {}
+  {
+    type: ByteCodec,
+    level: ByteCodec,
+    slotIndex: ByteCodec
+  }
 );
