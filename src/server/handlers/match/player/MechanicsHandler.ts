@@ -59,10 +59,15 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
   }
 
   private handleDrawPUP(
-    _session: SessionModel,
+    session: SessionModel,
     _data: AugmentAction<MechanicsActions.DRAW_PUP>
   ): boolean {
-    return true;
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined) {
+      return false;
+    }
+
+    return this.room.stateController.handleDrawPUP(playerID);
   }
   
 }

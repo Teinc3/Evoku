@@ -5,6 +5,7 @@ import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import sharedConfig from "@shared/config";
 import ServerBoardModel from "../../models/logic/Board";
+import SlotModel from "../../../shared/models/slot";
 
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
@@ -16,15 +17,13 @@ import type { GameLogicCallbacks } from "../../types/gamelogic";
 export default class GameStateController {
   /** Base board and solution tuple */
   private readonly baseBoard: [number[], number[]];
+  /** Unique board solution (due to possible structural transformations) for each player */
+  private readonly solutions = new Map<number, number[]>();
 
   /** Room state */
   public readonly matchState: IMatchState;
-
   /** Game state for each player */
   private readonly gameStates: Map<number, IPlayerState<ServerBoardModel>>;
-
-  /** Unique board solution (due to possible structural transformations) for each player */
-  private readonly solutions = new Map<number, number[]>();
 
   /** Callbacks for game logic events. */
   private callbacks!: GameLogicCallbacks;
@@ -74,9 +73,7 @@ export default class GameStateController {
     return true;
   }
 
-  /**
-   * Set the callback functions for game events.
-   */
+  /** Set the callback functions for game events */
   public setCallbacks(callbacks: GameLogicCallbacks): void {
     this.callbacks = callbacks;
   }
@@ -132,7 +129,11 @@ export default class GameStateController {
       playerState.gameState = {
         boardState: board,
         pupProgress: 0,
-        powerups: [] // Feature TODO: Add entry powerups in the future.
+        powerups: [
+          new SlotModel(),
+          new SlotModel(),
+          new SlotModel()
+        ]
       };
 
       // Also create a solution set for this player
@@ -231,5 +232,22 @@ export default class GameStateController {
       this.callbacks.onProgressUpdate(false, [{ playerID, progress: gameState.pupProgress }]);
     }
       
+  }
+
+  /** Handles drawing a PUP for a player */
+  public handleDrawPUP(playerID: number): boolean {
+    const playerState = this.gameStates.get(playerID);
+    if (playerState && playerState.gameState?.pupProgress === 100) {
+      // Reset PUP progress
+      playerState.gameState.pupProgress = 0;
+      this.callbacks.onProgressUpdate(false, [{ playerID, progress: 0 }]);
+      setTimeout(() => this.drawRandomPUP(playerID), 5000);
+      return true;
+    }
+    return false;
+  }
+
+  private drawRandomPUP(_playerID: number): void {
+    // Intentionally empty: step-by-step implementation.
   }
 }

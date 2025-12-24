@@ -155,9 +155,9 @@ describe('GameStateManager', () => {
     expect(player1State?.gameState).toBeDefined();
     expect(player2State?.gameState).toBeDefined();
     expect(player1State?.gameState?.pupProgress).toBe(0);
-    expect(player1State?.gameState?.powerups).toEqual([]);
+    expect(player1State?.gameState?.powerups).toHaveSize(3);
     expect(player2State?.gameState?.pupProgress).toBe(0);
-    expect(player2State?.gameState?.powerups).toEqual([]);
+    expect(player2State?.gameState?.powerups).toHaveSize(3);
   });
 
   it('should store, retrieve, and clear pending actions', () => {

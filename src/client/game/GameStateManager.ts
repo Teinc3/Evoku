@@ -1,6 +1,7 @@
 import MatchStatus from '@shared/types/enums/matchstatus';
 import { PlayerActions, ProtocolActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
+import SlotModel from '../../shared/models/slot';
 import ClientTimeCoordinator from './ClientTimeCoordinator';
 
 import type { IMatchState, IPlayerState } from '@shared/types/gamestate';
@@ -92,7 +93,11 @@ export default class GameStateManager {
       gameState: {
         boardState: new ClientBoardModel(),
         pupProgress: 0,
-        powerups: []
+        powerups: [
+          new SlotModel(),
+          new SlotModel(),
+          new SlotModel()
+        ]
       }
     });
     return true;

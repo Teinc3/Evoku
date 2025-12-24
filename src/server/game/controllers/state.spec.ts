@@ -249,7 +249,11 @@ describe('GameStateController', () => {
       const mockGameState = {
         boardState: mockServerBoardModel,
         pupProgress: 0,
-        powerups: []
+        powerups: [
+          { diffuseType: 0, lastCooldownEnd: 0 },
+          { diffuseType: 0, lastCooldownEnd: 0 },
+          { diffuseType: 0, lastCooldownEnd: 0 }
+        ]
       };
       gameState['gameStates'].set(
         playerID,

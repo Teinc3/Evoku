@@ -1,5 +1,5 @@
 import type MatchStatus from "../enums/matchstatus";
-import type PUPState from "./powerups";
+import type { IPUPSlotState } from "./powerups";
 import type { IBoardState } from "./board";
 
 
@@ -8,13 +8,19 @@ export interface IMatchState {
   phase: number;
 }
 
-export interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
+export interface IPlayerState<
+  SpecificBoardState extends IBoardState = IBoardState,
+  SpecificPUPSlotState extends IPUPSlotState = IPUPSlotState
+> {
   playerID: number;
-  gameState?: GameState<SpecificBoardState>;
+  gameState?: GameState<SpecificBoardState, SpecificPUPSlotState>;
 }
 
-export interface GameState<SpecificBoardState extends IBoardState = IBoardState> {
+export interface GameState<
+  SpecificBoardState extends IBoardState = IBoardState,
+  SpecificPUPSlotState extends IPUPSlotState = IPUPSlotState
+> {
   boardState: SpecificBoardState;
   pupProgress: number;
-  powerups: Array<PUPState>;
+  powerups: [SpecificPUPSlotState, SpecificPUPSlotState, SpecificPUPSlotState];
 }
