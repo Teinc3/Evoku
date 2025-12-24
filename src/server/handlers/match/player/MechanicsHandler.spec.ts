@@ -167,8 +167,8 @@ describe('MechanicsHandler', () => {
         drawPUPData
       );
 
-      // Assert
-      expect(result).toBe(true);
+      // Assert false (as progress not 100%)
+      expect(result).toBe(false);
     });
   });
 });
