@@ -159,7 +159,6 @@ describe('Match Handler Integration Test', () => {
     };
 
     // Pass the packet to the handler
-    // @ts-expect-error ts(2345)
     const result = await matchHandler.handleData(mockSession, unhandledPacket);
 
     // Assertions

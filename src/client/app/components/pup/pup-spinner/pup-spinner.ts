@@ -31,6 +31,8 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
 
   @Input()
   disabled = false;
+  @Input()
+  canSpin = true;
   @Output()
   roll = new EventEmitter<void>();
 
@@ -43,6 +45,7 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   private cachedSvg: string | null = null;
   private animationTimeoutId: number | null = null;
   private settlingTimeoutId: number | null = null;
+  private shakeTimeoutId: number | null = null;
   private svgElement: SVGElement | null = null;
   private frameIndex = 0;
   
@@ -51,8 +54,9 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   private static readonly READY_FLIP_INTERVAL = 500;
   private static readonly SPINNING_FLIP_INTERVAL = 250;
   private static readonly SETTLING_FLIP_INTERVAL = 750;
-  private static readonly SETTLING_TOTAL_MS = 5000;
-  private static readonly ELEMENT_TYPES = ['wood', 'fire', 'earth', 'metal', 'water'];
+  private static readonly SETTLING_TOTAL_MS = 3000;
+
+  private static readonly SHAKE_MS = 350;
   
   @HostBinding('attr.data-type')
   get dataType(): string | null {
@@ -60,6 +64,7 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   }
 
   private settlingType: string | null = null;
+  private isShaking = false;
 
   constructor() {}
 
@@ -77,6 +82,24 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
       clearTimeout(this.settlingTimeoutId);
       this.settlingTimeoutId = null;
     }
+
+    if (this.shakeTimeoutId !== null) {
+      clearTimeout(this.shakeTimeoutId);
+      this.shakeTimeoutId = null;
+    }
+  }
+
+  private beginShake(): void {
+    this.isShaking = true;
+
+    if (this.shakeTimeoutId !== null) {
+      clearTimeout(this.shakeTimeoutId);
+    }
+
+    this.shakeTimeoutId = setTimeout(() => {
+      this.isShaking = false;
+      this.shakeTimeoutId = null;
+    }, PupSpinnerComponent.SHAKE_MS);
   }
 
   private contrastFromProgress(progress: number): number {
@@ -104,11 +127,9 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
     return PupSpinnerComponent.IDLE_FLIP_INTERVAL;
   }
 
-  private beginSettling(targetIndex: number = 0): void {
+  public beginSettling(element: string): void {
     this.state = PUPOrbState.SETTLING;
-    
-    const typeIndex = Math.abs(targetIndex) % PupSpinnerComponent.ELEMENT_TYPES.length;
-    this.settlingType = PupSpinnerComponent.ELEMENT_TYPES[typeIndex];
+    this.settlingType = element
 
     if (this.settlingTimeoutId !== null) {
       clearTimeout(this.settlingTimeoutId);
@@ -210,44 +231,27 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   get isReady(): boolean {
     return this.state === PUPOrbState.READY;
   }
-
   @HostBinding('class.spinning')
   get isSpinning(): boolean {
     return this.state === PUPOrbState.SPINNING;
   }
-
   @HostBinding('class.settling')
   get isSettling(): boolean {
     return this.state === PUPOrbState.SETTLING;
   }
+  @HostBinding('class.shake')
+  get shake(): boolean {
+    return this.isShaking;
+  }
 
   @HostListener('click') 
   onClick(): void {
-    if (this.disabled) {
+    if (this.disabled || this.state !== PUPOrbState.READY || !this.canSpin) {
+      this.beginShake();
       return;
     }
 
-    // Testing cycle
-    switch (this.state) {
-      case PUPOrbState.IDLE:
-        this.state = PUPOrbState.READY;
-        break;
-      case PUPOrbState.READY:
-        this.state = PUPOrbState.SPINNING;
-        this.roll.emit();
-        break;
-      case PUPOrbState.SPINNING:
-        // Test with a random element
-        this.beginSettling(Math.floor(Math.random() * 5));
-        break;
-      case PUPOrbState.SETTLING:
-        this.state = PUPOrbState.IDLE;
-        if (this.settlingTimeoutId !== null) {
-          clearTimeout(this.settlingTimeoutId);
-          this.settlingTimeoutId = null;
-          this.settlingType = null;
-        }
-        break;
-    }
+    this.state = PUPOrbState.SPINNING;
+    this.roll.emit();
   }
 }

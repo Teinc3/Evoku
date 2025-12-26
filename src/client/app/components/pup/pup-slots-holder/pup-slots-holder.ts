@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import PupSlotComponent from '../pup-slot/pup-slot.component';
+
+import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
 
 
 @Component({
@@ -11,4 +13,7 @@ import PupSlotComponent from '../pup-slot/pup-slot.component';
   styleUrl: './pup-slots-holder.scss'
 })
 export default class PupSlotsHolderComponent {
+
+  @Input()
+  slots?: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState];
 }

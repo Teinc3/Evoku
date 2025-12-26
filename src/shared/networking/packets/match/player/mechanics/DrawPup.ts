@@ -5,13 +5,13 @@ import MechanicsActions from "../../../../../types/enums/actions/match/player/me
 
 export const DrawPup = createActionPacket(
   MechanicsActions.DRAW_PUP,
-  ['clientTime', 'actionID'],
+  [],
   {}
 );
 
 export const PupDrawn = createActionPacket(
   MechanicsActions.PUP_DRAWN,
-  ['serverTime', 'playerID', 'actionID', 'pupID'],
+  ['playerID', 'pupID'],
   {
     type: ByteCodec,
     level: ByteCodec,

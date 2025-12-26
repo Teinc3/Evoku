@@ -121,55 +121,29 @@ describe('PupSpinnerComponent', () => {
     expect(rollSpy).toHaveBeenCalled();
   });
 
-  it('should cycle through states on click when not disabled', () => {
+  it('should ignore clicks when not in READY state', () => {
     const hostDe = fixture.debugElement;
+    const rollSpy = jasmine.createSpy('roll');
+    component.roll.subscribe(rollSpy);
 
     component.disabled = false;
+
     component.state = PUPOrbState.IDLE;
     fixture.detectChanges();
-
     hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.READY);
+    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
 
+    component.state = PUPOrbState.SPINNING;
+    fixture.detectChanges();
     hostDe.triggerEventHandler('click', {});
     expect(component.state as PUPOrbState).toBe(PUPOrbState.SPINNING);
 
+    component.state = PUPOrbState.SETTLING;
+    fixture.detectChanges();
     hostDe.triggerEventHandler('click', {});
     expect(component.state as PUPOrbState).toBe(PUPOrbState.SETTLING);
-  });
 
-  it('should transition SETTLING->IDLE on click and clear settling timeout if set', () => {
-    const hostDe = fixture.debugElement;
-    const clearSpy = spyOn(window, 'clearTimeout').and.callThrough();
-
-    component.disabled = false;
-    component.state = PUPOrbState.SETTLING;
-    component['settlingTimeoutId'] = 123;
-    component['settlingType'] = 'fire';
-
-    fixture.detectChanges();
-    hostDe.triggerEventHandler('click', {});
-
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
-    expect(clearSpy).toHaveBeenCalled();
-    expect(component['settlingTimeoutId']).toBeNull();
-    expect(component['settlingType']).toBeNull();
-  });
-
-  it('should call beginSettling when clicking while SPINNING', () => {
-    const hostDe = fixture.debugElement;
-    const settleSpy = spyOn(
-      component as unknown as { beginSettling: (i: number) => void },
-      'beginSettling',
-    );
-    spyOn(Math, 'random').and.returnValue(0.4);
-
-    component.disabled = false;
-    component.state = PUPOrbState.SPINNING;
-    fixture.detectChanges();
-
-    hostDe.triggerEventHandler('click', {});
-    expect(settleSpy).toHaveBeenCalledWith(2);
+    expect(rollSpy).not.toHaveBeenCalled();
   });
 
   it('should not change state or emit when disabled', () => {
@@ -186,6 +160,29 @@ describe('PupSpinnerComponent', () => {
     expect(component.state).toBe(PUPOrbState.READY);
     expect(rollSpy).not.toHaveBeenCalled();
   });
+
+  it('should shake and not spin when canSpin is false', fakeAsync(() => {
+    const hostDe = fixture.debugElement;
+    const hostEl: HTMLElement = fixture.nativeElement;
+    const rollSpy = jasmine.createSpy('roll');
+    component.roll.subscribe(rollSpy);
+
+    component.disabled = false;
+    component.canSpin = false;
+    component.state = PUPOrbState.READY;
+    fixture.detectChanges();
+
+    hostDe.triggerEventHandler('click', {});
+    fixture.detectChanges();
+
+    expect(component.state as PUPOrbState).toBe(PUPOrbState.READY);
+    expect(rollSpy).not.toHaveBeenCalled();
+    expect(hostEl.classList.contains('shake')).toBeTrue();
+
+    tick(350);
+    fixture.detectChanges();
+    expect(hostEl.classList.contains('shake')).toBeFalse();
+  }));
 
   it('should update idle contrast when pupProgress changes (not spinning/settling)', () => {
     component.state = PUPOrbState.IDLE;
@@ -273,14 +270,13 @@ describe('PupSpinnerComponent', () => {
     );
 
     component['settlingTimeoutId'] = 999;
-    (component as unknown as { beginSettling: (i?: number) => void })
-      .beginSettling(-6);
+    component.beginSettling('fire');
 
     expect(component.state as PUPOrbState).toBe(PUPOrbState.SETTLING);
     expect(clearSpy).toHaveBeenCalled();
     expect(component['settlingType']).toBe('fire');
 
-    tick(5000);
+    tick(3000);
     expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
     expect(component['settlingType']).toBeNull();
     expect(component['settlingTimeoutId']).toBeNull();
@@ -326,12 +322,6 @@ describe('PupSpinnerComponent', () => {
 
     expect(initSpy).toHaveBeenCalled();
     expect(startSpy).toHaveBeenCalled();
-  }));
-
-  it('beginSettling should pick wood when no index is provided', fakeAsync(() => {
-    (component as unknown as { beginSettling: (i?: number) => void }).beginSettling();
-    expect(component['settlingType']).toBe('wood');
-    tick(5000);
   }));
 
   it('loadSvg should handle non-ok response and log an error', fakeAsync(() => {

@@ -1,6 +1,8 @@
-import { Component, type OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
+
+import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
 
 
 @Component({
@@ -9,20 +11,21 @@ import pupConfig from '@config/shared/pup.json';
   templateUrl: './pup-slot.component.html',
   styleUrl: './pup-slot.component.scss'
 })
-export default class PupSlotComponent implements OnInit {
-  // TODO: Accept a PUPClass input instead in the future
+export default class PupSlotComponent {
+  @Input()
+  slot: IPUPSlotState | null = null;
 
-  protected pupIcon: string | null = null;
-  protected level: number | null = null;
-
-  ngOnInit(): void {
-    // 70% chance to load a random pup
-    if (Math.random() < 0.7 && pupConfig.length > 0) {
-      const randomPup = pupConfig[Math.floor(Math.random() * pupConfig.length)];
-      this.pupIcon = randomPup.asset.icon;
-      
-      // Set random level between 1-5 if there's a pup
-      this.level = Math.floor(Math.random() * 5) + 1;
+  protected get pupIcon(): string | null {
+    const pup = this.slot?.pup;
+    if (!pup) {
+      return null;
     }
+    const configEntry = pupConfig.find(entry => entry.type === pup.type);
+    return configEntry ? configEntry.asset.icon : null;
+  }
+
+  protected get level(): number | null {
+    const pup = this.slot?.pup;
+    return pup ? pup.level : null;
   }
 }
