@@ -1,5 +1,7 @@
-<div class="slots">
-	<app-pup-slot></app-pup-slot>
-	<app-pup-slot></app-pup-slot>
-	<app-pup-slot></app-pup-slot>
-</div>
+@if (slots) {
+	<div class="slots">
+		@for (slot of slots; track $index) {
+			<app-pup-slot [slot]="slot"></app-pup-slot>
+		}
+	</div>
+}

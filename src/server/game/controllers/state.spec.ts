@@ -250,9 +250,9 @@ describe('GameStateController', () => {
         boardState: mockServerBoardModel,
         pupProgress: 0,
         powerups: [
-          { diffuseType: 0, lastCooldownEnd: 0 },
-          { diffuseType: 0, lastCooldownEnd: 0 },
-          { diffuseType: 0, lastCooldownEnd: 0 }
+          { slotIndex: 0, lastCooldownEnd: 0 },
+          { slotIndex: 0, lastCooldownEnd: 0 },
+          { slotIndex: 0, lastCooldownEnd: 0 }
         ]
       };
       gameState['gameStates'].set(

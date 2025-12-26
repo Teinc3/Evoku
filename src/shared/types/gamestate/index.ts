@@ -6,21 +6,16 @@ import type { IBoardState } from "./board";
 export interface IMatchState {
   status: MatchStatus;
   phase: number;
+  currentPUPID?: number;
 }
 
-export interface IPlayerState<
-  SpecificBoardState extends IBoardState = IBoardState,
-  SpecificPUPSlotState extends IPUPSlotState = IPUPSlotState
-> {
+export interface IPlayerState<SpecificBoardState extends IBoardState = IBoardState> {
   playerID: number;
-  gameState?: GameState<SpecificBoardState, SpecificPUPSlotState>;
+  gameState?: GameState<SpecificBoardState>;
 }
 
-export interface GameState<
-  SpecificBoardState extends IBoardState = IBoardState,
-  SpecificPUPSlotState extends IPUPSlotState = IPUPSlotState
-> {
+export interface GameState<SpecificBoardState extends IBoardState = IBoardState> {
   boardState: SpecificBoardState;
   pupProgress: number;
-  powerups: [SpecificPUPSlotState, SpecificPUPSlotState, SpecificPUPSlotState];
+  powerups: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState];
 }

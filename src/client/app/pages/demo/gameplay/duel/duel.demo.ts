@@ -6,6 +6,7 @@ import MatchStatus from '@shared/types/enums/matchstatus';
 import { 
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
+import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSpinnerComponent 
@@ -24,6 +25,9 @@ import { AppView } from '../../../../../types/enums';
 import GameStateManager from '../../../../../game/GameStateManager';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
+import type {
+  PupDrawnContract
+} from '@shared/types/contracts/match/player/mechanics/DrawPupContract';
 import type { MatchFoundContract } from '@shared/types/contracts';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
@@ -49,8 +53,24 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   private subscriptions = new Subscription();
   private nextActionId = 0;
 
-  @ViewChild('board1') board1!: BoardModelComponent;
-  @ViewChild('board2') board2!: BoardModelComponent;
+  @ViewChild('board1')
+  board1!: BoardModelComponent;
+  @ViewChild('board2')
+  board2!: BoardModelComponent;
+  @ViewChild('pupSpinner')
+  pupSpinner?: PupSpinnerComponent;
+
+  protected get canSpinPupSpinner(): boolean {
+    const powerups = this.gameState.getPlayerState(this.gameState.myID).gameState?.powerups;
+    if (!powerups) {
+      return true;
+    }
+
+    return powerups.some(slot =>
+      !slot.pup && !slot.locked
+      && slot.lastCooldownEnd < this.gameState.timeCoordinator.clientTime
+    );
+  }
 
   constructor(
     private viewStateService: ViewStateService,
@@ -163,6 +183,30 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         });
       })
     );
+
+    this.subscriptions.add(this.networkService.onPacket(MechanicsActions.PUP_DRAWN)
+      .subscribe((data: PupDrawnContract) => {
+        const playerGameState = this.gameState.getPlayerState(data.playerID).gameState;
+        if (!playerGameState) {
+          return;
+        }
+
+        const slot = playerGameState.powerups[data.slotIndex];
+        slot.pup = {
+          pupID: data.pupID,
+          type: data.type,
+          level: data.level
+        };
+
+        if (data.playerID === this.gameState.myID) {
+          const pup = pupConfig.find(entry => entry.type === data.type);
+          if (!pup) {
+            throw new Error(`Unknown pup type received: ${data.type}`);
+          }
+          this.pupSpinner?.beginSettling(pup.element);
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -183,6 +227,12 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     // Then send the packet to the server
     const { action, ...data } = actionData;
     this.networkService.send(action, data);
+  }
+
+  onPupRoll(): void {
+    this.onPacketRequest({
+      action: MechanicsActions.DRAW_PUP
+    });
   }
 
   /** Handle selection changes to ensure only one board has a cursor */

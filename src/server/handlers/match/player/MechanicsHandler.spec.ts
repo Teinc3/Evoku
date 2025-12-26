@@ -18,6 +18,16 @@ class MockSession {
 class MockStateController {
   setCellValue = jest.fn();
   computeHash = jest.fn();
+  reservePUPDraw = jest.fn<(playerID: number) => number>();
+  drawRandomPUP = jest.fn<(
+    playerID: number,
+    slotIndex: number
+  ) => {
+    pupID: number;
+    type: number;
+    level: number;
+    slotIndex: number;
+  } | null>();
 }
 
 class MockRoom {
@@ -153,22 +163,136 @@ describe('MechanicsHandler', () => {
   });
 
   describe('handleDrawPUP', () => {
-    it('should handle DRAW_PUP action and return true', async () => {
-      // Arrange
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should return false when draw cannot be reserved', async () => {
+      const playerID = 1;
       const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
-        action: MechanicsActions.DRAW_PUP,
-        actionID: 43,
-        clientTime: 1000,
+        action: MechanicsActions.DRAW_PUP
       };
 
-      // Act
+      mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockStateController.reservePUPDraw.mockReturnValue(-1);
+
       const result = await mechanicsHandler.handleData(
-        mockSession as unknown as SessionModel, 
+        mockSession as unknown as SessionModel,
         drawPUPData
       );
 
-      // Assert false (as progress not 100%)
       expect(result).toBe(false);
+      expect(mockStateController.reservePUPDraw).toHaveBeenCalledWith(playerID);
+      expect(mockStateController.drawRandomPUP).not.toHaveBeenCalled();
+      expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
+        MechanicsActions.PUP_DRAWN,
+        expect.anything()
+      );
+    });
+
+    it('should schedule a delayed draw and broadcast PUP_DRAWN', async () => {
+      const playerID = 1;
+      const reservedSlotIndex = 2;
+      const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
+        action: MechanicsActions.DRAW_PUP
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockStateController.reservePUPDraw.mockReturnValue(reservedSlotIndex);
+      mockStateController.drawRandomPUP.mockReturnValue({
+        pupID: 5,
+        type: 7,
+        level: 1,
+        slotIndex: reservedSlotIndex,
+      });
+
+      const result = await mechanicsHandler.handleData(
+        mockSession as unknown as SessionModel,
+        drawPUPData
+      );
+
+      expect(result).toBe(true);
+      expect(mockStateController.reservePUPDraw).toHaveBeenCalledWith(playerID);
+
+      jest.advanceTimersByTime(5000);
+
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, reservedSlotIndex);
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        MechanicsActions.PUP_DRAWN,
+        {
+          playerID,
+          pupID: 5,
+          type: 7,
+          level: 1,
+          slotIndex: reservedSlotIndex
+        }
+      );
+    });
+
+    it('should allow scheduling multiple draws (if controller allows)', async () => {
+      const playerID = 1;
+      const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
+        action: MechanicsActions.DRAW_PUP
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockStateController.reservePUPDraw
+        .mockReturnValueOnce(0)
+        .mockReturnValueOnce(1);
+      mockStateController.drawRandomPUP
+        .mockReturnValueOnce({
+          pupID: 5,
+          type: 7,
+          level: 1,
+          slotIndex: 0,
+        })
+        .mockReturnValueOnce({
+          pupID: 6,
+          type: 8,
+          level: 1,
+          slotIndex: 1,
+        });
+
+      const first = await mechanicsHandler.handleData(
+        mockSession as unknown as SessionModel,
+        drawPUPData
+      );
+      const second = await mechanicsHandler.handleData(
+        mockSession as unknown as SessionModel,
+        drawPUPData
+      );
+
+      expect(first).toBe(true);
+      expect(second).toBe(true);
+
+      jest.advanceTimersByTime(5000);
+
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, 0);
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, 1);
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        MechanicsActions.PUP_DRAWN,
+        {
+          playerID,
+          pupID: 5,
+          type: 7,
+          level: 1,
+          slotIndex: 0
+        }
+      );
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        MechanicsActions.PUP_DRAWN,
+        {
+          playerID,
+          pupID: 6,
+          type: 8,
+          level: 1,
+          slotIndex: 1
+        }
+      );
     });
   });
 });

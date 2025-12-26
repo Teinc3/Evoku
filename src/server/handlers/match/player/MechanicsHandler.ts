@@ -67,7 +67,24 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       return false;
     }
 
-    return this.room.stateController.handleDrawPUP(playerID);
+    const slotIndex = this.room.stateController.reservePUPDraw(playerID);
+    if (slotIndex === -1) {
+      return false;
+    }
+
+    setTimeout(() => {
+      const pupDrawn = this.room.stateController.drawRandomPUP(playerID, slotIndex);
+      if (!pupDrawn) {
+        return;
+      }
+
+      this.room.broadcast(MechanicsActions.PUP_DRAWN, {
+        playerID,
+        ...pupDrawn
+      });
+    }, 5000);
+
+    return true;
   }
   
 }

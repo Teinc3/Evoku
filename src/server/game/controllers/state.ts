@@ -1,11 +1,12 @@
 import { getSudoku } from "sudoku-gen";
 
+import initPUPSlots from "@shared/types/utils/initPUPSlots";
 import MatchStatus from "@shared/types/enums/matchstatus";
 import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import sharedConfig from "@shared/config";
+import pupConfig from "@config/shared/pup.json";
 import ServerBoardModel from "../../models/logic/Board";
-import SlotModel from "../../../shared/models/slot";
 
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
@@ -34,7 +35,8 @@ export default class GameStateController {
   ) {
     this.matchState = {
       status: MatchStatus.PREINIT,
-      phase: 0
+      phase: 0,
+      currentPUPID: 0,
     };
     this.gameStates = new Map();
 
@@ -129,11 +131,7 @@ export default class GameStateController {
       playerState.gameState = {
         boardState: board,
         pupProgress: 0,
-        powerups: [
-          new SlotModel(),
-          new SlotModel(),
-          new SlotModel()
-        ]
+        powerups: initPUPSlots()
       };
 
       // Also create a solution set for this player
@@ -235,19 +233,88 @@ export default class GameStateController {
   }
 
   /** Handles drawing a PUP for a player */
-  public handleDrawPUP(playerID: number): boolean {
+  public reservePUPDraw(playerID: number): number {
     const playerState = this.gameStates.get(playerID);
-    if (playerState && playerState.gameState?.pupProgress === 100) {
-      // Reset PUP progress
-      playerState.gameState.pupProgress = 0;
-      this.callbacks.onProgressUpdate(false, [{ playerID, progress: 0 }]);
-      setTimeout(() => this.drawRandomPUP(playerID), 5000);
-      return true;
+    const gameState = playerState?.gameState;
+    if (!gameState) {
+      return -1;
     }
-    return false;
+
+    if (gameState.pupProgress !== 100) {
+      return -1;
+    }
+
+    const emptySlotIndexes = gameState.powerups
+      .map((slot, index) => {
+        if (slot.pup !== undefined) {
+          return -1;
+        }
+        if (slot.locked) {
+          return -1;
+        }
+        return index;
+      })
+      .filter(index => index !== -1);
+
+    if (emptySlotIndexes.length === 0) {
+      return -1;
+    }
+
+    const randomIndex = Math.floor(Math.random() * emptySlotIndexes.length);
+    const slotIndex = emptySlotIndexes[randomIndex];
+    const slot = gameState.powerups[slotIndex];
+    if (!slot) {
+      return -1;
+    }
+
+    slot.locked = true;
+
+    // Reset PUP progress immediately when reserving a draw.
+    gameState.pupProgress = 0;
+    this.callbacks.onProgressUpdate(false, [{ playerID, progress: 0 }]);
+
+    return slotIndex;
   }
 
-  private drawRandomPUP(_playerID: number): void {
-    // Intentionally empty: step-by-step implementation.
+  public drawRandomPUP(playerID: number, slotIndex: number): {
+    pupID: number;
+    type: number;
+    level: number;
+    slotIndex: number;
+  } | null {
+    const playerState = this.gameStates.get(playerID);
+    const gameState = playerState?.gameState;
+    if (!gameState) {
+      return null;
+    }
+
+    const slot = gameState.powerups[slotIndex];
+    if (!slot || slot.pup !== undefined) {
+      return null;
+    }
+
+    if (!slot.locked) {
+      return null;
+    }
+
+    const pupID = this.matchState.currentPUPID!;
+    this.matchState.currentPUPID = pupID + 1;
+    const { type } = pupConfig[Math.floor(Math.random() * pupConfig.length)];
+    const level = 1;
+
+    slot.pup = {
+      pupID,
+      type,
+      level,
+    };
+
+    slot.locked = false;
+
+    return {
+      pupID,
+      type,
+      level,
+      slotIndex,
+    };
   }
 }

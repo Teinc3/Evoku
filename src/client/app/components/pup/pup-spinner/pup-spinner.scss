@@ -36,6 +36,31 @@ $water: hsl(200, 90%, 55%);
   transform: scale(1.05);
 }
 
+@keyframes pup-shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+:host(.shake) {
+  animation: pup-shake 0.35s linear;
+}
+
 :host([data-type="wood"]) { --target-color: #{$wood}; }
 :host([data-type="fire"]) { --target-color: #{$fire}; }
 :host([data-type="earth"]) { --target-color: #{$earth}; }
@@ -123,8 +148,8 @@ $water: hsl(200, 90%, 55%);
   --settle-opacity: 1;
   animation: aura-spin 0.8s linear infinite;
   transition: 
-    --spin-opacity 3s linear,
-    --settle-opacity 3s linear,
+    --spin-opacity 1.5s linear,
+    --settle-opacity 1.5s linear,
     --aura-blur 0.35s linear,
     --yy-contrast 0.35s linear;
 }
