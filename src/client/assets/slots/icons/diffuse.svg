@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <g fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" opacity="0.35">
+    <!-- Shortened so it doesn't overlap arrow junctions (prevents darker intersections) -->
+    <path d="M9.8 12H14.2" stroke-linecap="butt"/>
+
+    <!-- Left arrow (separated from the center line) -->
+    <path d="M9.4 9.6L7.2 12l2.2 2.4" stroke-linecap="round"/>
+
+    <!-- Right arrow (separated from the center line) -->
+    <path d="M14.6 9.6L16.8 12l-2.2 2.4" stroke-linecap="round"/>
+  </g>
+</svg>

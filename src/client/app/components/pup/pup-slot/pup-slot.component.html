@@ -1,9 +1,31 @@
 <div class="slot-wrapper">
+  @if (slotIcon) {
+    <img
+      [src]="slotIcon"
+      alt=""
+      aria-hidden="true"
+      class="slot-icon"
+      [class.rotate-90]="isColumnIcon"
+      [class.icon-box]="isBoxIcon"
+      [class.icon-diffuse]="!isBoxIcon"
+    >
+  }
+
   <div class="slot" [class.occupied]="!!pupIcon">
   </div>
   @if (pupIcon) {
     <img [src]="pupIcon" alt="Pup" class="pup-icon">
   }
+
+  @if (slot?.locked) {
+    <img
+      src="/assets/slots/icons/forbidden.svg"
+      alt=""
+      aria-hidden="true"
+      class="locked-overlay"
+    >
+  }
+
   @if (level !== null) {
     <div class="level">{{ level }}</div>
   }

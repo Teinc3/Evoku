@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Outer box is ~20% smaller per side (overall 80%), centered -->
+  <rect x="5.6" y="5.6" width="12.8" height="12.8" rx="1" ry="1" fill="none" stroke="#000" stroke-width="2" opacity="0.30" stroke-linejoin="round"/>
+
+  <!-- Filled bands keep intersections the same shade (no overlap darkening, no checkerboard gaps) -->
+  <g fill="#000" opacity="0.20">
+    <!-- Interior bounds (avoid bleeding into the 2px border stroke) -->
+    <!-- Vertical bands -->
+    <rect x="9.0667" y="6.6" width="1.6" height="10.8" rx="0.2"/>
+    <rect x="13.3333" y="6.6" width="1.6" height="10.8" rx="0.2"/>
+
+    <!-- Horizontal bands -->
+    <rect x="6.6" y="9.0667" width="10.8" height="1.6" rx="0.2"/>
+    <rect x="6.6" y="13.3333" width="10.8" height="1.6" rx="0.2"/>
+  </g>
+</svg>
