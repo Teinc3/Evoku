@@ -186,20 +186,17 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.networkService.onPacket(MechanicsActions.PUP_DRAWN)
       .subscribe((data: PupDrawnContract) => {
-        const playerGameState = this.gameState.getPlayerState(data.playerID).gameState;
+        const { playerID, slotIndex, ...pupData } = data;
+        const playerGameState = this.gameState.getPlayerState(playerID).gameState;
         if (!playerGameState) {
           return;
         }
 
-        const slot = playerGameState.powerups[data.slotIndex];
-        slot.pup = {
-          pupID: data.pupID,
-          type: data.type,
-          level: data.level
-        };
+        const slot = playerGameState.powerups[slotIndex];
+        slot.pup = pupData;
         slot.locked = false;
 
-        if (data.playerID === this.gameState.myID) {
+        if (playerID === this.gameState.myID) {
           this.pupSpinner?.beginSettling();
         }
       })
@@ -219,7 +216,6 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
         slot.locked = true;
         this.pupSpinner?.setSettlingType(data.element);
-        console.log('PUP spun:', data);
       })
     );
   }

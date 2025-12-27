@@ -15,6 +15,27 @@ export default class PupSlotComponent {
   @Input()
   slot: IPUPSlotState | null = null;
 
+  protected get slotIcon(): string | null {
+    const slotIndex = this.slot?.slotIndex;
+    if (slotIndex === undefined || slotIndex === null) {
+      return null;
+    }
+
+    if (slotIndex === 2) {
+      return '/assets/slots/icons/box-diffuse.svg';
+    }
+
+    return '/assets/slots/icons/diffuse.svg';
+  }
+
+  protected get isColumnIcon(): boolean {
+    return this.slot?.slotIndex === 1;
+  }
+
+  protected get isBoxIcon(): boolean {
+    return this.slot?.slotIndex === 2;
+  }
+
   protected get pupIcon(): string | null {
     const pup = this.slot?.pup;
     if (!pup) {

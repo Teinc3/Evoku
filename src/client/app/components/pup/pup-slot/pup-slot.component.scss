@@ -2,6 +2,38 @@
   position: relative;
   width: 100%;
   height: 100%;
+  transition: transform 120ms ease;
+}
+
+.slot-wrapper:hover,
+.slot-wrapper:focus-within {
+  transform: scale(1.05);
+}
+
+.slot-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.slot-icon.icon-box {
+  width: 90%;
+  height: 90%;
+}
+
+.slot-icon.icon-diffuse {
+  width: 130%;
+  height: 130%;
+}
+
+.slot-icon.rotate-90 {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .slot {
@@ -29,7 +61,11 @@
 
 .slot:hover,
 .slot:focus-visible {
-  transform: scale(1.05) rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.slot-wrapper:hover .slot,
+.slot-wrapper:focus-within .slot {
   box-shadow: 0 10px 24px rgba(0,0,0,0.35);
 }
 
@@ -47,7 +83,7 @@
   border-radius: 50%;
   font-weight: 600;
   font-size: 100%;
-  z-index: 2;
+  z-index: 5;
 }
 
 .pup-icon {
@@ -59,11 +95,19 @@
   left: 50%;
   transform: translate(-50%, -50%);
   transform-origin: center;
-  z-index: 1;
+  z-index: 3;
   image-rendering: optimizeQuality;
   transition: transform 120ms ease;
 }
 
-.pup-icon:hover {
-  transform: translate(-50%, -50%) scale(1.05);
+.locked-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 85%;
+  height: 85%;
+  transform: translate(-50%, -50%);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 4;
 }
