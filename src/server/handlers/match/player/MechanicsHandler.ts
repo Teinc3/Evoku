@@ -1,4 +1,6 @@
+import PUPElements from "@shared/types/enums/elements";
 import { ProtocolActions, MechanicsActions } from "@shared/types/enums/actions";
+import pupConfig from "@config/shared/pup.json";
 import EnumHandler from "../../EnumHandler";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
@@ -72,8 +74,21 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       return false;
     }
 
+    const chosenPUPConfig = pupConfig[Math.floor(Math.random() * pupConfig.length)];
+    const element = PUPElements[chosenPUPConfig.element.toUpperCase() as keyof typeof PUPElements];
+    const pupType = chosenPUPConfig.type;
+
+    this.room.broadcast(
+      MechanicsActions.PUP_SPUN,
+      {
+        element,
+        slotIndex
+      },
+      { to: [session.uuid] }
+    );
+
     setTimeout(() => {
-      const pupDrawn = this.room.stateController.drawRandomPUP(playerID, slotIndex);
+      const pupDrawn = this.room.stateController.drawRandomPUP(playerID, slotIndex, pupType);
       if (!pupDrawn) {
         return;
       }

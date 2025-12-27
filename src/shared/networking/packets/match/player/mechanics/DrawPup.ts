@@ -18,3 +18,12 @@ export const PupDrawn = createActionPacket(
     slotIndex: ByteCodec
   }
 );
+
+export const PupSpinAccepted = createActionPacket(
+  MechanicsActions.PUP_SPUN,
+  [],
+  {
+    element: ByteCodec,
+    slotIndex: ByteCodec
+  }
+);

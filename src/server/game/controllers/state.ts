@@ -5,7 +5,6 @@ import MatchStatus from "@shared/types/enums/matchstatus";
 import { MechanicsActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import sharedConfig from "@shared/config";
-import pupConfig from "@config/shared/pup.json";
 import ServerBoardModel from "../../models/logic/Board";
 
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
@@ -276,7 +275,7 @@ export default class GameStateController {
     return slotIndex;
   }
 
-  public drawRandomPUP(playerID: number, slotIndex: number): {
+  public drawRandomPUP(playerID: number, slotIndex: number, type: number): {
     pupID: number;
     type: number;
     level: number;
@@ -299,7 +298,7 @@ export default class GameStateController {
 
     const pupID = this.matchState.currentPUPID!;
     this.matchState.currentPUPID = pupID + 1;
-    const { type } = pupConfig[Math.floor(Math.random() * pupConfig.length)];
+    
     const level = 1;
 
     slot.pup = {

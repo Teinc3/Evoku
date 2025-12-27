@@ -6,7 +6,6 @@ import MatchStatus from '@shared/types/enums/matchstatus';
 import { 
   MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
 } from '@shared/types/enums/actions/';
-import pupConfig from '@config/shared/pup.json';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSpinnerComponent 
@@ -26,7 +25,8 @@ import GameStateManager from '../../../../../game/GameStateManager';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type {
-  PupDrawnContract
+  PupDrawnContract,
+  PupSpunContract
 } from '@shared/types/contracts/match/player/mechanics/DrawPupContract';
 import type { MatchFoundContract } from '@shared/types/contracts';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
@@ -197,14 +197,29 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
           type: data.type,
           level: data.level
         };
+        slot.locked = false;
 
         if (data.playerID === this.gameState.myID) {
-          const pup = pupConfig.find(entry => entry.type === data.type);
-          if (!pup) {
-            throw new Error(`Unknown pup type received: ${data.type}`);
-          }
-          this.pupSpinner?.beginSettling(pup.element);
+          this.pupSpinner?.beginSettling();
         }
+      })
+    );
+
+    this.subscriptions.add(this.networkService.onPacket(MechanicsActions.PUP_SPUN)
+      .subscribe((data: PupSpunContract) => {
+        const playerGameState = this.gameState.getPlayerState(this.gameState.myID).gameState;
+        if (!playerGameState) {
+          return;
+        }
+
+        const slot = playerGameState.powerups[data.slotIndex];
+        if (!slot) {
+          return;
+        }
+
+        slot.locked = true;
+        this.pupSpinner?.setSettlingType(data.element);
+        console.log('PUP spun:', data);
       })
     );
   }

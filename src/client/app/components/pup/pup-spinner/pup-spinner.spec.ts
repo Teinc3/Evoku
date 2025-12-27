@@ -3,6 +3,7 @@ import {
 } from '@angular/core/testing';
 import { ElementRef } from '@angular/core';
 
+import PUPElements from '@shared/types/enums/elements';
 import { PUPOrbState } from '../../../../types/enums';
 import PupSpinnerComponent from './pup-spinner';
 
@@ -80,15 +81,15 @@ describe('PupSpinnerComponent', () => {
   });
 
   it('should expose aria-busy=true while spinning/settling', () => {
-    component.state = PUPOrbState.SPINNING;
+    component['state'] = PUPOrbState.SPINNING;
     fixture.detectChanges();
     expect(component.ariaBusy).toBe('true');
 
-    component.state = PUPOrbState.SETTLING;
+    component['state'] = PUPOrbState.SETTLING;
     fixture.detectChanges();
     expect(component.ariaBusy).toBe('true');
 
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     fixture.detectChanges();
     expect(component.ariaBusy).toBe('false');
   });
@@ -96,7 +97,7 @@ describe('PupSpinnerComponent', () => {
   it('should reflect settling type via data-type host attribute', () => {
     const hostEl: HTMLElement = fixture.nativeElement;
 
-    component['settlingType'] = 'wood';
+    component['settlingType'] = PUPElements.WOOD;
     fixture.detectChanges();
     expect(hostEl.getAttribute('data-type')).toBe('wood');
 
@@ -110,14 +111,14 @@ describe('PupSpinnerComponent', () => {
     const rollSpy = jasmine.createSpy('roll');
     component.roll.subscribe(rollSpy);
 
-    component.state = PUPOrbState.READY;
+    component['state'] = PUPOrbState.READY;
     fixture.detectChanges();
 
     hostDe.triggerEventHandler('click', {});
     fixture.detectChanges();
 
     // Widen enum type for Jasmine matcher generics
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.SPINNING);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.SPINNING);
     expect(rollSpy).toHaveBeenCalled();
   });
 
@@ -128,20 +129,20 @@ describe('PupSpinnerComponent', () => {
 
     component.disabled = false;
 
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     fixture.detectChanges();
     hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.IDLE);
 
-    component.state = PUPOrbState.SPINNING;
+    component['state'] = PUPOrbState.SPINNING;
     fixture.detectChanges();
     hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.SPINNING);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.SPINNING);
 
-    component.state = PUPOrbState.SETTLING;
+    component['state'] = PUPOrbState.SETTLING;
     fixture.detectChanges();
     hostDe.triggerEventHandler('click', {});
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.SETTLING);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.SETTLING);
 
     expect(rollSpy).not.toHaveBeenCalled();
   });
@@ -152,12 +153,12 @@ describe('PupSpinnerComponent', () => {
     component.roll.subscribe(rollSpy);
 
     component.disabled = true;
-    component.state = PUPOrbState.READY;
+    component['state'] = PUPOrbState.READY;
     fixture.detectChanges();
 
     hostDe.triggerEventHandler('click', {});
 
-    expect(component.state).toBe(PUPOrbState.READY);
+    expect(component['state']).toBe(PUPOrbState.READY);
     expect(rollSpy).not.toHaveBeenCalled();
   });
 
@@ -169,13 +170,13 @@ describe('PupSpinnerComponent', () => {
 
     component.disabled = false;
     component.canSpin = false;
-    component.state = PUPOrbState.READY;
+    component['state'] = PUPOrbState.READY;
     fixture.detectChanges();
 
     hostDe.triggerEventHandler('click', {});
     fixture.detectChanges();
 
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.READY);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.READY);
     expect(rollSpy).not.toHaveBeenCalled();
     expect(hostEl.classList.contains('shake')).toBeTrue();
 
@@ -185,7 +186,7 @@ describe('PupSpinnerComponent', () => {
   }));
 
   it('should update idle contrast when pupProgress changes (not spinning/settling)', () => {
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
 
     component.pupProgress = 25;
     fixture.detectChanges();
@@ -196,21 +197,21 @@ describe('PupSpinnerComponent', () => {
   });
 
   it('should not update idle contrast while SPINNING or SETTLING', () => {
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     component.pupProgress = 10;
     fixture.detectChanges();
 
     const before = component.iconContainer.nativeElement.style
       .getPropertyValue('--yy-contrast');
 
-    component.state = PUPOrbState.SPINNING;
+    component['state'] = PUPOrbState.SPINNING;
     component.pupProgress = 50;
     fixture.detectChanges();
     const afterSpinning = component.iconContainer.nativeElement.style
       .getPropertyValue('--yy-contrast');
     expect(afterSpinning).toBe(before);
 
-    component.state = PUPOrbState.SETTLING;
+    component['state'] = PUPOrbState.SETTLING;
     component.pupProgress = 80;
     fixture.detectChanges();
     const afterSettling = component.iconContainer.nativeElement.style
@@ -219,9 +220,9 @@ describe('PupSpinnerComponent', () => {
   });
 
   it('should auto-transition IDLE->READY when pupProgress reaches 100', () => {
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     component.pupProgress = 100;
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.READY);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.READY);
   });
 
   it('pickFlipInterval should return correct interval for each state and progress', () => {
@@ -229,20 +230,20 @@ describe('PupSpinnerComponent', () => {
       .pickFlipInterval
       .bind(component);
 
-    component.state = PUPOrbState.SPINNING;
+    component['state'] = PUPOrbState.SPINNING;
     expect(pick()).toBe(250);
 
-    component.state = PUPOrbState.SETTLING;
+    component['state'] = PUPOrbState.SETTLING;
     expect(pick()).toBe(750);
 
-    component.state = PUPOrbState.READY;
+    component['state'] = PUPOrbState.READY;
     expect(pick()).toBe(500);
 
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     component.pupProgress = 100;
     expect(pick()).toBe(500);
 
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
     component.pupProgress = 0;
     expect(pick()).toBe(1000);
   });
@@ -253,11 +254,11 @@ describe('PupSpinnerComponent', () => {
       .bind(component);
 
     // Setting pupProgress while SPINNING avoids the IDLE->READY auto-transition in the setter.
-    component.state = PUPOrbState.SPINNING;
+    component['state'] = PUPOrbState.SPINNING;
     component.pupProgress = 100;
 
     // Now force IDLE with progress still at 100 to hit the `pupProgress >= 100` branch.
-    component.state = PUPOrbState.IDLE;
+    component['state'] = PUPOrbState.IDLE;
 
     expect(pick()).toBe(500);
   });
@@ -269,15 +270,16 @@ describe('PupSpinnerComponent', () => {
       'updateIdleContrast',
     );
 
+    component.setSettlingType(PUPElements.FIRE);
     component['settlingTimeoutId'] = 999;
-    component.beginSettling('fire');
+    component.beginSettling();
 
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.SETTLING);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.SETTLING);
     expect(clearSpy).toHaveBeenCalled();
-    expect(component['settlingType']).toBe('fire');
+    expect(component['settlingType']).toBe(PUPElements.FIRE);
 
-    tick(3000);
-    expect(component.state as PUPOrbState).toBe(PUPOrbState.IDLE);
+    tick(2000);
+    expect(component['state'] as PUPOrbState).toBe(PUPOrbState.IDLE);
     expect(component['settlingType']).toBeNull();
     expect(component['settlingTimeoutId']).toBeNull();
     expect(contrastSpy).toHaveBeenCalled();
@@ -398,7 +400,7 @@ describe('PupSpinnerComponent', () => {
     expect(component['frameIndex']).toBe(0);
   });
 
-  it('flipIcon should swap fill and stroke for the active frame ids', () => {
+  it('flipIcon should toggle fill for the active frame ids', () => {
     component['cachedSvg'] = MINIMAL_SVG_WITH_VIEWBOX;
     (component as unknown as { initSvg: () => void }).initSvg();
     component['frameIndex'] = 0;
@@ -409,13 +411,14 @@ describe('PupSpinnerComponent', () => {
     expect(p0).toBeTruthy();
     expect(p4).toBeTruthy();
     expect(p0?.getAttribute('fill')).toBe('a');
-    expect(p0?.getAttribute('stroke')).toBe('b');
+    expect(p0?.getAttribute('stroke')).toBeNull();
 
     (component as unknown as { flipIcon: () => void }).flipIcon();
-    expect(p0?.getAttribute('fill')).toBe('b');
-    expect(p0?.getAttribute('stroke')).toBe('a');
-    expect(p4?.getAttribute('fill')).toBe('d');
-    expect(p4?.getAttribute('stroke')).toBe('c');
+    expect(component['frameIndex']).toBe(1);
+    expect(p0?.getAttribute('fill')).toBe('#fff');
+    expect(p0?.getAttribute('stroke')).toBeNull();
+    expect(p4?.getAttribute('fill')).toBe('#fff');
+    expect(p4?.getAttribute('stroke')).toBeNull();
   });
 
   it('ngOnDestroy should clear any scheduled timeouts', () => {
