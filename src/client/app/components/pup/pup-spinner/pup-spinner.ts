@@ -3,6 +3,7 @@ import {
   HostListener, Input, OnDestroy, OnInit, Output, ViewChild
 } from '@angular/core';
 
+import PUPElements from '@shared/types/enums/elements';
 import { PUPOrbState } from '../../../../types/enums';
 
 
@@ -39,8 +40,8 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   @ViewChild('iconContainer', { static: true })
   iconContainer!: ElementRef<HTMLDivElement>;
 
-  state: PUPOrbState = PUPOrbState.IDLE;
   public PUPOrbState = PUPOrbState;
+  private state: PUPOrbState = PUPOrbState.IDLE;
 
   private cachedSvg: string | null = null;
   private animationTimeoutId: number | null = null;
@@ -54,16 +55,19 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   private static readonly READY_FLIP_INTERVAL = 500;
   private static readonly SPINNING_FLIP_INTERVAL = 250;
   private static readonly SETTLING_FLIP_INTERVAL = 750;
-  private static readonly SETTLING_TOTAL_MS = 3000;
-
+  private static readonly SETTLING_TOTAL_MS = 2000;
   private static readonly SHAKE_MS = 350;
   
   @HostBinding('attr.data-type')
   get dataType(): string | null {
-    return this.settlingType;
+    if (this.settlingType === null) {
+      return null;
+    }
+
+    return PUPElements[this.settlingType].toLowerCase();
   }
 
-  private settlingType: string | null = null;
+  private settlingType: PUPElements | null = null;
   private isShaking = false;
 
   constructor() {}
@@ -127,9 +131,12 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
     return PupSpinnerComponent.IDLE_FLIP_INTERVAL;
   }
 
-  public beginSettling(element: string): void {
+  public setSettlingType(element: PUPElements): void {
+    this.settlingType = element;
+  }
+
+  public beginSettling(): void {
     this.state = PUPOrbState.SETTLING;
-    this.settlingType = element
 
     if (this.settlingTimeoutId !== null) {
       clearTimeout(this.settlingTimeoutId);
@@ -178,6 +185,13 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
       // Remove hardcoded dimensions so CSS 100% takes over
       svg.removeAttribute('width');
       svg.removeAttribute('height');
+
+      for (let i = 0; i < 8; i++) {
+        const element = this.svgElement.querySelector(`[id="p${i}"]`);
+        if (element) {
+          element.removeAttribute('stroke'); // Remove stroke to prevent aliasing issues
+        }
+      }
       
       this.updateIdleContrast();
     }
@@ -212,9 +226,7 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
         return;
       }
       const currentFill = element.getAttribute('fill');
-      const currentStroke = element.getAttribute('stroke');
-      element.setAttribute('fill', currentStroke ?? '');
-      element.setAttribute('stroke', currentFill ?? '');
+      element.setAttribute('fill', currentFill === '#fff' ? '#000' : '#fff');
     });
     this.frameIndex = (this.frameIndex + 1) % 4;
   }

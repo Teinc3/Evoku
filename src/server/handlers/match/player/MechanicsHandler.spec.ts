@@ -220,7 +220,11 @@ describe('MechanicsHandler', () => {
 
       jest.advanceTimersByTime(5000);
 
-      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, reservedSlotIndex);
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(
+        playerID,
+        reservedSlotIndex,
+        expect.any(Number)
+      );
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         MechanicsActions.PUP_DRAWN,
         {
@@ -271,8 +275,16 @@ describe('MechanicsHandler', () => {
 
       jest.advanceTimersByTime(5000);
 
-      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, 0);
-      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(playerID, 1);
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(
+        playerID,
+        0,
+        expect.any(Number)
+      );
+      expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(
+        playerID,
+        1,
+        expect.any(Number)
+      );
       expect(mockRoom.broadcast).toHaveBeenCalledWith(
         MechanicsActions.PUP_DRAWN,
         {

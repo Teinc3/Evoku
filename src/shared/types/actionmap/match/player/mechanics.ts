@@ -3,7 +3,7 @@ import type {
   SetCellContract, CellSetContract
 } from "../../../contracts/match/player/mechanics";
 import type {
-  DrawPupContract, PupDrawnContract
+  DrawPupContract, PupDrawnContract, PupSpunContract
 } from "../../../contracts/match/player/mechanics";
 
 
@@ -12,4 +12,5 @@ export default interface MechanicsActionMap {
   [MechanicsActions.CELL_SET]: CellSetContract;
   [MechanicsActions.DRAW_PUP]: DrawPupContract;
   [MechanicsActions.PUP_DRAWN]: PupDrawnContract;
+  [MechanicsActions.PUP_SPUN]: PupSpunContract;
 }

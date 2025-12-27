@@ -1,2 +1,2 @@
 export type { SetCellContract, CellSetContract } from './SetCellContract';
-export type { DrawPupContract, PupDrawnContract } from './DrawPupContract';
+export type { DrawPupContract, PupSpunContract, PupDrawnContract } from './DrawPupContract';
