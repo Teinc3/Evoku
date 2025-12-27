@@ -3,6 +3,7 @@ import { NgParticlesService, NgxParticlesModule } from '@tsparticles/angular';
 import { RouterOutlet } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 
+import SvgPrecacheService from './services/svg-precache';
 import NetworkService from './services/network';
 import DynamicFaviconService from './services/dynamic-favicon';
 
@@ -58,13 +59,17 @@ export default class App implements OnInit {
   constructor(
     private readonly ngParticleService: NgParticlesService,
     protected readonly faviconService: DynamicFaviconService,
-    private readonly networkService: NetworkService
+    private readonly networkService: NetworkService,
+    private readonly svgPrecacheService: SvgPrecacheService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.ngParticleService.init(async engine => {
       await loadSlim(engine);
     });
+
+    this.svgPrecacheService.schedule();
+
     try {
       await this.networkService.initGuestAuth();
     } catch (error) {
