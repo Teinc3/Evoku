@@ -1,3 +1,11 @@
+:host {
+  display: block;
+}
+
+:host(.shake) {
+  animation: pup-shake 0.35s linear;
+}
+
 .slot-wrapper {
   position: relative;
   width: 100%;

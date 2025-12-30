@@ -44,7 +44,9 @@
       (roll)="onPupRoll()"
     />
     <app-pup-slots-holder
+      #myPupSlots
       [slots]="gameState.getPlayerState(gameState.myID).gameState?.powerups"
+      (slotClicked)="onMyPupSlotClicked($event)"
     />
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>

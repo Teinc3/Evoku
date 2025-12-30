@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component, EventEmitter, Input, Output, ViewChildren, type QueryList,
+} from '@angular/core';
 
 import PupSlotComponent from '../pup-slot/pup-slot.component';
 
@@ -16,4 +18,23 @@ export default class PupSlotsHolderComponent {
 
   @Input()
   slots?: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState];
+
+  @Output()
+  slotClicked = new EventEmitter<number>();
+
+  @ViewChildren(PupSlotComponent)
+  private slotComponents?: QueryList<PupSlotComponent>;
+
+  protected onSlotClicked(slotIndex: number): void {
+    this.slotClicked.emit(slotIndex);
+  }
+
+  public shakeSlot(slotIndex: number): void {
+    const slotComp = this.slotComponents?.find(comp => comp.slot?.slotIndex === slotIndex);
+    if (!slotComp) {
+      return;
+    }
+
+    slotComp.beginShake();
+  }
 }
