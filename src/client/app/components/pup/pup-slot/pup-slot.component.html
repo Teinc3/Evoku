@@ -13,6 +13,13 @@
 
   <div class="slot" [class.occupied]="!!pupIcon">
   </div>
+  @if (countdownHelper.currentAngle() > 0 || countdownHelper.transitionDuration() !== '0s') {
+    <div
+      class="countdown-overlay"
+      [style.--angle]="countdownHelper.currentAngle() + 'deg'"
+      [style.transition-duration]="countdownHelper.transitionDuration()"
+    ></div>
+  }
   @if (pupIcon) {
     <img [src]="pupIcon" alt="Pup" class="pup-icon">
   }

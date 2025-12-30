@@ -1,8 +1,9 @@
 import {
-  Component, EventEmitter, HostBinding, Input, Output, type OnDestroy,
+  Component, DoCheck, EventEmitter, HostBinding, Input, Output, type OnDestroy,
 } from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
+import CooldownAnimationHelper from '../../../utils/cooldown-animation-helper';
 
 import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
 
@@ -13,17 +14,32 @@ import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
   templateUrl: './pup-slot.component.html',
   styleUrl: './pup-slot.component.scss'
 })
-export default class PupSlotComponent implements OnDestroy {
+export default class PupSlotComponent implements DoCheck, OnDestroy {
   @Input()
-  slot: IPUPSlotState | null = null;
+  slot: IPUPSlotState | null;
   @Output()
-  slotClicked = new EventEmitter<number>();
+  slotClicked: EventEmitter<number>;
 
   private static readonly SHAKE_MS = 350;
-  private shakeTimeoutId: number | null = null;
-  private isShaking = false;
+  public readonly countdownHelper: CooldownAnimationHelper;
+  private shakeTimeoutId: number | null;
+  private isShaking: boolean;
+
+  constructor() {
+    this.slot = null;
+    this.slotClicked = new EventEmitter<number>();
+    this.countdownHelper = new CooldownAnimationHelper();
+    this.shakeTimeoutId = null;
+    this.isShaking = false;
+  }
+
+  ngDoCheck(): void {
+    this.countdownHelper.checkCooldownChanges(undefined, this.slot?.lastCooldownEnd);
+  }
 
   ngOnDestroy(): void {
+    this.countdownHelper.reset();
+
     if (this.shakeTimeoutId !== null) {
       clearTimeout(this.shakeTimeoutId);
       this.shakeTimeoutId = null;
