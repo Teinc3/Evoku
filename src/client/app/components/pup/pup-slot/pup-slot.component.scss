@@ -1,3 +1,5 @@
+@use '../../../../globals' as *;
+
 :host {
   display: block;
 }
@@ -61,6 +63,14 @@
   &.occupied {
     display: none;
   }
+}
+
+.countdown-overlay {
+  @extend %cooldown-overlay-base;
+  border-radius: 10px;
+  transform: rotate(45deg);
+  z-index: 1;
+  background: conic-gradient(from 0deg, var(--cd-global) 0deg var(--angle), transparent var(--angle) 360deg);
 }
 
 .slot.pending {
