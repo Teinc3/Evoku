@@ -1,4 +1,6 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component, EventEmitter, HostBinding, Input, Output, type OnDestroy,
+} from '@angular/core';
 
 import pupConfig from '@config/shared/pup.json';
 
@@ -11,9 +13,49 @@ import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
   templateUrl: './pup-slot.component.html',
   styleUrl: './pup-slot.component.scss'
 })
-export default class PupSlotComponent {
+export default class PupSlotComponent implements OnDestroy {
   @Input()
   slot: IPUPSlotState | null = null;
+  @Output()
+  slotClicked = new EventEmitter<number>();
+
+  private static readonly SHAKE_MS = 350;
+  private shakeTimeoutId: number | null = null;
+  private isShaking = false;
+
+  ngOnDestroy(): void {
+    if (this.shakeTimeoutId !== null) {
+      clearTimeout(this.shakeTimeoutId);
+      this.shakeTimeoutId = null;
+    }
+  }
+
+  @HostBinding('class.shake')
+  get shakeClass(): boolean {
+    return this.isShaking;
+  }
+
+  public beginShake(): void {
+    this.isShaking = true;
+
+    if (this.shakeTimeoutId !== null) {
+      clearTimeout(this.shakeTimeoutId);
+    }
+
+    this.shakeTimeoutId = window.setTimeout(() => {
+      this.isShaking = false;
+      this.shakeTimeoutId = null;
+    }, PupSlotComponent.SHAKE_MS);
+  }
+
+  protected onClick(): void {
+    const slotIndex = this.slot?.slotIndex;
+    if (slotIndex === undefined || slotIndex === null) {
+      return;
+    }
+
+    this.slotClicked.emit(slotIndex);
+  }
 
   protected get slotIcon(): string | null {
     const slotIndex = this.slot?.slotIndex;

@@ -1,7 +1,7 @@
 @if (slots) {
 	<div class="slots">
 		@for (slot of slots; track $index) {
-			<app-pup-slot [slot]="slot"></app-pup-slot>
+			<app-pup-slot [slot]="slot" (slotClicked)="onSlotClicked($event)"></app-pup-slot>
 		}
 	</div>
 }

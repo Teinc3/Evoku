@@ -4,7 +4,15 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import ActionGuard from '@shared/types/utils/typeguards/actions';
 import MatchStatus from '@shared/types/enums/matchstatus';
 import { 
-  MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
+  MechanicsActions,
+  LifecycleActions,
+  ProtocolActions,
+  WaterPUPActions,
+  FirePUPActions,
+  WoodPUPActions,
+  EarthPUPActions,
+  MetalPUPActions,
+  type PlayerActions
 } from '@shared/types/enums/actions/';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
@@ -59,6 +67,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
   board2!: BoardModelComponent;
   @ViewChild('pupSpinner')
   pupSpinner?: PupSpinnerComponent;
+  @ViewChild('myPupSlots')
+  myPupSlots?: PupSlotsHolderComponent;
+
 
   protected get canSpinPupSpinner(): boolean {
     const powerups = this.gameState.getPlayerState(this.gameState.myID).gameState?.powerups;
@@ -238,12 +249,163 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     // Then send the packet to the server
     const { action, ...data } = actionData;
     this.networkService.send(action, data);
+    console.log('Sent action:', action, data);
   }
 
   onPupRoll(): void {
     this.onPacketRequest({
       action: MechanicsActions.DRAW_PUP
     });
+  }
+
+  onMyPupSlotClicked(slotIndex: number): void {
+    const playerGameState = this.gameState.getPlayerState(this.gameState.myID).gameState;
+    if (!playerGameState) {
+      return;
+    }
+
+    const slot = playerGameState.powerups[slotIndex];
+    const now = this.gameState.timeCoordinator.clientTime;
+
+    if (!slot.pup || slot.locked || slot.lastCooldownEnd > now) {
+      this.myPupSlots?.shakeSlot(slotIndex);
+      return;
+    }
+
+    const { pup } = slot;
+    const { pupID } = pup;
+    const enemyID = 1 - this.gameState.myID;
+
+    switch (pup.type) {
+      // Water
+      case 0: {
+        // Cryo requires an enemy cell target
+        const enemyCellIndex = this.board2.selected();
+        if (enemyCellIndex === null) {
+          this.myPupSlots?.shakeSlot(slotIndex);
+          return;
+        }
+
+        this.onPacketRequest({
+          action: WaterPUPActions.USE_CRYO,
+          pupID,
+          targetID: enemyID,
+          cellIndex: enemyCellIndex,
+        });
+        return;
+      }
+      case 1: {
+        this.onPacketRequest({
+          action: WaterPUPActions.USE_PURITY,
+          pupID,
+        });
+        return;
+      }
+
+      // Fire
+      case 2: {
+        // Inferno requires an enemy cell target
+        const enemyCellIndex = this.board2.selected();
+        if (enemyCellIndex === null) {
+          this.myPupSlots?.shakeSlot(slotIndex);
+          return;
+        }
+
+        this.onPacketRequest({
+          action: FirePUPActions.USE_INFERNO,
+          pupID,
+          targetID: enemyID,
+          cellIndex: enemyCellIndex,
+        });
+        return;
+      }
+      case 3: {
+        this.onPacketRequest({
+          action: FirePUPActions.USE_METABOLIC,
+          pupID,
+        });
+        return;
+      }
+
+      // Wood
+      case 4: {
+        this.onPacketRequest({
+          action: WoodPUPActions.USE_ENTANGLE,
+          pupID,
+          targetID: enemyID,
+        });
+        return;
+      }
+      case 5: {
+        this.onPacketRequest({
+          action: WoodPUPActions.USE_WISDOM,
+          pupID,
+        });
+        return;
+      }
+
+      // Earth
+      case 6: {
+        this.onPacketRequest({
+          action: EarthPUPActions.USE_LANDSLIDE,
+          pupID,
+          targetID: enemyID,
+        });
+        return;
+      }
+      case 7: {
+        // Excavate requires a selected cell on your board
+        const myCellIndex = this.board1.selected();
+        if (myCellIndex === null) {
+          this.myPupSlots?.shakeSlot(slotIndex);
+          return;
+        }
+
+        this.onPacketRequest({
+          action: EarthPUPActions.USE_EXCAVATE,
+          pupID,
+          cellIndex: myCellIndex,
+        });
+        return;
+      }
+
+      // Metal
+      case 8: {
+        // Check selected cell's number (both own and opponent selected cell is fine)
+        const board1Selected = this.board1.selected();
+        const board2Selected = this.board2.selected();
+
+        const value = board1Selected !== null
+          ? this.board1.model.board[board1Selected].value
+          : board2Selected !== null
+            ? this.board2.model.board[board2Selected].value
+            : null;
+          
+        if (value === null || value <= 0) {
+          this.myPupSlots?.shakeSlot(slotIndex);
+          return;
+        }
+
+        this.onPacketRequest({
+          action: MetalPUPActions.USE_LOCK,
+          pupID,
+          targetID: enemyID,
+          value,
+        });
+        return;
+      }
+      case 9: {
+        this.onPacketRequest({
+          action: MetalPUPActions.USE_FORGE,
+          pupID,
+        });
+        return;
+      }
+      default: {
+        // Unknown PUP, shake the slot to indicate error
+        this.myPupSlots?.shakeSlot(slotIndex);
+      }
+    }
   }
 
   /** Handle selection changes to ensure only one board has a cursor */
