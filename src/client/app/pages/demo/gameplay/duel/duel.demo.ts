@@ -14,6 +14,8 @@ import {
   MetalPUPActions,
   type PlayerActions
 } from '@shared/types/enums/actions/';
+import pupConfig from '@config/shared/pup.json';
+import sharedConfig from '@config/shared/base.json';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSpinnerComponent 
@@ -77,9 +79,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
       return true;
     }
 
-    return powerups.some(slot =>
-      !slot.pup && !slot.locked
-      && slot.lastCooldownEnd < this.gameState.timeCoordinator.clientTime
+    return powerups.some(slot => !slot.pup && !slot.locked
+      && Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0)
+        < this.gameState.timeCoordinator.clientTime
     );
   }
 
@@ -175,10 +177,23 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
           this.gameState.pendingActions.delete(data.actionID);
           const board = this.gameState.getPlayerBoard(this.gameState.myID);
           if (board) {
-            // TODO: Handle rejection for different action types
-            // For now, just reject the cell set
+            // Reject the cell set
             if (ActionGuard.isActionContract(MechanicsActions.SET_CELL, pendingAction)) {
               this.board1.handleCellRejection(pendingAction.cellIndex, pendingAction.value);
+              return;
+            }
+          }
+          
+          // Cancel optimistic cooldowns for PUP usage
+          if (ActionGuard.isPUPActionsData(pendingAction)) {
+            const playerGameState = this.gameState.getPlayerState(this.gameState.myID).gameState;
+            if (!playerGameState) {
+              return;
+            }
+
+            const slot = playerGameState.powerups.find(s => s.pup?.pupID === pendingAction.pupID);
+            if (slot) {
+              slot.pendingCooldownEnd = undefined;
             }
           }
         }
@@ -206,6 +221,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
         const slot = playerGameState.powerups[slotIndex];
         slot.pup = pupData;
         slot.locked = false;
+        slot.pendingCooldownEnd = undefined;
 
         if (playerID === this.gameState.myID) {
           this.pupSpinner?.beginSettling();
@@ -266,8 +282,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
     const slot = playerGameState.powerups[slotIndex];
     const now = this.gameState.timeCoordinator.clientTime;
+    const effectiveCooldownEnd = Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0);
 
-    if (!slot.pup || slot.locked || slot.lastCooldownEnd > now) {
+    if (!slot.pup || slot.locked || effectiveCooldownEnd > now) {
       this.myPupSlots?.shakeSlot(slotIndex);
       return;
     }
@@ -275,6 +292,12 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     const { pup } = slot;
     const { pupID } = pup;
     const enemyID = 1 - this.gameState.myID;
+
+    // Optimistic cooldown: apply for Yang PUPs (challenge cooldown)
+    if (pupConfig[pup.type].theme === true) {
+      const duration = sharedConfig.game.challenge.duration[this.gameState.matchState.phase];
+      slot.pendingCooldownEnd = now + duration;
+    }
 
     switch (pup.type) {
       // Water

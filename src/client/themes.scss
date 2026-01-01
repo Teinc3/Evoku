@@ -26,6 +26,7 @@
 
   --cd-global: rgba(0, 229, 255, 0.08); /* Cyan Radial Timer (Rhythm) */
   --cd-cell: rgba(128, 128, 128, 0.4);   /* Grey Overlay (Input Locking) */
+  --cd-pup: color-mix(in srgb, var(--state-danger) 45%, transparent); /* Glass Red (PUP Cooldown) */
   --state-success: #39ff14;            /* Acid Green (Valid/XP) */
   --state-danger: #ff003c;             /* Cyber Crimson (Attacks/Errors) */
 }
