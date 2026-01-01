@@ -3,6 +3,13 @@ export interface IPUPSlotState {
   slotIndex: number;
   /** Timestamp when the cooldown ends */
   lastCooldownEnd: number;
+  /**
+   * Client-only optimistic cooldown end timestamp.
+   * 
+   * When set, the UI can immediately render a cooldown overlay before the
+   * server-confirmed `lastCooldownEnd` arrives.
+   */
+  pendingCooldownEnd?: number;
   /** If the slot is locked */
   locked: boolean;
   pup?: IPUPState;

@@ -34,7 +34,15 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
   }
 
   ngDoCheck(): void {
-    this.countdownHelper.checkCooldownChanges(undefined, this.slot?.lastCooldownEnd);
+    const pendingEnd = this.slot?.pendingCooldownEnd;
+    const normalEnd = this.slot?.lastCooldownEnd;
+
+    this.countdownHelper.checkCooldownChanges(
+      pendingEnd !== undefined && normalEnd !== undefined && pendingEnd > normalEnd
+        ? pendingEnd
+        : undefined,
+      normalEnd
+    );
   }
 
   ngOnDestroy(): void {
