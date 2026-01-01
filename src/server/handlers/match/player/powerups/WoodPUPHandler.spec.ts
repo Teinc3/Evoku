@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 
+import MatchStatus from '@shared/types/enums/matchstatus';
 import WoodPUPActions from '@shared/types/enums/actions/match/player/powerups/wood';
 import WoodPUPHandler from "./WoodPUPHandler";
 
@@ -16,7 +17,24 @@ class MockSession {
 }
 
 class MockRoom {
+  public broadcast = jest.fn();
+  public timeService = {
+    assessTiming: jest.fn().mockReturnValue(0),
+    updateLastActionTime: jest.fn().mockReturnValue(1234),
+  };
+  public stateController = {
+    matchState: { status: MatchStatus.ONGOING },
+    canUsePUP: jest.fn().mockReturnValue(true),
+    consumePUP: jest.fn().mockReturnValue(1234),
+    computeHash: jest.fn().mockReturnValue(0),
+    getSolution: jest.fn().mockReturnValue(5),
+  };
+
   constructor(public readonly roomID: string) {}
+
+  public getPlayerID(): number {
+    return 0;
+  }
 }
 
 describe('WoodPUPHandler', () => {
@@ -39,7 +57,7 @@ describe('WoodPUPHandler', () => {
         actionID: 42,
         pupID: 1,
         clientTime: 1000,
-        targetID: 2,
+        targetID: 1,
       };
 
       // Act
@@ -50,6 +68,17 @@ describe('WoodPUPHandler', () => {
 
       // Assert
       expect(result).toBe(true);
+
+      expect((mockRoom as unknown as { broadcast: jest.Mock }).broadcast).toHaveBeenCalledWith(
+        WoodPUPActions.ENTANGLE_USED,
+        expect.objectContaining({
+          actionID: 42,
+          pupID: 1,
+          targetID: 1,
+          playerID: 0,
+          serverTime: 1234,
+        })
+      );
     });
   });
 
@@ -71,6 +100,16 @@ describe('WoodPUPHandler', () => {
 
       // Assert
       expect(result).toBe(true);
+
+      expect((mockRoom as unknown as { broadcast: jest.Mock }).broadcast).toHaveBeenCalledWith(
+        WoodPUPActions.WISDOM_USED,
+        expect.objectContaining({
+          actionID: 43,
+          pupID: 2,
+          playerID: 0,
+          serverTime: 1234,
+        })
+      );
     });
   });
 });

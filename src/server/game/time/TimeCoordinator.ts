@@ -112,8 +112,13 @@ export default class TimeCoordinator {
    * Commits the action time after successful validation and logic processing.
    * @returns The current server time for broadcasting.
    */
-  public updateLastActionTime(playerID: number, action: PlayerActions, clientTime: number): number {
-    const now = this.getServerTime();
+  public updateLastActionTime(
+    playerID: number,
+    action: PlayerActions,
+    clientTime: number,
+    serverTime?: number
+  ): number {
+    const now = serverTime ?? this.getServerTime();
     return this.actionValidator.updateLastActionTime(playerID, action, clientTime, now);
   }
 

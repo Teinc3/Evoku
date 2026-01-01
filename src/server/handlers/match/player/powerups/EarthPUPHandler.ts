@@ -1,5 +1,6 @@
 import EarthPUPActions from "@shared/types/enums/actions/match/player/powerups/earth";
 import EnumHandler from "../../../EnumHandler";
+import reject from "../../../../utils/reject";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type { IMatchEnumHandler } from "../../../../types/handler";
@@ -22,16 +23,59 @@ export default class EarthPUPHandler extends EnumHandler<EarthPUPActions>
   }
 
   private handleUseLandslide(
-    _session: SessionModel,
-    _data: AugmentAction<EarthPUPActions>
+    session: SessionModel,
+    data: AugmentAction<EarthPUPActions.USE_LANDSLIDE>
   ): boolean {
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined || data.targetID !== 1 - playerID) {
+      return false;
+    }
+
+    const { action, clientTime, ...payload } = data;
+    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime)
+
+    if (result === false) {
+      reject(this.room, session, data.actionID);
+      return true;
+    }
+
+    // Random cell index to apply landslide to
+    // This is just a placeholder until the actual logic is implemented
+    const cellIndex = Math.floor(Math.random() * 81);
+
+    this.room.broadcast(EarthPUPActions.LANDSLIDE_USED, {
+      serverTime: result,
+      playerID,
+      ...payload,
+      cellIndex
+    });
+
     return true;
   }
 
   private handleUseExcavate(
-    _session: SessionModel,
-    _data: AugmentAction<EarthPUPActions>
+    session: SessionModel,
+    data: AugmentAction<EarthPUPActions.USE_EXCAVATE>
   ): boolean {
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined || data.cellIndex < 0 || data.cellIndex >= 81) {
+      return false;
+    }
+
+    const { action, clientTime, ...payload } = data;
+    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime);
+
+    if (result === false) {
+      reject(this.room, session, data.actionID);
+      return true;
+    }
+
+    this.room.broadcast(EarthPUPActions.EXCAVATE_USED, {
+      serverTime: result,
+      playerID,
+      ...payload
+    });
+
     return true;
   }
 

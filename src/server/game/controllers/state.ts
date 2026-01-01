@@ -2,11 +2,13 @@ import { getSudoku } from "sudoku-gen";
 
 import initPUPSlots from "@shared/types/utils/initPUPSlots";
 import MatchStatus from "@shared/types/enums/matchstatus";
-import { MechanicsActions } from "@shared/types/enums/actions";
+import { MechanicsActions, type PUPActions } from "@shared/types/enums/actions";
 import BoardConverter from "@shared/mechanics/utils/BoardConverter";
 import sharedConfig from "@shared/config";
+import pupConfig from "@config/shared/pup.json";
 import ServerBoardModel from "../../models/logic/Board";
 
+import type { IPUPSlotState } from "@shared/types/gamestate/powerups";
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
 import type TimeCoordinator from "../time";
@@ -315,5 +317,58 @@ export default class GameStateController {
       level,
       slotIndex,
     };
+  }
+
+  public consumePUP(
+    action: PUPActions,
+    playerID: number,
+    pupID: number,
+    clientTime: number
+  ): number | false {
+    const serverTime = this.timeService.assessTiming(playerID, clientTime);
+    if (serverTime < 0) {
+      return false;
+    }
+
+    const slot = this.findPUPSlotByPupID(playerID, pupID);
+    if (this.matchState.status !== MatchStatus.ONGOING
+      || !slot || slot.locked || !slot.pup || slot.lastCooldownEnd > serverTime) {
+      return false;
+    }
+
+    this.timeService.updateLastActionTime(
+      playerID,
+      action,
+      clientTime,
+      serverTime
+    );
+
+    // Differentiate theme
+    if (pupConfig[slot.pup.type].theme === true) {
+      // Yang pup - set challenge cooldown
+      const challengeDuration = sharedConfig.game.challenge.duration[this.matchState.phase];
+      slot.lastCooldownEnd = serverTime + challengeDuration;
+      // TODO: Create challenge timer task
+    } else {
+      // Yin pup - consume immediately
+      slot.pup = undefined;
+    }
+    return serverTime;
+  }
+
+  private findPUPSlotByPupID(playerID: number, pupID: number): IPUPSlotState | undefined {
+    const playerState = this.gameStates.get(playerID);
+    const gameState = playerState?.gameState;
+    if (!gameState) {
+      return undefined;
+    }
+
+    for (const slot of gameState.powerups) {
+      if (slot.pup?.pupID === pupID) {
+        return slot;
+      }
+    }
+
+    return undefined;
   }
 }
