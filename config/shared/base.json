@@ -7,6 +7,9 @@
     "objectives": {
       "normalGain": [20, 15, 10],
       "goldenGain": [50, 40, 30]
+    },
+    "challenge": {
+      "duration": [10000, 8000, 6000]
     }
   },
   "networking": {

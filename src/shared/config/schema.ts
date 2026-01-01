@@ -11,6 +11,9 @@ export const SharedConfigSchema = z.object({
       normalGain: z.array(z.number().int().nonnegative()).length(3),
       goldenGain: z.array(z.number().int().nonnegative()).length(3),
     }),
+    challenge: z.object({
+      duration: z.array(z.number().int().nonnegative()).length(3),
+    }),
   }),
   networking: z.object({
     ws: z.object({

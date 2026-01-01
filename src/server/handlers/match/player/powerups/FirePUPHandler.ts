@@ -1,5 +1,6 @@
 import FirePUPActions from "@shared/types/enums/actions/match/player/powerups/fire";
 import EnumHandler from "../../../EnumHandler";
+import reject from "../../../../utils/reject";
 
 import type AugmentAction from "@shared/types/utils/AugmentAction";
 import type { IMatchEnumHandler } from "../../../../types/handler";
@@ -21,14 +22,57 @@ export default class FirePUPHandler extends EnumHandler<FirePUPActions>
     this.setHandlerMap(handlerMap);
   }
 
-  private handleUseInferno(_session: SessionModel, _data: AugmentAction<FirePUPActions>): boolean {
+  private handleUseInferno(
+    session: SessionModel,
+    data: AugmentAction<FirePUPActions.USE_INFERNO>
+  ): boolean {
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined) {
+      return false;
+    } else if (data.cellIndex < 0 || data.cellIndex >= 81 || data.targetID !== 1 - playerID) {
+      return false;
+    }
+
+    const { action, clientTime, ...payload } = data;
+    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime);
+
+    if (result === false) {
+      reject(this.room, session, data.actionID);
+      return true;
+    }
+
+    this.room.broadcast(FirePUPActions.INFERNO_USED, {
+      serverTime: result,
+      playerID,
+      ...payload
+    });
+
     return true;
   }
 
   private handleUseMetabolic(
-    _session: SessionModel,
-    _data: AugmentAction<FirePUPActions>
+    session: SessionModel,
+    data: AugmentAction<FirePUPActions.USE_METABOLIC>
   ): boolean {
+    const playerID = this.room.getPlayerID(session);
+    if (playerID === undefined) {
+      return false;
+    }
+
+    const { action, clientTime, ...payload } = data;
+    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime);
+
+    if (result === false) {
+      reject(this.room, session, data.actionID);
+      return true;
+    }
+
+    this.room.broadcast(FirePUPActions.METABOLIC_USED, {
+      serverTime: result,
+      playerID,
+      ...payload
+    });
+
     return true;
   }
   

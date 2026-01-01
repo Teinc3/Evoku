@@ -100,6 +100,18 @@ describe('TimeCoordinator Unit Tests', () => {
       expect(serverTime).toBeGreaterThanOrEqual(0);
     });
 
+    it('should use provided server time for updateLastActionTime', () => {
+      const providedTime = 12345;
+      const serverTime = timeService.updateLastActionTime(
+        1,
+        MechanicsActions.SET_CELL,
+        1100,
+        providedTime
+      );
+      
+      expect(serverTime).toBe(providedTime);
+    });
+
     it('should maintain action history limit without throwing', () => {
       // Add more actions than the limit
       for (let i = 0; i < TimeCoordinator.MAX_ACTION_HISTORY_COUNT + 5; i++) {

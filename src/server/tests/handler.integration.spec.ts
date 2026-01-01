@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 
+import MatchStatus from '@shared/types/enums/matchstatus';
 import SessionActions from '@shared/types/enums/actions/system/session';
 import LobbyActions from '@shared/types/enums/actions/system/lobby';
 import FirePUPActions from '@shared/types/enums/actions/match/player/powerups/fire';
@@ -31,7 +32,23 @@ class MockMatchmakingManager {
 }
 
 class MockRoom {
+  public broadcast = jest.fn();
+  public timeService = {
+    assessTiming: jest.fn().mockReturnValue(0),
+    updateLastActionTime: jest.fn().mockReturnValue(1234),
+  };
+  public stateController = {
+    matchState: { status: MatchStatus.ONGOING },
+    canUsePUP: jest.fn().mockReturnValue(true),
+    consumePUP: jest.fn().mockReturnValue(true),
+    computeHash: jest.fn().mockReturnValue(0),
+  };
+
   constructor(public readonly roomID: string) {}
+
+  public getPlayerID(): number {
+    return 0;
+  }
 }
 
 
