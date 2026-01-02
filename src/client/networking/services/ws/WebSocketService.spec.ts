@@ -282,6 +282,56 @@ describe('WebSocketService', () => {
 
   });
 
+  describe('Event handling', () => {
+    beforeEach(() => {
+      jasmine.clock().install();
+    });
+
+    it('should deliver incoming packets via packetSubject', fakeAsync(async () => {
+      const received: unknown[] = [];
+      service.packetSubject.subscribe(packet => {
+        received.push(packet);
+      });
+
+      const connectPromise = service.connect();
+      await mockClientSocket.connect();
+      await connectPromise;
+
+      const mockPacket = { action: SessionActions.HEARTBEAT };
+      mockClientSocket.simulatePacket(mockPacket);
+
+      const latency = sharedConfig.networking.ws.simulatedLatencyMs;
+      jasmine.clock().tick(latency);
+
+      expect(received.length).toBe(1);
+      expect(received[0]).toEqual(mockPacket);
+    }));
+
+    it('should call disconnect callback and emit onDisconnect on close', () => {
+      const callback = jasmine.createSpy('disconnectCallback');
+      service.setDisconnectCallback(callback);
+
+      let disconnectEmitted = false;
+      service.onDisconnect.subscribe(() => {
+        disconnectEmitted = true;
+      });
+
+      const closeEvent = { code: 1000, reason: 'Test close' } as CloseEvent;
+      (service as unknown as { handleClose: (event: CloseEvent) => void }).handleClose(closeEvent);
+
+      expect(callback).toHaveBeenCalledWith(1000, 'Test close');
+      expect(disconnectEmitted).toBe(true);
+    });
+
+    it('should log websocket errors', () => {
+      const errorSpy = spyOn(console, 'error');
+      const event = new Event('error');
+
+      (service as unknown as { handleError: (error: Event) => void }).handleError(event);
+      expect(errorSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('Heartbeat functionality', () => {
     beforeEach(() => {
       jasmine.clock().install();

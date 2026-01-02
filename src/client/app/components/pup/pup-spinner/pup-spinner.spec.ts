@@ -365,6 +365,45 @@ describe('PupSpinnerComponent', () => {
     expect(component['svgElement']).toBeNull();
   });
 
+  it('initSvg should return early when cachedSvg is missing', () => {
+    component['cachedSvg'] = null;
+
+    expect(() => {
+      (component as unknown as { initSvg: () => void }).initSvg();
+    }).not.toThrow();
+  });
+
+  it('initSvg should fall back to default width/height when attributes are missing', () => {
+    component['cachedSvg'] = [
+      '<svg>',
+      '<g id="p0" fill="a"></g>',
+      '<g id="p4" fill="b"></g>',
+      '</svg>',
+    ].join('');
+
+    (component as unknown as { initSvg: () => void }).initSvg();
+    const svg = component.iconContainer.nativeElement.querySelector('svg');
+
+    expect(svg).toBeTruthy();
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 467 467');
+  });
+
+  it('updateIdleContrast should return early when iconContainer is missing', () => {
+    component['iconContainer'] = null as unknown as PupSpinnerComponent['iconContainer'];
+
+    expect(() => {
+      (component as unknown as { updateIdleContrast: () => void }).updateIdleContrast();
+    }).not.toThrow();
+  });
+
+  it('flipIcon should return early when svgElement is missing', () => {
+    component['svgElement'] = null;
+    component['frameIndex'] = 2;
+
+    (component as unknown as { flipIcon: () => void }).flipIcon();
+    expect(component['frameIndex']).toBe(2);
+  });
+
   it('flipIcon should handle missing element ids and still advance the frame index', () => {
     component['cachedSvg'] = [
       '<svg viewBox="0 0 1 1">',

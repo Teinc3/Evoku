@@ -2,11 +2,19 @@ import { jest } from '@jest/globals';
 
 import MatchStatus from '@shared/types/enums/matchstatus';
 import WoodPUPActions from '@shared/types/enums/actions/match/player/powerups/wood';
-import WoodPUPHandler from "./WoodPUPHandler";
+import reject from '../../../../utils/reject';
+import WoodPUPHandler from './WoodPUPHandler';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { RoomModel } from '../../../../models/networking';
 import type { SessionModel } from '../../../../models/networking';
+
+
+jest.mock('../../../../utils/reject', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 
 // Mock classes for testing
@@ -32,9 +40,7 @@ class MockRoom {
 
   constructor(public readonly roomID: string) {}
 
-  public getPlayerID(): number {
-    return 0;
-  }
+  public getPlayerID = jest.fn<() => number | undefined>().mockReturnValue(0);
 }
 
 describe('WoodPUPHandler', () => {
@@ -80,6 +86,71 @@ describe('WoodPUPHandler', () => {
         })
       );
     });
+
+    it('should return false when playerID is undefined', async () => {
+      const useEntangleData: AugmentAction<WoodPUPActions.USE_ENTANGLE> = {
+        action: WoodPUPActions.USE_ENTANGLE,
+        actionID: 42,
+        pupID: 1,
+        clientTime: 1000,
+        targetID: 1,
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(undefined);
+
+      const result = await woodPUPHandler.handleData(
+        mockSession as unknown as SessionModel,
+        useEntangleData,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when targetID does not match opponent', async () => {
+      const useEntangleData: AugmentAction<WoodPUPActions.USE_ENTANGLE> = {
+        action: WoodPUPActions.USE_ENTANGLE,
+        actionID: 42,
+        pupID: 1,
+        clientTime: 1000,
+        targetID: 0,
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(0);
+
+      const result = await woodPUPHandler.handleData(
+        mockSession as unknown as SessionModel,
+        useEntangleData,
+      );
+
+      expect(result).toBe(false);
+      expect((mockRoom as unknown as { broadcast: jest.Mock }).broadcast).not.toHaveBeenCalled();
+    });
+
+    it('should reject action when consumePUP returns false', async () => {
+      const useEntangleData: AugmentAction<WoodPUPActions.USE_ENTANGLE> = {
+        action: WoodPUPActions.USE_ENTANGLE,
+        actionID: 99,
+        pupID: 1,
+        clientTime: 1000,
+        targetID: 1,
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(0);
+      (mockRoom.stateController.consumePUP as jest.Mock).mockReturnValue(false);
+
+      const result = await woodPUPHandler.handleData(
+        mockSession as unknown as SessionModel,
+        useEntangleData,
+      );
+
+      expect(result).toBe(true);
+      expect(reject).toHaveBeenCalledWith(
+        mockRoom as unknown as RoomModel,
+        mockSession as unknown as SessionModel,
+        useEntangleData.actionID,
+      );
+      expect((mockRoom as unknown as { broadcast: jest.Mock }).broadcast).not.toHaveBeenCalled();
+    });
   });
 
   describe('handleUseWisdom', () => {
@@ -110,6 +181,44 @@ describe('WoodPUPHandler', () => {
           serverTime: 1234,
         })
       );
+    });
+
+    it('should return false when playerID is undefined', async () => {
+      const useWisdomData: AugmentAction<WoodPUPActions.USE_WISDOM> = {
+        action: WoodPUPActions.USE_WISDOM,
+        actionID: 43,
+        pupID: 2,
+        clientTime: 1000,
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(undefined);
+
+      const result = await woodPUPHandler.handleData(
+        mockSession as unknown as SessionModel,
+        useWisdomData,
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when solution lookup fails', async () => {
+      const useWisdomData: AugmentAction<WoodPUPActions.USE_WISDOM> = {
+        action: WoodPUPActions.USE_WISDOM,
+        actionID: 43,
+        pupID: 2,
+        clientTime: 1000,
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(0);
+      (mockRoom.stateController.getSolution as jest.Mock).mockReturnValue(undefined);
+
+      const result = await woodPUPHandler.handleData(
+        mockSession as unknown as SessionModel,
+        useWisdomData,
+      );
+
+      expect(result).toBe(false);
+      expect((mockRoom as unknown as { broadcast: jest.Mock }).broadcast).not.toHaveBeenCalled();
     });
   });
 });

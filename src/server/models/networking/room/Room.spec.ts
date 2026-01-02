@@ -392,6 +392,56 @@ describe('RoomModel', () => {
     });
   });
 
+  describe('tracked timeouts', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should execute tracked timeout callback and remove it from the set', () => {
+      const cb = jest.fn();
+      const roomWithTrackedTimeouts = room as unknown as {
+        trackedTimeouts: Set<ReturnType<typeof setTimeout>>;
+      };
+
+      const id = room.setTrackedTimeout(cb, 50);
+      expect(roomWithTrackedTimeouts.trackedTimeouts.has(id)).toBe(true);
+
+      jest.advanceTimersByTime(50);
+
+      expect(cb).toHaveBeenCalledTimes(1);
+      expect(roomWithTrackedTimeouts.trackedTimeouts.size).toBe(0);
+    });
+
+    it('should clear tracked timeout and prevent callback execution', () => {
+      const cb = jest.fn();
+      const roomWithTrackedTimeouts = room as unknown as {
+        trackedTimeouts: Set<ReturnType<typeof setTimeout>>;
+      };
+
+      const id = room.setTrackedTimeout(cb, 50);
+      room.clearTrackedTimeout(id);
+
+      expect(roomWithTrackedTimeouts.trackedTimeouts.size).toBe(0);
+
+      jest.advanceTimersByTime(50);
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it('should clear all tracked timeouts on close', () => {
+      const cb = jest.fn();
+      room.setTrackedTimeout(cb, 50);
+
+      room.close();
+
+      jest.advanceTimersByTime(50);
+      expect(cb).not.toHaveBeenCalled();
+    });
+  });
+
   describe('close', () => {
     beforeEach(() => {
       room.addPlayers([mockSession1, mockSession2]);
