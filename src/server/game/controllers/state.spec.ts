@@ -1,4 +1,6 @@
 import MatchStatus from '@shared/types/enums/matchstatus';
+import WoodPUPActions from '@shared/types/enums/actions/match/player/powerups/wood';
+import sharedConfig from '@shared/config';
 import GameStateController from '.';
 
 import type { IPlayerState } from '@shared/types/gamestate';
@@ -648,6 +650,18 @@ describe('GameStateController', () => {
 
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
+
+    it('should return early when no solution exists for the player', () => {
+      // Remove solution mapping and ensure we do not crash or emit progress updates.
+      gameState['solutions'].delete(playerID);
+      mockServerBoardModel.board[cellIndex].value = 4;
+      mockServerBoardModel.board[cellIndex].pupProgressSet = false;
+
+      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
+        .checkPUPProgress(playerID, cellIndex);
+
+      expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+    });
   });
 
   describe('integration scenarios', () => {
@@ -709,6 +723,363 @@ describe('GameStateController', () => {
         actionID: 1006
       });
       expect(result.result).toBe(true);
+    });
+  });
+
+  describe('reservePUPDraw', () => {
+    const playerID = 1;
+
+    beforeEach(() => {
+      gameState.addPlayer(playerID);
+      gameState.initGameStates();
+    });
+
+    it('should return -1 when PUP progress is not 100', () => {
+      const slotIndex = gameState.reservePUPDraw(playerID);
+      expect(slotIndex).toBe(-1);
+    });
+
+    it('should lock an empty slot and reset PUP progress', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      playerState.gameState.pupProgress = 100;
+      playerState.gameState.powerups = [
+        {
+          slotIndex: 0,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: undefined,
+        },
+        {
+          slotIndex: 1,
+          lastCooldownEnd: 0,
+          locked: true,
+          pup: undefined,
+        },
+        {
+          slotIndex: 2,
+          lastCooldownEnd: 0,
+          locked: true,
+          pup: undefined,
+        },
+      ];
+
+      const slotIndex = gameState.reservePUPDraw(playerID);
+
+      expect(slotIndex).toBe(0);
+      expect(playerState.gameState.powerups[0]?.locked).toBe(true);
+      expect(playerState.gameState.pupProgress).toBe(0);
+      expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(false, [
+        { playerID, progress: 0 },
+      ]);
+    });
+
+    it('should return -1 when no empty slots are available', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      playerState.gameState.pupProgress = 100;
+      playerState.gameState.powerups = [
+        { slotIndex: 0, lastCooldownEnd: 0, locked: true, pup: undefined },
+        {
+          slotIndex: 1,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: { pupID: 1, type: 1, level: 1 },
+        },
+        {
+          slotIndex: 2,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: { pupID: 2, type: 0, level: 1 },
+        },
+      ];
+
+      const slotIndex = gameState.reservePUPDraw(playerID);
+      expect(slotIndex).toBe(-1);
+    });
+
+    it('should return -1 when selected slot is unexpectedly missing', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      playerState.gameState.pupProgress = 100;
+
+      // Create a custom powerups object whose `map` reports an empty slot at index 0,
+      // but where `[0]` access returns undefined. This hits the defensive `if (!slot)` guard.
+      const powerups = {
+        map: (cb: (slot: { pup: undefined; locked: false }, index: number) => number) => {
+          return [cb({ pup: undefined, locked: false }, 0)];
+        },
+      } as unknown as typeof playerState.gameState.powerups;
+
+      playerState.gameState.powerups = powerups;
+
+      expect(gameState.reservePUPDraw(playerID)).toBe(-1);
+    });
+
+    it('should return -1 when player has no gameState', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState) {
+        throw new Error('Expected playerState to exist');
+      }
+
+      delete playerState.gameState;
+
+      expect(gameState.reservePUPDraw(playerID)).toBe(-1);
+    });
+
+    it('should return -1 for unknown player', () => {
+      expect(gameState.reservePUPDraw(999)).toBe(-1);
+    });
+  });
+
+  describe('drawRandomPUP', () => {
+    const playerID = 1;
+
+    beforeEach(() => {
+      gameState.addPlayer(playerID);
+      gameState.initGameStates();
+    });
+
+    it('should return null when slot is not locked', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        {
+          slotIndex: 0,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: undefined,
+        },
+        powerups[1],
+        powerups[2],
+      ] as typeof playerState.gameState.powerups;
+
+      const result = gameState.drawRandomPUP(playerID, 0, 1);
+      expect(result).toBeNull();
+    });
+
+    it('should draw a PUP, unlock the slot, and advance pupID', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      gameState.matchState.currentPUPID = 10;
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        powerups[0],
+        powerups[1],
+        {
+          slotIndex: 2,
+          lastCooldownEnd: 0,
+          locked: true,
+          pup: undefined,
+        },
+      ] as typeof playerState.gameState.powerups;
+
+      const drawn = gameState.drawRandomPUP(playerID, 2, 1);
+      expect(drawn).toEqual({
+        pupID: 10,
+        type: 1,
+        level: 1,
+        slotIndex: 2,
+      });
+      expect(gameState.matchState.currentPUPID).toBe(11);
+      expect(playerState.gameState.powerups[2]?.locked).toBe(false);
+      expect(playerState.gameState.powerups[2]?.pup?.pupID).toBe(10);
+    });
+
+    it('should return null for unknown player', () => {
+      expect(gameState.drawRandomPUP(999, 0, 1)).toBeNull();
+    });
+
+    it('should return null when slot index is out of bounds', () => {
+      const result = gameState.drawRandomPUP(playerID, 999, 1);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when slot already contains a PUP', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        {
+          slotIndex: 0,
+          lastCooldownEnd: 0,
+          locked: true,
+          pup: { pupID: 1, type: 1, level: 1 },
+        },
+        powerups[1],
+        powerups[2],
+      ] as typeof playerState.gameState.powerups;
+
+      expect(gameState.drawRandomPUP(playerID, 0, 1)).toBeNull();
+    });
+  });
+
+  describe('consumePUP', () => {
+    const playerID = 1;
+    const pupID = 123;
+
+    beforeEach(() => {
+      gameState.addPlayer(playerID);
+      gameState.initGameStates();
+      gameState.matchState.status = MatchStatus.ONGOING;
+      gameState.matchState.phase = 0;
+    });
+
+    it('should return false when timing assessment fails', () => {
+      mockTimeService.assessTiming.mockReturnValue(-1);
+
+      const result = gameState.consumePUP(WoodPUPActions.USE_WISDOM, playerID, pupID, 1000);
+      expect(result).toBe(false);
+    });
+
+    it('should consume Yin PUP immediately (theme=false)', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        {
+          slotIndex: 0,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: { pupID, type: 1, level: 1 },
+        },
+        powerups[1],
+        powerups[2],
+      ] as typeof playerState.gameState.powerups;
+
+      mockTimeService.assessTiming.mockReturnValue(1000);
+      mockTimeService.updateLastActionTime.mockReturnValue(1000);
+
+      const result = gameState.consumePUP(WoodPUPActions.USE_WISDOM, playerID, pupID, 999);
+      expect(result).toBe(1000);
+      expect(playerState.gameState.powerups[0]?.pup).toBeUndefined();
+    });
+
+    it('should apply Yang cooldown (theme=true) and keep PUP in slot', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        powerups[0],
+        {
+          slotIndex: 1,
+          lastCooldownEnd: 0,
+          locked: false,
+          pup: { pupID, type: 0, level: 1 },
+        },
+        powerups[2],
+      ] as typeof playerState.gameState.powerups;
+
+      mockTimeService.assessTiming.mockReturnValue(1000);
+      mockTimeService.updateLastActionTime.mockReturnValue(1000);
+
+      const result = gameState.consumePUP(WoodPUPActions.USE_ENTANGLE, playerID, pupID, 999);
+      expect(result).toBe(1000);
+      const duration = sharedConfig.game.challenge.duration[0];
+      expect(playerState.gameState.powerups[1]?.lastCooldownEnd).toBe(1000 + duration);
+      expect(playerState.gameState.powerups[1]?.pup?.pupID).toBe(pupID);
+    });
+
+    it('should return false when PUP is on cooldown', () => {
+      const gameStates = (gameState as unknown as {
+        gameStates: Map<number, IPlayerState<ServerBoardModel>>;
+      }).gameStates;
+      const playerState = gameStates.get(playerID);
+      if (!playerState?.gameState) {
+        throw new Error('Expected gameState to be initialized');
+      }
+
+      const powerups = playerState.gameState.powerups;
+      playerState.gameState.powerups = [
+        powerups[0],
+        powerups[1],
+        {
+          slotIndex: 2,
+          lastCooldownEnd: 2000,
+          locked: false,
+          pup: { pupID, type: 1, level: 1 },
+        },
+      ] as typeof playerState.gameState.powerups;
+
+      mockTimeService.assessTiming.mockReturnValue(1000);
+
+      const result = gameState.consumePUP(WoodPUPActions.USE_WISDOM, playerID, pupID, 999);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('findPUPSlotByPupID', () => {
+    it('should return undefined when player has no gameState', () => {
+      gameState.addPlayer(1);
+
+      const result = (gameState as unknown as {
+        findPUPSlotByPupID: (playerID: number, pupID: number) => unknown;
+      }).findPUPSlotByPupID(1, 123);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no slot matches pupID', () => {
+      gameState.addPlayer(1);
+      gameState.initGameStates();
+
+      const result = (gameState as unknown as {
+        findPUPSlotByPupID: (playerID: number, pupID: number) => unknown;
+      }).findPUPSlotByPupID(1, 999999);
+
+      expect(result).toBeUndefined();
     });
   });
 });

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture, TestBed, fakeAsync, tick,
+} from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 
 import PupSlotComponent from './pup-slot.component';
@@ -23,6 +25,104 @@ describe('PupSlotComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('ngDoCheck', () => {
+    it('should prefer pending cooldown when it is later than the normal cooldown', () => {
+      component.slot = {
+        slotIndex: 0,
+        lastCooldownEnd: 100,
+        pendingCooldownEnd: 200,
+        locked: false,
+      };
+
+      const spy = spyOn(component.countdownHelper, 'checkCooldownChanges');
+
+      component.ngDoCheck();
+
+      expect(spy).toHaveBeenCalledWith(200, 100);
+    });
+
+    it('should not use pending cooldown when it is not later than normal cooldown', () => {
+      component.slot = {
+        slotIndex: 0,
+        lastCooldownEnd: 200,
+        pendingCooldownEnd: 100,
+        locked: false,
+      };
+
+      const spy = spyOn(component.countdownHelper, 'checkCooldownChanges');
+
+      component.ngDoCheck();
+
+      expect(spy).toHaveBeenCalledWith(undefined, 200);
+    });
+  });
+
+  describe('click handling', () => {
+    it('should not emit when slot is null', () => {
+      const emitSpy = spyOn(component.slotClicked, 'emit');
+      component.slot = null;
+
+      (component as unknown as { onClick: () => void }).onClick();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should emit slotIndex when slot is set', () => {
+      const emitSpy = spyOn(component.slotClicked, 'emit');
+      component.slot = { slotIndex: 2, lastCooldownEnd: 0, locked: false };
+
+      (component as unknown as { onClick: () => void }).onClick();
+
+      expect(emitSpy).toHaveBeenCalledWith(2);
+    });
+  });
+
+  describe('icon helpers', () => {
+    it('should return box icon for slotIndex 2', () => {
+      component.slot = { slotIndex: 2, lastCooldownEnd: 0, locked: false };
+
+      const icon = (component as unknown as { slotIcon: string | null }).slotIcon;
+      expect(icon).toBe('/assets/slots/icons/box-diffuse.svg');
+      expect((component as unknown as { isBoxIcon: boolean }).isBoxIcon).toBe(true);
+    });
+
+    it('should return diffuse icon for non-box slots', () => {
+      component.slot = { slotIndex: 0, lastCooldownEnd: 0, locked: false };
+
+      const icon = (component as unknown as { slotIcon: string | null }).slotIcon;
+      expect(icon).toBe('/assets/slots/icons/diffuse.svg');
+      expect((component as unknown as { isColumnIcon: boolean }).isColumnIcon).toBe(false);
+    });
+
+    it('should return null for pupIcon when there is no pup', () => {
+      component.slot = { slotIndex: 0, lastCooldownEnd: 0, locked: false };
+      const icon = (component as unknown as { pupIcon: string | null }).pupIcon;
+      expect(icon).toBeNull();
+    });
+  });
+
+  describe('shake lifecycle', () => {
+    it('should apply shake class then clear it after timeout', fakeAsync(() => {
+      expect(component.shakeClass).toBe(false);
+
+      component.beginShake();
+      expect(component.shakeClass).toBe(true);
+
+      tick(350);
+      expect(component.shakeClass).toBe(false);
+    }));
+
+    it('should clear shake timeout on destroy', fakeAsync(() => {
+      component.beginShake();
+      expect(component.shakeClass).toBe(true);
+
+      component.ngOnDestroy();
+      tick(350);
+
+      expect(component.shakeClass).toBe(true);
+    }));
   });
 
   describe('template rendering', () => {

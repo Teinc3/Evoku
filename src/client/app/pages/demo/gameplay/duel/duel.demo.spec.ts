@@ -4,9 +4,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 
 import MatchStatus from '@shared/types/enums/matchstatus';
+import PUPElements from '@shared/types/enums/elements';
 import ActionEnum, {
-  MechanicsActions, LifecycleActions, ProtocolActions, type PlayerActions
+  MechanicsActions,
+  LifecycleActions,
+  ProtocolActions,
+  WaterPUPActions,
+  type PlayerActions
 } from '@shared/types/enums/actions/';
+import pupConfig from '@config/shared/pup.json';
+import sharedConfig from '@config/shared/base.json';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import { AppView } from '../../../../../types/enums';
@@ -14,6 +21,8 @@ import DuelDemoPageComponent from './duel.demo';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { IPlayerState } from '@shared/types/gamestate';
+import type { ActionContractC2S }
+  from '@shared/types/contracts/components/extendables/ActionContract';
 import type { MatchFoundContract, PingContract } from '@shared/types/contracts';
 import type BoardModelComponent from '../../../../components/board/board.component';
 import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
@@ -349,6 +358,753 @@ describe('DuelDemoPageComponent', () => {
 
       expect(component.gameState.pendingActions.has(123)).toBeFalse();
       expect(mockBoard1.handleCellRejection).toHaveBeenCalledWith(5, 7);
+    });
+
+    it('should cancel optimistic PUP cooldown on REJECT_ACTION for PUP usage', () => {
+      component.ngOnInit();
+
+      const pupID = 999;
+      const myID = 0;
+      (component.gameState as typeof component.gameState & { myID: number }).myID = myID;
+
+      const slot = {
+        pup: { pupID, type: 1 },
+        locked: false,
+        lastCooldownEnd: 0,
+        pendingCooldownEnd: 1234,
+      };
+      const playerGameState = {
+        powerups: [slot]
+      };
+
+      spyOn(component.gameState, 'getPlayerState').and.callFake((playerID: number) => {
+        if (playerID === myID) {
+          return { gameState: playerGameState } as unknown as IPlayerState<ClientBoardModel>;
+        }
+
+        return { gameState: null } as unknown as IPlayerState<ClientBoardModel>;
+      });
+
+      const pendingAction: ActionContractC2S & {
+        action: PlayerActions;
+        pupID: number;
+      } = {
+        action: WaterPUPActions.USE_PURITY,
+        actionID: 123,
+        pupID,
+        clientTime: 0,
+      };
+      component.gameState.pendingActions.set(123, pendingAction);
+
+      const rejectData = { actionID: 123 };
+      const action = ProtocolActions.REJECT_ACTION;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next(rejectData as unknown as ActionEnum);
+      expect(slot.pendingCooldownEnd).toBeUndefined();
+    });
+
+    it('should return early for UPDATE_PROGRESS when player gameState is missing', () => {
+      component.ngOnInit();
+
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const action = ProtocolActions.UPDATE_PROGRESS;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        playerID: 0,
+        isBoard: true,
+        progress: 50,
+      } as unknown as ActionEnum);
+
+      expect(component.gameState.getPlayerState).toHaveBeenCalled();
+    });
+
+    it('should confirm CELL_SET for opponent using estimated client time', () => {
+      component.ngOnInit();
+
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const confirmCellSet = jasmine.createSpy('confirmCellSet');
+      spyOn(component.gameState, 'getPlayerBoard').and.returnValue({
+        confirmCellSet
+      } as unknown as ClientBoardModel);
+
+      const estimateSpy = spyOn(component.gameState.timeCoordinator, 'estimateClientTime')
+        .and.returnValue(123456);
+
+      const action = MechanicsActions.CELL_SET;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        playerID: 1,
+        actionID: 99,
+        serverTime: 777,
+        cellIndex: 10,
+        value: 3,
+      } as unknown as ActionEnum);
+
+      expect(estimateSpy).toHaveBeenCalledWith(777);
+      expect(confirmCellSet).toHaveBeenCalledWith(10, 3, 123456);
+    });
+
+    it('should handle REJECT_ACTION for PUP usage even when my gameState is missing', () => {
+      component.ngOnInit();
+
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      spyOn(component.gameState, 'getPlayerBoard')
+        .and.returnValue(null as unknown as ClientBoardModel);
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const pendingAction: ActionContractC2S & {
+        action: PlayerActions;
+        pupID: number;
+      } = {
+        action: WaterPUPActions.USE_PURITY,
+        actionID: 123,
+        pupID: 999,
+        clientTime: 0,
+      };
+      component.gameState.pendingActions.set(123, pendingAction);
+
+      const action = ProtocolActions.REJECT_ACTION;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({ actionID: 123 } as unknown as ActionEnum);
+
+      expect(component.gameState.pendingActions.has(123)).toBeFalse();
+    });
+
+    it('should ignore PUP_DRAWN when player gameState is missing', () => {
+      component.ngOnInit();
+
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const action = MechanicsActions.PUP_DRAWN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        playerID: 0,
+        slotIndex: 0,
+        pupID: 1,
+        type: 1,
+        level: 0,
+      } as unknown as ActionEnum);
+
+      expect(component.gameState.getPlayerState).toHaveBeenCalled();
+    });
+
+    it('should ignore PUP_SPUN when player gameState is missing', () => {
+      component.ngOnInit();
+
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const action = MechanicsActions.PUP_SPUN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        slotIndex: 0,
+        element: PUPElements.WATER,
+      } as unknown as ActionEnum);
+
+      expect(component.gameState.getPlayerState).toHaveBeenCalled();
+    });
+
+    it('should ignore PUP_SPUN when slot index is invalid', () => {
+      component.ngOnInit();
+
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: {
+          powerups: []
+        }
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const setSettlingType = jasmine.createSpy('setSettlingType');
+      component.pupSpinner = { setSettlingType } as unknown as
+        DuelDemoPageComponent['pupSpinner'];
+
+      const action = MechanicsActions.PUP_SPUN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        slotIndex: 0,
+        element: PUPElements.WATER,
+      } as unknown as ActionEnum);
+
+      expect(setSettlingType).not.toHaveBeenCalled();
+    });
+
+    it('canSpinPupSpinner returns true when no powerups exist', () => {
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const canSpin = (component as unknown as { canSpinPupSpinner: boolean })
+        .canSpinPupSpinner;
+      expect(canSpin).toBe(true);
+    });
+
+    it('canSpinPupSpinner returns true when any slot is available and cooled down', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: null,
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          },
+          {
+            pup: { pupID: 1, type: 1 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          },
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const canSpin = (component as unknown as { canSpinPupSpinner: boolean })
+        .canSpinPupSpinner;
+      expect(canSpin).toBe(true);
+    });
+
+    it('canSpinPupSpinner returns false when no slot is available', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 1, type: 1 },
+            locked: true,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          },
+          {
+            pup: { pupID: 2, type: 1 },
+            locked: false,
+            lastCooldownEnd: 2000,
+            pendingCooldownEnd: undefined
+          },
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const canSpin = (component as unknown as { canSpinPupSpinner: boolean })
+        .canSpinPupSpinner;
+      expect(canSpin).toBe(false);
+    });
+
+    it('should handle PUP_DRAWN and begin settling for self', () => {
+      component.ngOnInit();
+
+      const myID = 0;
+      (component.gameState as typeof component.gameState & { myID: number }).myID = myID;
+
+      const slot = { pup: null, locked: true, lastCooldownEnd: 0, pendingCooldownEnd: 123 };
+      const playerGameState = { powerups: [slot] };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const pupSpinner = jasmine.createSpyObj('PupSpinnerComponent', ['beginSettling']);
+      component.pupSpinner = pupSpinner as unknown as
+        DuelDemoPageComponent['pupSpinner'];
+
+      const action = MechanicsActions.PUP_DRAWN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        playerID: myID,
+        slotIndex: 0,
+        pupID: 555,
+        type: 1,
+        level: 0,
+      } as unknown as ActionEnum);
+
+      expect(slot.locked).toBe(false);
+      expect(slot.pendingCooldownEnd).toBeUndefined();
+      expect(pupSpinner.beginSettling).toHaveBeenCalled();
+    });
+
+    it('should handle PUP_SPUN and lock the slot', () => {
+      component.ngOnInit();
+
+      const myID = 0;
+      (component.gameState as typeof component.gameState & { myID: number }).myID = myID;
+
+      const slot = {
+        pup: { pupID: 1, type: 1 },
+        locked: false,
+        lastCooldownEnd: 0,
+        pendingCooldownEnd: undefined
+      };
+      const playerGameState = { powerups: [slot] };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const pupSpinner = jasmine.createSpyObj('PupSpinnerComponent', ['setSettlingType']);
+      component.pupSpinner = pupSpinner as unknown as
+        DuelDemoPageComponent['pupSpinner'];
+
+      const action = MechanicsActions.PUP_SPUN;
+      if (!packetSubjects.has(action)) {
+        packetSubjects.set(action, new Subject<ActionEnum>());
+      }
+
+      packetSubjects.get(action)!.next({
+        slotIndex: 0,
+        element: PUPElements.WATER,
+      } as unknown as ActionEnum);
+
+      expect(slot.locked).toBe(true);
+      expect(pupSpinner.setSettlingType).toHaveBeenCalledWith(PUPElements.WATER);
+    });
+
+    it('onMyPupSlotClicked shakes when slot is unusable', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const playerGameState = {
+        powerups: [{ pup: null, locked: false, lastCooldownEnd: 0, pendingCooldownEnd: undefined }]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(shakeSlot).toHaveBeenCalledWith(0);
+    });
+
+    it('onMyPupSlotClicked sends correct PUP actions for each type (covers switch cases)', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      component.gameState.matchState.phase = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as DuelDemoPageComponent['myPupSlots'];
+
+      const board1Selected = signal<number | null>(3);
+      const board2Selected = signal<number | null>(10);
+      const board1 = {
+        selected: board1Selected,
+        model: { board: Array.from({ length: 81 }, () => ({ value: 0 })) },
+      };
+      const board2 = {
+        selected: board2Selected,
+        model: { board: Array.from({ length: 81 }, () => ({ value: 0 })) },
+      };
+      board2.model.board[10].value = 7;
+
+      component.board1 = board1 as unknown as BoardModelComponent;
+      component.board2 = board2 as unknown as BoardModelComponent;
+
+      const makeSlot = (type: number) => ({
+        pup: { pupID: 1000 + type, type },
+        locked: false,
+        lastCooldownEnd: 0,
+        pendingCooldownEnd: undefined as number | undefined,
+      });
+
+      const slots = Array.from({ length: 10 }, (_, i) => makeSlot(i));
+      const playerGameState = { powerups: slots };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      // Cryo requires enemy selection; cover the "missing selection" shake branch once
+      board2Selected.set(null);
+      component.onMyPupSlotClicked(0);
+      expect(shakeSlot).toHaveBeenCalledWith(0);
+      board2Selected.set(10);
+
+      // Purity
+      component.onMyPupSlotClicked(1);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1001 })
+      );
+
+      // Inferno
+      component.onMyPupSlotClicked(2);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1002, targetID: 1, cellIndex: 10 })
+      );
+
+      // Metabolic
+      component.onMyPupSlotClicked(3);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1003 })
+      );
+
+      // Entangle
+      component.onMyPupSlotClicked(4);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1004, targetID: 1 })
+      );
+
+      // Wisdom
+      component.onMyPupSlotClicked(5);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1005 })
+      );
+
+      // Landslide
+      component.onMyPupSlotClicked(6);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1006, targetID: 1 })
+      );
+
+      // Excavate requires my selection
+      component.onMyPupSlotClicked(7);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1007, cellIndex: 3 })
+      );
+
+      // Lock uses selected cell value
+      board1Selected.set(null);
+      board2Selected.set(10);
+      component.onMyPupSlotClicked(8);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1008, targetID: 1, value: 7 })
+      );
+
+      // Forge
+      component.onMyPupSlotClicked(9);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1009 })
+      );
+
+      // Ensure optimistic cooldown is applied only for Yang PUPs (theme === true)
+      const duration = sharedConfig.game.challenge.duration[
+        component.gameState.matchState.phase
+      ];
+      const yangTypes = pupConfig
+        .filter(p => p.theme === true)
+        .map(p => p.type);
+      for (const t of yangTypes) {
+        expect(slots[t].pendingCooldownEnd).toBe(1000 + duration);
+      }
+      const yinTypes = pupConfig
+        .filter(p => p.theme === false)
+        .map(p => p.type);
+      for (const t of yinTypes) {
+        expect(slots[t].pendingCooldownEnd).toBeUndefined();
+      }
+    });
+
+    it('onMyPupSlotClicked throws for unknown PUP type (not in pup config)', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      component.gameState.matchState.phase = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+      component.board2 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 999, type: 999 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      expect(() => {
+        component.onMyPupSlotClicked(0);
+      }).toThrow();
+    });
+
+    it('onMyPupSlotClicked returns early when player gameState is missing', () => {
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: null
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      expect(() => {
+        component.onMyPupSlotClicked(0);
+      }).not.toThrow();
+
+      expect(shakeSlot).not.toHaveBeenCalled();
+    });
+
+    it('onMyPupSlotClicked shakes when Inferno has no enemy selection', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+      component.board2 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 2000, type: 2 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(networkServiceSpy.send).not.toHaveBeenCalled();
+      expect(shakeSlot).toHaveBeenCalledWith(0);
+    });
+
+    it('onMyPupSlotClicked shakes when Excavate has no my selection', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+      component.board2 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 7000, type: 7 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(networkServiceSpy.send).not.toHaveBeenCalled();
+      expect(shakeSlot).toHaveBeenCalledWith(0);
+    });
+
+    it('onMyPupSlotClicked shakes when Lock has no selection on either board', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = {
+        selected: signal<number | null>(null),
+        model: { board: [] },
+      } as unknown as BoardModelComponent;
+      component.board2 = {
+        selected: signal<number | null>(null),
+        model: { board: [] },
+      } as unknown as BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 8000, type: 8 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(networkServiceSpy.send).not.toHaveBeenCalled();
+      expect(shakeSlot).toHaveBeenCalledWith(0);
+    });
+
+    it('onMyPupSlotClicked shakes for unknown PUP type when pupConfig contains an entry', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+      component.gameState.matchState.phase = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+      component.board2 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+
+      const pupIndex = 999;
+      const pupConfigArray = pupConfig as unknown as
+        Array<{ theme: boolean } | undefined>;
+      const original = pupConfigArray[pupIndex];
+      pupConfigArray[pupIndex] = { theme: false };
+
+      try {
+        const playerGameState = {
+          powerups: [
+            {
+              pup: { pupID: 9999, type: pupIndex },
+              locked: false,
+              lastCooldownEnd: 0,
+              pendingCooldownEnd: undefined
+            }
+          ]
+        };
+        spyOn(component.gameState, 'getPlayerState').and.returnValue({
+          gameState: playerGameState
+        } as unknown as IPlayerState<ClientBoardModel>);
+
+        component.onMyPupSlotClicked(0);
+        expect(shakeSlot).toHaveBeenCalledWith(0);
+      } finally {
+        if (typeof original === 'undefined') {
+          delete pupConfigArray[pupIndex];
+        } else {
+          pupConfigArray[pupIndex] = original;
+        }
+      }
+    });
+
+    it('onMyPupSlotClicked sends Cryo when enemy cell is selected', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as
+        DuelDemoPageComponent['myPupSlots'];
+
+      component.board1 = { selected: signal<number | null>(null) } as unknown as
+        BoardModelComponent;
+      component.board2 = { selected: signal<number | null>(10) } as unknown as
+        BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 1000, type: 0 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(networkServiceSpy.send).toHaveBeenCalledWith(
+        jasmine.any(Number),
+        jasmine.objectContaining({ pupID: 1000, targetID: 1, cellIndex: 10 })
+      );
+    });
+
+    it('onMyPupSlotClicked shakes when Lock has no positive selected value', () => {
+      spyOn(performance, 'now').and.returnValue(1000);
+      (component.gameState as typeof component.gameState & { myID: number }).myID = 0;
+
+      const shakeSlot = jasmine.createSpy('shakeSlot');
+      component.myPupSlots = { shakeSlot } as unknown as DuelDemoPageComponent['myPupSlots'];
+
+      const board1Selected = signal<number | null>(0);
+      const board1 = {
+        selected: board1Selected,
+        model: { board: Array.from({ length: 81 }, () => ({ value: 0 })) },
+      };
+      component.board1 = board1 as unknown as BoardModelComponent;
+      component.board2 = {
+        selected: signal<number | null>(null),
+        model: { board: [] }
+      } as unknown as BoardModelComponent;
+
+      const playerGameState = {
+        powerups: [
+          {
+            pup: { pupID: 1008, type: 8 },
+            locked: false,
+            lastCooldownEnd: 0,
+            pendingCooldownEnd: undefined
+          }
+        ]
+      };
+      spyOn(component.gameState, 'getPlayerState').and.returnValue({
+        gameState: playerGameState
+      } as unknown as IPlayerState<ClientBoardModel>);
+
+      component.onMyPupSlotClicked(0);
+      expect(shakeSlot).toHaveBeenCalledWith(0);
     });
 
     it('onBoardSelectionChanged clears selection on other board for mutual exclusivity', () => {

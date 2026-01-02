@@ -52,6 +52,25 @@ describe('CookieService', () => {
       const value = service.get('testCookie');
       expect(value).toBe('test value with spaces');
     });
+
+    it('should write cookie string with secure defaults', () => {
+      const cookieSetSpy = spyOnProperty(document, 'cookie', 'set');
+
+      service.set('testCookie', 'testValue', 3600);
+
+      const cookieValue = cookieSetSpy.calls.mostRecent().args[0];
+      expect(cookieValue).toContain('testCookie=testValue');
+      expect(cookieValue).toContain('max-age=3600');
+      expect(cookieValue).toContain('path=/');
+      expect(cookieValue).toContain('SameSite=Strict');
+
+      const expectsSecure = window.location.protocol === 'https:';
+      if (expectsSecure) {
+        expect(cookieValue).toContain('Secure;');
+      } else {
+        expect(cookieValue).not.toContain('Secure;');
+      }
+    });
   });
 
   describe('delete', () => {

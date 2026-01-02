@@ -305,4 +305,104 @@ describe('DynamicFaviconService', () => {
     expect(link!.href.endsWith('/favicon.ico')).toBe(true);
   }));
 
+  it('updateIcon uses empty string when cachedSvg is null', fakeAsync(() => {
+    tick();
+    const priv = service as unknown as DynamicFaviconServicePrivate;
+    priv.cachedSvg = null;
+    if (priv.updateIcon) {
+      expect(() => priv.updateIcon!()).not.toThrow();
+    }
+  }));
+
+  it('ensureSvgFetched returns early when cachedSvg already exists', fakeAsync(async () => {
+    const priv = service as unknown as DynamicFaviconServicePrivate;
+    priv.cachedSvg = mockSvg;
+    fetchSpy.calls.reset();
+    if (priv.ensureSvgFetched) {
+      await priv.ensureSvgFetched();
+    }
+    expect(fetchSpy).not.toHaveBeenCalled();
+  }));
+
+  it('start interval skips updates when document is hidden', fakeAsync(() => {
+    service!.stop();
+
+    const priv = service as unknown as DynamicFaviconServicePrivate;
+    // Ensure the SVG fetch resolves immediately
+    priv.cachedSvg = mockSvg;
+
+    const updateSpy = spyOn(
+      service as unknown as { updateIcon: () => void },
+      'updateIcon'
+    ).and.callThrough();
+    spyOn(
+      service as unknown as { ensureSvgFetched: () => Promise<void> },
+      'ensureSvgFetched'
+    ).and.resolveTo(undefined);
+    spyOn(
+      service as unknown as { isSVGUnfriendly: () => boolean },
+      'isSVGUnfriendly'
+    ).and.returnValue(false);
+
+    spyOnProperty(document, 'hidden', 'get').and.returnValue(true);
+
+    service!.start();
+    flushMicrotasks();
+
+    // First update on start
+    expect(updateSpy).toHaveBeenCalled();
+    const callCountAfterStart = updateSpy.calls.count();
+
+    // Interval tick should early-return due to document.hidden
+    tick(400);
+    expect(updateSpy.calls.count()).toBe(callCountAfterStart);
+  }));
+
+  it('isSVGUnfriendly returns false when parseInt yields NaN', fakeAsync(() => {
+    const windowWithParseInt = window as unknown as { parseInt: typeof parseInt };
+    const originalParseInt = windowWithParseInt.parseInt;
+    spyOn(windowWithParseInt, 'parseInt').and.callFake((value: string, radix?: number) => {
+      if (value === '18') {
+        return Number.NaN;
+      }
+
+      return originalParseInt(value, radix);
+    });
+
+    spyOnProperty(navigator, 'userAgent', 'get').and.returnValue(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 ' +
+      '(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
+    );
+
+    const priv = service as unknown as DynamicFaviconServicePrivate;
+    if (priv.isSVGUnfriendly) {
+      expect(priv.isSVGUnfriendly()).toBe(false);
+    }
+  }));
+
+  it('isSVGUnfriendly returns false when navigator is undefined', fakeAsync(() => {
+    const desc = Object.getOwnPropertyDescriptor(window, 'navigator');
+    if (!desc || desc.configurable !== true) {
+      // If the environment does not allow overriding navigator,
+      // we can only assert the default path.
+      const priv = service as unknown as DynamicFaviconServicePrivate;
+      if (priv.isSVGUnfriendly) {
+        expect(typeof navigator).toBe('object');
+        expect(priv.isSVGUnfriendly()).toBe(false);
+      }
+      return;
+    }
+
+    const originalNavigator = (window as unknown as { navigator: Navigator }).navigator;
+    Object.defineProperty(window, 'navigator', { value: undefined, configurable: true });
+    try {
+      const priv = service as unknown as DynamicFaviconServicePrivate;
+      if (priv.isSVGUnfriendly) {
+        expect(priv.isSVGUnfriendly()).toBe(false);
+      }
+    } finally {
+      Object.defineProperty(window, 'navigator', { value: originalNavigator, configurable: true });
+    }
+  }));
+
 });

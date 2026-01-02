@@ -3,6 +3,7 @@ import GameOverReason from '@shared/types/enums/GameOverReason';
 import ProtocolActions from '@shared/types/enums/actions/match/protocol';
 import { LifecycleActions } from '@shared/types/enums/actions';
 import RatingCalculator from '../../utils/rating';
+import guestAuthService from '../../services/auth';
 import LifecycleController from './lifecycle';
 
 import type { IMatchState } from '@shared/types/gamestate';
@@ -309,6 +310,54 @@ describe('LifecycleController', () => {
         lifecycleController.onPlayerLeft('99999-88888-77777-66666-55555');
       }).not.toThrow();
     });
+
+    it('should return early if no remaining UUID can be determined', async () => {
+      const leavingUUID = '11111-22222-33333-44444-55555';
+
+      // Size=2 but both sessions report the same uuid as the leaving player.
+      Object.defineProperty(mockRoom, 'participants', {
+        value: new Map([
+          ['a', new MockSession(leavingUUID)],
+          ['b', new MockSession(leavingUUID)],
+        ]),
+        writable: true
+      });
+
+      await lifecycleController.onPlayerLeft(leavingUUID);
+
+      expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
+        LifecycleActions.GAME_OVER,
+        expect.anything()
+      );
+    });
+
+    it('should not end game if winnerID is undefined (exactly 2 players remain)', async () => {
+      const leavingUUID = '11111-22222-33333-44444-55555';
+      const remainingUUID = '66666-77777-88888-99999-00000';
+
+      Object.defineProperty(mockRoom, 'participants', {
+        value: new Map([
+          [leavingUUID, new MockSession(leavingUUID)],
+          [remainingUUID, new MockSession(remainingUUID)],
+        ]),
+        writable: true
+      });
+
+      Object.defineProperty(mockRoom, 'playerMap', {
+        value: {
+          ...mockRoom.playerMap,
+          get: jest.fn().mockReturnValue(undefined),
+        },
+        writable: true
+      });
+
+      await lifecycleController.onPlayerLeft(leavingUUID);
+
+      expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
+        LifecycleActions.GAME_OVER,
+        expect.anything()
+      );
+    });
   });
 
   describe('initGame', () => {
@@ -510,6 +559,63 @@ describe('LifecycleController', () => {
       lifecycleController.onPlayerJoined();
       
       expect(setTimeoutSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onGameOver edge cases', () => {
+    it('should broadcast eloChange=0 if winner/loser sessions are missing', async () => {
+      lifecycleController.initGame();
+
+      // Ensure UUID lookups succeed, but sessions are missing from participants.
+      Object.defineProperty(mockRoom, 'playerMap', {
+        value: {
+          ...mockRoom.playerMap,
+          getKey: jest.fn().mockImplementation((id: number) => {
+            if (id === 0) {
+              return 'winner-uuid';
+            }
+            if (id === 1) {
+              return 'loser-uuid';
+            }
+            return undefined;
+          }),
+        },
+        writable: true
+      });
+
+      Object.defineProperty(mockRoom, 'participants', {
+        value: new Map(),
+        writable: true
+      });
+
+      await lifecycleController['onGameOver'](0, GameOverReason.SCORE);
+
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        LifecycleActions.GAME_OVER,
+        { winnerID: 0, reason: GameOverReason.SCORE, eloChange: 0 }
+      );
+    });
+
+    it('should log error when ELO update fails and still broadcast', async () => {
+      lifecycleController.initGame();
+
+      (guestAuthService.updateElo as jest.MockedFunction<typeof guestAuthService.updateElo>)
+        .mockRejectedValueOnce(new Error('Redis down'));
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await lifecycleController['onGameOver'](1, GameOverReason.SCORE);
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to update ELO in Redis:',
+        expect.anything()
+      );
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(
+        LifecycleActions.GAME_OVER,
+        expect.objectContaining({ winnerID: 1, reason: GameOverReason.SCORE })
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 

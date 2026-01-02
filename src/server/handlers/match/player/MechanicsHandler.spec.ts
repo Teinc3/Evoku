@@ -38,7 +38,11 @@ class MockRoom {
   broadcast = jest.fn();
   getSessionIDFromPlayerID = jest.fn<(playerID: number) => string | undefined>();
   participants = new Map<string, MockSession>();
-  setTrackedTimeout = (cb: () => void, delayMs: number) => setTimeout(cb, delayMs);
+  setTrackedTimeout = jest.fn<(cb: () => void, delayMs: number) => ReturnType<typeof setTimeout>>(
+    (cb: () => void, delayMs: number) => {
+      return setTimeout(cb, delayMs);
+    },
+  );
 }
 
 describe('MechanicsHandler', () => {
@@ -198,6 +202,22 @@ describe('MechanicsHandler', () => {
       );
     });
 
+    it('should return false when session has no playerID', async () => {
+      const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
+        action: MechanicsActions.DRAW_PUP
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(undefined);
+
+      const result = await mechanicsHandler.handleData(
+        mockSession as unknown as SessionModel,
+        drawPUPData
+      );
+
+      expect(result).toBe(false);
+      expect(mockStateController.reservePUPDraw).not.toHaveBeenCalled();
+    });
+
     it('should schedule a delayed draw and broadcast PUP_DRAWN', async () => {
       const playerID = 1;
       const reservedSlotIndex = 2;
@@ -223,6 +243,11 @@ describe('MechanicsHandler', () => {
 
       expect(result).toBe(true);
       expect(mockStateController.reservePUPDraw).toHaveBeenCalledWith(playerID);
+
+      expect(mockRoom.setTrackedTimeout).toHaveBeenCalledWith(
+        expect.any(Function),
+        sharedConfig.game.powerups.drawSettleDelayMs,
+      );
 
       jest.advanceTimersByTime(sharedConfig.game.powerups.drawSettleDelayMs);
 
@@ -312,6 +337,32 @@ describe('MechanicsHandler', () => {
           level: 1,
           slotIndex: 1
         }
+      );
+    });
+
+    it('should not broadcast PUP_DRAWN when drawRandomPUP returns null', async () => {
+      const playerID = 1;
+      const reservedSlotIndex = 0;
+      const drawPUPData: AugmentAction<MechanicsActions.DRAW_PUP> = {
+        action: MechanicsActions.DRAW_PUP
+      };
+
+      mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockStateController.reservePUPDraw.mockReturnValue(reservedSlotIndex);
+      mockStateController.drawRandomPUP.mockReturnValue(null);
+
+      const result = await mechanicsHandler.handleData(
+        mockSession as unknown as SessionModel,
+        drawPUPData
+      );
+
+      expect(result).toBe(true);
+
+      jest.advanceTimersByTime(sharedConfig.game.powerups.drawSettleDelayMs);
+
+      expect(mockRoom.broadcast).not.toHaveBeenCalledWith(
+        MechanicsActions.PUP_DRAWN,
+        expect.anything()
       );
     });
   });
