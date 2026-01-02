@@ -125,7 +125,7 @@ $water: hsl(200, 90%, 55%);
 :host(.spinning) .icon-container {
   animation:
     aura-spin 0.8s linear infinite,
-    spin-to-settle 5s linear forwards;
+    spin-to-settle calc(var(--pup-draw-settle-delay-ms) * 1ms) linear forwards;
   --aura-blur: 18px;
   --yy-contrast: 1;
 }

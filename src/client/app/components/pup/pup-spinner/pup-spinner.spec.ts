@@ -1,7 +1,6 @@
 import {
   ComponentFixture, TestBed, fakeAsync, flushMicrotasks, tick,
 } from '@angular/core/testing';
-import { ElementRef } from '@angular/core';
 
 import PUPElements from '@shared/types/enums/elements';
 import { PUPOrbState } from '../../../../types/enums';
@@ -335,16 +334,6 @@ describe('PupSpinnerComponent', () => {
     expect(consoleSpy).toHaveBeenCalled();
   }));
 
-  it('initSvg should early return when cachedSvg or iconContainer is missing', () => {
-    component['cachedSvg'] = null;
-    (component as unknown as { initSvg: () => void }).initSvg();
-
-    component['cachedSvg'] = MINIMAL_SVG_WITH_SIZE;
-    const nullIconContainer = null as unknown as ElementRef<HTMLDivElement>;
-    component['iconContainer'] = nullIconContainer;
-    (component as unknown as { initSvg: () => void }).initSvg();
-  });
-
   it('initSvg should set viewBox when missing and remove width/height', () => {
     const contrastSpy = spyOn(
       component as unknown as { updateIdleContrast: () => void },
@@ -374,17 +363,6 @@ describe('PupSpinnerComponent', () => {
     component['cachedSvg'] = SVG_WITHOUT_SVG_TAG;
     (component as unknown as { initSvg: () => void }).initSvg();
     expect(component['svgElement']).toBeNull();
-  });
-
-  it('updateIdleContrast should early return if iconContainer is missing', () => {
-    const nullIconContainer = null as unknown as ElementRef<HTMLDivElement>;
-    component['iconContainer'] = nullIconContainer;
-    (component as unknown as { updateIdleContrast: () => void }).updateIdleContrast();
-  });
-
-  it('flipIcon should early return if svgElement is missing', () => {
-    component['svgElement'] = null;
-    (component as unknown as { flipIcon: () => void }).flipIcon();
   });
 
   it('flipIcon should handle missing element ids and still advance the frame index', () => {

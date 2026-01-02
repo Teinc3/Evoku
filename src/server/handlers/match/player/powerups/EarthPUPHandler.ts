@@ -32,7 +32,7 @@ export default class EarthPUPHandler extends EnumHandler<EarthPUPActions>
     }
 
     const { action, clientTime, ...payload } = data;
-    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime)
+    const result = this.room.stateController.consumePUP(action, playerID, data.pupID, clientTime);
 
     if (result === false) {
       reject(this.room, session, data.actionID);

@@ -265,7 +265,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     // Then send the packet to the server
     const { action, ...data } = actionData;
     this.networkService.send(action, data);
-    console.log('Sent action:', action, data);
+    // console.log('Sent action:', action, data);
   }
 
   onPupRoll(): void {

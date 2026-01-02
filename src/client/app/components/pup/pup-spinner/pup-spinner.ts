@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 
 import PUPElements from '@shared/types/enums/elements';
+import sharedConfig from '@shared/config';
 import { PUPOrbState } from '../../../../types/enums';
 
 
@@ -70,9 +71,13 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
   private settlingType: PUPElements | null = null;
   private isShaking = false;
 
-  constructor() {}
+  constructor(private readonly hostElement: ElementRef<HTMLElement>) {}
 
   ngOnInit(): void {
+    this.hostElement.nativeElement.style.setProperty(
+      '--pup-draw-settle-delay-ms',
+      String(sharedConfig.game.powerups.drawSettleDelayMs)
+    );
     this.loadSvg();
   }
 
@@ -186,12 +191,11 @@ export default class PupSpinnerComponent implements OnInit, OnDestroy {
       svg.removeAttribute('width');
       svg.removeAttribute('height');
 
-      for (let i = 0; i < 8; i++) {
-        const element = this.svgElement.querySelector(`[id="p${i}"]`);
-        if (element) {
-          element.removeAttribute('stroke'); // Remove stroke to prevent aliasing issues
-        }
-      }
+      const strokeElements = this.svgElement.querySelectorAll<SVGElement>('[id^="p"]');
+      strokeElements.forEach(element => {
+        element.removeAttribute('stroke'); // Remove stroke to prevent aliasing issues
+      });
+        
       
       this.updateIdleContrast();
     }

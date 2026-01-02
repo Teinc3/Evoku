@@ -3,7 +3,7 @@ enum PUPElements {
   FIRE = 1,
   WOOD = 2,
   EARTH = 3,
-  METAL = 4   
+  METAL = 4
 }
 
 export default PUPElements;

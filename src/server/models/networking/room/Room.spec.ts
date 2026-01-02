@@ -123,6 +123,11 @@ describe('RoomModel', () => {
       writable: true
     });
 
+    Object.defineProperty(room, 'trackedTimeouts', {
+      value: new Set(),
+      writable: true
+    });
+
     mockSession1 = new MockSession(
       'session-1' as UUID, 
       new MockServerSocket()

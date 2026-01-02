@@ -12,7 +12,7 @@ export interface PupSpunContract extends IDataContract {
 
 export interface PupDrawnContract extends PUPContract, IDataContract {
   playerID: number;
-  type: number;  
+  type: number;
   level: number;
   slotIndex: number;
 }
