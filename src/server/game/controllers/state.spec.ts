@@ -251,8 +251,8 @@ describe('GameStateController', () => {
         pupProgress: 0,
         powerups: [
           { slotIndex: 0, lastCooldownEnd: 0 },
-          { slotIndex: 0, lastCooldownEnd: 0 },
-          { slotIndex: 0, lastCooldownEnd: 0 }
+          { slotIndex: 1, lastCooldownEnd: 0 },
+          { slotIndex: 2, lastCooldownEnd: 0 }
         ]
       };
       gameState['gameStates'].set(

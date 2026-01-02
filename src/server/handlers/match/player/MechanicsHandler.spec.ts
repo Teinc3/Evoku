@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 
 import { ProtocolActions, MechanicsActions } from '@shared/types/enums/actions';
+import sharedConfig from '@shared/config';
 import MechanicsHandler from "./MechanicsHandler";
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
@@ -35,6 +36,9 @@ class MockRoom {
   stateController = new MockStateController();
   getPlayerID = jest.fn<(session: SessionModel) => number | undefined>();
   broadcast = jest.fn();
+  getSessionIDFromPlayerID = jest.fn<(playerID: number) => string | undefined>();
+  participants = new Map<string, MockSession>();
+  setTrackedTimeout = (cb: () => void, delayMs: number) => setTimeout(cb, delayMs);
 }
 
 describe('MechanicsHandler', () => {
@@ -202,6 +206,8 @@ describe('MechanicsHandler', () => {
       };
 
       mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockRoom.getSessionIDFromPlayerID.mockReturnValue(mockSession.uuid);
+      mockRoom.participants.set(mockSession.uuid, mockSession);
       mockStateController.reservePUPDraw.mockReturnValue(reservedSlotIndex);
       mockStateController.drawRandomPUP.mockReturnValue({
         pupID: 5,
@@ -218,7 +224,7 @@ describe('MechanicsHandler', () => {
       expect(result).toBe(true);
       expect(mockStateController.reservePUPDraw).toHaveBeenCalledWith(playerID);
 
-      jest.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(sharedConfig.game.powerups.drawSettleDelayMs);
 
       expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(
         playerID,
@@ -244,6 +250,8 @@ describe('MechanicsHandler', () => {
       };
 
       mockRoom.getPlayerID.mockReturnValue(playerID);
+      mockRoom.getSessionIDFromPlayerID.mockReturnValue(mockSession.uuid);
+      mockRoom.participants.set(mockSession.uuid, mockSession);
       mockStateController.reservePUPDraw
         .mockReturnValueOnce(0)
         .mockReturnValueOnce(1);
@@ -273,7 +281,7 @@ describe('MechanicsHandler', () => {
       expect(first).toBe(true);
       expect(second).toBe(true);
 
-      jest.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(sharedConfig.game.powerups.drawSettleDelayMs);
 
       expect(mockStateController.drawRandomPUP).toHaveBeenCalledWith(
         playerID,

@@ -301,7 +301,7 @@ export default class GameStateController {
     const pupID = this.matchState.currentPUPID!;
     this.matchState.currentPUPID = pupID + 1;
     
-    const level = 1;
+    const level = 1; // TODO: Implement level logic
 
     slot.pup = {
       pupID,

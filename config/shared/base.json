@@ -4,6 +4,9 @@
       "board": [5000, 5000, 5000],
       "cell": 10000
     },
+    "powerups": {
+      "drawSettleDelayMs": 5000
+    },
     "objectives": {
       "normalGain": [20, 15, 10],
       "goldenGain": [50, 40, 30]

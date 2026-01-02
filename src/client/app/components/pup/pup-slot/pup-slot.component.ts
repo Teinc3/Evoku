@@ -87,7 +87,7 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
       return null;
     }
 
-    if (slotIndex === 2) {
+    if (slotIndex === 2) { // Box slot icon
       return '/assets/slots/icons/box-diffuse.svg';
     }
 
@@ -107,8 +107,7 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
     if (!pup) {
       return null;
     }
-    const configEntry = pupConfig.find(entry => entry.type === pup.type);
-    return configEntry ? configEntry.asset.icon : null;
+    return pupConfig[pup.type]?.asset.icon;
   }
 
   protected get level(): number | null {

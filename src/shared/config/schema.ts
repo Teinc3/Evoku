@@ -7,6 +7,9 @@ export const SharedConfigSchema = z.object({
       board: z.array(z.number().int().nonnegative()).length(3),
       cell: z.number().int().nonnegative(),
     }),
+    powerups: z.object({
+      drawSettleDelayMs: z.number().int().nonnegative(),
+    }),
     objectives: z.object({
       normalGain: z.array(z.number().int().nonnegative()).length(3),
       goldenGain: z.array(z.number().int().nonnegative()).length(3),

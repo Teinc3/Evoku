@@ -1,5 +1,6 @@
 import PUPElements from "@shared/types/enums/elements";
 import { ProtocolActions, MechanicsActions } from "@shared/types/enums/actions";
+import sharedConfig from "@shared/config";
 import pupConfig from "@config/shared/pup.json";
 import EnumHandler from "../../EnumHandler";
 
@@ -87,7 +88,7 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       { to: [session.uuid] }
     );
 
-    setTimeout(() => {
+    this.room.setTrackedTimeout(() => {
       const pupDrawn = this.room.stateController.drawRandomPUP(playerID, slotIndex, pupType);
       if (!pupDrawn) {
         return;
@@ -97,7 +98,7 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
         playerID,
         ...pupDrawn
       });
-    }, 5000);
+    }, sharedConfig.game.powerups.drawSettleDelayMs);
 
     return true;
   }
