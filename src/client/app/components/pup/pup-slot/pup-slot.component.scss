@@ -67,10 +67,11 @@
 
 .countdown-overlay {
   @extend %cooldown-overlay-base;
+  --cd-overlay-rotation: 45deg;
   border-radius: 10px;
-  transform: rotate(45deg);
+  transform: rotate(var(--cd-overlay-rotation));
   z-index: 5;
-  background: conic-gradient(from 0deg, var(--cd-pup, var(--cd-global)) 0deg var(--angle), transparent var(--angle) 360deg);
+  background: conic-gradient(from calc(0deg - var(--cd-overlay-rotation)), var(--cd-pup, var(--cd-global)) 0deg var(--angle), transparent var(--angle) 360deg);
 }
 
 .slot.pending {

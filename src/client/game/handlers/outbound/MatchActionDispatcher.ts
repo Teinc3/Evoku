@@ -92,18 +92,19 @@ export default abstract class MatchActionDispatcher {
 
     const { pup } = slot;
 
+
+    const pupHandler = this.pupUseHandlers[pup.type];
+    if (!pupHandler || !pupHandler(slotIndex)) {
+      this.getPupSlotShake()?.(slotIndex);
+      return false;
+    }
+
     if (pupConfig[pup.type].theme === true) {
       const duration = sharedConfig.game.challenge.duration[gameState.matchState.phase];
       slot.pendingCooldownEnd = now + duration;
     }
 
-    const pupHandler = this.pupUseHandlers[pup.type];
-    if (!pupHandler) {
-      this.getPupSlotShake()?.(slotIndex);
-      return false;
-    }
-
-    return pupHandler(slotIndex);
+    return true;
   }
 
   public drawPup(): void {
