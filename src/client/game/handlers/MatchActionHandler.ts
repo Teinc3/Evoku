@@ -73,7 +73,7 @@ export default abstract class MatchActionHandler {
    * Executes the shared "use PUP" flow for the local player.
    * Returns true if an action was dispatched.
    */
-  public tryUseMyPup(slotIndex: number): boolean {
+  public tryUsePUP(slotIndex: number): boolean {
     const gameState = this.getGameState();
     const playerGameState = gameState.getPlayerState(gameState.myID).gameState;
 
@@ -97,13 +97,13 @@ export default abstract class MatchActionHandler {
       slot.pendingCooldownEnd = now + duration;
     }
 
-    const handler = this.pupUseHandlers[pup.type];
-    if (!handler) {
+    const pupHandler = this.pupUseHandlers[pup.type];
+    if (!pupHandler) {
       this.getPupSlotShake()?.(slotIndex);
       return false;
     }
 
-    return handler(slotIndex);
+    return pupHandler(slotIndex);
   }
 
   public drawPup(): void {
