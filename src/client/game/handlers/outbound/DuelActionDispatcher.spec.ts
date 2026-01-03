@@ -11,17 +11,17 @@ import {
 } from '@shared/types/enums/actions/';
 import pupConfig from '@config/shared/pup.json';
 import sharedConfig from '@config/shared/base.json';
-import GameStateManager from '../GameStateManager';
-import NetworkService from '../../app/services/network';
-import DuelActionHandler from './DuelActionHandler';
+import GameStateManager from '../../GameStateManager';
+import NetworkService from '../../../app/services/network';
+import DuelActionDispatcher from './DuelActionDispatcher';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
-import type { OmitBaseAttrs } from '../../types/OmitAttrs';
+import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
 
 
-describe('DuelActionHandler', () => {
-  let handler: DuelActionHandler;
+describe('DuelActionDispatcher', () => {
+  let dispatcher: DuelActionDispatcher;
   let networkServiceSpy: jasmine.SpyObj<NetworkService>;
   let gameState: GameStateManager;
 
@@ -43,7 +43,7 @@ describe('DuelActionHandler', () => {
     getEnemyCellValue?: (cellIndex: number) => number | null;
     shakeSlot?: (slotIndex: number) => void;
   }): void => {
-    handler.setAccessContexts(
+    dispatcher.setAccessContexts(
       {
         selected: options.mySelected,
         getCellValue: options.getMyCellValue ?? (() => null),
@@ -61,18 +61,18 @@ describe('DuelActionHandler', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        DuelActionHandler,
+        DuelActionDispatcher,
         { provide: NetworkService, useValue: networkServiceSpy },
       ]
     });
 
-    handler = TestBed.inject(DuelActionHandler);
+    dispatcher = TestBed.inject(DuelActionDispatcher);
 
     gameState = new GameStateManager(2);
     (gameState as typeof gameState & { myID: number }).myID = 0;
     gameState.matchState.phase = 0;
 
-    handler.gameInit(gameState);
+    dispatcher.gameInit(gameState);
 
     setAccessContexts({
       mySelected: () => null,
@@ -89,7 +89,7 @@ describe('DuelActionHandler', () => {
       value: 3,
     };
 
-    handler.dispatch(request);
+    dispatcher.dispatch(request);
 
     expect(gameState.pendingActions.size).toBe(1);
     const pendingAction = [...gameState.pendingActions.values()][0];
@@ -121,7 +121,7 @@ describe('DuelActionHandler', () => {
 
     setSlot(0, { slotIndex: 0, lastCooldownEnd: 0, locked: false });
 
-    const didDispatch = handler.tryUsePUP(0);
+    const didDispatch = dispatcher.tryUsePUP(0);
     expect(didDispatch).toBe(false);
     expect(shakeSlot).toHaveBeenCalledWith(0);
   });
@@ -137,7 +137,7 @@ describe('DuelActionHandler', () => {
     });
 
     expect(() => {
-      handler.tryUsePUP(0);
+      dispatcher.tryUsePUP(0);
     }).toThrow();
   });
 
@@ -164,7 +164,7 @@ describe('DuelActionHandler', () => {
         pup: { pupID: 9999, type: pupIndex, level: 0 }
       });
 
-      const didDispatch = handler.tryUsePUP(0);
+      const didDispatch = dispatcher.tryUsePUP(0);
       expect(didDispatch).toBe(false);
       expect(networkServiceSpy.send).not.toHaveBeenCalled();
       expect(shakeSlot).toHaveBeenCalledWith(0);
@@ -261,7 +261,7 @@ describe('DuelActionHandler', () => {
         pup: { pupID, type, level: 0 }
       });
 
-      const didDispatch = handler.tryUsePUP(0);
+      const didDispatch = dispatcher.tryUsePUP(0);
       expect(didDispatch).toBe(true);
 
       expect(networkServiceSpy.send).toHaveBeenCalledWith(
@@ -302,7 +302,7 @@ describe('DuelActionHandler', () => {
       pup: { pupID: 1111, type: yinType, level: 0 }
     });
 
-    handler.tryUsePUP(0);
+    dispatcher.tryUsePUP(0);
 
     const yinSlot = gameState.getPlayerState(gameState.myID).gameState?.powerups[0];
     expect(yinSlot?.pendingCooldownEnd).toBeUndefined();
@@ -315,7 +315,7 @@ describe('DuelActionHandler', () => {
       pup: { pupID: 2222, type: yangType, level: 0 }
     });
 
-    handler.tryUsePUP(0);
+    dispatcher.tryUsePUP(0);
 
     const yangSlot = gameState.getPlayerState(gameState.myID).gameState?.powerups[0];
     expect(yangSlot?.pendingCooldownEnd).toBe(1000 + duration);
@@ -339,7 +339,7 @@ describe('DuelActionHandler', () => {
       pup: { pupID: 2000, type: 2, level: 0 }
     });
 
-    const didDispatch = handler.tryUsePUP(0);
+    const didDispatch = dispatcher.tryUsePUP(0);
     expect(didDispatch).toBe(false);
     expect(networkServiceSpy.send).not.toHaveBeenCalled();
     expect(shakeSlot).toHaveBeenCalledWith(0);
@@ -364,7 +364,7 @@ describe('DuelActionHandler', () => {
       pup: { pupID: 8000, type: 8, level: 0 }
     });
 
-    const didDispatch = handler.tryUsePUP(0);
+    const didDispatch = dispatcher.tryUsePUP(0);
     expect(didDispatch).toBe(false);
     expect(networkServiceSpy.send).not.toHaveBeenCalled();
     expect(shakeSlot).toHaveBeenCalledWith(0);
