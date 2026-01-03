@@ -17,7 +17,7 @@
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
     [isMe]="true"
-    (sendPacket)="onPacketRequest($event)"
+    (sendPacket)="duelActionHandler.dispatch($event)"
     (selectionChanged)="onBoardSelectionChanged(0)"
   />
   <app-utility-buttons-holder/>
@@ -25,7 +25,7 @@
     #board2
     [model]="gameState.getPlayerBoard(1 - gameState.myID)"
     [isMe]="false"
-    (sendPacket)="onPacketRequest($event)"
+    (sendPacket)="duelActionHandler.dispatch($event)"
     (selectionChanged)="onBoardSelectionChanged(1)"
   />
   <app-universal-progress-bar
@@ -41,12 +41,12 @@
       #pupSpinner
       [pupProgress]="gameState.getPlayerState(gameState.myID).gameState?.pupProgress ?? 0"
       [canSpin]="canSpinPupSpinner"
-      (roll)="onPupRoll()"
+      (roll)="duelActionHandler.drawPup()"
     />
     <app-pup-slots-holder
       #myPupSlots
       [slots]="gameState.getPlayerState(gameState.myID).gameState?.powerups"
-      (slotClicked)="onMyPupSlotClicked($event)"
+      (slotClicked)="duelActionHandler.tryUsePUP($event)"
     />
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>

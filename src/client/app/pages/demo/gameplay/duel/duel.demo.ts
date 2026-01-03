@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 
 import ActionGuard from '@shared/types/utils/typeguards/actions';
 import MatchStatus from '@shared/types/enums/matchstatus';
@@ -7,15 +7,7 @@ import {
   MechanicsActions,
   LifecycleActions,
   ProtocolActions,
-  WaterPUPActions,
-  FirePUPActions,
-  WoodPUPActions,
-  EarthPUPActions,
-  MetalPUPActions,
-  type PlayerActions
 } from '@shared/types/enums/actions/';
-import pupConfig from '@config/shared/pup.json';
-import sharedConfig from '@config/shared/base.json';
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
 import PupSpinnerComponent 
@@ -31,20 +23,20 @@ import NumericButtonsHolderComponent
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
 import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
+import { DuelActionHandler } from '../../../../../game/handlers';
 import GameStateManager from '../../../../../game/GameStateManager';
 
-import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type {
   PupDrawnContract,
   PupSpunContract
 } from '@shared/types/contracts/match/player/mechanics/DrawPupContract';
 import type { MatchFoundContract } from '@shared/types/contracts';
-import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
 
 
 @Component({
   selector: 'app-demo-duel',
   standalone: true,
+  providers: [DuelActionHandler],
   imports: [
     DuelHudTopComponent, 
     BoardModelComponent, 
@@ -57,11 +49,10 @@ import type { OmitBaseAttrs } from '../../../../../types/OmitAttrs';
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'
 })
-export default class DuelDemoPageComponent implements OnInit, OnDestroy {
+export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterViewInit {
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
   private subscriptions = new Subscription();
-  private nextActionId = 0;
 
   @ViewChild('board1')
   board1!: BoardModelComponent;
@@ -87,9 +78,35 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private viewStateService: ViewStateService,
-    private networkService: NetworkService
+    private networkService: NetworkService,
+    protected readonly duelActionHandler: DuelActionHandler
   ) {
     this.gameState = new GameStateManager(DuelDemoPageComponent.MAX_PLAYER_COUNT);
+    this.duelActionHandler.gameInit(this.gameState);
+  }
+
+  ngAfterViewInit(): void {
+    this.duelActionHandler.setAccessContexts(
+      {
+        selected: () => {
+          return this.board1.selected();
+        },
+        getCellValue: (cellIndex: number) => {
+          return this.board1.model.board[cellIndex]?.value ?? null;
+        }
+      },
+      {
+        selected: () => {
+          return this.board2.selected();
+        },
+        getCellValue: (cellIndex: number) => {
+          return this.board2.model.board[cellIndex]?.value ?? null;
+        }
+      },
+      (slotIndex: number) => {
+        this.myPupSlots?.shakeSlot(slotIndex);
+      }
+    );
   }
 
   ngOnInit(): void {
@@ -251,184 +268,6 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy {
     // Clear our local match state
     this.gameState.clearMatchData();
     this.subscriptions.unsubscribe();
-  }
-
-  /** Handle packet requests from board components */
-  onPacketRequest(request: OmitBaseAttrs<AugmentAction<PlayerActions>>): void {
-    const actionData = {
-      clientTime: this.gameState.timeCoordinator.clientTime,
-      actionID: this.nextActionId++,
-      ...request
-    };
-    // Store the action for potential lookup on confirmation
-    this.gameState.pendingActions.set(actionData.actionID, actionData);
-    // Then send the packet to the server
-    const { action, ...data } = actionData;
-    this.networkService.send(action, data);
-    // console.log('Sent action:', action, data);
-  }
-
-  onPupRoll(): void {
-    this.onPacketRequest({
-      action: MechanicsActions.DRAW_PUP
-    });
-  }
-
-  onMyPupSlotClicked(slotIndex: number): void {
-    const playerGameState = this.gameState.getPlayerState(this.gameState.myID).gameState;
-    if (!playerGameState) {
-      return;
-    }
-
-    const slot = playerGameState.powerups[slotIndex];
-    const now = this.gameState.timeCoordinator.clientTime;
-    const effectiveCooldownEnd = Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0);
-
-    if (!slot.pup || slot.locked || effectiveCooldownEnd > now) {
-      this.myPupSlots?.shakeSlot(slotIndex);
-      return;
-    }
-
-    const { pup } = slot;
-    const { pupID } = pup;
-    const enemyID = 1 - this.gameState.myID;
-
-    // Optimistic cooldown: apply for Yang PUPs (challenge cooldown)
-    if (pupConfig[pup.type].theme === true) {
-      const duration = sharedConfig.game.challenge.duration[this.gameState.matchState.phase];
-      slot.pendingCooldownEnd = now + duration;
-    }
-
-    switch (pup.type) {
-      // Water
-      case 0: {
-        // Cryo requires an enemy cell target
-        const enemyCellIndex = this.board2.selected();
-        if (enemyCellIndex === null) {
-          this.myPupSlots?.shakeSlot(slotIndex);
-          return;
-        }
-
-        this.onPacketRequest({
-          action: WaterPUPActions.USE_CRYO,
-          pupID,
-          targetID: enemyID,
-          cellIndex: enemyCellIndex,
-        });
-        return;
-      }
-      case 1: {
-        this.onPacketRequest({
-          action: WaterPUPActions.USE_PURITY,
-          pupID,
-        });
-        return;
-      }
-
-      // Fire
-      case 2: {
-        // Inferno requires an enemy cell target
-        const enemyCellIndex = this.board2.selected();
-        if (enemyCellIndex === null) {
-          this.myPupSlots?.shakeSlot(slotIndex);
-          return;
-        }
-
-        this.onPacketRequest({
-          action: FirePUPActions.USE_INFERNO,
-          pupID,
-          targetID: enemyID,
-          cellIndex: enemyCellIndex,
-        });
-        return;
-      }
-      case 3: {
-        this.onPacketRequest({
-          action: FirePUPActions.USE_METABOLIC,
-          pupID,
-        });
-        return;
-      }
-
-      // Wood
-      case 4: {
-        this.onPacketRequest({
-          action: WoodPUPActions.USE_ENTANGLE,
-          pupID,
-          targetID: enemyID,
-        });
-        return;
-      }
-      case 5: {
-        this.onPacketRequest({
-          action: WoodPUPActions.USE_WISDOM,
-          pupID,
-        });
-        return;
-      }
-
-      // Earth
-      case 6: {
-        this.onPacketRequest({
-          action: EarthPUPActions.USE_LANDSLIDE,
-          pupID,
-          targetID: enemyID,
-        });
-        return;
-      }
-      case 7: {
-        // Excavate requires a selected cell on your board
-        const myCellIndex = this.board1.selected();
-        if (myCellIndex === null) {
-          this.myPupSlots?.shakeSlot(slotIndex);
-          return;
-        }
-
-        this.onPacketRequest({
-          action: EarthPUPActions.USE_EXCAVATE,
-          pupID,
-          cellIndex: myCellIndex,
-        });
-        return;
-      }
-
-      // Metal
-      case 8: {
-        // Check selected cell's number (both own and opponent selected cell is fine)
-        const board1Selected = this.board1.selected();
-        const board2Selected = this.board2.selected();
-
-        const value = board1Selected !== null
-          ? this.board1.model.board[board1Selected].value
-          : board2Selected !== null
-            ? this.board2.model.board[board2Selected].value
-            : null;
-          
-        if (value === null || value <= 0) {
-          this.myPupSlots?.shakeSlot(slotIndex);
-          return;
-        }
-
-        this.onPacketRequest({
-          action: MetalPUPActions.USE_LOCK,
-          pupID,
-          targetID: enemyID,
-          value,
-        });
-        return;
-      }
-      case 9: {
-        this.onPacketRequest({
-          action: MetalPUPActions.USE_FORGE,
-          pupID,
-        });
-        return;
-      }
-      default: {
-        // Unknown PUP, shake the slot to indicate error
-        this.myPupSlots?.shakeSlot(slotIndex);
-      }
-    }
   }
 
   /** Handle selection changes to ensure only one board has a cursor */
