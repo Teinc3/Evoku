@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 
-import NetworkService from '../../app/services/network';
-import MatchActionHandler from './MatchActionHandler';
+import NetworkService from '../../../app/services/network';
+import MatchActionDispatcher from './MatchActionDispatcher';
 
 import type {
   BoardAccessContext,
   PupSlotShakeContext
-} from '../../types/handlers/MatchActionHandlerContext';
+} from '../../../types/handlers/MatchActionDispatcherContext';
 
 
 @Injectable()
-export default class DuelActionHandler extends MatchActionHandler {
+export default class DuelActionDispatcher extends MatchActionDispatcher {
   private myBoardAccess?: BoardAccessContext;
   private enemyBoardAccess?: BoardAccessContext;
   private pupSlotShake?: PupSlotShakeContext;
@@ -31,14 +31,14 @@ export default class DuelActionHandler extends MatchActionHandler {
 
   protected getMyBoardAccess(): BoardAccessContext {
     if (!this.myBoardAccess) {
-      throw new Error('DuelActionHandler: my board access not set.');
+      throw new Error('DuelActionDispatcher: my board access not set.');
     }
     return this.myBoardAccess;
   }
 
   protected getTargetBoardAccess(): BoardAccessContext {
     if (!this.enemyBoardAccess) {
-      throw new Error('DuelActionHandler: enemy board access not set.');
+      throw new Error('DuelActionDispatcher: enemy board access not set.');
     }
     return this.enemyBoardAccess;
   }

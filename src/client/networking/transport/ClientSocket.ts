@@ -4,6 +4,7 @@ import sharedConfig from "@shared/config";
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
 import type ActionMap from '@shared/types/actionmap';
+import type { PacketHandler } from '../../types/handlers/MatchActionListenerContext';
 
 
 /**
@@ -121,7 +122,7 @@ export default class ClientSocket {
   }
 
   // Private members
-  private packetHandler: ((data: AugmentAction<ActionEnum>) => void) | null = null;
+  private packetHandler: (PacketHandler<ActionEnum>) | null = null;
 
   private handleMessage = async (ev: MessageEvent): Promise<void> => {
     try {

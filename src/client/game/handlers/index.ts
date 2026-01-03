@@ -1,2 +1,2 @@
-export { default as DuelActionHandler } from './DuelActionHandler';
-export { default as MatchActionHandler } from './MatchActionHandler';
+export * from './inbound';
+export * from './outbound';

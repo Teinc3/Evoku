@@ -9,24 +9,24 @@ import {
 } from '@shared/types/enums/actions/';
 import pupConfig from '@config/shared/pup.json';
 import sharedConfig from '@config/shared/base.json';
-import GameStateManager from '../GameStateManager';
-import NetworkService from '../../app/services/network';
+import GameStateManager from '../../GameStateManager';
+import NetworkService from '../../../app/services/network';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
-import type { OmitBaseAttrs } from '../../types/OmitAttrs';
+import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
 import type {
   BoardAccessContext,
   PupSlotShakeContext
-} from '../../types/handlers/MatchActionHandlerContext';
+} from '../../../types/handlers/MatchActionDispatcherContext';
 
 
 /**
- * Orchestrates the client-side optimistic action flow for a match instance.
+ * Orchestrates the client-side optimistic outbound action flow for a match instance.
  *
  * This object is intended to be provided/owned per game mode instance
  * (e.g. Duel, Time Attack) rather than globally.
  */
-export default abstract class MatchActionHandler {
+export default abstract class MatchActionDispatcher {
   private nextActionId = 0;
   private gameState?: GameStateManager;
   private readonly pupUseHandlers: Array<((slotIndex: number) => boolean) | undefined>;
@@ -48,7 +48,7 @@ export default abstract class MatchActionHandler {
 
   protected getGameState(): GameStateManager {
     if (!this.gameState) {
-      throw new Error('MatchActionHandler not initialized with a GameStateManager.');
+      throw new Error('MatchActionDispatcher not initialized with a GameStateManager.');
     }
     return this.gameState;
   }
