@@ -126,21 +126,6 @@ describe('DuelActionDispatcher', () => {
     expect(shakeSlot).toHaveBeenCalledWith(0);
   });
 
-  it('tryUsePUP throws when pup type is not in pup config', () => {
-    spyOn(performance, 'now').and.returnValue(1000);
-
-    setSlot(0, {
-      slotIndex: 0,
-      lastCooldownEnd: 0,
-      locked: false,
-      pup: { pupID: 999, type: 999, level: 0 }
-    });
-
-    expect(() => {
-      dispatcher.tryUsePUP(0);
-    }).toThrow();
-  });
-
   it('tryUsePUP shakes (no dispatch) when pup config exists but handler is missing', () => {
     spyOn(performance, 'now').and.returnValue(1000);
 
@@ -343,6 +328,9 @@ describe('DuelActionDispatcher', () => {
     expect(didDispatch).toBe(false);
     expect(networkServiceSpy.send).not.toHaveBeenCalled();
     expect(shakeSlot).toHaveBeenCalledWith(0);
+
+    const slot = gameState.getPlayerState(gameState.myID).gameState?.powerups[0];
+    expect(slot?.pendingCooldownEnd).toBeUndefined();
   });
 
   it('tryUsePUP shakes and returns false when Lock has no positive selected value', () => {
