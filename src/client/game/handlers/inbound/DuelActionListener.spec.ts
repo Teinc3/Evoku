@@ -6,6 +6,7 @@ import {
   MechanicsActions,
   LifecycleActions,
   ProtocolActions,
+  WaterPUPActions,
 } from '@shared/types/enums/actions/';
 import GameStateManager from '../../GameStateManager';
 import DuelActionListener from './DuelActionListener';
@@ -78,6 +79,49 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
+  it('ignores UPDATE_PROGRESS when player gameState is missing', () => {
+    const subscription = listener.bind();
+
+    const subject = packetSubjects.get(ProtocolActions.UPDATE_PROGRESS);
+    if (!subject) {
+      throw new Error('Expected UPDATE_PROGRESS subject to be registered.');
+    }
+
+    const packet: ActionMap[ProtocolActions.UPDATE_PROGRESS] = {
+      playerID: 0,
+      isBoard: true,
+      progress: 10,
+    };
+
+    expect(() => {
+      subject.next(packet);
+    }).not.toThrow();
+
+    subscription.unsubscribe();
+  });
+
+  it('sets match status to ENDED on GAME_OVER', () => {
+    const subscription = listener.bind();
+
+    const subject = packetSubjects.get(LifecycleActions.GAME_OVER);
+    if (!subject) {
+      throw new Error('Expected GAME_OVER subject to be registered.');
+    }
+
+    expect(gameState.matchState.status).not.toBe(MatchStatus.ENDED);
+
+    const packet: ActionMap[LifecycleActions.GAME_OVER] = {
+      winnerID: 0,
+      reason: 0,
+      eloChange: 0,
+    };
+
+    subject.next(packet);
+    expect(gameState.matchState.status).toBe(MatchStatus.ENDED);
+
+    subscription.unsubscribe();
+  });
+
   it('handles GAME_INIT by initializing state and setting ONGOING', () => {
     const initData = { cellValues: Array(81).fill(0) };
 
@@ -135,6 +179,21 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
+  it('ignores UPDATE_PROGRESS when player gameState is missing', () => {
+    const subscription = listener.bind();
+
+    const subject = packetSubjects.get(ProtocolActions.UPDATE_PROGRESS);
+    if (!subject) {
+      throw new Error('Missing subject for UPDATE_PROGRESS');
+    }
+
+    gameState.getPlayerState(0).gameState = undefined;
+
+    subject.next({ playerID: 0, isBoard: true, progress: 50 });
+
+    subscription.unsubscribe();
+  });
+
   it('handles CELL_SET using pending action clientTime when available', () => {
     const subscription = listener.bind();
 
@@ -172,6 +231,57 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
+  it('handles CELL_SET using estimated clientTime when pending action is missing', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const board = gameState.getPlayerBoard(1);
+    const confirmSpy = spyOn(board, 'confirmCellSet');
+    const estimateSpy = spyOn(gameState.timeCoordinator, 'estimateClientTime')
+      .and.returnValue(1234);
+
+    const subject = packetSubjects.get(MechanicsActions.CELL_SET);
+    if (!subject) {
+      throw new Error('Missing subject for CELL_SET');
+    }
+
+    subject.next({
+      playerID: 1,
+      actionID: 999,
+      serverTime: 777,
+      cellIndex: 10,
+      value: 3,
+    });
+
+    expect(confirmSpy).toHaveBeenCalledWith(10, 3, 1234);
+    expect(estimateSpy).toHaveBeenCalledWith(777);
+
+    subscription.unsubscribe();
+  });
+
+  it('ignores CELL_SET when board is missing', () => {
+    const subscription = listener.bind();
+
+    type PlayerBoard = ReturnType<typeof gameState.getPlayerBoard>;
+    spyOn(gameState, 'getPlayerBoard').and.returnValue(null as unknown as PlayerBoard);
+
+    const subject = packetSubjects.get(MechanicsActions.CELL_SET);
+    if (!subject) {
+      throw new Error('Missing subject for CELL_SET');
+    }
+
+    subject.next({
+      playerID: 0,
+      actionID: 1,
+      serverTime: 0,
+      cellIndex: 0,
+      value: 1,
+    });
+
+    subscription.unsubscribe();
+  });
+
   it('handles REJECT_ACTION by removing pending SET_CELL and calling onCellRejection', () => {
     const onCellRejection = jasmine.createSpy('onCellRejection');
 
@@ -200,6 +310,110 @@ describe('DuelActionListener', () => {
 
     expect(gameState.pendingActions.has(123)).toBeFalse();
     expect(onCellRejection).toHaveBeenCalledWith(7, 9);
+
+    subscription.unsubscribe();
+  });
+
+  it('ignores REJECT_ACTION when pending action is missing', () => {
+    const subscription = listener.bind();
+
+    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
+    if (!subject) {
+      throw new Error('Missing subject for REJECT_ACTION');
+    }
+
+    subject.next({ actionID: 123 });
+
+    subscription.unsubscribe();
+  });
+
+  it('clears optimistic pup cooldown on REJECT_ACTION for pup usage', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const slot = gameState.getPlayerState(0).gameState!.powerups[0];
+    slot.pup = { pupID: 999, type: 1, level: 0 };
+    slot.pendingCooldownEnd = 1234;
+
+    type PendingAction = (typeof gameState)['pendingActions'] extends Map<number, infer T>
+      ? T
+      : never;
+
+    const pendingAction = {
+      action: WaterPUPActions.USE_PURITY,
+      actionID: 123,
+      clientTime: 0,
+      pupID: 999,
+    } as unknown as PendingAction;
+
+    gameState.pendingActions.set(123, pendingAction);
+
+    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
+    if (!subject) {
+      throw new Error('Missing subject for REJECT_ACTION');
+    }
+
+    subject.next({ actionID: 123 });
+
+    expect(slot.pendingCooldownEnd).toBeUndefined();
+
+    subscription.unsubscribe();
+  });
+
+  it('handles REJECT_ACTION pup branch safely when my gameState is missing', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+    gameState.getPlayerState(0).gameState = undefined;
+
+    type PendingAction = (typeof gameState)['pendingActions'] extends Map<number, infer T>
+      ? T
+      : never;
+
+    const pendingAction = {
+      action: WaterPUPActions.USE_PURITY,
+      actionID: 123,
+      clientTime: 0,
+      pupID: 999,
+    } as unknown as PendingAction;
+
+    gameState.pendingActions.set(123, pendingAction);
+
+    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
+    if (!subject) {
+      throw new Error('Missing subject for REJECT_ACTION');
+    }
+
+    subject.next({ actionID: 123 });
+
+    subscription.unsubscribe();
+  });
+
+  it('handles REJECT_ACTION pup branch safely when slot is not found', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    type PendingAction = (typeof gameState)['pendingActions'] extends Map<number, infer T>
+      ? T
+      : never;
+
+    const pendingAction = {
+      action: WaterPUPActions.USE_PURITY,
+      actionID: 123,
+      clientTime: 0,
+      pupID: 123456,
+    } as unknown as PendingAction;
+
+    gameState.pendingActions.set(123, pendingAction);
+
+    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
+    if (!subject) {
+      throw new Error('Missing subject for REJECT_ACTION');
+    }
+
+    subject.next({ actionID: 123 });
 
     subscription.unsubscribe();
   });
@@ -266,6 +480,64 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
+  it('ignores PUP_DRAWN when player gameState is missing', () => {
+    const onBeginPupSettling = jasmine.createSpy('onBeginPupSettling');
+
+    listener.setContext({
+      onBeginPupSettling
+    });
+
+    const subscription = listener.bind();
+
+    gameState.getPlayerState(0).gameState = undefined;
+
+    const subject = packetSubjects.get(MechanicsActions.PUP_DRAWN);
+    if (!subject) {
+      throw new Error('Missing subject for PUP_DRAWN');
+    }
+
+    subject.next({
+      playerID: 0,
+      slotIndex: 0,
+      pupID: 999,
+      type: 1,
+      level: 2
+    });
+
+    expect(onBeginPupSettling).not.toHaveBeenCalled();
+
+    subscription.unsubscribe();
+  });
+
+  it('does not trigger settling for opponent PUP_DRAWN', () => {
+    const onBeginPupSettling = jasmine.createSpy('onBeginPupSettling');
+
+    listener.setContext({
+      onBeginPupSettling
+    });
+
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const subject = packetSubjects.get(MechanicsActions.PUP_DRAWN);
+    if (!subject) {
+      throw new Error('Missing subject for PUP_DRAWN');
+    }
+
+    subject.next({
+      playerID: 1,
+      slotIndex: 0,
+      pupID: 999,
+      type: 1,
+      level: 2
+    });
+
+    expect(onBeginPupSettling).not.toHaveBeenCalled();
+
+    subscription.unsubscribe();
+  });
+
   it('handles PUP_SPUN by locking slot and setting settling element', () => {
     const onSetPupSettlingType = jasmine.createSpy('onSetPupSettlingType');
 
@@ -292,5 +564,55 @@ describe('DuelActionListener', () => {
     expect(onSetPupSettlingType).toHaveBeenCalledWith(PUPElements.WATER);
 
     subscription.unsubscribe();
+  });
+
+  it('ignores PUP_SPUN when my gameState is missing', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+    gameState.getPlayerState(0).gameState = undefined;
+
+    const subject = packetSubjects.get(MechanicsActions.PUP_SPUN);
+    if (!subject) {
+      throw new Error('Missing subject for PUP_SPUN');
+    }
+
+    subject.next({
+      slotIndex: 0,
+      element: PUPElements.WATER
+    });
+
+    subscription.unsubscribe();
+  });
+
+  it('ignores PUP_SPUN when slot index is invalid', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const subject = packetSubjects.get(MechanicsActions.PUP_SPUN);
+    if (!subject) {
+      throw new Error('Missing subject for PUP_SPUN');
+    }
+
+    subject.next({
+      slotIndex: 999,
+      element: PUPElements.WATER
+    });
+
+    subscription.unsubscribe();
+  });
+
+  it('throws when getGameState is called before gameInit()', () => {
+    type PrivateApi = {
+      getGameState(): GameStateManager;
+    };
+
+    const listenerWithoutInit = new DuelActionListener(networkServiceSpy);
+    const privateApi = listenerWithoutInit as unknown as PrivateApi;
+
+    expect(() => {
+      privateApi.getGameState();
+    }).toThrowError('MatchActionListener not initialized with a GameStateManager.');
   });
 });

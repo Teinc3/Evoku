@@ -199,4 +199,73 @@ describe('GameStateManager', () => {
     gameState.pendingActions.delete(456);
     expect(gameState.pendingActions.has(456)).toBeFalse();
   });
+
+  it('canSpinPupSpinner returns true when player gameState is missing', () => {
+    gameState.getPlayerState(gameState.myID).gameState = undefined;
+
+    expect(gameState.canSpinPupSpinner).toBe(true);
+  });
+
+  it('canSpinPupSpinner returns false when no slot is available', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const playerGameState = gameState.getPlayerState(gameState.myID).gameState;
+    if (!playerGameState) {
+      throw new Error('Missing player gameState in test setup.');
+    }
+
+    playerGameState.powerups = [
+      {
+        slotIndex: 0,
+        locked: true,
+        lastCooldownEnd: 0,
+        pup: { pupID: 1, type: 1, level: 0 }
+      },
+      {
+        slotIndex: 1,
+        locked: false,
+        lastCooldownEnd: 2000,
+        pup: null,
+      },
+      {
+        slotIndex: 2,
+        locked: false,
+        lastCooldownEnd: 2000,
+        pup: null,
+      },
+    ] as unknown as typeof playerGameState.powerups;
+
+    expect(gameState.canSpinPupSpinner).toBe(false);
+  });
+
+  it('canSpinPupSpinner returns true when an empty slot is available and cooled down', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const playerGameState = gameState.getPlayerState(gameState.myID).gameState;
+    if (!playerGameState) {
+      throw new Error('Missing player gameState in test setup.');
+    }
+
+    playerGameState.powerups = [
+      {
+        slotIndex: 0,
+        locked: false,
+        lastCooldownEnd: 0,
+      },
+      {
+        slotIndex: 1,
+        locked: false,
+        lastCooldownEnd: 0,
+        pup: { pupID: 1, type: 1, level: 0 }
+      },
+      {
+        slotIndex: 2,
+        locked: true,
+        lastCooldownEnd: 0,
+        pup: { pupID: 2, type: 1, level: 0 }
+      },
+    ] as unknown as typeof playerGameState.powerups;
+
+    expect(gameState.canSpinPupSpinner).toBe(true);
+  });
 });
