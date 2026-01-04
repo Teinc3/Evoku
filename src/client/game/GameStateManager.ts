@@ -1,6 +1,6 @@
 import initPUPSlots from '@shared/types/utils/initPUPSlots';
 import MatchStatus from '@shared/types/enums/matchstatus';
-import { PlayerActions, ProtocolActions } from '@shared/types/enums/actions';
+import { PlayerActions } from '@shared/types/enums/actions';
 import ClientBoardModel from '../models/Board';
 import ClientTimeCoordinator from './ClientTimeCoordinator';
 
@@ -8,7 +8,7 @@ import type { IMatchState, IPlayerState } from '@shared/types/gamestate';
 import type {
   ActionContractC2S
 } from '@shared/types/contracts/components/extendables/ActionContract';
-import type { MatchFoundContract, PingContract, PongContract } from '@shared/types/contracts';
+import type { MatchFoundContract } from '@shared/types/contracts';
 
 
 /**
@@ -153,17 +153,16 @@ export default class GameStateManager {
     }
   }
 
-  /**
-   * Handle incoming ping packet from server for time synchronization
-   * @param ping The ping packet from server
-   * @param sendPong Callback to send pong response
-   */
-  public handlePing(
-    ping: PingContract,
-    sendPong: (action: typeof ProtocolActions.PONG, data: PongContract) => void
-  ): void {
-    this.timeCoordinator.handlePing(ping, pong => {
-      sendPong(ProtocolActions.PONG, pong);
-    });
+  /** Check if the local player can spin the PUP spinner */
+  public get canSpinPupSpinner(): boolean {
+    const powerups = this.getPlayerState(this.myID).gameState?.powerups;
+    if (!powerups) {
+      return true;
+    }
+
+    return powerups.some(slot => !slot.pup && !slot.locked
+      && Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0)
+        < this.timeCoordinator.clientTime
+    );
   }
 }

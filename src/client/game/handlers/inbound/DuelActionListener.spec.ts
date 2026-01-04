@@ -204,7 +204,7 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
-  it('handles PING by delegating to gameState.handlePing and sending PONG', () => {
+  it('handles PING by delegating to gameState.timeCoordinator.handlePing and sending PONG', () => {
     const subscription = listener.bind();
 
     const pingData: PingContract = {
@@ -212,14 +212,12 @@ describe('DuelActionListener', () => {
       clientPing: 100
     };
 
-    spyOn(gameState, 'handlePing').and.callFake((_ping, sendPong) => {
-      const pongData: PongContract = {
-        clientTime: 123,
-        serverTime: 2000
-      };
+    const expectedPong: PongContract = {
+      clientTime: 123,
+      serverTime: 2000
+    };
 
-      sendPong(ProtocolActions.PONG, pongData);
-    });
+    spyOn(gameState.timeCoordinator, 'handlePing').and.returnValue(expectedPong);
 
     const subject = packetSubjects.get(ProtocolActions.PING);
     if (!subject) {
@@ -228,11 +226,8 @@ describe('DuelActionListener', () => {
 
     subject.next(pingData);
 
-    expect(gameState.handlePing).toHaveBeenCalled();
-    expect(networkServiceSpy.send).toHaveBeenCalledWith(ProtocolActions.PONG, {
-      clientTime: 123,
-      serverTime: 2000
-    });
+    expect(gameState.timeCoordinator.handlePing).toHaveBeenCalledWith(pingData);
+    expect(networkServiceSpy.send).toHaveBeenCalledWith(ProtocolActions.PONG, expectedPong);
 
     subscription.unsubscribe();
   });

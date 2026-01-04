@@ -22,7 +22,10 @@ describe('DuelDemoPageComponent', () => {
       getNavigationData: jasmine.createSpy('getNavigationData')
     });
 
-    const networkSpy = jasmine.createSpyObj('NetworkService', ['send', 'onDisconnect', 'onPacket']);
+    const networkSpy = jasmine.createSpyObj(
+      'NetworkService',
+      ['send', 'onDisconnect', 'onPacket', 'disconnect']
+    );
     networkSpy.onDisconnect.and.returnValue(disconnectSubject.asObservable());
     networkSpy.onPacket.and.returnValue(new Subject<unknown>().asObservable());
 

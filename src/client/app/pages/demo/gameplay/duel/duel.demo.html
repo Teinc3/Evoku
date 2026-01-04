@@ -20,7 +20,11 @@
     (sendPacket)="duelActionDispatcher.dispatch($event)"
     (selectionChanged)="onBoardSelectionChanged(0)"
   />
-  <app-utility-buttons-holder/>
+  <app-utility-buttons-holder
+    (quitClick)="onQuit()"
+    (utilityClick)="board1.onUtilityAction($event)"
+    [noteModeActive]="board1.isNoteMode"
+  />
   <app-board-model
     #board2
     [model]="gameState.getPlayerBoard(1 - gameState.myID)"
@@ -40,7 +44,7 @@
     <app-pup-spinner
       #pupSpinner
       [pupProgress]="gameState.getPlayerState(gameState.myID).gameState?.pupProgress ?? 0"
-      [canSpin]="canSpinPupSpinner"
+      [canSpin]="gameState.canSpinPupSpinner"
       (roll)="duelActionDispatcher.drawPup()"
     />
     <app-pup-slots-holder
