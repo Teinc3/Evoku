@@ -176,11 +176,9 @@ export default abstract class MatchActionListener {
   }
 
   protected onPing(data: AugmentAction<ProtocolActions.PING>): void {
-    const gameState = this.getGameState();
-
-    gameState.handlePing(data, (action, pongData) => {
-      this.networkService.send(action, pongData);
-    });
+    const { action: _, ...pingData } = data;
+    const pongPacket = this.getGameState().timeCoordinator.handlePing(pingData);
+    this.networkService.send(ProtocolActions.PONG, pongPacket);
   }
 
   protected onPupDrawn(data: AugmentAction<MechanicsActions.PUP_DRAWN>): void {

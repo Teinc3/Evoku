@@ -2,6 +2,7 @@ import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 
 import ViewStateService from '../../../../services/view-state';
+import NetworkService from '../../../../services/network';
 import PupSpinnerComponent 
   from '../../../../components/pup/pup-spinner/pup-spinner';
 import PupSlotsHolderComponent 
@@ -41,6 +42,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
   private subscriptions = new Subscription();
+  protected AppView = AppView;
 
   @ViewChild('board1')
   board1!: BoardModelComponent;
@@ -51,23 +53,11 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   @ViewChild('myPupSlots')
   myPupSlots?: PupSlotsHolderComponent;
 
-
-  protected get canSpinPupSpinner(): boolean {
-    const powerups = this.gameState.getPlayerState(this.gameState.myID).gameState?.powerups;
-    if (!powerups) {
-      return true;
-    }
-
-    return powerups.some(slot => !slot.pup && !slot.locked
-      && Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0)
-        < this.gameState.timeCoordinator.clientTime
-    );
-  }
-
   constructor(
-    private viewStateService: ViewStateService,
+    protected viewStateService: ViewStateService,
     protected readonly duelActionDispatcher: DuelActionDispatcher,
-    protected readonly duelActionListener: DuelActionListener
+    protected readonly duelActionListener: DuelActionListener,
+    private readonly networkService: NetworkService
   ) {
     this.gameState = new GameStateManager(DuelDemoPageComponent.MAX_PLAYER_COUNT);
     this.duelActionDispatcher.gameInit(this.gameState);
@@ -81,24 +71,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   ngAfterViewInit(): void {
     this.duelActionDispatcher.setAccessContexts(
       {
-        selected: () => {
-          return this.board1.selected();
-        },
-        getCellValue: (cellIndex: number) => {
-          return this.board1.model.board[cellIndex]?.value ?? null;
-        }
+        selected: () => this.board1.selected(),
+        getCellValue: (cellIndex: number) => this.board1.model.board[cellIndex]?.value ?? null
       },
       {
-        selected: () => {
-          return this.board2.selected();
-        },
-        getCellValue: (cellIndex: number) => {
-          return this.board2.model.board[cellIndex]?.value ?? null;
-        }
+        selected: () => this.board2.selected(),
+        getCellValue: (cellIndex: number) => this.board2.model.board[cellIndex]?.value ?? null
       },
-      (slotIndex: number) => {
-        this.myPupSlots?.shakeSlot(slotIndex);
-      }
+      (slotIndex: number) => this.myPupSlots?.shakeSlot(slotIndex)
     );
 
     this.duelActionListener.setContext({
@@ -122,9 +102,14 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   }
 
   ngOnDestroy(): void {
-    // Clear our local match state
     this.gameState.clearMatchData();
-    this.subscriptions.unsubscribe();
+    this.networkService.disconnect();
+  }
+
+  /** Handle quit action: disconnect and navigate to catalogue */
+  onQuit(): void {
+    this.networkService.disconnect();
+    this.viewStateService.navigateToView(AppView.CATALOGUE);
   }
 
   /** Handle selection changes to ensure only one board has a cursor */

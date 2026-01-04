@@ -5,24 +5,20 @@ import type { PingContract } from '@shared/types/contracts';
 
 describe('ClientTimeCoordinator', () => {
   let timeCoordinator: ClientTimeCoordinator;
-  let mockSendPong: jasmine.Spy;
 
   beforeEach(() => {
     timeCoordinator = new ClientTimeCoordinator();
-    mockSendPong = jasmine.createSpy('sendPong');
   });
 
-  it('should handle ping packet and send pong response', () => {
+  it('should handle ping packet and return pong response', () => {
     const ping: PingContract = {
       serverTime: 1000,
       clientPing: 950
     };
     
-    timeCoordinator.handlePing(ping, mockSendPong);
+    const pong = timeCoordinator.handlePing(ping);
     
-    expect(mockSendPong).toHaveBeenCalled();
-    const pongCall = mockSendPong.calls.first();
-    expect(pongCall.args[0]).toEqual({
+    expect(pong).toEqual({
       clientTime: jasmine.any(Number),
       serverTime: 1000
     });
