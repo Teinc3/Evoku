@@ -41,7 +41,7 @@ import type { MatchFoundContract } from '@shared/types/contracts';
 export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterViewInit {
   static readonly MAX_PLAYER_COUNT = 2;
   public readonly gameState: GameStateManager;
-  private subscriptions = new Subscription();
+  private readonly subscriptions: Subscription;
   protected AppView = AppView;
 
   @ViewChild('board1')
@@ -60,12 +60,9 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
     private readonly networkService: NetworkService
   ) {
     this.gameState = new GameStateManager(DuelDemoPageComponent.MAX_PLAYER_COUNT);
+    this.subscriptions = new Subscription();
     this.duelActionDispatcher.gameInit(this.gameState);
     this.duelActionListener.gameInit(this.gameState);
-
-    this.duelActionListener.setContext({
-      onDisconnect: () => this.viewStateService.navigateToView(AppView.CATALOGUE)
-    });
   }
 
   ngAfterViewInit(): void {
@@ -82,7 +79,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
     );
 
     this.duelActionListener.setContext({
-      onDisconnect: () => this.viewStateService.navigateToView(AppView.CATALOGUE),
+      onDisconnect: () => this.onQuit(),
       onCellRejection: (cellIndex: number, value: number) => {
         this.board1.handleCellRejection(cellIndex, value);
       },
@@ -104,6 +101,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   ngOnDestroy(): void {
     this.gameState.clearMatchData();
     this.networkService.disconnect();
+    this.subscriptions.unsubscribe();
   }
 
   /** Handle quit action: disconnect and navigate to catalogue */

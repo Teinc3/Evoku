@@ -333,6 +333,60 @@ describe('DuelActionDispatcher', () => {
     expect(slot?.pendingCooldownEnd).toBeUndefined();
   });
 
+  it('tryUsePUP shakes and returns false when required selection is missing (Cryo)', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const shakeSlot = jasmine.createSpy('shakeSlot');
+
+    setAccessContexts({
+      mySelected: () => null,
+      enemySelected: () => null,
+      shakeSlot,
+    });
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 2000, type: 0, level: 0 }
+    });
+
+    const didDispatch = dispatcher.tryUsePUP(0);
+    expect(didDispatch).toBe(false);
+    expect(networkServiceSpy.send).not.toHaveBeenCalled();
+    expect(shakeSlot).toHaveBeenCalledWith(0);
+
+    const slot = gameState.getPlayerState(gameState.myID).gameState?.powerups[0];
+    expect(slot?.pendingCooldownEnd).toBeUndefined();
+  });
+
+  it('tryUsePUP shakes and returns false when required selection is missing (Excavate)', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const shakeSlot = jasmine.createSpy('shakeSlot');
+
+    setAccessContexts({
+      mySelected: () => null,
+      enemySelected: () => null,
+      shakeSlot,
+    });
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 7000, type: 7, level: 0 }
+    });
+
+    const didDispatch = dispatcher.tryUsePUP(0);
+    expect(didDispatch).toBe(false);
+    expect(networkServiceSpy.send).not.toHaveBeenCalled();
+    expect(shakeSlot).toHaveBeenCalledWith(0);
+
+    const slot = gameState.getPlayerState(gameState.myID).gameState?.powerups[0];
+    expect(slot?.pendingCooldownEnd).toBeUndefined();
+  });
+
   it('tryUsePUP shakes and returns false when Lock has no positive selected value', () => {
     spyOn(performance, 'now').and.returnValue(1000);
 
@@ -356,5 +410,150 @@ describe('DuelActionDispatcher', () => {
     expect(didDispatch).toBe(false);
     expect(networkServiceSpy.send).not.toHaveBeenCalled();
     expect(shakeSlot).toHaveBeenCalledWith(0);
+  });
+
+  it('drawPup dispatches DRAW_PUP', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    dispatcher.drawPup();
+
+    expect(networkServiceSpy.send).toHaveBeenCalledWith(
+      MechanicsActions.DRAW_PUP,
+      jasmine.objectContaining({
+        actionID: 0,
+        clientTime: 1000,
+      })
+    );
+  });
+
+  it('tryUsePUP returns false when player gameState is missing', () => {
+    const playerState = gameState.getPlayerState(gameState.myID);
+    playerState.gameState = undefined;
+
+    const didDispatch = dispatcher.tryUsePUP(0);
+    expect(didDispatch).toBe(false);
+  });
+
+  it('throws when my board access is not set and a pup requires it', () => {
+    const dispatcherWithoutAccess = new DuelActionDispatcher(networkServiceSpy);
+    dispatcherWithoutAccess.gameInit(gameState);
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 7000, type: 7, level: 0 }
+    });
+
+    expect(() => {
+      dispatcherWithoutAccess.tryUsePUP(0);
+    }).toThrowError('DuelActionDispatcher: my board access not set.');
+  });
+
+  it('throws when enemy board access is not set and a pup requires it', () => {
+    const dispatcherWithoutAccess = new DuelActionDispatcher(networkServiceSpy);
+    dispatcherWithoutAccess.gameInit(gameState);
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 1000, type: 0, level: 0 }
+    });
+
+    expect(() => {
+      dispatcherWithoutAccess.tryUsePUP(0);
+    }).toThrowError('DuelActionDispatcher: enemy board access not set.');
+  });
+
+  it('Lock uses enemy selected value when my selection is null', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const shakeSlot = jasmine.createSpy('shakeSlot');
+    setAccessContexts({
+      mySelected: () => null,
+      enemySelected: () => 10,
+      getEnemyCellValue: () => 7,
+      shakeSlot,
+    });
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 8000, type: 8, level: 0 }
+    });
+
+    const didDispatch = dispatcher.tryUsePUP(0);
+    expect(didDispatch).toBe(true);
+    expect(networkServiceSpy.send).toHaveBeenCalledWith(
+      MetalPUPActions.USE_LOCK,
+      jasmine.objectContaining({ pupID: 8000, targetID: 1, value: 7 })
+    );
+    expect(shakeSlot).not.toHaveBeenCalled();
+  });
+
+  it('Lock shakes when neither board has a selected value', () => {
+    spyOn(performance, 'now').and.returnValue(1000);
+
+    const shakeSlot = jasmine.createSpy('shakeSlot');
+    setAccessContexts({
+      mySelected: () => null,
+      enemySelected: () => null,
+      shakeSlot,
+    });
+
+    setSlot(0, {
+      slotIndex: 0,
+      lastCooldownEnd: 0,
+      locked: false,
+      pup: { pupID: 8000, type: 8, level: 0 }
+    });
+
+    const didDispatch = dispatcher.tryUsePUP(0);
+    expect(didDispatch).toBe(false);
+    expect(networkServiceSpy.send).not.toHaveBeenCalled();
+    expect(shakeSlot).toHaveBeenCalled();
+  });
+
+  it('throws when dispatch is called before gameInit()', () => {
+    const uninitialized = new DuelActionDispatcher(networkServiceSpy);
+
+    expect(() => {
+      uninitialized.dispatch({
+        action: MechanicsActions.SET_CELL,
+        cellIndex: 0,
+        value: 1,
+      });
+    }).toThrowError('MatchActionDispatcher not initialized with a GameStateManager.');
+  });
+
+  it('getMyPupID throws when player gameState is missing', () => {
+    type PrivateApi = {
+      getMyPupID(slotIndex: number): number;
+    };
+
+    const playerState = gameState.getPlayerState(gameState.myID);
+    playerState.gameState = undefined;
+
+    const privateApi = dispatcher as unknown as PrivateApi;
+
+    expect(() => {
+      privateApi.getMyPupID(0);
+    }).toThrowError('Player game state missing while using a PUP.');
+  });
+
+  it('getMyPupID throws when slot is empty', () => {
+    type PrivateApi = {
+      getMyPupID(slotIndex: number): number;
+    };
+
+    setSlot(0, { slotIndex: 0, lastCooldownEnd: 0, locked: false });
+
+    const privateApi = dispatcher as unknown as PrivateApi;
+
+    expect(() => {
+      privateApi.getMyPupID(0);
+    }).toThrowError('Attempted to use a PUP from an empty slot.');
   });
 });
