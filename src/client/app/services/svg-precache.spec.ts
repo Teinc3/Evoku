@@ -186,17 +186,19 @@ describe('SvgPrecacheService', () => {
         preloadImage: (u: string) => Promise<void>;
       };
       await serviceWithPreloadImage.preloadImage(url);
+
+      expect(preloadedImages.get(url)?.complete).toBeTrue();
     });
   });
 
   describe('precacheAllSvgs', () => {
     it('should swallow individual preload failures', async () => {
-      spyOn(
+      const loadManifestSpy = spyOn(
         service as unknown as { loadManifest: () => Promise<readonly string[] | null> },
         'loadManifest',
       )
         .and.resolveTo(['/a.svg']);
-      spyOn(
+      const preloadImageSpy = spyOn(
         service as unknown as { preloadImage: (u: string) => Promise<void> },
         'preloadImage',
       )
@@ -206,10 +208,13 @@ describe('SvgPrecacheService', () => {
         precacheAllSvgs: () => Promise<void>;
       };
       await serviceWithPrecacheAllSvgs.precacheAllSvgs();
+
+      expect(loadManifestSpy).toHaveBeenCalled();
+      expect(preloadImageSpy).toHaveBeenCalledWith('/a.svg');
     });
 
     it('should early return when manifest is null', async () => {
-      spyOn(
+      const loadManifestSpy = spyOn(
         service as unknown as { loadManifest: () => Promise<readonly string[] | null> },
         'loadManifest',
       )
@@ -219,6 +224,8 @@ describe('SvgPrecacheService', () => {
         precacheAllSvgs: () => Promise<void>;
       };
       await serviceWithPrecacheAllSvgs.precacheAllSvgs();
+
+      expect(loadManifestSpy).toHaveBeenCalled();
     });
   });
 });

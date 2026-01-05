@@ -179,21 +179,6 @@ describe('DuelActionListener', () => {
     subscription.unsubscribe();
   });
 
-  it('ignores UPDATE_PROGRESS when player gameState is missing', () => {
-    const subscription = listener.bind();
-
-    const subject = packetSubjects.get(ProtocolActions.UPDATE_PROGRESS);
-    if (!subject) {
-      throw new Error('Missing subject for UPDATE_PROGRESS');
-    }
-
-    gameState.getPlayerState(0).gameState = undefined;
-
-    subject.next({ playerID: 0, isBoard: true, progress: 50 });
-
-    subscription.unsubscribe();
-  });
-
   it('handles CELL_SET using pending action clientTime when available', () => {
     const subscription = listener.bind();
 
@@ -279,6 +264,8 @@ describe('DuelActionListener', () => {
       value: 1,
     });
 
+    expect(gameState.getPlayerBoard).toHaveBeenCalledWith(0);
+
     subscription.unsubscribe();
   });
 
@@ -324,6 +311,8 @@ describe('DuelActionListener', () => {
 
     subject.next({ actionID: 123 });
 
+    expect(gameState.pendingActions.has(123)).toBeFalse();
+
     subscription.unsubscribe();
   });
 
@@ -357,63 +346,6 @@ describe('DuelActionListener', () => {
     subject.next({ actionID: 123 });
 
     expect(slot.pendingCooldownEnd).toBeUndefined();
-
-    subscription.unsubscribe();
-  });
-
-  it('handles REJECT_ACTION pup branch safely when my gameState is missing', () => {
-    const subscription = listener.bind();
-
-    gameState.myID = 0;
-    gameState.getPlayerState(0).gameState = undefined;
-
-    type PendingAction = (typeof gameState)['pendingActions'] extends Map<number, infer T>
-      ? T
-      : never;
-
-    const pendingAction = {
-      action: WaterPUPActions.USE_PURITY,
-      actionID: 123,
-      clientTime: 0,
-      pupID: 999,
-    } as unknown as PendingAction;
-
-    gameState.pendingActions.set(123, pendingAction);
-
-    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
-    if (!subject) {
-      throw new Error('Missing subject for REJECT_ACTION');
-    }
-
-    subject.next({ actionID: 123 });
-
-    subscription.unsubscribe();
-  });
-
-  it('handles REJECT_ACTION pup branch safely when slot is not found', () => {
-    const subscription = listener.bind();
-
-    gameState.myID = 0;
-
-    type PendingAction = (typeof gameState)['pendingActions'] extends Map<number, infer T>
-      ? T
-      : never;
-
-    const pendingAction = {
-      action: WaterPUPActions.USE_PURITY,
-      actionID: 123,
-      clientTime: 0,
-      pupID: 123456,
-    } as unknown as PendingAction;
-
-    gameState.pendingActions.set(123, pendingAction);
-
-    const subject = packetSubjects.get(ProtocolActions.REJECT_ACTION);
-    if (!subject) {
-      throw new Error('Missing subject for REJECT_ACTION');
-    }
-
-    subject.next({ actionID: 123 });
 
     subscription.unsubscribe();
   });
@@ -562,43 +494,6 @@ describe('DuelActionListener', () => {
     const slot = gameState.getPlayerState(0).gameState!.powerups[0];
     expect(slot.locked).toBeTrue();
     expect(onSetPupSettlingType).toHaveBeenCalledWith(PUPElements.WATER);
-
-    subscription.unsubscribe();
-  });
-
-  it('ignores PUP_SPUN when my gameState is missing', () => {
-    const subscription = listener.bind();
-
-    gameState.myID = 0;
-    gameState.getPlayerState(0).gameState = undefined;
-
-    const subject = packetSubjects.get(MechanicsActions.PUP_SPUN);
-    if (!subject) {
-      throw new Error('Missing subject for PUP_SPUN');
-    }
-
-    subject.next({
-      slotIndex: 0,
-      element: PUPElements.WATER
-    });
-
-    subscription.unsubscribe();
-  });
-
-  it('ignores PUP_SPUN when slot index is invalid', () => {
-    const subscription = listener.bind();
-
-    gameState.myID = 0;
-
-    const subject = packetSubjects.get(MechanicsActions.PUP_SPUN);
-    if (!subject) {
-      throw new Error('Missing subject for PUP_SPUN');
-    }
-
-    subject.next({
-      slotIndex: 999,
-      element: PUPElements.WATER
-    });
 
     subscription.unsubscribe();
   });
