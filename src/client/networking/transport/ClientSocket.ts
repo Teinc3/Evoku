@@ -1,5 +1,4 @@
 import PacketIO from '@shared/networking/utils/PacketIO';
-import sharedConfig from "@shared/config";
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -19,27 +18,30 @@ export default class ClientSocket {
 
   constructor() {
     this.ws = null;
-    this.url = sharedConfig.networking.ws.uri;
+    this.url = ClientSocket.resolveUrl();
     this.io = new PacketIO();
   }
 
-  /**
-   * Current WebSocket ready state
-   */
+  private static resolveUrl(): string {
+    if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
+      const scheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${scheme}//${window.location.host}`;
+    }
+
+    throw new Error('Cannot resolve WebSocket URL: window.location is not available.');
+  }
+
+  /** Current WebSocket ready state */
   get readyState(): number {
     return this.ws?.readyState ?? WebSocket.CLOSED;
   }
 
-  /**
-   * Whether the socket is currently open
-   */
+  /** Whether the socket is currently open */
   get isOpen(): boolean {
     return this.readyState === WebSocket.OPEN;
   }
 
-  /**
-   * Connect to the WebSocket server
-   */
+  /** Connect to the WebSocket server */
   async connect(): Promise<void> {
     if (this.ws && (this.isOpen || this.readyState === WebSocket.CONNECTING)) {
       return;
@@ -69,18 +71,14 @@ export default class ClientSocket {
     });
   }
 
-  /**
-   * Close the WebSocket connection
-   */
+  /** Close the WebSocket connection */
   close(code?: number, reason?: string): void {
     this.ws?.removeEventListener('message', this.handleMessage);
     this.ws?.close(code, reason);
     this.ws = null;
   }
 
-  /**
-   * Send a packet through the WebSocket using the same pattern as ServerSocket
-   */
+  /** Send a packet through the WebSocket using the same pattern as ServerSocket */
   send<GenericAction extends ActionEnum>(
     action: GenericAction,
     data: ActionMap[GenericAction]
@@ -93,9 +91,7 @@ export default class ClientSocket {
     this.ws.send(buffer);
   }
 
-  /**
-   * Set a packet handler, similar to ServerSocket.setListener
-   */
+  /** Set a packet handler, similar to ServerSocket.setListener */
   setListener(handler: (data: AugmentAction<ActionEnum>) => void): void {
     if (!this.ws) {
       throw new Error('WebSocket not connected');
@@ -106,9 +102,7 @@ export default class ClientSocket {
     this.packetHandler = handler;
   }
 
-  /**
-   * Set close and error handlers
-   */
+  /** Set close and error handlers */
   onClose(handler: (event: CloseEvent) => void): void {
     if (this.ws) {
       this.ws.addEventListener('close', handler);

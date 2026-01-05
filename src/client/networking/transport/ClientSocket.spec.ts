@@ -160,6 +160,12 @@ describe('ClientSocket', () => {
     it('should connect successfully', async () => {
       const connectPromise = clientSocket.connect();
 
+      const expectedUrl = window.location.protocol === 'https:'
+        ? `wss://${window.location.host}`
+        : `ws://${window.location.host}`;
+
+      expect(window.WebSocket).toHaveBeenCalledWith(expectedUrl);
+
       // Simulate WebSocket opening
       mockWebSocket.simulateOpen();
 

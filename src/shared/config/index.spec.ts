@@ -22,7 +22,7 @@ describe('Shared Config', () => {
       const invalidConfig = {
         networking: {
           ws: {
-            uri: 'not-a-url',
+            timeoutMs: -1,
           },
         },
       };

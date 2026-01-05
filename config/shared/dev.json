@@ -1,7 +1,6 @@
 {
   "networking": {
     "ws": {
-      "uri": "ws://localhost:8745",
       "simulatedLatencyMs": 100
     }
   },
