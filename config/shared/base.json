@@ -17,7 +17,6 @@
   },
   "networking": {
     "ws": {
-      "uri": "",
       "timeoutMs": 5000,
       "simulatedLatencyMs": 0
     },
