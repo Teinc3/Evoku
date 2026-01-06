@@ -3,12 +3,37 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+
+  --combat-notif-width: 240px;
 }
 
 app-duel-hud-top {
   flex: 0 0 10%;
   width: 90%;
-  margin-bottom: 3%;
+  padding-bottom: 0;
+}
+
+app-duel-hud-top.combat-side-mode {
+  padding-bottom: 0;
+}
+
+.combat-top-row {
+  width: 100%;
+  height: 6rem;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: stretch;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.combat-top-row app-combat-notification-holder {
+  width: var(--combat-notif-width);
+  height: 100%;
+}
+
+.combat-top-row app-combat-notification {
+  height: 100%;
 }
 
 .hud-centre {
@@ -58,9 +83,15 @@ app-duel-hud-top {
     aspect-ratio: var(--util-r);
   }
 
+  app-combat-notification-holder[data-mode='SIDE'] {
+    width: var(--combat-notif-width);
+    min-width: var(--combat-notif-width);
+    height: 100%;
+  }
+
   /* Permit any direct child to shrink below its intrinsic content size when necessary.
      This is important for grid/flex children to avoid an unshrinkable minimum width. */
-  > * {
+  > :not(app-combat-notification-holder) {
     min-width: 0;
   }
 }

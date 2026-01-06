@@ -1,5 +1,6 @@
 <!--Hud at the top-->
 <app-duel-hud-top
+	[class.combat-side-mode]="isCombatSideMode()"
 	[boardProgress1]="gameState.getPlayerBoard(gameState.myID).progress"
 	[boardProgress2]="gameState.getPlayerBoard(1 - gameState.myID).progress"
 	[startTime]="gameState.timeCoordinator.startTime"
@@ -7,12 +8,36 @@
 	[phase]="gameState.matchState.phase"
 ></app-duel-hud-top>
 
+@if (!isCombatSideMode()) {
+  <div class="combat-top-row">
+    <app-combat-notification-holder mode="TOP" owner="ME">
+      <app-combat-notification
+        [isOutbound]="false"
+        [secondsLeft]="5"
+        [defuseObjective]=0
+        [pupLabel]="'CYRO 1'"
+      />
+    </app-combat-notification-holder>
+    <app-combat-notification-holder mode="TOP" owner="OPPONENT" />
+  </div>
+}
+
 <!-- This contains everything in the centre, including the two boards, PUP Bars, and central buttons-->
 <div class="hud-centre">
   <app-universal-progress-bar
     [percentage]="gameState.getPlayerState(gameState.myID).gameState?.pupProgress ?? 0"
     [isVertical]="true"
   />
+  @if (isCombatSideMode()) {
+    <app-combat-notification-holder mode="SIDE" owner="ME">
+      <app-combat-notification
+        [isOutbound]="false"
+        [secondsLeft]="5"
+        [defuseObjective]=0
+        [pupLabel]="'CYRO 1'"
+      />
+    </app-combat-notification-holder>
+  }
   <app-board-model
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
@@ -32,6 +57,9 @@
     (sendPacket)="duelActionDispatcher.dispatch($event)"
     (selectionChanged)="onBoardSelectionChanged(1)"
   />
+  @if (isCombatSideMode()) {
+    <app-combat-notification-holder mode="SIDE" owner="OPPONENT" />
+  }
   <app-universal-progress-bar
     [percentage]="gameState.getPlayerState(1 - gameState.myID).gameState?.pupProgress ?? 0"
     [isVertical]="true"

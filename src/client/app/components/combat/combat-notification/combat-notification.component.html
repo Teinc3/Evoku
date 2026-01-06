@@ -1,0 +1,22 @@
+<div class="combat-notification" [attr.data-outbound]="isOutbound">
+  <div class="combat-notification-top">
+    <div class="combat-notification-direction">
+      {{ isOutbound ? 'OUTGOING' : 'INCOMING' }}
+    </div>
+    <div class="combat-notification-timer">
+      {{ timerLabel }}
+    </div>
+  </div>
+
+  <div class="combat-notification-bottom">
+    <div class="combat-notification-icon" aria-hidden="true"></div>
+    <div class="combat-notification-content">
+      <div class="combat-notification-label">
+        {{ pupLabel }}
+      </div>
+      <div class="combat-notification-objective">
+        DEFUSE {{ defuseObjective == 0 ? "ROW" : defuseObjective == 1 ? "COLUMN" : "GRID" }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,12 @@
 import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ViewChild,
+  signal,
+} from '@angular/core';
 
 import ViewStateService from '../../../../services/view-state';
 import NetworkService from '../../../../services/network';
@@ -14,6 +21,11 @@ import UtilityButtonsHolderComponent
   from '../../../../components/controls/utility-buttons-holder/utility-buttons-holder.component';
 import NumericButtonsHolderComponent 
   from '../../../../components/controls/numeric-buttons-holder/numeric-buttons-holder.component';
+import CombatNotificationHolderComponent
+  from
+  '../../../../components/combat/combat-notification-holder/combat-notification-holder.component';
+import CombatNotificationComponent
+  from '../../../../components/combat/combat-notification/combat-notification.component';
 import BoardModelComponent from '../../../../components/board/board.component';
 import { AppView } from '../../../../../types/enums';
 import { DuelActionDispatcher, DuelActionListener } from '../../../../../game/handlers';
@@ -34,12 +46,16 @@ import type { MatchFoundContract } from '@shared/types/contracts';
     NumericButtonsHolderComponent,
     PupSlotsHolderComponent,
     PupSpinnerComponent,
+    CombatNotificationComponent,
+    CombatNotificationHolderComponent,
   ],
   templateUrl: './duel.demo.html',
   styleUrl: './duel.demo.scss'
 })
 export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterViewInit {
   static readonly MAX_PLAYER_COUNT = 2;
+  private static readonly COMBAT_SIDE_MODE_ENTER_PX = 2250;
+  private static readonly COMBAT_SIDE_MODE_EXIT_PX = 2200;
   public readonly gameState: GameStateManager;
   private readonly subscriptions: Subscription;
   protected AppView = AppView;
@@ -52,6 +68,10 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   pupSpinner?: PupSpinnerComponent;
   @ViewChild('myPupSlots')
   myPupSlots?: PupSlotsHolderComponent;
+
+  protected readonly isCombatSideMode = signal<boolean>(false);
+
+  private isViewportListenerBound = false;
 
   constructor(
     protected viewStateService: ViewStateService,
@@ -86,6 +106,8 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
       onBeginPupSettling: () => this.pupSpinner?.beginSettling(),
       onSetPupSettlingType: element => this.pupSpinner?.setSettlingType(element)
     });
+
+    this.bindViewportModeListener();
   }
 
   ngOnInit(): void {
@@ -102,6 +124,11 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
     this.gameState.clearMatchData();
     this.networkService.disconnect();
     this.subscriptions.unsubscribe();
+
+    if (this.isViewportListenerBound) {
+      window.removeEventListener('resize', this.onViewportResize);
+      this.isViewportListenerBound = false;
+    }
   }
 
   /** Handle quit action: disconnect and navigate to catalogue */
@@ -116,6 +143,36 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
       this.board2.selected.set(null);
     } else if (boardIndex === 1) {
       this.board1.selected.set(null);
+    }
+  }
+
+  private bindViewportModeListener(): void {
+    if (this.isViewportListenerBound) {
+      return;
+    }
+
+    this.isViewportListenerBound = true;
+    window.addEventListener('resize', this.onViewportResize);
+    this.recalculateCombatModeFromViewport();
+  }
+
+  private readonly onViewportResize = (): void => {
+    this.recalculateCombatModeFromViewport();
+  };
+
+  private recalculateCombatModeFromViewport(): void {
+    const width = window.innerWidth;
+    const currentSideMode = this.isCombatSideMode();
+
+    let nextSideMode = currentSideMode;
+    if (currentSideMode) {
+      nextSideMode = width >= DuelDemoPageComponent.COMBAT_SIDE_MODE_EXIT_PX;
+    } else {
+      nextSideMode = width >= DuelDemoPageComponent.COMBAT_SIDE_MODE_ENTER_PX;
+    }
+
+    if (nextSideMode !== currentSideMode) {
+      this.isCombatSideMode.set(nextSideMode);
     }
   }
 }

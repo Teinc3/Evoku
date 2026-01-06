@@ -1,0 +1,82 @@
+:host {
+  display: block;
+}
+
+.combat-notification {
+  width: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  padding: 0.55rem 0.65rem;
+  box-sizing: border-box;
+
+  background: var(--bg-surface);
+  border: 1px solid var(--surface-frame);
+  border-radius: 0.55rem;
+  box-shadow: var(--surface-glow);
+  color: var(--text-body);
+
+  backdrop-filter: blur(6px);
+}
+
+.combat-notification[data-outbound='false'] {
+  border-color: color-mix(in srgb, var(--state-danger) 70%, var(--surface-frame));
+}
+
+.combat-notification[data-outbound='true'] {
+  border-color: color-mix(in srgb, var(--state-success) 70%, var(--surface-frame));
+}
+
+.combat-notification-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.combat-notification-direction {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.combat-notification-timer {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+.combat-notification-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.combat-notification-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+
+  border-radius: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--surface-frame) 55%, transparent);
+  background: color-mix(in srgb, var(--ui-frame) 18%, transparent);
+}
+
+.combat-notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.combat-notification-label {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.combat-notification-objective {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}

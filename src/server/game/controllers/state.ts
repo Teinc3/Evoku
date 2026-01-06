@@ -135,6 +135,11 @@ export default class GameStateController {
         powerups: initPUPSlots()
       };
 
+      if (process.env['DEBUG_START_PUP'] === 'true') {
+        playerState.gameState.pupProgress = 100;
+        this.callbacks.onProgressUpdate(false, [{ playerID, progress: 100 }]);
+      }
+
       // Also create a solution set for this player
       this.solutions.set(playerID, this.baseBoard[1]);
     }
