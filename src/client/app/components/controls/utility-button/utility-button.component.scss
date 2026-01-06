@@ -3,16 +3,16 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  align-self: center;
+  width: clamp(2rem, 100%, 6rem);
   aspect-ratio: 1 / 1;
+  container-type: size;
   background: var(--bg-surface);
   backdrop-filter: blur(4px);
   border: 3px solid var(--surface-frame);
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
-  padding: 0.55rem 0.4rem;
-  box-sizing: border-box;
   position: relative;
   user-select: none;
   color: var(--text-body);
@@ -55,14 +55,14 @@
   }
 
   .material-icons {
-    font-size: 1.9rem;
+    font-size: clamp(1.25rem, 40cqh, 2.5rem);
     line-height: 1;
     transition: color 160ms ease;
   }
 
   .label {
-    font-size: 0.72rem;
-    margin-top: 0.25rem;
+    font-size: clamp(0.5rem, 20cqh, 0.9rem);
+    margin-top: clamp(0.1rem, 5cqh, 0.4rem);
     letter-spacing: 0.5px;
     text-transform: uppercase;
     font-weight: 600;

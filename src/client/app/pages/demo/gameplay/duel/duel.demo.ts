@@ -54,8 +54,8 @@ import type { MatchFoundContract } from '@shared/types/contracts';
 })
 export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterViewInit {
   static readonly MAX_PLAYER_COUNT = 2;
-  private static readonly COMBAT_SIDE_MODE_ENTER_PX = 2250;
-  private static readonly COMBAT_SIDE_MODE_EXIT_PX = 2200;
+  private static readonly COMBAT_SIDE_MODE_ENTER_RATIO = 2.1;
+  private static readonly COMBAT_SIDE_MODE_EXIT_RATIO = 2;
   public readonly gameState: GameStateManager;
   private readonly subscriptions: Subscription;
   protected AppView = AppView;
@@ -162,13 +162,15 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
 
   private recalculateCombatModeFromViewport(): void {
     const width = window.innerWidth;
+    const height = Math.max(1, window.innerHeight);
+    const viewportRatio = width / height;
     const currentSideMode = this.isCombatSideMode();
 
     let nextSideMode = currentSideMode;
     if (currentSideMode) {
-      nextSideMode = width >= DuelDemoPageComponent.COMBAT_SIDE_MODE_EXIT_PX;
+      nextSideMode = viewportRatio >= DuelDemoPageComponent.COMBAT_SIDE_MODE_EXIT_RATIO;
     } else {
-      nextSideMode = width >= DuelDemoPageComponent.COMBAT_SIDE_MODE_ENTER_PX;
+      nextSideMode = viewportRatio >= DuelDemoPageComponent.COMBAT_SIDE_MODE_ENTER_RATIO;
     }
 
     if (nextSideMode !== currentSideMode) {

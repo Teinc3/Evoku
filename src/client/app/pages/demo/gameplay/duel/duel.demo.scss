@@ -57,8 +57,8 @@ app-duel-hud-top {
   }
 
   app-universal-progress-bar {
-    height: 100%;
-    aspect-ratio: 1 / 12;
+    height: 102%;
+    aspect-ratio: 1 / 14;
   }
 
   app-utility-buttons-holder {
@@ -100,7 +100,7 @@ app-duel-hud-top {
   app-numeric-buttons-holder {
     display: block;
     /* Reduce basis so it doesn't dominate; prevent growing beyond its basis. */
-    flex: 0 1 45%;
+    flex: 0 1 min(45%, 45rem);
     min-width: 0;
   }
 
