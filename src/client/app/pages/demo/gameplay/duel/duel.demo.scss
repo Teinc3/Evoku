@@ -3,7 +3,6 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-
   --combat-notif-width: 240px;
 }
 
@@ -11,10 +10,10 @@ app-duel-hud-top {
   flex: 0 0 10%;
   width: 90%;
   padding-bottom: 0;
-}
 
-app-duel-hud-top.combat-side-mode {
-  padding-bottom: 0;
+  .combat-side-mode {
+    padding-bottom: 0;
+  }
 }
 
 .combat-top-row {
@@ -25,74 +24,52 @@ app-duel-hud-top.combat-side-mode {
   align-items: stretch;
   padding-bottom: 1rem;
   box-sizing: border-box;
-}
 
-.combat-top-row app-combat-notification-holder {
-  width: var(--combat-notif-width);
-  height: 100%;
-}
-
-.combat-top-row app-combat-notification {
-  height: 100%;
-}
-
-.hud-centre {
-  flex: 1 1 auto;
-  /* Ratios used to derive widths from height (no deformation) */
-  --bar-r: 0.08;   /* bar width = --bar-r * height */
-  --util-r: 0.18; /* utility width = --util-r * height */
-  --gaps: 4;      /* number of gaps between 5 items */
-  --gap-x: 16px;  /* equal gap between items */
-  --width-factor: calc(2 + (2 * var(--bar-r)) + var(--util-r)); /* width/height ratio for cluster */
-
-  /* Let the cluster size itself from available width (so items shrink when width is tight).
-     width/height = --width-factor, therefore height = width / --width-factor. Cap height to 75%. */
-  box-sizing: border-box;
-  width: 100%;
-  aspect-ratio: var(--width-factor); /* enforces height derived from width */
-  min-height: 0%;
-  max-height: 75%; /* cap so it never becomes taller than the surrounding area */
-
-  /* Grid: five columns sized by content, centered with fixed equal gaps */
-  display: grid;
-  grid-auto-flow: column;
-  /* Allow columns to shrink below their content's intrinsic size when necessary.
-    Using `auto` with `min-width: 0` on children permits the aspect-ratio-driven
-    layout to reduce sizes further instead of hitting a hard cutoff. */
-  grid-auto-columns: auto;
-  justify-content: center; /* center the whole cluster */
-  align-items: end;      /* align items to the bottom so boards/utilities sit on the same baseline as bars */
-  column-gap: var(--gap-x); /* equal spacing */
-  padding: 0 1rem;
-
-  /* Vertical progress bars: derive width from height via aspect-ratio */
-  app-universal-progress-bar {
-    height: 105%;
-    aspect-ratio: var(--bar-r);
-  }
-
-  /* Boards: perfect squares, capped by container height */
-  app-board-model {
-    aspect-ratio: 1 / 1; /* square board */
-    align-self: end;
-  }
-
-  /* Utility cluster: width proportional to height, non-deforming */
-  app-utility-buttons-holder {
-    height: 100%;
-    aspect-ratio: var(--util-r);
-  }
-
-  app-combat-notification-holder[data-mode='SIDE'] {
-    width: var(--combat-notif-width);
+  app-combat-notification-holder {
     min-width: var(--combat-notif-width);
     height: 100%;
   }
 
-  /* Permit any direct child to shrink below its intrinsic content size when necessary.
-     This is important for grid/flex children to avoid an unshrinkable minimum width. */
-  > :not(app-combat-notification-holder) {
+  ::ng-deep app-combat-notification {
+    height: 100%;
+  }
+}
+
+.hud-centre {
+  width: 100%;
+  min-height: 0;
+  max-height: 75%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  container-type: size;
+  flex: 1 1 auto;
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1%;
+
+  app-board-model {
+    height: 100%;
     min-width: 0;
+    max-width: 100cqh;
+    flex: 1 1 auto;
+  }
+
+  app-universal-progress-bar {
+    height: 100%;
+    aspect-ratio: 1 / 12;
+  }
+
+  app-utility-buttons-holder {
+    height: 100%;
+    aspect-ratio: 1 / 6;
+  }
+
+  app-combat-notification-holder[data-mode='SIDE'] {
+    min-width: var(--combat-notif-width);
+    height: 100%;
+    flex: 1 1 var(--combat-notif-width);
   }
 }
 
