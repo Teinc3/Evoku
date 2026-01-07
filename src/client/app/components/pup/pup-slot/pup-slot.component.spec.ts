@@ -125,6 +125,33 @@ describe('PupSlotComponent', () => {
     }));
   });
 
+  describe('glow lifecycle', () => {
+
+    it('should apply glow class then clear it after timeout', fakeAsync(() => {
+      const comp = component as unknown as { glowClass: boolean };
+      expect(comp.glowClass).toBe(false);
+
+      component.beginGlow();
+      expect(comp.glowClass).toBe(true);
+
+      tick(550);
+      expect(comp.glowClass).toBe(false);
+    }));
+
+    it('should clear glow timeout on destroy', fakeAsync(() => {
+      const comp = component as unknown as { glowClass: boolean };
+
+      component.beginGlow();
+      expect(comp.glowClass).toBe(true);
+
+      component.ngOnDestroy();
+      tick(550);
+
+      // should remain glowing because the timeout was cleared
+      expect(comp.glowClass).toBe(true);
+    }));
+  });
+
   describe('template rendering', () => {
 
     it('should render slot wrapper', () => {

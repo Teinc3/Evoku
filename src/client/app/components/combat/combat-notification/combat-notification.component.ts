@@ -1,4 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+import pupConfig from '@config/shared/pup.json';
+
+import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
 
 
 @Component({
@@ -11,15 +15,34 @@ export default class CombatNotificationComponent {
   @Input({ required: true })
   public isOutbound!: boolean;
   @Input({ required: true })
-  public secondsLeft!: number;
-  @Input({ required: true })
   public defuseObjective!: number;
-  /** Placeholder name for now; will be wired to real PUP later. */
   @Input({ required: true })
-  public pupLabel!: string;
+  public pupSlot!: IPUPSlotState;
+  @Output()
+  public readonly pupSlotClicked: EventEmitter<number>;
+
+  protected pupConfig = pupConfig; // Expose to template
+
+  constructor() {
+    this.pupSlotClicked = new EventEmitter<number>();
+  }
 
   protected get timerLabel(): string {
-    const safeSeconds = Math.max(0, Math.floor(this.secondsLeft));
-    return `${safeSeconds}s`;
+    const msLeft
+      = (this.pupSlot.pendingCooldownEnd ?? this.pupSlot.lastCooldownEnd) - performance.now();
+    const secondsDisplay = Math.floor((msLeft / 1000) % 60).toString().padStart(2, '0');
+    const centiSecondsDisplay = Math.floor((msLeft % 1000) / 10).toString().padStart(2, '0');
+    return `${secondsDisplay}:${centiSecondsDisplay}`;
+  }
+
+  protected onPupClicked(event: MouseEvent): void {
+    event.stopPropagation();
+
+    const slotIndex = this.pupSlot?.slotIndex;
+    if (slotIndex === undefined || slotIndex === null) {
+      return;
+    }
+
+    this.pupSlotClicked.emit(slotIndex);
   }
 }

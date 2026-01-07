@@ -79,6 +79,38 @@ describe('PupSlotsHolderComponent', () => {
     expect(beginShakeSpy).toHaveBeenCalled();
   });
 
+  it('should call beginGlow on the matching slot component', () => {
+    const beginGlowSpy = jasmine.createSpy('beginGlow');
+
+    const slot0: IPUPSlotState = { slotIndex: 0, lastCooldownEnd: 0, locked: false };
+    const slot1: IPUPSlotState = { slotIndex: 1, lastCooldownEnd: 0, locked: false };
+
+    const slotComp0 = {
+      slot: slot0,
+      beginGlow: jasmine.createSpy('beginGlow0'),
+    } as unknown as PupSlotComponent;
+
+    const slotComp1 = {
+      slot: slot1,
+      beginGlow: beginGlowSpy,
+    } as unknown as PupSlotComponent;
+
+    const listLike = {
+      find: (predicate: (comp: PupSlotComponent) => boolean) => {
+        return [slotComp0, slotComp1].find(predicate);
+      },
+    } as unknown as QueryList<PupSlotComponent>;
+
+    const componentWithSlotComponents = component as unknown as {
+      slotComponents?: QueryList<PupSlotComponent>;
+    };
+    componentWithSlotComponents.slotComponents = listLike;
+
+    component.glowSlot(1);
+
+    expect(beginGlowSpy).toHaveBeenCalled();
+  });
+
   it('should not call beginShake when slot index does not match', () => {
     const slot0: IPUPSlotState = { slotIndex: 0, lastCooldownEnd: 0, locked: false };
 

@@ -21,9 +21,12 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
   slotClicked: EventEmitter<number>;
 
   private static readonly SHAKE_MS = 350;
+  private static readonly GLOW_MS = 550;
   public readonly countdownHelper: CooldownAnimationHelper;
   private shakeTimeoutId: number | null;
   private isShaking: boolean;
+  private glowTimeoutId: number | null;
+  private isGlowing: boolean;
 
   constructor() {
     this.slot = null;
@@ -31,6 +34,8 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
     this.countdownHelper = new CooldownAnimationHelper();
     this.shakeTimeoutId = null;
     this.isShaking = false;
+    this.glowTimeoutId = null;
+    this.isGlowing = false;
   }
 
   ngDoCheck(): void {
@@ -52,11 +57,19 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
       clearTimeout(this.shakeTimeoutId);
       this.shakeTimeoutId = null;
     }
+    if (this.glowTimeoutId !== null) {
+      clearTimeout(this.glowTimeoutId);
+      this.glowTimeoutId = null;
+    }
   }
 
   @HostBinding('class.shake')
   get shakeClass(): boolean {
     return this.isShaking;
+  }
+  @HostBinding('class.glow')
+  get glowClass(): boolean {
+    return this.isGlowing;
   }
 
   public beginShake(): void {
@@ -66,10 +79,23 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
       clearTimeout(this.shakeTimeoutId);
     }
 
-    this.shakeTimeoutId = window.setTimeout(() => {
+    this.shakeTimeoutId = setTimeout(() => {
       this.isShaking = false;
       this.shakeTimeoutId = null;
     }, PupSlotComponent.SHAKE_MS);
+  }
+
+  public beginGlow(): void {
+    this.isGlowing = true;
+
+    if (this.glowTimeoutId !== null) {
+      clearTimeout(this.glowTimeoutId);
+    }
+
+    this.glowTimeoutId = setTimeout(() => {
+      this.isGlowing = false;
+      this.glowTimeoutId = null;
+    }, PupSlotComponent.GLOW_MS);
   }
 
   protected onClick(): void {

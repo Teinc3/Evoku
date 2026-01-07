@@ -10,15 +10,32 @@
 
 @if (!isCombatSideMode()) {
   <div class="combat-top-row">
-    <app-combat-notification-holder mode="TOP" owner="ME">
-      <app-combat-notification
-        [isOutbound]="false"
-        [secondsLeft]="5"
-        [defuseObjective]=0
-        [pupLabel]="'CYRO 1'"
-      />
+    <app-combat-notification-holder [isSide]="false" [isMine]="true">
+      @for (slot of enemyPupSlots.slots; track slot.slotIndex) {
+        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
+        @if (cooldownEnd > performance.now()) {
+          <app-combat-notification
+            [isOutbound]="false"
+            [defuseObjective]="slot.slotIndex"
+            [pupSlot]="slot"
+            (pupSlotClicked)="enemyPupSlots?.glowSlot($event)"
+          />
+        }
+      }
     </app-combat-notification-holder>
-    <app-combat-notification-holder mode="TOP" owner="OPPONENT" />
+    <app-combat-notification-holder [isSide]="false" [isMine]="false" >
+      @for (slot of myPupSlots.slots; track slot.slotIndex) {
+        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
+        @if (cooldownEnd > performance.now()) {
+          <app-combat-notification
+            [isOutbound]="true"
+            [defuseObjective]="slot.slotIndex"
+            [pupSlot]="slot"
+            (pupSlotClicked)="myPupSlots?.glowSlot($event)"
+          />
+        }
+      }
+    </app-combat-notification-holder>
   </div>
 }
 
@@ -29,13 +46,18 @@
     [isVertical]="true"
   />
   @if (isCombatSideMode()) {
-    <app-combat-notification-holder mode="SIDE" owner="ME">
-      <app-combat-notification
-        [isOutbound]="false"
-        [secondsLeft]="5"
-        [defuseObjective]=0
-        [pupLabel]="'CYRO 1'"
-      />
+    <app-combat-notification-holder [isSide]="true" [isMine]="true">
+      @for (slot of enemyPupSlots.slots; track slot.slotIndex) {
+        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
+        @if (cooldownEnd > performance.now()) {
+          <app-combat-notification
+            [isOutbound]="false"
+            [defuseObjective]="slot.slotIndex"
+            [pupSlot]="slot"
+            (pupSlotClicked)="enemyPupSlots?.glowSlot($event)"
+          />
+        }
+      }
     </app-combat-notification-holder>
   }
   <app-board-model
@@ -58,7 +80,19 @@
     (selectionChanged)="onBoardSelectionChanged(1)"
   />
   @if (isCombatSideMode()) {
-    <app-combat-notification-holder mode="SIDE" owner="OPPONENT" />
+    <app-combat-notification-holder [isSide]="true" [isMine]="false" >
+      @for (slot of myPupSlots.slots; track slot.slotIndex) {
+        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
+        @if (cooldownEnd > performance.now()) {
+          <app-combat-notification
+            [isOutbound]="true"
+            [defuseObjective]="slot.slotIndex"
+            [pupSlot]="slot"
+            (pupSlotClicked)="myPupSlots?.glowSlot($event)"
+          />
+        }
+      }
+    </app-combat-notification-holder>
   }
   <app-universal-progress-bar
     [percentage]="gameState.getPlayerState(1 - gameState.myID).gameState?.pupProgress ?? 0"
@@ -83,6 +117,7 @@
   </div>
   <app-numeric-buttons-holder (numberClick)="board1.parseNumberKey($event)"/>
   <app-pup-slots-holder
+    #enemyPupSlots
     [slots]="gameState.getPlayerState(1 - gameState.myID).gameState?.powerups"
   />
 </div>

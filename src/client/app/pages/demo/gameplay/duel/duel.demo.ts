@@ -59,6 +59,7 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   public readonly gameState: GameStateManager;
   private readonly subscriptions: Subscription;
   protected AppView = AppView;
+  protected performance = performance;
 
   @ViewChild('board1')
   board1!: BoardModelComponent;

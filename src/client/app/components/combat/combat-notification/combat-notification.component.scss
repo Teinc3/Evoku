@@ -1,7 +1,3 @@
-:host {
-  display: block;
-}
-
 .combat-notification {
   width: 15rem;
   display: flex;
@@ -12,9 +8,9 @@
   box-sizing: border-box;
 
   background: var(--bg-surface);
-  border: 1px solid var(--surface-frame);
+  border: 2px solid var(--surface-frame);
   border-radius: 0.55rem;
-  box-shadow: var(--surface-glow);
+  box-shadow: 0 0 10px var(--board-border);
   color: var(--text-body);
 
   backdrop-filter: blur(6px);
@@ -58,9 +54,27 @@
   width: 1.8rem;
   height: 1.8rem;
 
+  padding: 0;
+  display: grid;
+  place-items: center;
+
   border-radius: 0.45rem;
   border: 1px solid color-mix(in srgb, var(--surface-frame) 55%, transparent);
   background: color-mix(in srgb, var(--ui-frame) 18%, transparent);
+
+  cursor: pointer;
+}
+
+.combat-notification-icon:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.combat-notification-pup-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+  image-rendering: optimizeQuality;
 }
 
 .combat-notification-content {
@@ -73,6 +87,7 @@
 .combat-notification-label {
   font-size: 0.85rem;
   letter-spacing: 0.04em;
+  text-align: left;
 }
 
 .combat-notification-objective {

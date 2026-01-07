@@ -37,4 +37,13 @@ export default class PupSlotsHolderComponent {
 
     slotComp.beginShake();
   }
+
+  public glowSlot(slotIndex: number): void {
+    const slotComp = this.slotComponents?.find(comp => comp.slot?.slotIndex === slotIndex);
+    if (!slotComp) {
+      return;
+    }
+
+    slotComp.beginGlow();
+  }
 }

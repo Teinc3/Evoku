@@ -1,24 +1,24 @@
 :host {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
   pointer-events: none;
 }
 
-:host([data-mode='TOP']) {
-  align-items: stretch;
+:host([data-is-side="false"]) {
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+:host([data-is-side="true"]) {
+  justify-content: center;
+  flex-direction: column;
+  gap: 20%;
+}
+
+:host([data-is-side="false"][data-is-mine="true"]) {
   justify-content: flex-start;
 }
 
-:host([data-mode='SIDE']) {
-  justify-content: center;
-}
-
-:host([data-mode='SIDE'][data-owner='ME']) {
-  align-items: flex-end;
-}
-
-:host([data-mode='SIDE'][data-owner='OPPONENT']) {
-  align-items: flex-start;
+:host([data-is-side="false"][data-is-mine="false"]) {
+  justify-content: flex-end;
 }
