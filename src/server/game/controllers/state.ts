@@ -221,6 +221,9 @@ export default class GameStateController {
 
     if (!cell.pupProgressSet) {
       cell.pupProgressSet = true;
+      if (process.env['DEBUG_START_PUP'] === 'true') {
+        gameState.pupProgress += 100;
+      }
       gameState.pupProgress += sharedConfig.game.objectives.normalGain[this.matchState.phase];
     }
     if (cell.goldenObjectiveActive) {

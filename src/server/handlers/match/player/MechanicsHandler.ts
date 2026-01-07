@@ -75,7 +75,12 @@ export default class MechanicsHandler extends EnumHandler<MechanicsActions>
       return false;
     }
 
-    const chosenPUPConfig = pupConfig[Math.floor(Math.random() * pupConfig.length)];
+    let randomPUPType = Math.floor(Math.random() * pupConfig.length);
+    // For debug we want YANG pup (so if Yin i.e. odd number, then -1 for even/yang PUP)
+    if (process.env['DEBUG_START_PUP'] === 'true' && randomPUPType % 2 === 1) {
+      randomPUPType -= 1;
+    }
+    const chosenPUPConfig = pupConfig[randomPUPType];
     const element = PUPElements[chosenPUPConfig.element.toUpperCase() as keyof typeof PUPElements];
     const pupType = chosenPUPConfig.type;
 
