@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 
+import sharedConfig from '@shared/config';
 import statsService, { type StatsService } from '../services/stats';
 import OnlineSampler from '../services/sampler/OnlineSampler';
 import { SessionManager, RoomManager, MatchmakingManager } from '../managers';
@@ -24,7 +25,16 @@ export default class WSServer {
     httpServer: HttpServer,
   ) {
     // Attach the WebSocket server to the provided HTTP server instance
-    this.wss = new WebSocketServer({ server: httpServer });
+    this.wss = new WebSocketServer({
+      server: httpServer,
+      handleProtocols: protocols => {
+        if (protocols.has(sharedConfig.networking.ws.protocol)) {
+          return sharedConfig.networking.ws.protocol;
+        }
+
+        return false;
+      },
+    });
     this.configureWebSockets();
 
     // Initialize custom server services

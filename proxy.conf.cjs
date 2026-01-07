@@ -1,30 +1,35 @@
-module.exports = [
-  {
-    context: ['/api'],
-    target: 'http://localhost:8745',
+const protocol = require('./config/shared/base.json').networking.ws.protocol;
+
+
+module.exports = {
+  '/api': {
+    target: 'http://127.0.0.1:8745',
     secure: false,
     changeOrigin: true,
   },
-  {
-    context: (_pathname, req) => {
+  '/': {
+    target: 'http://127.0.0.1:8745',
+    secure: false,
+    changeOrigin: true,
+    ws: true,
+    bypass: req => {
       const upgradeHeader = req.headers.upgrade;
-      const isWebSocketUpgrade = typeof upgradeHeader === 'string'
-        && upgradeHeader.toLowerCase() === 'websocket';
 
-      if (!isWebSocketUpgrade) {
-        return false;
+      // Never proxy regular HTTP traffic on '/'.
+      if (typeof upgradeHeader !== 'string' || upgradeHeader.toLowerCase() !== 'websocket') {
+        return req.url;
       }
 
       const protocolHeader = req.headers['sec-websocket-protocol'];
       const protocols = String(protocolHeader ?? '');
 
-      // Vite (used by Angular dev-server) uses a websocket for HMR/livereload.
-      // It sets `Sec-WebSocket-Protocol: vite-hmr`, and must not be proxied.
-      return !protocols.toLowerCase().includes('vite-hmr');
+      // Leave Vite's HMR websocket and all other non-Evoku websockets alone.
+      if (protocols.includes('vite-hmr') || !protocols.includes(protocol)) {
+        return req.url;
+      }
+
+      // Allows the Evoku WebSocket to be proxied to the target.
+      return undefined;
     },
-    target: 'http://localhost:8745',
-    secure: false,
-    changeOrigin: true,
-    ws: true,
   },
-];
+};

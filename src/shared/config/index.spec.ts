@@ -28,6 +28,18 @@ describe('Shared Config', () => {
       };
       expect(() => SharedConfigSchema.parse(invalidConfig)).toThrow();
     });
+
+    it('should fail validation when websocket protocol is empty', () => {
+      const invalidConfig = deepMerge(baseConfig, {
+        networking: {
+          ws: {
+            protocol: '',
+          },
+        },
+      });
+
+      expect(() => SharedConfigSchema.parse(invalidConfig)).toThrow();
+    });
   });
 
   describe('Version Consistency', () => {

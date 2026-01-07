@@ -1,4 +1,5 @@
 import PacketIO from '@shared/networking/utils/PacketIO';
+import sharedConfig from '@shared/config';
 
 import type AugmentAction from '@shared/types/utils/AugmentAction';
 import type ActionEnum from '@shared/types/enums/actions';
@@ -47,7 +48,7 @@ export default class ClientSocket {
       return;
     }
 
-    this.ws = new WebSocket(this.url);
+    this.ws = new WebSocket(this.url, sharedConfig.networking.ws.protocol);
     this.ws.binaryType = 'arraybuffer';
 
     await new Promise<void>((resolve, reject) => {
