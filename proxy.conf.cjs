@@ -16,7 +16,7 @@ module.exports = {
       const upgradeHeader = req.headers.upgrade;
 
       // Never proxy regular HTTP traffic on '/'.
-      if (typeof upgradeHeader !== 'string' || upgradeHeader.toLowerCase() === 'websocket') {
+      if (typeof upgradeHeader !== 'string' || upgradeHeader.toLowerCase() !== 'websocket') {
         return req.url;
       }
 

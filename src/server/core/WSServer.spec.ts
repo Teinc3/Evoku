@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
-import WSCloseCode from '@shared/types/enums/ws-codes.enum';
 import sharedConfig from '@shared/config';
 import { SessionManager, RoomManager } from '../managers';
 import WSServer from "./WSServer";
@@ -118,21 +117,5 @@ describe('WSServer Integration Test', () => {
     // Assert that the SessionManager was told to create a new session
     expect(createSessionSpy).toHaveBeenCalledTimes(1);
     expect(createSessionSpy).toHaveBeenCalledWith(mockClientSocket);
-  });
-
-  it('should close the connection and not create a session when protocol is wrong', () => {
-    const createSessionSpy = jest.spyOn(mockSessionManager, 'createSession');
-    const closeSpy = jest.fn();
-
-    const mockClientSocket = {
-      protocol: 'wrong-protocol',
-      close: closeSpy,
-    };
-
-    mockWssInstance.emit('connection', mockClientSocket);
-
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-    expect(closeSpy).toHaveBeenCalledWith(WSCloseCode.PROTOCOL_ERROR);
-    expect(createSessionSpy).not.toHaveBeenCalled();
   });
 });

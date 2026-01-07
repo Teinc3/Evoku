@@ -1,6 +1,5 @@
 import { WebSocketServer } from 'ws';
 
-import WSCloseCode from '@shared/types/enums/ws-codes.enum';
 import sharedConfig from '@shared/config';
 import statsService, { type StatsService } from '../services/stats';
 import OnlineSampler from '../services/sampler/OnlineSampler';
@@ -58,12 +57,6 @@ export default class WSServer {
   private configureWebSockets(): void {
     this.wss.on('connection', ws => {
       ws.binaryType = 'arraybuffer';
-
-      if (ws.protocol !== sharedConfig.networking.ws.protocol) {
-        ws.close(WSCloseCode.PROTOCOL_ERROR);
-        return;
-      }
-
       this.sessionManager.createSession(ws);
     });
   }
