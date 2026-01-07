@@ -17,6 +17,7 @@
   },
   "networking": {
     "ws": {
+      "protocol": "evoku-ws",
       "timeoutMs": 5000,
       "simulatedLatencyMs": 0
     },

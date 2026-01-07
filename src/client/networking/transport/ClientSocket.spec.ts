@@ -1,5 +1,6 @@
 import '@shared/networking/packets';
 import { SessionActions } from '@shared/types/enums/actions';
+import sharedConfig from '@shared/config';
 import ClientSocket from '.';
 
 
@@ -164,7 +165,10 @@ describe('ClientSocket', () => {
         ? `wss://${window.location.host}`
         : `ws://${window.location.host}`;
 
-      expect(window.WebSocket).toHaveBeenCalledWith(expectedUrl);
+      expect(window.WebSocket).toHaveBeenCalledWith(
+        expectedUrl,
+        sharedConfig.networking.ws.protocol
+      );
 
       // Simulate WebSocket opening
       mockWebSocket.simulateOpen();

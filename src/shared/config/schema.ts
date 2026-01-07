@@ -20,6 +20,7 @@ export const SharedConfigSchema = z.object({
   }),
   networking: z.object({
     ws: z.object({
+      protocol: z.string().min(1),
       timeoutMs: z.number().int().nonnegative(),
       simulatedLatencyMs: z.number().int().nonnegative(),
     }),

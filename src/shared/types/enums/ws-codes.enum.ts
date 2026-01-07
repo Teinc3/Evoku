@@ -13,15 +13,10 @@ enum WSCloseCode {
    */
   NORMAL_CLOSURE = 1000,
   
-  /**
-   * The endpoint is going away, either because of a server failure
-   * or browser navigation.
-   */
+  /** The endpoint is going away, either because of a server failure or browser navigation */
   GOING_AWAY = 1001,
   
-  /**
-   * The endpoint is terminating the connection due to a protocol error.
-   */
+  /** The endpoint is terminating the connection due to a protocol error */
   PROTOCOL_ERROR = 1002,
   
   /**
@@ -33,16 +28,10 @@ enum WSCloseCode {
   /** Reserved. A meaning might be defined in the future. */
   RESERVED = 1004,
   
-  /**
-   * Reserved. Indicates that no status code was provided even though
-   * one was expected.
-   */
+  /** Reserved. Indicates that no status code was provided even though one was expected */
   NO_STATUS_RECEIVED = 1005,
   
-  /**
-   * Reserved. Indicates an abnormal closure without sending/receiving
-   * a close frame.
-   */
+  /** Reserved. Indicates an abnormal closure without sending/receiving a close frame */
   ABNORMAL_CLOSURE = 1006,
   
   /**
@@ -69,31 +58,19 @@ enum WSCloseCode {
    */
   MANDATORY_EXTENSION = 1010,
   
-  /**
-   * The server is terminating the connection because it encountered
-   * an unexpected condition.
-   */
+  /** The server is terminating the connection because it encountered an unexpected condition */
   INTERNAL_ERROR = 1011,
   
   /** The server is terminating the connection because it is restarting. */
   SERVICE_RESTART = 1012,
   
-  /**
-   * The server is terminating the connection due to a temporary condition
-   * (e.g., overloaded).
-   */
+  /** The server is terminating the connection due to a temporary condition (e.g., overloaded) */
   TRY_AGAIN_LATER = 1013,
   
-  /**
-   * The server acting as a gateway received an invalid response
-   * from an upstream server.
-   */
+  /** The server acting as a gateway received an invalid response from an upstream server */
   BAD_GATEWAY = 1014,
   
-  /**
-   * Reserved. Indicates that the connection was closed due to
-   * a TLS handshake failure.
-   */
+  /** Reserved. Indicates that the connection was closed due to a TLS handshake failure */
   TLS_HANDSHAKE_FAILED = 1015,
   
   // Custom application codes (4000-4999)

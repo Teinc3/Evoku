@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
 import { jest } from '@jest/globals';
 
+import WSCloseCode from '@shared/types/enums/ws-codes.enum';
+import sharedConfig from '@shared/config';
 import { SessionManager, RoomManager } from '../managers';
 import WSServer from "./WSServer";
 
@@ -78,23 +80,59 @@ describe('WSServer Integration Test', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { WebSocketServer } = require('ws');
     expect(WebSocketServer).toHaveBeenCalledTimes(1);
-    expect(WebSocketServer).toHaveBeenCalledWith({ server: httpServer });
+    expect(WebSocketServer).toHaveBeenCalledWith(expect.objectContaining({
+      server: httpServer,
+      handleProtocols: expect.any(Function),
+    }));
 
     // Assert that our internal managers were instantiated by the WSServer constructor
     expect(SessionManager).toHaveBeenCalledTimes(1);
     expect(RoomManager).toHaveBeenCalledTimes(1);
   });
 
-  it('should create a new ServerSocket and a new Session when a client connects', () => {
+  it('should negotiate the configured subprotocol and reject others', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { WebSocketServer } = require('ws') as {
+      WebSocketServer: jest.Mock;
+    };
+
+    const options = WebSocketServer.mock.calls[0][0] as {
+      handleProtocols: (protocols: Set<string>) => string | false;
+    };
+
+    const expectedProtocol = sharedConfig.networking.ws.protocol;
+    expect(options.handleProtocols(new Set([expectedProtocol]))).toBe(expectedProtocol);
+    expect(options.handleProtocols(new Set(['some-other-protocol']))).toBe(false);
+  });
+
+  it('should create a new session when a client connects with correct protocol', () => {
     // Spy on the mock session manager's createSession method
     const createSessionSpy = jest.spyOn(mockSessionManager, 'createSession');
     
     // Simulate a new client connecting by manually emitting the 'connection' event
-    const mockClientSocket = {}; // A simple object to represent the client connection
+    const mockClientSocket = {
+      protocol: sharedConfig.networking.ws.protocol,
+    }; // A simple object to represent the client connection
     mockWssInstance.emit('connection', mockClientSocket);
 
     // Assert that the SessionManager was told to create a new session
     expect(createSessionSpy).toHaveBeenCalledTimes(1);
     expect(createSessionSpy).toHaveBeenCalledWith(mockClientSocket);
+  });
+
+  it('should close the connection and not create a session when protocol is wrong', () => {
+    const createSessionSpy = jest.spyOn(mockSessionManager, 'createSession');
+    const closeSpy = jest.fn();
+
+    const mockClientSocket = {
+      protocol: 'wrong-protocol',
+      close: closeSpy,
+    };
+
+    mockWssInstance.emit('connection', mockClientSocket);
+
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(closeSpy).toHaveBeenCalledWith(WSCloseCode.PROTOCOL_ERROR);
+    expect(createSessionSpy).not.toHaveBeenCalled();
   });
 });
