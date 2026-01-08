@@ -22,7 +22,7 @@ app-duel-hud-top {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  padding: 0 1rem 1rem 1rem;
+  padding: 0 1rem 0.5rem 1rem;
   box-sizing: border-box;
 
   app-combat-notification-holder {

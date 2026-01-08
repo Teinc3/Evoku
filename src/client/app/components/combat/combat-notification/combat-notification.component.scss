@@ -1,8 +1,9 @@
 .combat-notification {
-  width: 15rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
+  height: 100%;
+  width: 100%;
 
   padding: 0.55rem 0.65rem;
   box-sizing: border-box;
@@ -25,6 +26,7 @@
 }
 
 .combat-notification-top {
+  flex-grow: 0;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -32,35 +34,44 @@
 }
 
 .combat-notification-direction {
-  font-size: 0.7rem;
+  font-size: 90%;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.95;
 }
 
 .combat-notification-timer {
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
+  font-size: 90%;
   opacity: 0.9;
 }
 
 .combat-notification-bottom {
+  flex-grow: 1;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0.6rem;
+  container-type: size;
 }
 
 .combat-notification-icon {
-  width: 1.8rem;
-  height: 1.8rem;
+  align-self: center;
+  transform: rotate(45deg);
 
+  .combat-notification-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: rotate(-45deg);
+  }
+  aspect-ratio: 1/1;
+  height: 100cqh;
   padding: 0;
-  display: grid;
-  place-items: center;
 
-  border-radius: 0.45rem;
-  border: 1px solid color-mix(in srgb, var(--surface-frame) 55%, transparent);
-  background: color-mix(in srgb, var(--ui-frame) 18%, transparent);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  border: none;
+  background-color: transparent;
 
   cursor: pointer;
 }
@@ -70,28 +81,25 @@
   opacity: 0.6;
 }
 
-.combat-notification-pup-icon {
-  width: 1.35rem;
-  height: 1.35rem;
-  object-fit: contain;
-  image-rendering: optimizeQuality;
-}
 
 .combat-notification-content {
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
   gap: 0.1rem;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .combat-notification-label {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   letter-spacing: 0.04em;
   text-align: left;
 }
 
 .combat-notification-objective {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   letter-spacing: 0.06em;
   opacity: 0.85;
+  text-align: left;
 }

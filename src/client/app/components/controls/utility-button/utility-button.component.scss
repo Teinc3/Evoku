@@ -1,3 +1,10 @@
+:host {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .utility-button {
   display: flex;
   flex-direction: column;

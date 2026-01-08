@@ -11,13 +11,15 @@
   <div class="combat-notification-bottom">
     <button
       type="button"
-      class="combat-notification-icon"
+      class="combat-notification-icon combat-notification-pup-btn"
       (click)="onPupClicked($event)"
+      [attr.aria-label]="pupConfig[pupSlot.pup!.type]!.name"
     >
       <img
-        class="combat-notification-pup-icon"
+        class="combat-notification-icon-img"
         [src]="pupConfig[pupSlot.pup!.type]!.asset.icon"
-        alt="PUP"
+        alt=""
+        draggable="false"
       />
     </button>
     <div class="combat-notification-content">
