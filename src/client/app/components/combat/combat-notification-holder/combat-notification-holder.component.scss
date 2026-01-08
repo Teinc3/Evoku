@@ -1,6 +1,10 @@
 :host {
   display: flex;
   pointer-events: none;
+
+  ::ng-deep app-combat-notification {
+    pointer-events: auto;
+  }
 }
 
 :host([data-is-side="false"]) {

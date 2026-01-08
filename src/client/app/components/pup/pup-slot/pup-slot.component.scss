@@ -9,6 +9,7 @@
   width: 100%;
   height: 100%;
   transition: transform 120ms ease;
+  transform-origin: center;
 }
 
 .slot-wrapper:hover,
@@ -22,7 +23,7 @@
 
 :host(.glow) {
   .slot-wrapper {
-    animation: pup-glow 0.55s ease-out;
+    animation: pup-glow 1.5s ease-out;
   }
 }
 
@@ -140,16 +141,31 @@
 @keyframes pup-glow {
   0% {
     filter: drop-shadow(0 0 0 transparent);
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
-  45% {
+  20% {
     filter: drop-shadow(
-      0 0 12px color-mix(in srgb, var(--state-danger) 60%, transparent)
+      0 0 14px color-mix(in srgb, var(--state-danger) 60%, transparent)
     );
-    transform: scale(1.04);
+    transform: scale(1.08) rotate(-1deg);
+  }
+  28% {
+    transform: scale(1.08) rotate(1deg);
+  }
+  36% {
+    transform: scale(1.1) rotate(-0.8deg);
+  }
+  44% {
+    transform: scale(1.1) rotate(0.8deg);
+  }
+  60% {
+    filter: drop-shadow(
+      0 0 10px color-mix(in srgb, var(--state-danger) 55%, transparent)
+    );
+    transform: scale(1.06) rotate(-0.4deg);
   }
   100% {
     filter: drop-shadow(0 0 0 transparent);
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
 }

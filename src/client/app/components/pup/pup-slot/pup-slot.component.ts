@@ -21,7 +21,7 @@ export default class PupSlotComponent implements DoCheck, OnDestroy {
   slotClicked: EventEmitter<number>;
 
   private static readonly SHAKE_MS = 350;
-  private static readonly GLOW_MS = 550;
+  private static readonly GLOW_MS = 1500;
   public readonly countdownHelper: CooldownAnimationHelper;
   private shakeTimeoutId: number | null;
   private isShaking: boolean;

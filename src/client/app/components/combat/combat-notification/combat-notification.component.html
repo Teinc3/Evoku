@@ -1,9 +1,13 @@
-<div class="combat-notification" [attr.data-outbound]="isOutbound">
+<div
+  class="combat-notification"
+  [attr.data-outbound]="isOutbound"
+  [attr.data-element]="pupConfig[pupSlot.pup!.type]!.element"
+>
   <div class="combat-notification-top">
     <div class="combat-notification-direction">
       {{ isOutbound ? 'OUTGOING' : 'INCOMING' }}
     </div>
-    <div class="combat-notification-timer">
+    <div class="combat-notification-timer" [attr.data-urgent]="msLeft <= 3000">
       {{ timerLabel }}
     </div>
   </div>

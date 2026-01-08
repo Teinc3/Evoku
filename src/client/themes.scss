@@ -29,4 +29,10 @@
   --cd-pup: color-mix(in srgb, var(--state-danger) 45%, transparent); /* Glass Red (PUP Cooldown) */
   --state-success: #39ff14;            /* Acid Green (Valid/XP) */
   --state-danger: #ff003c;             /* Cyber Crimson (Attacks/Errors) */
+
+  --element-water: color-mix(in srgb, var(--ui-frame) 80%, var(--text-body));
+  --element-fire: color-mix(in srgb, var(--state-danger) 80%, var(--frame-txt));
+  --element-wood: color-mix(in srgb, var(--state-success) 80%, var(--ui-frame));
+  --element-earth: color-mix(in srgb, var(--frame-txt) 90%, var(--text-body));
+  --element-metal: color-mix(in srgb, var(--surface-frame) 75%, var(--ui-frame));
 }

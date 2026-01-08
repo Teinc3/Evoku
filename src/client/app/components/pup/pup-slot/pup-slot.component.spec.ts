@@ -134,7 +134,7 @@ describe('PupSlotComponent', () => {
       component.beginGlow();
       expect(comp.glowClass).toBe(true);
 
-      tick(550);
+      tick(1750);
       expect(comp.glowClass).toBe(false);
     }));
 

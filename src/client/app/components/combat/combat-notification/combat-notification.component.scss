@@ -4,6 +4,7 @@
   gap: 0.2rem;
   height: 100%;
   width: 100%;
+  user-select: none;
 
   padding: 0.55rem 0.65rem;
   box-sizing: border-box;
@@ -17,12 +18,47 @@
   backdrop-filter: blur(6px);
 }
 
+.combat-notification-direction {
+  font-size: 90%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.combat-notification[data-element='water'] {
+  --pup-element-color: var(--element-water);
+}
+
+.combat-notification[data-element='fire'] {
+  --pup-element-color: var(--element-fire);
+}
+
+.combat-notification[data-element='wood'] {
+  --pup-element-color: var(--element-wood);
+}
+
+.combat-notification[data-element='earth'] {
+  --pup-element-color: var(--element-earth);
+}
+
+.combat-notification[data-element='metal'] {
+  --pup-element-color: var(--element-metal);
+}
+
 .combat-notification[data-outbound='false'] {
   border-color: color-mix(in srgb, var(--state-danger) 70%, var(--surface-frame));
+
+  .combat-notification-direction {
+    color: color-mix(in srgb, var(--state-danger) 80%, var(--text-body));
+  }
 }
 
 .combat-notification[data-outbound='true'] {
   border-color: color-mix(in srgb, var(--state-success) 70%, var(--surface-frame));
+
+  .combat-notification-direction {
+    color: color-mix(in srgb, var(--state-success) 80%, var(--text-body));
+  }
 }
 
 .combat-notification-top {
@@ -33,16 +69,26 @@
   gap: 0.5rem;
 }
 
-.combat-notification-direction {
-  font-size: 90%;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.95;
-}
-
 .combat-notification-timer {
   font-size: 90%;
-  opacity: 0.9;
+  color: color-mix(in srgb, var(--ui-frame) 70%, var(--text-body));
+  font-variant-numeric: tabular-nums;
+  min-width: 5ch;
+  text-align: right;
+}
+
+.combat-notification-timer[data-urgent='true'] {
+  animation: combat-notification-urgent-pulse 1s ease-in-out infinite;
+}
+
+@keyframes combat-notification-urgent-pulse {
+  0%,
+  100% {
+    color: color-mix(in srgb, var(--state-danger) 85%, var(--text-body));
+  }
+  50% {
+    color: color-mix(in srgb, var(--frame-txt) 85%, var(--text-body));
+  }
 }
 
 .combat-notification-bottom {
@@ -56,6 +102,8 @@
 .combat-notification-icon {
   align-self: center;
   transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform 110ms ease;
 
   .combat-notification-icon-img {
     width: 100%;
@@ -74,6 +122,14 @@
   background-color: transparent;
 
   cursor: pointer;
+}
+
+.combat-notification-icon:hover {
+  transform: rotate(45deg) scale(1.04);
+}
+
+.combat-notification-icon:active {
+  transform: rotate(45deg) scale(0.98);
 }
 
 .combat-notification-icon:disabled {
@@ -95,6 +151,7 @@
   font-size: 1.05rem;
   letter-spacing: 0.04em;
   text-align: left;
+  color: var(--pup-element-color, var(--frame-txt));
 }
 
 .combat-notification-objective {
