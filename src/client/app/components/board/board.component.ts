@@ -12,6 +12,7 @@ import SudokuCellComponent from './cell/cell.component';
 
 import type { WritableSignal } from '@angular/core';
 import type AugmentAction from '@shared/types/utils/AugmentAction';
+import type { ISlotEffect } from '@shared/types/gamestate/powerups';
 import type { OmitBaseAttrs } from '../../../types/OmitAttrs';
 import type ClientCellModel from '../../../models/Cell';
 
@@ -28,6 +29,10 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   @Input() public model!: ClientBoardModel;
   /** Whether this board belongs to the current player */
   @Input() public isMe = false;
+  /** Optional incoming pending effect used for threat highlighting */
+  @Input() public threatEffect: ISlotEffect | null;
+  /** Defuse objective type (0=row, 1=column, 2=box) for the incoming threat */
+  @Input() public threatDefuseObjective: number | null;
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
@@ -44,6 +49,20 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
     this.cooldownHelper = new CooldownAnimationHelper();
+    this.threatEffect = null;
+    this.threatDefuseObjective = null;
+  }
+
+  public get isThreatActive(): boolean {
+    return this.threatEffect !== null;
+  }
+
+  public get isThreatGlobal(): boolean {
+    return this.isThreatActive && this.threatEffect?.cellIndex === undefined;
+  }
+
+  public isThreatCell(cellIndex: number): boolean {
+    return this.threatEffect?.cellIndex === cellIndex;
   }
 
   ngDoCheck(): void {

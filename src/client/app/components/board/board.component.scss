@@ -27,3 +27,19 @@
   background: conic-gradient(from 0deg, var(--cd-global) 0deg var(--angle), transparent var(--angle) 360deg);
   z-index: 2; /* Above cells */
 }
+
+.board[data-threat-active='true'][data-threat-global='true'] {
+  animation: board-threat-pulse 1s ease-in-out infinite;
+}
+
+@keyframes board-threat-pulse {
+  0%,
+  100% {
+    border-color: color-mix(in srgb, var(--state-danger) 85%, var(--board-border));
+    box-shadow: 0 0 20px color-mix(in srgb, var(--state-danger) 65%, transparent);
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--state-danger) 55%, var(--board-border));
+    box-shadow: 0 0 26px color-mix(in srgb, var(--state-danger) 80%, transparent);
+  }
+}

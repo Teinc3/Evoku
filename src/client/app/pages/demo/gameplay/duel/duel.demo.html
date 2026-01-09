@@ -61,6 +61,8 @@
     #board1
     [model]="gameState.getPlayerBoard(gameState.myID)"
     [isMe]="true"
+    [threatEffect]="incomingThreat?.effect ?? null"
+    [threatDefuseObjective]="incomingThreat?.defuseObjective ?? null"
     (sendPacket)="duelActionDispatcher.dispatch($event)"
     (selectionChanged)="onBoardSelectionChanged(0)"
   />

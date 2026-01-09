@@ -1,4 +1,8 @@
-<div class="board">
+<div
+  class="board"
+  [attr.data-threat-active]="isThreatActive"
+  [attr.data-threat-global]="isThreatGlobal"
+>
   @for (i of indices; track i) {
     <app-cell-model
       [model]="getCellModel(i)"
@@ -8,6 +12,10 @@
       [class.selected]="selected() === i"
       [class.highlight-related]="isRelatedCell(i)"
       [class.highlight-same-number]="isSameNumberCell(i)"
+      [class.threat-cell]="isThreatCell(i)"
+      [class.defuse-row-global]="isThreatActive && threatDefuseObjective === 0"
+      [class.defuse-col-global]="isThreatActive && threatDefuseObjective === 1"
+      [class.defuse-box-global]="isThreatActive && threatDefuseObjective === 2"
       [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
     ></app-cell-model>
   }

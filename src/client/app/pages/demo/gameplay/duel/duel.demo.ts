@@ -31,6 +31,7 @@ import { AppView } from '../../../../../types/enums';
 import { DuelActionDispatcher, DuelActionListener } from '../../../../../game/handlers';
 import GameStateManager from '../../../../../game/GameStateManager';
 
+import type { ISlotEffect } from '@shared/types/gamestate/powerups';
 import type { MatchFoundContract } from '@shared/types/contracts';
 
 
@@ -60,6 +61,23 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   private readonly subscriptions: Subscription;
   protected AppView = AppView;
   protected performance = performance;
+
+  protected get incomingThreat(): { effect: ISlotEffect; defuseObjective: number } | null {
+    const enemyID = 1 - this.gameState.myID;
+    const slots = this.gameState.getPlayerState(enemyID).gameState?.powerups;
+    if (!slots) {
+      return null;
+    }
+
+    for (const slot of slots) {
+      const effect = slot.pup?.pendingEffect;
+      if (effect) {
+        return { effect, defuseObjective: slot.slotIndex };
+      }
+    }
+
+    return null;
+  }
 
   @ViewChild('board1')
   board1!: BoardModelComponent;
