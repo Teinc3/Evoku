@@ -13,11 +13,25 @@ export interface IPUPSlotState {
   /** If the slot is locked */
   locked: boolean;
   pup?: IPUPState;
-  //effects: ISlotEffect[];
+  //effects: ISlotEffect[]; // Effect on the SLOT itself, not of the PUP
 }
 
 export interface IPUPState {
   pupID: number;
   type: number;
   level: number;
+  /** 
+   * If the PUP has an effect that is pending to be applied.
+   * 
+   * For example, a Cyro PUP waiting to be deflected by the defender.
+   * This attribute stores the details of the effect (which slot? Which player? etc.)
+   */
+  pendingEffect?: ISlotEffect;
+}
+
+export interface ISlotEffect {
+  targetID: number;
+  cellIndex?: number;
+  slotIndex?: number;
+  value?: number;
 }

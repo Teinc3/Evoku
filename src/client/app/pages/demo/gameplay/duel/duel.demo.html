@@ -12,8 +12,7 @@
   <div class="combat-top-row">
     <app-combat-notification-holder [isSide]="false" [isMine]="true">
       @for (slot of enemyPupSlots.slots; track slot.slotIndex) {
-        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
-        @if (cooldownEnd > performance.now()) {
+        @if (slot.lastCooldownEnd > performance.now()) {
           <app-combat-notification
             [isOutbound]="false"
             [defuseObjective]="slot.slotIndex"
@@ -25,8 +24,7 @@
     </app-combat-notification-holder>
     <app-combat-notification-holder [isSide]="false" [isMine]="false" >
       @for (slot of myPupSlots.slots; track slot.slotIndex) {
-        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
-        @if (cooldownEnd > performance.now()) {
+        @if (slot.lastCooldownEnd > performance.now()) {
           <app-combat-notification
             [isOutbound]="true"
             [defuseObjective]="slot.slotIndex"
@@ -48,8 +46,7 @@
   @if (isCombatSideMode()) {
     <app-combat-notification-holder [isSide]="true" [isMine]="true">
       @for (slot of enemyPupSlots.slots; track slot.slotIndex) {
-        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
-        @if (cooldownEnd > performance.now()) {
+        @if (slot.lastCooldownEnd > performance.now()) {
           <app-combat-notification
             [isOutbound]="false"
             [defuseObjective]="slot.slotIndex"
@@ -82,8 +79,7 @@
   @if (isCombatSideMode()) {
     <app-combat-notification-holder [isSide]="true" [isMine]="false" >
       @for (slot of myPupSlots.slots; track slot.slotIndex) {
-        @let cooldownEnd = slot.pendingCooldownEnd ?? slot.lastCooldownEnd;
-        @if (cooldownEnd > performance.now()) {
+        @if (slot.lastCooldownEnd > performance.now()) {
           <app-combat-notification
             [isOutbound]="true"
             [defuseObjective]="slot.slotIndex"

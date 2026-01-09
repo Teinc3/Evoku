@@ -7,6 +7,7 @@ import {
   LifecycleActions,
   ProtocolActions,
   WaterPUPActions,
+  MetalPUPActions,
 } from '@shared/types/enums/actions/';
 import GameStateManager from '../../GameStateManager';
 import DuelActionListener from './DuelActionListener';
@@ -509,5 +510,90 @@ describe('DuelActionListener', () => {
     expect(() => {
       privateApi.getGameState();
     }).toThrowError('MatchActionListener not initialized with a GameStateManager.');
+  });
+
+  it('handles CRYO_USED by setting pendingEffect on the used pup', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const enemySlot = gameState.getPlayerState(1).gameState!.powerups[0];
+    enemySlot.pup = { pupID: 111, type: 0, level: 0 };
+
+    const subject = packetSubjects.get(WaterPUPActions.CRYO_USED);
+    if (!subject) {
+      throw new Error('Missing subject for CRYO_USED');
+    }
+
+    subject.next({
+      playerID: 1,
+      actionID: 1,
+      serverTime: 100,
+      pupID: 111,
+      targetID: 0,
+      cellIndex: 5,
+    });
+
+    expect(enemySlot.pup.pendingEffect).toEqual({
+      targetID: 0,
+      cellIndex: 5,
+    });
+
+    subscription.unsubscribe();
+  });
+
+  it('handles LOCK_USED by setting pendingEffect with targetID and value', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const enemySlot = gameState.getPlayerState(1).gameState!.powerups[0];
+    enemySlot.pup = { pupID: 222, type: 8, level: 0 };
+
+    const subject = packetSubjects.get(MetalPUPActions.LOCK_USED);
+    if (!subject) {
+      throw new Error('Missing subject for LOCK_USED');
+    }
+
+    subject.next({
+      playerID: 1,
+      actionID: 2,
+      serverTime: 100,
+      pupID: 222,
+      targetID: 0,
+      value: 7,
+    });
+
+    expect(enemySlot.pup.pendingEffect).toEqual({
+      targetID: 0,
+      value: 7,
+    });
+
+    subscription.unsubscribe();
+  });
+
+  it('consumes pup on YIN PUP used action (PURITY_USED)', () => {
+    const subscription = listener.bind();
+
+    gameState.myID = 0;
+
+    const enemySlot = gameState.getPlayerState(1).gameState!.powerups[0];
+    enemySlot.pup = { pupID: 333, type: 1, level: 0 };
+
+    const subject = packetSubjects.get(WaterPUPActions.PURITY_USED);
+    if (!subject) {
+      throw new Error('Missing subject for PURITY_USED');
+    }
+
+    subject.next({
+      playerID: 1,
+      actionID: 3,
+      serverTime: 100,
+      pupID: 333,
+    });
+
+    expect(enemySlot.pup).toBeUndefined();
+
+    subscription.unsubscribe();
   });
 });
