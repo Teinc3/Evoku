@@ -43,6 +43,12 @@ export default class EarthPUPHandler extends EnumHandler<EarthPUPActions>
     // This is just a placeholder until the actual logic is implemented
     const cellIndex = Math.floor(Math.random() * 81);
 
+    // Store pendingEffect server-side (include the randomly selected cellIndex)
+    this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
+      targetID: data.targetID,
+      cellIndex
+    });
+
     this.room.broadcast(EarthPUPActions.LANDSLIDE_USED, {
       serverTime: result,
       playerID,

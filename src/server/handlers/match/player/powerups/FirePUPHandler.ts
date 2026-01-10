@@ -41,6 +41,12 @@ export default class FirePUPHandler extends EnumHandler<FirePUPActions>
       return true;
     }
 
+    // Store pendingEffect server-side (used by clients to visualise incoming threat)
+    this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
+      targetID: data.targetID,
+      cellIndex: data.cellIndex
+    });
+
     this.room.broadcast(FirePUPActions.INFERNO_USED, {
       serverTime: result,
       playerID,

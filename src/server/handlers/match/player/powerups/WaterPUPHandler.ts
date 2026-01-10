@@ -40,6 +40,12 @@ export default class WaterPUPHandler extends EnumHandler<WaterPUPActions>
       return true;
     }
 
+    // Store pendingEffect server-side
+    this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
+      targetID: data.targetID,
+      cellIndex: data.cellIndex
+    });
+
     this.room.broadcast(WaterPUPActions.CRYO_USED, {
       serverTime: result,
       playerID,

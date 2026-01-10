@@ -8,7 +8,7 @@ import sharedConfig from "@shared/config";
 import pupConfig from "@config/shared/pup.json";
 import ServerBoardModel from "../../models/logic/Board";
 
-import type { IPUPSlotState } from "@shared/types/gamestate/powerups";
+import type { IPUPSlotState, ISlotEffect } from '@shared/types/gamestate/powerups';
 import type { IPlayerState, IMatchState } from "@shared/types/gamestate";
 import type ActionMap from "@shared/types/actionmap";
 import type TimeCoordinator from "../time";
@@ -362,6 +362,20 @@ export default class GameStateController {
       slot.pup = undefined;
     }
     return serverTime;
+  }
+
+  /**
+   * Set or clear the pendingEffect for a specific PUP slot (server-side authoritative).
+   * Returns true if the slot was found and updated.
+   */
+  public setPUPPendingEffect(playerID: number, pupID: number, effect?: ISlotEffect): boolean {
+    const slot = this.findPUPSlotByPupID(playerID, pupID);
+    if (!slot || !slot.pup) {
+      return false;
+    }
+
+    slot.pup.pendingEffect = effect;
+    return true;
   }
 
   private findPUPSlotByPupID(playerID: number, pupID: number): IPUPSlotState | undefined {

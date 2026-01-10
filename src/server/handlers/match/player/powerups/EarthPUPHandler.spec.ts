@@ -27,6 +27,7 @@ class MockRoom {
     canUsePUP: jest.fn().mockReturnValue(true),
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
+    setPUPPendingEffect: jest.fn(),
   };
 
   constructor(public readonly roomID: string) {}
@@ -77,6 +78,17 @@ describe('EarthPUPHandler', () => {
           targetID: 1,
           playerID: 0,
           serverTime: 1234,
+        })
+      );
+
+      expect(
+        mockRoom.stateController.setPUPPendingEffect
+      ).toHaveBeenCalledWith(
+        0,
+        1,
+        expect.objectContaining({
+          targetID: 1,
+          cellIndex: expect.any(Number),
         })
       );
     });

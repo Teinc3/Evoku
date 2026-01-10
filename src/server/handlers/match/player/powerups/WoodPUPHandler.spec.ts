@@ -36,6 +36,7 @@ class MockRoom {
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
     getSolution: jest.fn().mockReturnValue(5),
+    setPUPPendingEffect: jest.fn(),
   };
 
   constructor(public readonly roomID: string) {}
@@ -85,6 +86,10 @@ describe('WoodPUPHandler', () => {
           serverTime: 1234,
         })
       );
+
+      expect(mockRoom.stateController.setPUPPendingEffect).toHaveBeenCalledWith(0, 1, {
+        targetID: 1
+      });
     });
 
     it('should return false when playerID is undefined', async () => {

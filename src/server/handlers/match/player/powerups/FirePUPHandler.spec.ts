@@ -27,6 +27,7 @@ class MockRoom {
     canUsePUP: jest.fn().mockReturnValue(true),
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
+    setPUPPendingEffect: jest.fn(),
   };
 
   constructor(public readonly roomID: string) {}
@@ -80,6 +81,12 @@ describe('FirePUPHandler', () => {
           serverTime: 1234,
         })
       );
+
+      // pendingEffect should be stored server-side
+      expect(mockRoom.stateController.setPUPPendingEffect).toHaveBeenCalledWith(0, 1, {
+        targetID: 1,
+        cellIndex: 5
+      });
     });
 
     it('should return false if targetID is invalid', async () => {

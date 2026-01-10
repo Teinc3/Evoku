@@ -39,6 +39,11 @@ export default class WoodPUPHandler extends EnumHandler<WoodPUPActions>
       return true;
     }
 
+    // Store pendingEffect server-side
+    this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
+      targetID: data.targetID
+    });
+
     this.room.broadcast(WoodPUPActions.ENTANGLE_USED, {
       serverTime: result,
       playerID,

@@ -27,6 +27,7 @@ class MockRoom {
     canUsePUP: jest.fn().mockReturnValue(true),
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
+    setPUPPendingEffect: jest.fn(),
   };
 
   constructor(public readonly roomID: string) {}

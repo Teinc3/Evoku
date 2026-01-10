@@ -39,6 +39,12 @@ export default class MetalPUPHandler extends EnumHandler<MetalPUPActions>
       return true;
     }
 
+    // Store pendingEffect server-side
+    this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
+      targetID: data.targetID,
+      value: data.value
+    });
+
     this.room.broadcast(MetalPUPActions.LOCK_USED, {
       serverTime: result,
       playerID,
