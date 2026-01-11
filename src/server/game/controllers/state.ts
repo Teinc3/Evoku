@@ -48,6 +48,10 @@ export default class GameStateController {
       BoardConverter.toBoardArray(board.solution)
     ];
   }
+  
+  public get currentChallengeDuration(): number {
+    return sharedConfig.game.challenge.duration[this.matchState.phase];
+  }
 
   /**
    * Add a player to the game and initialize their board according to the base board.
@@ -116,7 +120,7 @@ export default class GameStateController {
       clientTime
     );
     this.checkBoardProgresses([playerID]);
-    this.checkPUPProgress(playerID, cellIndex);
+    this.checkPUPProgress(playerID, cellIndex, serverTime);
 
     return { result: true, serverTime };
   }
@@ -200,7 +204,7 @@ export default class GameStateController {
   }
 
   /** Checks for completed cell objectives, and increments PUP progress accordingly */
-  private checkPUPProgress(playerID: number, cellIndex: number): void {
+  private checkPUPProgress(playerID: number, cellIndex: number, serverTime: number): void {
     // See if current cell value fits solution
     const gameState = this.gameStates.get(playerID)?.gameState;
     if (!gameState) {
@@ -238,7 +242,84 @@ export default class GameStateController {
       // Broadcast PUP progress
       this.callbacks.onProgressUpdate(false, [{ playerID, progress: gameState.pupProgress }]);
     }
-      
+    this.callbacks.onCellSolved(playerID, cellIndex, serverTime);
+  }
+
+  /** Returns whether the objective that the given cell belongs to is fully and correctly filled */
+  public isObjectiveSolvedForCell(
+    playerID: number,
+    objectiveType: number,
+    cellIndex: number
+  ): boolean {
+    const gameState = this.gameStates.get(playerID)?.gameState;
+    if (!gameState) {
+      return false;
+    }
+
+    const boardState = gameState.boardState;
+    const rowIndex = Math.floor(cellIndex / 9);
+    const colIndex = cellIndex % 9;
+    const boxIndex = Math.floor(rowIndex / 3) * 3 + Math.floor(colIndex / 3);
+
+    switch (objectiveType) {
+      case 0: {
+        return this.isRowSolved(boardState, rowIndex);
+      }
+      case 1: {
+        return this.isColSolved(boardState, colIndex);
+      }
+      case 2: {
+        return this.isBoxSolved(boardState, boxIndex);
+      }
+      default: {
+        return false;
+      }
+    }
+  }
+
+  public getPlayerPowerups(
+    playerID: number
+  ): readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] | undefined {
+    return this.gameStates.get(playerID)?.gameState?.powerups;
+  }
+
+  private isRowSolved(boardState: ServerBoardModel, rowIndex: number): boolean {
+    const start = rowIndex * 9;
+    for (let offset = 0; offset < 9; offset += 1) {
+      const index = start + offset;
+      if (!boardState.board[index].pupProgressSet && !boardState.board[index].fixed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isColSolved(boardState: ServerBoardModel, colIndex: number): boolean {
+    for (let row = 0; row < 9; row += 1) {
+      const index = row * 9 + colIndex;
+      if (!boardState.board[index].pupProgressSet && !boardState.board[index].fixed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isBoxSolved(boardState: ServerBoardModel, boxIndex: number): boolean {
+    const boxRow = Math.floor(boxIndex / 3) * 3;
+    const boxCol = (boxIndex % 3) * 3;
+
+    for (let rowOffset = 0; rowOffset < 3; rowOffset += 1) {
+      for (let colOffset = 0; colOffset < 3; colOffset += 1) {
+        const row = boxRow + rowOffset;
+        const col = boxCol + colOffset;
+        const index = row * 9 + col;
+        if (!boardState.board[index].pupProgressSet && !boardState.board[index].fixed) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   /** Handles drawing a PUP for a player */
@@ -354,9 +435,8 @@ export default class GameStateController {
     // Differentiate theme
     if (pupConfig[slot.pup.type].theme === true) {
       // Yang pup - set challenge cooldown
-      const challengeDuration = sharedConfig.game.challenge.duration[this.matchState.phase];
-      slot.lastCooldownEnd = serverTime + challengeDuration;
-      // TODO: Create challenge timer task
+      slot.lastCooldownEnd = serverTime + this.currentChallengeDuration;
+      // Challenge timer task will be created in the respective handlers
     } else {
       // Yin pup - consume immediately
       slot.pup = undefined;
@@ -378,7 +458,7 @@ export default class GameStateController {
     return true;
   }
 
-  private findPUPSlotByPupID(playerID: number, pupID: number): IPUPSlotState | undefined {
+  public findPUPSlotByPupID(playerID: number, pupID: number): IPUPSlotState | undefined {
     const playerState = this.gameStates.get(playerID);
     const gameState = playerState?.gameState;
     if (!gameState) {

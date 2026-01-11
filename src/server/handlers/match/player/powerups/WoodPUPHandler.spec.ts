@@ -26,6 +26,9 @@ class MockSession {
 
 class MockRoom {
   public broadcast = jest.fn();
+  public setTrackedTimeout = jest
+    .fn()
+    .mockReturnValue(999 as unknown as ReturnType<typeof setTimeout>);
   public timeService = {
     assessTiming: jest.fn().mockReturnValue(0),
     updateLastActionTime: jest.fn().mockReturnValue(1234),
@@ -37,6 +40,7 @@ class MockRoom {
     computeHash: jest.fn().mockReturnValue(0),
     getSolution: jest.fn().mockReturnValue(5),
     setPUPPendingEffect: jest.fn(),
+    currentChallengeDuration: 5000,
   };
 
   constructor(public readonly roomID: string) {}
@@ -87,9 +91,15 @@ describe('WoodPUPHandler', () => {
         })
       );
 
-      expect(mockRoom.stateController.setPUPPendingEffect).toHaveBeenCalledWith(0, 1, {
-        targetID: 1
-      });
+      expect(mockRoom.setTrackedTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+      expect(mockRoom.stateController.setPUPPendingEffect).toHaveBeenCalledWith(
+        0,
+        1,
+        expect.objectContaining({
+          targetID: 1,
+          serverTimeoutID: 999,
+        })
+      );
     });
 
     it('should return false when playerID is undefined', async () => {

@@ -34,4 +34,6 @@ export interface ISlotEffect {
   cellIndex?: number;
   slotIndex?: number;
   value?: number;
+  /** Server-only: tracked timeout handle used to cancel pending Yang effects */
+  serverTimeoutID?: ReturnType<typeof setTimeout>;
 }

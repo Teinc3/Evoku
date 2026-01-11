@@ -41,10 +41,14 @@ export default class FirePUPHandler extends EnumHandler<FirePUPActions>
       return true;
     }
 
-    // Store pendingEffect server-side (used by clients to visualise incoming threat)
+    const timeoutId = this.room.setTrackedTimeout(() => {
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutId);
+    }, this.room.stateController.currentChallengeDuration);
+
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
       targetID: data.targetID,
-      cellIndex: data.cellIndex
+      cellIndex: data.cellIndex,
+      serverTimeoutID: timeoutId,
     });
 
     this.room.broadcast(FirePUPActions.INFERNO_USED, {

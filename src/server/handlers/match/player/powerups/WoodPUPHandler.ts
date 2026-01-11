@@ -39,9 +39,13 @@ export default class WoodPUPHandler extends EnumHandler<WoodPUPActions>
       return true;
     }
 
-    // Store pendingEffect server-side
+    const timeoutID = this.room.setTrackedTimeout(() => {
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutID);
+    }, this.room.stateController.currentChallengeDuration);
+
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
-      targetID: data.targetID
+      targetID: data.targetID,
+      serverTimeoutID: timeoutID,
     });
 
     this.room.broadcast(WoodPUPActions.ENTANGLE_USED, {

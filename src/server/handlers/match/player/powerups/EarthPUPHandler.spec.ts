@@ -18,6 +18,9 @@ class MockSession {
 
 class MockRoom {
   public broadcast = jest.fn();
+  public setTrackedTimeout = jest
+    .fn()
+    .mockReturnValue(999 as unknown as ReturnType<typeof setTimeout>);
   public timeService = {
     assessTiming: jest.fn().mockReturnValue(0),
     updateLastActionTime: jest.fn().mockReturnValue(1234),
@@ -28,6 +31,7 @@ class MockRoom {
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
     setPUPPendingEffect: jest.fn(),
+    currentChallengeDuration: 5000,
   };
 
   constructor(public readonly roomID: string) {}
@@ -89,8 +93,11 @@ describe('EarthPUPHandler', () => {
         expect.objectContaining({
           targetID: 1,
           cellIndex: expect.any(Number),
+          serverTimeoutID: 999,
         })
       );
+
+      expect(mockRoom.setTrackedTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
     });
 
     it('should return false if targetID is invalid', async () => {

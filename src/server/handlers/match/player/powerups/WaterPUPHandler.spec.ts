@@ -18,6 +18,9 @@ class MockSession {
 
 class MockRoom {
   public broadcast = jest.fn();
+  public setTrackedTimeout = jest
+    .fn()
+    .mockReturnValue(999 as unknown as ReturnType<typeof setTimeout>);
   public timeService = {
     assessTiming: jest.fn().mockReturnValue(0),
     updateLastActionTime: jest.fn().mockReturnValue(1234),
@@ -28,8 +31,9 @@ class MockRoom {
     consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
     setPUPPendingEffect: jest.fn(),
+    currentChallengeDuration: 5000,
   };
-
+  
   constructor(public readonly roomID: string) {}
 
   public getPlayerID(): number {
@@ -79,6 +83,17 @@ describe('WaterPUPHandler', () => {
           cellIndex: 5,
           playerID: 0,
           serverTime: 1234,
+        })
+      );
+
+      expect(mockRoom.setTrackedTimeout).toHaveBeenCalledWith(expect.any(Function), 5000);
+      expect(mockRoom.stateController.setPUPPendingEffect).toHaveBeenCalledWith(
+        0,
+        1,
+        expect.objectContaining({
+          targetID: 1,
+          cellIndex: 5,
+          serverTimeoutID: 999,
         })
       );
     });

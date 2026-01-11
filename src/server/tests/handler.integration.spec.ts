@@ -33,6 +33,9 @@ class MockMatchmakingManager {
 
 class MockRoom {
   public broadcast = jest.fn();
+  public setTrackedTimeout = jest
+    .fn()
+    .mockReturnValue(999 as unknown as ReturnType<typeof setTimeout>);
   public timeService = {
     assessTiming: jest.fn().mockReturnValue(0),
     updateLastActionTime: jest.fn().mockReturnValue(1234),
@@ -40,9 +43,10 @@ class MockRoom {
   public stateController = {
     matchState: { status: MatchStatus.ONGOING },
     canUsePUP: jest.fn().mockReturnValue(true),
-    consumePUP: jest.fn().mockReturnValue(true),
+    consumePUP: jest.fn().mockReturnValue(1234),
     computeHash: jest.fn().mockReturnValue(0),
     setPUPPendingEffect: jest.fn(),
+    currentChallengeDuration: 5000,
   };
 
   constructor(public readonly roomID: string) {}

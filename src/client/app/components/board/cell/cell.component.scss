@@ -68,30 +68,6 @@
   animation: defuse-pulse 1s ease-in-out infinite;
 }
 
-/* Row objective (horizontal lines) */
-/* Thick 3x3 dividers: draw on top of row 4 and row 7 */
-:host(.defuse-row-global):nth-child(n + 28):nth-child(-n + 36) .cell::before,
-:host(.defuse-row-global):nth-child(n + 55):nth-child(-n + 63) .cell::before {
-  @extend %defuse-line;
-  top: -2px;
-  bottom: auto;
-  left: 0;
-  right: 0;
-  height: 2px;
-}
-
-/* Thin inner lines: draw on bottom of rows 1,2,4,5,7,8 */
-:host(.defuse-row-global):nth-child(-n + 18) .cell::after,
-:host(.defuse-row-global):nth-child(n + 28):nth-child(-n + 45) .cell::after,
-:host(.defuse-row-global):nth-child(n + 55):nth-child(-n + 72) .cell::after {
-  @extend %defuse-line;
-  top: auto;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-}
-
 /* Column objective (vertical lines) */
 /* Thick 3x3 dividers: draw on left of col 4 and col 7 */
 :host(.defuse-col-global):nth-child(9n + 4) .cell::before,
@@ -128,6 +104,30 @@
   top: 0;
   bottom: 0;
   width: 2px;
+}
+
+/* Row objective (horizontal lines) */
+/* Thick 3x3 dividers: draw on top of row 4 and row 7 */
+:host(.defuse-row-global):nth-child(n + 28):nth-child(-n + 36) .cell::before,
+:host(.defuse-row-global):nth-child(n + 55):nth-child(-n + 63) .cell::before {
+  @extend %defuse-line;
+  top: -2px;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+/* Thin inner lines: draw on bottom of rows 1,2,4,5,7,8 */
+:host(.defuse-row-global):nth-child(-n + 18) .cell::after,
+:host(.defuse-row-global):nth-child(n + 28):nth-child(-n + 45) .cell::after,
+:host(.defuse-row-global):nth-child(n + 55):nth-child(-n + 72) .cell::after {
+  @extend %defuse-line;
+  top: auto;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
 }
 
 :host(.defuse-box-global):nth-child(n + 28):nth-child(-n + 36) .cell::after,

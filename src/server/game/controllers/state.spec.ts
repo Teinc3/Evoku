@@ -61,7 +61,8 @@ describe('GameStateController', () => {
 
     // Create mock callbacks
     mockCallbacks = {
-      onProgressUpdate: jest.fn()
+      onProgressUpdate: jest.fn(),
+      onCellSolved: jest.fn(),
     };
 
     gameState.setCallbacks(mockCallbacks);
@@ -144,7 +145,8 @@ describe('GameStateController', () => {
   describe('setCallbacks', () => {
     it('should set callback functions', () => {
       const newCallbacks: GameLogicCallbacks = {
-        onProgressUpdate: jest.fn()
+        onProgressUpdate: jest.fn(),
+        onCellSolved: jest.fn(),
       };
 
       gameState.setCallbacks(newCallbacks);
@@ -512,6 +514,7 @@ describe('GameStateController', () => {
   describe('checkPUPProgress', () => {
     const playerID = 1;
     const cellIndex = 0; // Solution value is 4
+    const serverTime = 1234;
 
     beforeEach(() => {
       gameState.addPlayer(playerID);
@@ -524,8 +527,9 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].pupProgressSet = false;
 
       // Access private method
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       // Check progress incremented
       const gameStates = (gameState as unknown as {
@@ -540,14 +544,20 @@ describe('GameStateController', () => {
         false,
         [{ playerID, progress: 20 }]
       );
+      expect(mockCallbacks.onCellSolved).toHaveBeenCalledWith(
+        playerID,
+        cellIndex,
+        serverTime
+      );
     });
 
     it('should not increment PUP progress when pupProgressSet is already true', () => {
       mockServerBoardModel.board[cellIndex].value = 4;
       mockServerBoardModel.board[cellIndex].pupProgressSet = true;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       const gameStates = (gameState as unknown as {
         gameStates: Map<number, IPlayerState<ServerBoardModel>>
@@ -561,8 +571,9 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].value = 5; // Wrong value
       mockServerBoardModel.board[cellIndex].pupProgressSet = false;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       const gameStates = (gameState as unknown as {
         gameStates: Map<number, IPlayerState<ServerBoardModel>>
@@ -570,6 +581,7 @@ describe('GameStateController', () => {
       const playerState = gameStates.get(playerID);
       expect(playerState?.gameState?.pupProgress).toBe(0);
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onCellSolved).not.toHaveBeenCalled();
     });
 
     it('should increment PUP progress by 50 when golden objective is active', () => {
@@ -577,8 +589,9 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].pupProgressSet = false;
       mockServerBoardModel.board[cellIndex].goldenObjectiveActive = true;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       const gameStates = (gameState as unknown as {
         gameStates: Map<number, IPlayerState<ServerBoardModel>>
@@ -590,6 +603,11 @@ describe('GameStateController', () => {
       expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
         false,
         [{ playerID, progress: 70 }]
+      );
+      expect(mockCallbacks.onCellSolved).toHaveBeenCalledWith(
+        playerID,
+        cellIndex,
+        serverTime
       );
     });
 
@@ -607,14 +625,20 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].pupProgressSet = false;
       mockServerBoardModel.board[cellIndex].goldenObjectiveActive = true;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       expect(playerState?.gameState?.pupProgress).toBe(100); // 90 + 20 + 50 = 160, clamped to 100
 
       expect(mockCallbacks.onProgressUpdate).toHaveBeenCalledWith(
         false,
         [{ playerID, progress: 100 }]
+      );
+      expect(mockCallbacks.onCellSolved).toHaveBeenCalledWith(
+        playerID,
+        cellIndex,
+        serverTime
       );
     });
 
@@ -623,17 +647,20 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].pupProgressSet = true; // Already set
       mockServerBoardModel.board[cellIndex].goldenObjectiveActive = false;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
     });
 
     it('should handle invalid player ID gracefully', () => {
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(999, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(999, cellIndex, serverTime);
 
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onCellSolved).not.toHaveBeenCalled();
     });
 
     it('should handle player without gameState', () => {
@@ -645,10 +672,12 @@ describe('GameStateController', () => {
         delete playerState.gameState;
       }
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onCellSolved).not.toHaveBeenCalled();
     });
 
     it('should return early when no solution exists for the player', () => {
@@ -657,10 +686,12 @@ describe('GameStateController', () => {
       mockServerBoardModel.board[cellIndex].value = 4;
       mockServerBoardModel.board[cellIndex].pupProgressSet = false;
 
-      (gameState as unknown as { checkPUPProgress: (playerID: number, cellIndex: number) => void })
-        .checkPUPProgress(playerID, cellIndex);
+      (gameState as unknown as {
+        checkPUPProgress: (playerID: number, cellIndex: number, serverTime: number) => void;
+      }).checkPUPProgress(playerID, cellIndex, serverTime);
 
       expect(mockCallbacks.onProgressUpdate).not.toHaveBeenCalled();
+      expect(mockCallbacks.onCellSolved).not.toHaveBeenCalled();
     });
   });
 

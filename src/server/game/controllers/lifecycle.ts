@@ -5,6 +5,7 @@ import RatingCalculator from "../../utils/rating";
 import guestAuthService from "../../services/auth";
 
 import type { UUID } from "crypto";
+import type { ISlotEffect } from "@shared/types/gamestate/powerups";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 import type { RoomModel } from "../../models/networking";
 import type GameStateController from "./state";
@@ -26,6 +27,7 @@ export default class LifecycleController {
   ) {
     const callbacks: GameLogicCallbacks = {
       onProgressUpdate: this.updateProgress.bind(this),
+      onCellSolved: this.onCellSolved.bind(this),
     };
     this.stateController.setCallbacks(callbacks);
   }
@@ -188,6 +190,73 @@ export default class LifecycleController {
         newPhase: this.stateController.matchState.phase
       });
     }
+  }
+
+  public onThreatExpired(
+    attackerID: number,
+    pupID: number,
+    timeoutId: ReturnType<typeof setTimeout>
+  ): void {
+    if (this.stateController.matchState.status !== MatchStatus.ONGOING) {
+      return;
+    }
+
+    const slot = this.stateController.findPUPSlotByPupID(attackerID, pupID);
+    const pendingEffect = slot?.pup?.pendingEffect;
+    if (!pendingEffect || pendingEffect.serverTimeoutID !== timeoutId) {
+      return;
+    }
+
+    this.stateController.setPUPPendingEffect(attackerID, pupID, undefined);
+    this.applyEffect(pendingEffect.targetID, pupID, pendingEffect);
+  }
+
+  private async onCellSolved(
+    playerID: number,
+    cellIndex: number,
+    serverTime: number
+  ): Promise<void> {
+    if (this.stateController.matchState.status !== MatchStatus.ONGOING) {
+      return;
+    }
+
+    const opponentID = 1 - playerID;
+    const oppPups = this.stateController.getPlayerPowerups(opponentID);
+    if (!oppPups) {
+      return;
+    }
+
+    for (const slot of oppPups) {
+      const pup = slot.pup;
+      const pendingEffect = pup?.pendingEffect;
+      const timeoutId = pendingEffect?.serverTimeoutID;
+
+      if (!pup || !pendingEffect || timeoutId === undefined
+        || pendingEffect.targetID !== playerID || serverTime >= slot.lastCooldownEnd) {
+        continue;
+      }
+
+      const objectiveType = slot.slotIndex;
+      if (!this.stateController.isObjectiveSolvedForCell(playerID, objectiveType, cellIndex)) {
+        continue;
+      }
+
+      this.room.clearTrackedTimeout(timeoutId);
+      this.stateController.setPUPPendingEffect(opponentID, pup.pupID, undefined);
+      this.applyEffect(opponentID, pup.pupID, pendingEffect);
+    }
+  }
+
+  private applyEffect(targetID: number, pupID: number, effect: ISlotEffect): void {
+    void targetID;
+    void pupID;
+    void effect;
+
+    // Delete the pup from the attacker's inventory
+    
+    // TODO: Implement effect application logic based on pup type
+
+    // Broadcast result to players
   }
 
   /** Reset state when closing room. */

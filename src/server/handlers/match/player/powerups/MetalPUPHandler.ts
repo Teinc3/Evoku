@@ -39,10 +39,14 @@ export default class MetalPUPHandler extends EnumHandler<MetalPUPActions>
       return true;
     }
 
-    // Store pendingEffect server-side
+    const timeoutID = this.room.setTrackedTimeout(() => {
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutID);
+    }, this.room.stateController.currentChallengeDuration);
+
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
       targetID: data.targetID,
-      value: data.value
+      value: data.value,
+      serverTimeoutID: timeoutID,
     });
 
     this.room.broadcast(MetalPUPActions.LOCK_USED, {

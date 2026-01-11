@@ -4,4 +4,9 @@ export interface GameLogicCallbacks {
     isBoard: boolean,
     progressData: { playerID: number; progress: number }[]
   ) => Promise<void>;
+  onCellSolved: (
+    playerID: number,
+    cellIndex: number,
+    serverTime: number
+  ) => Promise<void>;
 }
