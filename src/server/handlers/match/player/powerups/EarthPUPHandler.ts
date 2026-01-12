@@ -42,9 +42,10 @@ export default class EarthPUPHandler extends EnumHandler<EarthPUPActions>
     // Random cell index to apply landslide to
     // This is just a placeholder until the actual logic is implemented
     const cellIndex = Math.floor(Math.random() * 81);
-
+    
+    const newTime = result + this.room.stateController.currentChallengeDuration;
     const timeoutID = this.room.setTrackedTimeout(() => {
-      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutID);
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, newTime, timeoutID);
     }, this.room.stateController.currentChallengeDuration);
 
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {

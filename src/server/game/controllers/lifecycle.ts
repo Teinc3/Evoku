@@ -5,7 +5,7 @@ import RatingCalculator from "../../utils/rating";
 import guestAuthService from "../../services/auth";
 
 import type { UUID } from "crypto";
-import type { ISlotEffect } from "@shared/types/gamestate/powerups";
+import type { IPUPSlotState } from "@shared/types/gamestate/powerups";
 import type { GameLogicCallbacks } from "../../types/gamelogic";
 import type { RoomModel } from "../../models/networking";
 import type GameStateController from "./state";
@@ -195,6 +195,7 @@ export default class LifecycleController {
   public onThreatExpired(
     attackerID: number,
     pupID: number,
+    serverTime: number,
     timeoutId: ReturnType<typeof setTimeout>
   ): void {
     if (this.stateController.matchState.status !== MatchStatus.ONGOING) {
@@ -207,8 +208,8 @@ export default class LifecycleController {
       return;
     }
 
+    this.applyEffect(attackerID, slot, serverTime, false);
     this.stateController.setPUPPendingEffect(attackerID, pupID, undefined);
-    this.applyEffect(pendingEffect.targetID, pupID, pendingEffect);
   }
 
   private async onCellSolved(
@@ -241,22 +242,36 @@ export default class LifecycleController {
         continue;
       }
 
+      this.applyEffect(playerID, slot, serverTime, true);
       this.room.clearTrackedTimeout(timeoutId);
-      this.stateController.setPUPPendingEffect(opponentID, pup.pupID, undefined);
-      this.applyEffect(opponentID, pup.pupID, pendingEffect);
     }
   }
 
-  private applyEffect(targetID: number, pupID: number, effect: ISlotEffect): void {
-    void targetID;
-    void pupID;
-    void effect;
+  private applyEffect(
+    playerID: number,
+    slot: IPUPSlotState,
+    serverTime: number,
+    diffused: boolean
+  ): void {
+    if (!slot.pup || !slot.pup.pendingEffect) {
+      return;
+    }
 
-    // Delete the pup from the attacker's inventory
-    
+    const targetID = diffused ? playerID : slot.pup.pendingEffect.targetID;
+
     // TODO: Implement effect application logic based on pup type
+    // this.stateController.applyPUPEffect(slot.pup, targetID);
 
     // Broadcast result to players
+    this.room.broadcast(LifecycleActions.APPLY_EFFECT, {
+      serverTime,
+      playerID,
+      targetID,
+      pupID: slot.pup.pupID,
+    });
+
+    // Finally, delete the pup from the attacker's inventory
+    slot.pup = undefined;
   }
 
   /** Reset state when closing room. */

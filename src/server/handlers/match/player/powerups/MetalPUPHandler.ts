@@ -39,8 +39,9 @@ export default class MetalPUPHandler extends EnumHandler<MetalPUPActions>
       return true;
     }
 
+    const newTime = result + this.room.stateController.currentChallengeDuration;
     const timeoutID = this.room.setTrackedTimeout(() => {
-      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutID);
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, newTime, timeoutID);
     }, this.room.stateController.currentChallengeDuration);
 
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {

@@ -41,14 +41,15 @@ export default class FirePUPHandler extends EnumHandler<FirePUPActions>
       return true;
     }
 
-    const timeoutId = this.room.setTrackedTimeout(() => {
-      this.room.lifecycle.onThreatExpired(playerID, data.pupID, timeoutId);
+    const newTime = result + this.room.stateController.currentChallengeDuration;
+    const timeoutID = this.room.setTrackedTimeout(() => {
+      this.room.lifecycle.onThreatExpired(playerID, data.pupID, newTime, timeoutID);
     }, this.room.stateController.currentChallengeDuration);
 
     this.room.stateController.setPUPPendingEffect(playerID, data.pupID, {
       targetID: data.targetID,
       cellIndex: data.cellIndex,
-      serverTimeoutID: timeoutId,
+      serverTimeoutID: timeoutID,
     });
 
     this.room.broadcast(FirePUPActions.INFERNO_USED, {

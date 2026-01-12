@@ -6,6 +6,7 @@ import RatingCalculator from '../../utils/rating';
 import guestAuthService from '../../services/auth';
 import LifecycleController from './lifecycle';
 
+import type { IPUPSlotState } from '@shared/types/gamestate/powerups';
 import type { IMatchState } from '@shared/types/gamestate';
 import type { RoomModel } from '../../models/networking';
 import type GameStateController from './state';
@@ -87,7 +88,8 @@ describe('LifecycleController', () => {
       },
       timeService: mockTimeService,
       broadcast: jest.fn(),
-      closeRoom: jest.fn()
+      closeRoom: jest.fn(),
+      clearTrackedTimeout: jest.fn()
     } as unknown as jest.Mocked<RoomModel>;
     
     // Setup game state mock
@@ -99,6 +101,10 @@ describe('LifecycleController', () => {
       setCellValue: jest.fn(),
       getSolution: jest.fn(),
       computeHash: jest.fn(),
+      findPUPSlotByPupID: jest.fn(),
+      getPlayerPowerups: jest.fn(),
+      setPUPPendingEffect: jest.fn(),
+      isObjectiveSolvedForCell: jest.fn(),
       matchState: { status: MatchStatus.PREINIT, phase: 0 }
     } as unknown as jest.Mocked<GameStateController>;
     
@@ -762,6 +768,266 @@ describe('LifecycleController', () => {
         isBoard: false,
         progress: 50
       });
+    });
+  });
+
+  describe('onThreatExpired', () => {
+    beforeEach(() => {
+      lifecycleController.initGame(); // Set status to ONGOING
+    });
+
+    it('should return early if match status is not ONGOING', () => {
+      (lifecycleController['stateController'].matchState as IMatchState).status = MatchStatus.ENDED;
+
+      const timeoutId = setTimeout(() => {}, 1000);
+      lifecycleController.onThreatExpired(0, 1, 1000, timeoutId);
+
+      expect(mockGameState.findPUPSlotByPupID).not.toHaveBeenCalled();
+    });
+
+    it('should return early if slot is not found', () => {
+      mockGameState.findPUPSlotByPupID.mockReturnValue(undefined);
+
+      const timeoutId = setTimeout(() => {}, 1000);
+      lifecycleController.onThreatExpired(0, 1, 1000, timeoutId);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should return early if pendingEffect is not set', () => {
+      const mockSlot = { pup: {} } as unknown as IPUPSlotState;
+      mockGameState.findPUPSlotByPupID.mockReturnValue(mockSlot);
+
+      const timeoutId = setTimeout(() => {}, 1000);
+      lifecycleController.onThreatExpired(0, 1, 1000, timeoutId);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should return early if timeoutId does not match', () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const otherTimeoutId = setTimeout(() => {}, 2000);
+      const mockSlot = {
+        pup: { pendingEffect: { serverTimeoutID: otherTimeoutId } },
+      } as unknown as IPUPSlotState;
+      mockGameState.findPUPSlotByPupID.mockReturnValue(mockSlot);
+
+      lifecycleController.onThreatExpired(0, 1, 1000, timeoutId);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should apply effect + clear pendingEffect if conditions are met', () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const pupID = 1;
+
+      const slot = {
+        pup: {
+          pupID,
+          pendingEffect: {
+            serverTimeoutID: timeoutId,
+            targetID: 1,
+          },
+        },
+      } as unknown as IPUPSlotState;
+      mockGameState.findPUPSlotByPupID.mockReturnValue(slot);
+
+      lifecycleController.onThreatExpired(0, pupID, 1000, timeoutId);
+
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(LifecycleActions.APPLY_EFFECT, {
+        serverTime: 1000,
+        playerID: 0,
+        targetID: 1,
+        pupID,
+      });
+      expect(mockGameState.setPUPPendingEffect).toHaveBeenCalledWith(0, pupID, undefined);
+      expect(slot.pup).toBeUndefined();
+    });
+  });
+
+  describe('onCellSolved callback', () => {
+    let cellSolvedCallback: (
+      playerID: number, cellIndex: number, serverTime: number
+    ) => Promise<void>;
+
+    beforeEach(() => {
+      lifecycleController.initGame(); // Set status to ONGOING
+      const callbacks = mockGameState.setCallbacks.mock.calls[0][0];
+      cellSolvedCallback = callbacks.onCellSolved;
+    });
+
+    it('should return early if match status is not ONGOING', async () => {
+      (lifecycleController['stateController'].matchState as IMatchState).status = MatchStatus.ENDED;
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.getPlayerPowerups).not.toHaveBeenCalled();
+    });
+
+    it('should return early if opponent has no PUPs', async () => {
+      mockGameState.getPlayerPowerups.mockReturnValue(undefined);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.findPUPSlotByPupID).not.toHaveBeenCalled();
+    });
+
+    it('should skip slots without pup', async () => {
+      const slot0 = { slotIndex: 0, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState]
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should skip slots without pendingEffect', async () => {
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 0,
+        locked: false,
+        pup: { pupID: 1, type: 0, level: 1 }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState]
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should skip if timeoutId is undefined', async () => {
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 2000,
+        locked: false,
+        pup: { pupID: 1, type: 0, level: 1, pendingEffect: { targetID: 0 } }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] 
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should skip if targetID does not match', async () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 2000,
+        locked: false,
+        pup: {
+          pupID: 1,
+          type: 0,
+          level: 1,
+          pendingEffect: { serverTimeoutID: timeoutId, targetID: 2 }
+        }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] 
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should skip if serverTime is before lastCooldownEnd', async () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 500,
+        locked: false,
+        pup: {
+          pupID: 1,
+          type: 0,
+          level: 1,
+          pendingEffect: { serverTimeoutID: timeoutId, targetID: 0 }
+        }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] 
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockGameState.setPUPPendingEffect).not.toHaveBeenCalled();
+    });
+
+    it('should skip if objective is not solved for cell', async () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 2000,
+        locked: false,
+        pup: {
+          pupID: 1,
+          type: 0,
+          level: 1,
+          pendingEffect: { serverTimeoutID: timeoutId, targetID: 0 }
+        }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] 
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+      mockGameState.isObjectiveSolvedForCell.mockReturnValue(false);
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockRoom.clearTrackedTimeout).not.toHaveBeenCalled();
+    });
+
+    it('should clear timeout and apply effect if all conditions met', async () => {
+      const timeoutId = setTimeout(() => {}, 1000);
+      const pupID = 1;
+      const slot0 = {
+        slotIndex: 0,
+        lastCooldownEnd: 2000,
+        locked: false,
+        pup: {
+          pupID,
+          type: 0,
+          level: 1,
+          pendingEffect: { serverTimeoutID: timeoutId, targetID: 0 }
+        }
+      } as IPUPSlotState;
+      const slot1 = { slotIndex: 1, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const slot2 = { slotIndex: 2, lastCooldownEnd: 0, locked: false } as IPUPSlotState;
+      const mockSlots: readonly [IPUPSlotState, IPUPSlotState, IPUPSlotState] 
+        = [slot0, slot1, slot2];
+      mockGameState.getPlayerPowerups.mockReturnValue(mockSlots);
+      mockGameState.isObjectiveSolvedForCell.mockReturnValue(true);
+
+      (lifecycleController['stateController'].matchState as IMatchState).status 
+        = MatchStatus.ONGOING;
+
+      await cellSolvedCallback(0, 10, 1000);
+
+      expect(mockRoom.clearTrackedTimeout).toHaveBeenCalledWith(timeoutId);
+      expect(mockRoom.broadcast).toHaveBeenCalledWith(LifecycleActions.APPLY_EFFECT, {
+        serverTime: 1000,
+        playerID: 0,
+        targetID: 0,
+        pupID,
+      });
+      expect(mockSlots[0]?.pup).toBeUndefined();
     });
   });
 });
