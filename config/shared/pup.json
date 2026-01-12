@@ -2,7 +2,7 @@
   {
     "name": "Cryo",
     "type": 0,
-    "theme": true,
+    "offensive": true,
     "element": "water",
     "description": "Freezes an area of enemy cells for a short duration.",
     "asset": {
@@ -13,7 +13,7 @@
   {
     "name": "Purity",
     "type": 1,
-    "theme": false,
+    "offensive": false,
     "element": "water",
     "description": "Reduces all negative effects from your board.",
     "asset": {
@@ -24,7 +24,7 @@
   {
     "name": "Inferno",
     "type": 2,
-    "theme": true,
+    "offensive": true,
     "element": "fire",
     "description": "Burns an area of filled enemy cells into empty ashes.",
     "asset": {
@@ -35,7 +35,7 @@
   {
     "name": "Metabolic",
     "type": 3,
-    "theme": false,
+    "offensive": false,
     "element": "fire",
     "description": "Speeds up board cooldown time for a short duration.",
     "asset": {
@@ -46,7 +46,7 @@
   {
     "name": "Entangle",
     "type": 4,
-    "theme": true,
+    "offensive": true,
     "element": "wood",
     "description": "Leeches powerup progress from enemy players over time.",
     "asset": {
@@ -57,7 +57,7 @@
   {
     "name": "Wisdom",
     "type": 5,
-    "theme": false,
+    "offensive": false,
     "element": "wood",
     "description": "Fills in a random number of empty cells on your board.",
     "asset": {
@@ -68,7 +68,7 @@
   {
     "name": "Landslide",
     "type": 6,
-    "theme": true,
+    "offensive": true,
     "element": "earth",
     "description": "Covers mud onto enemy cells, which must first be cleared.",
     "asset": {
@@ -79,7 +79,7 @@
   {
     "name": "Excavate",
     "type": 7,
-    "theme": false,
+    "offensive": false,
     "element": "earth",
     "description": "Reveals all possible number combinations for a selected area of cells.",
     "asset": {
@@ -90,7 +90,7 @@
   {
     "name": "Lock",
     "type": 8,
-    "theme": true,
+    "offensive": true,
     "element": "metal",
     "description": "Locks a selected number from being placed on enemy boards for a short duration.",
     "asset": {
@@ -101,7 +101,7 @@
   {
     "name": "Forge",
     "type": 9,
-    "theme": false,
+    "offensive": false,
     "element": "metal",
     "description": "Increases powerup progress gain for a short duration.",
     "asset": {

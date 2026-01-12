@@ -77,7 +77,7 @@ export default class LoadingDemoPageComponent implements OnInit, OnDestroy {
   }
 
   private getAvailablePups(isYin: boolean): typeof pupConfig {
-    return pupConfig.filter(pup => pup.theme === !isYin); // theme: false = yin, theme: true = yang
+    return pupConfig.filter(pup => pup.offensive === !isYin); // offensive: true = yang
   }
 
   private getRandomAvailablePup(isYin: boolean): typeof pupConfig[0] | null {

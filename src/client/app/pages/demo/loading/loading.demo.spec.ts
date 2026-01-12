@@ -194,18 +194,18 @@ describe('LoadingDemoPageComponent', () => {
   });
 
   it('should filter pups correctly in getAvailablePups', () => {
-    // Test Yin pups (theme: false)
+    // Test Yin pups (offensive: false)
     const yinPups = component['getAvailablePups'](true);
-    expect(yinPups.every((pup: typeof pupConfig[0]) => pup.theme === false)).toBe(true);
+    expect(yinPups.every((pup: typeof pupConfig[0]) => pup.offensive === false)).toBe(true);
 
-    // Test Yang pups (theme: true)
+    // Test Yang pups (offensive: true)
     const yangPups = component['getAvailablePups'](false);
-    expect(yangPups.every((pup: typeof pupConfig[0]) => pup.theme === true)).toBe(true);
+    expect(yangPups.every((pup: typeof pupConfig[0]) => pup.offensive === true)).toBe(true);
   });
 
   it('should return null when no unused pups available', () => {
     // Fill all cells with all available Yin pups to exhaust options
-    const yinPups = pupConfig.filter(pup => pup.theme === false); // Yin pups have theme: false
+    const yinPups = pupConfig.filter(pup => pup.offensive === false); // Yin pups offensive: false
     let pupIndex = 0;
 
     component['cells'].forEach((cell: typeof component['cells'][0]) => {

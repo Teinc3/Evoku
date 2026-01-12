@@ -137,9 +137,9 @@ describe('DuelActionDispatcher', () => {
     });
 
     const pupIndex = 999;
-    const pupConfigArray = pupConfig as unknown as Array<{ theme: boolean } | undefined>;
+    const pupConfigArray = pupConfig as unknown as Array<{ offensive: boolean } | undefined>;
     const original = pupConfigArray[pupIndex];
-    pupConfigArray[pupIndex] = { theme: false };
+    pupConfigArray[pupIndex] = { offensive: false };
 
     try {
       setSlot(0, {
@@ -266,8 +266,8 @@ describe('DuelActionDispatcher', () => {
 
     const duration = sharedConfig.game.challenge.duration[gameState.matchState.phase];
 
-    const yinType = pupConfig.find(p => p.theme === false)?.type;
-    const yangType = pupConfig.find(p => p.theme === true)?.type;
+    const yinType = pupConfig.find(p => p.offensive === false)?.type;
+    const yangType = pupConfig.find(p => p.offensive === true)?.type;
 
     if (typeof yinType !== 'number' || typeof yangType !== 'number') {
       throw new Error('Missing yin/yang types in pupConfig for test.');

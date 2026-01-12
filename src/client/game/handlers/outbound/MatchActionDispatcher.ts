@@ -99,7 +99,7 @@ export default abstract class MatchActionDispatcher {
       return false;
     }
 
-    if (pupConfig[pup.type].theme === true) {
+    if (pupConfig[pup.type].offensive === true) {
       const duration = sharedConfig.game.challenge.duration[gameState.matchState.phase];
       slot.pendingCooldownEnd = now + duration;
     }

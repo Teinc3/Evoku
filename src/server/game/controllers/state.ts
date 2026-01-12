@@ -432,8 +432,8 @@ export default class GameStateController {
       serverTime
     );
 
-    // Differentiate theme
-    if (pupConfig[slot.pup.type].theme === true) {
+    // Differentiate offensive
+    if (pupConfig[slot.pup.type].offensive === true) {
       // Yang pup - set challenge cooldown
       slot.lastCooldownEnd = serverTime + this.currentChallengeDuration;
       // Challenge timer task will be created in the respective handlers

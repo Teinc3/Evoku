@@ -244,7 +244,7 @@ export default abstract class MatchActionListener {
       return;
     }
 
-    const isYang = pupConfig[slot.pup.type]?.theme === true;
+    const isYang = pupConfig[slot.pup.type]?.offensive === true;
     if (isYang) {
       const pendingAction = (data.playerID === gameState.myID)
         ? gameState.pendingActions.get(data.actionID)

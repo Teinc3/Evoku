@@ -1003,7 +1003,7 @@ describe('GameStateController', () => {
       expect(result).toBe(false);
     });
 
-    it('should consume Yin PUP immediately (theme=false)', () => {
+    it('should consume Yin PUP immediately (offensive=false)', () => {
       const gameStates = (gameState as unknown as {
         gameStates: Map<number, IPlayerState<ServerBoardModel>>;
       }).gameStates;
@@ -1032,7 +1032,7 @@ describe('GameStateController', () => {
       expect(playerState.gameState.powerups[0]?.pup).toBeUndefined();
     });
 
-    it('should apply Yang cooldown (theme=true) and keep PUP in slot', () => {
+    it('should apply Yang cooldown (offensive=true) and keep PUP in slot', () => {
       const gameStates = (gameState as unknown as {
         gameStates: Map<number, IPlayerState<ServerBoardModel>>;
       }).gameStates;
