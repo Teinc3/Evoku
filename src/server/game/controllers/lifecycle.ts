@@ -242,7 +242,7 @@ export default class LifecycleController {
         continue;
       }
 
-      this.applyEffect(playerID, slot, serverTime, true);
+      this.applyEffect(opponentID, slot, serverTime, true);
       this.room.clearTrackedTimeout(timeoutId);
     }
   }

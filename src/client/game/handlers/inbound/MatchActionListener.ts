@@ -46,6 +46,7 @@ export default abstract class MatchActionListener {
     this.addPacketHandler(LifecycleActions.GAME_INIT, this.onGameInit.bind(this));
     this.addPacketHandler(LifecycleActions.GAME_OVER, this.onGameOver.bind(this));
     this.addPacketHandler(LifecycleActions.PHASE_TRANSITION, this.onPhaseTransition.bind(this));
+    this.addPacketHandler(LifecycleActions.APPLY_EFFECT, this.onApplyEffect.bind(this));
     this.addPacketHandler(ProtocolActions.UPDATE_PROGRESS, this.onUpdateProgress.bind(this));
     this.addPacketHandler(MechanicsActions.CELL_SET, this.onCellSet.bind(this));
     this.addPacketHandler(ProtocolActions.REJECT_ACTION, this.onRejectAction.bind(this));
@@ -121,6 +122,30 @@ export default abstract class MatchActionListener {
 
   protected onPhaseTransition(data: AugmentAction<LifecycleActions.PHASE_TRANSITION>): void {
     this.getGameState().matchState.phase = data.newPhase;
+  }
+
+  protected onApplyEffect(data: AugmentAction<LifecycleActions.APPLY_EFFECT>): void {
+    const gameState = this.getGameState();
+    const clientTime = gameState.timeCoordinator.estimateClientTime(data.serverTime);
+
+    const { playerID, targetID } = data;
+
+    const playerGameState = gameState.getPlayerState(playerID).gameState;
+    if (!playerGameState) {
+      return;
+    }
+
+    const slot = playerGameState.powerups.find(s => s.pup?.pupID === data.pupID);
+    if (!slot || !slot.pup) {
+      return;
+    }
+
+    // Apply the pendingEffect to the targetID
+    void targetID;
+    void clientTime;
+
+    slot.pup = undefined;
+    return;
   }
 
   protected onUpdateProgress(data: AugmentAction<ProtocolActions.UPDATE_PROGRESS>): void {
@@ -208,6 +233,7 @@ export default abstract class MatchActionListener {
     slot.pendingCooldownEnd = undefined;
 
     if (playerID === gameState.myID) {
+      console.log(`PUP drawn in slot ${slotIndex}:`, pupData);
       this.getContext()?.onBeginPupSettling?.();
     }
   }
@@ -250,7 +276,7 @@ export default abstract class MatchActionListener {
         ? gameState.pendingActions.get(data.actionID)
         : undefined;
 
-      if (pendingAction) {
+      if (pendingAction) { // Confirmed our pending timer
         gameState.pendingActions.delete(data.actionID);
         slot.lastCooldownEnd = Math.max(slot.lastCooldownEnd, slot.pendingCooldownEnd ?? 0);
         slot.pendingCooldownEnd = undefined;

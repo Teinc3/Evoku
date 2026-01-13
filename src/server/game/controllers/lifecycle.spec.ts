@@ -1023,8 +1023,8 @@ describe('LifecycleController', () => {
       expect(mockRoom.clearTrackedTimeout).toHaveBeenCalledWith(timeoutId);
       expect(mockRoom.broadcast).toHaveBeenCalledWith(LifecycleActions.APPLY_EFFECT, {
         serverTime: 1000,
-        playerID: 0,
-        targetID: 0,
+        playerID: 1,
+        targetID: 1,
         pupID,
       });
       expect(mockSlots[0]?.pup).toBeUndefined();
