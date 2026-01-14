@@ -29,10 +29,10 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   @Input() public model!: ClientBoardModel;
   /** Whether this board belongs to the current player */
   @Input() public isMe = false;
-  /** Optional incoming pending effect used for threat highlighting */
-  @Input() public threatEffect: ISlotEffect | null;
-  /** Defuse objective type (0=row, 1=column, 2=box) for the incoming threat */
-  @Input() public threatDefuseObjective: number | null;
+  /** Optional incoming pending effects used for threat highlighting (multi-threat support) */
+  @Input() public threatEffects: readonly ISlotEffect[] | null;
+  /** Defuse objective types (0=row, 1=column, 2=box) for incoming threats (multi-threat support) */
+  @Input() public threatDefuseObjectives: readonly number[] | null;
   @Output() public sendPacket = new EventEmitter<
     OmitBaseAttrs<AugmentAction<MechanicsActions>>
   >();
@@ -44,25 +44,32 @@ export default class BoardModelComponent implements DoCheck, OnDestroy {
   readonly indices: number[];
   readonly selected: WritableSignal<number | null>;
   public readonly cooldownHelper: CooldownAnimationHelper;
-
   constructor() {
     this.indices = Array.from({ length: 81 }, (_, i) => i);
     this.selected = signal<number | null>(null);
     this.cooldownHelper = new CooldownAnimationHelper();
-    this.threatEffect = null;
-    this.threatDefuseObjective = null;
+    this.threatEffects = null;
+    this.threatDefuseObjectives = null;
   }
 
   public get isThreatActive(): boolean {
-    return this.threatEffect !== null;
+    return (this.threatEffects?.length ?? 0) > 0;
   }
 
   public get isThreatGlobal(): boolean {
-    return this.isThreatActive && this.threatEffect?.cellIndex === undefined;
+    return this.threatEffects?.some(effect => effect.cellIndex === undefined) ?? false;
   }
 
   public isThreatCell(cellIndex: number): boolean {
-    return this.threatEffect?.cellIndex === cellIndex;
+    return this.threatEffects?.some(effect => effect.cellIndex === cellIndex) ?? false;
+  }
+
+  public hasDefuseObjective(objective: number): boolean {
+    if (!this.isThreatActive) {
+      return false;
+    }
+
+    return this.threatDefuseObjectives?.includes(objective) ?? false;
   }
 
   ngDoCheck(): void {

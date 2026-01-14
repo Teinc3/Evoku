@@ -62,21 +62,39 @@ export default class DuelDemoPageComponent implements OnInit, OnDestroy, AfterVi
   protected AppView = AppView;
   protected performance = performance;
 
-  protected get incomingThreat(): { effect: ISlotEffect; defuseObjective: number } | null {
+  protected get incomingThreatEffects(): ISlotEffect[] {
     const enemyID = 1 - this.gameState.myID;
     const slots = this.gameState.getPlayerState(enemyID).gameState?.powerups;
     if (!slots) {
-      return null;
+      return [];
     }
 
+    const effects: ISlotEffect[] = [];
     for (const slot of slots) {
       const effect = slot.pup?.pendingEffect;
       if (effect) {
-        return { effect, defuseObjective: slot.slotIndex };
+        effects.push(effect);
       }
     }
 
-    return null;
+    return effects;
+  }
+
+  protected get incomingThreatDefuseObjectives(): number[] {
+    const enemyID = 1 - this.gameState.myID;
+    const slots = this.gameState.getPlayerState(enemyID).gameState?.powerups;
+    if (!slots) {
+      return [];
+    }
+
+    const objectives = new Set<number>();
+    for (const slot of slots) {
+      if (slot.pup?.pendingEffect) {
+        objectives.add(slot.slotIndex);
+      }
+    }
+
+    return Array.from(objectives);
   }
 
   @ViewChild('board1')

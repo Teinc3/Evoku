@@ -13,9 +13,9 @@
       [class.highlight-related]="isRelatedCell(i)"
       [class.highlight-same-number]="isSameNumberCell(i)"
       [class.threat-cell]="isThreatCell(i)"
-      [class.defuse-row-global]="isThreatActive && threatDefuseObjective === 0"
-      [class.defuse-col-global]="isThreatActive && threatDefuseObjective === 1"
-      [class.defuse-box-global]="isThreatActive && threatDefuseObjective === 2"
+      [class.defuse-row-global]="hasDefuseObjective(0)"
+      [class.defuse-col-global]="hasDefuseObjective(1)"
+      [class.defuse-box-global]="hasDefuseObjective(2)"
       [selectedValue]="selected() !== null ? getCellModel(selected()!).getDisplayValue() : 0"
     ></app-cell-model>
   }
